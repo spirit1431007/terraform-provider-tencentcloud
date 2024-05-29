@@ -2972,14 +2972,16 @@ func resourceTencentCloudTkeClusterDelete(d *schema.ResourceData, meta interface
 			}
 		}
 		err := service.DeleteCluster(ctx, d.Id())
-
-		if e, ok := err.(*errors.TencentCloudSDKError); ok {
-			if e.GetCode() == "InternalError.ClusterNotFound" {
-				return nil
-			}
-		}
-
 		if err != nil {
+			if e, ok := err.(*errors.TencentCloudSDKError); ok {
+				if e.GetCode() == "InternalError.ClusterNotFound" {
+					return nil
+				}
+				// prepaid native node pools need to be released
+				if e.GetCode() == "FailedOperation.ClusterForbiddenToDelete" {
+					return resource.RetryableError(err)
+				}
+			}
 			return tccommon.RetryError(err, tccommon.InternalError)
 		}
 		return nil
