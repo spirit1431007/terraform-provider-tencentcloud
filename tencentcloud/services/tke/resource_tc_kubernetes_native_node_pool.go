@@ -5,9 +5,10 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	sdkErrors "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
 	"log"
 	"strings"
+
+	sdkErrors "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -937,6 +938,8 @@ func resourceTencentCloudKubernetesNativeNodePoolCreate(d *schema.ResourceData, 
 		return err
 	}
 
+	nodePoolId = *response.Response.NodePoolId
+
 	// wait for status ok
 	service := TkeService{client: meta.(tccommon.ProviderMeta).GetAPIV3Conn()}
 	err = resource.Retry(5*tccommon.ReadRetryTimeout, func() *resource.RetryError {
@@ -953,8 +956,6 @@ func resourceTencentCloudKubernetesNativeNodePoolCreate(d *schema.ResourceData, 
 	if err != nil {
 		return err
 	}
-
-	nodePoolId = *response.Response.NodePoolId
 
 	d.SetId(strings.Join([]string{clusterId, nodePoolId}, tccommon.FILED_SP))
 

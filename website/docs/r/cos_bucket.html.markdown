@@ -11,6 +11,8 @@ description: |-
 
 Provides a COS resource to create a COS bucket and set its attributes.
 
+~> **NOTE:** The following capabilities do not support cdc scenarios: `multi_az`, `website`, and bucket replication `replica_role`.
+
 ## Example Usage
 
 ### Private Bucket
@@ -31,6 +33,16 @@ resource "tencentcloud_cos_bucket" "private_bucket" {
 ### Private Bucket with CDC cluster
 
 ```hcl
+provider "tencentcloud" {
+  cos_domain = "https://${local.cdc_id}.cos-cdc.${local.region}.myqcloud.com/"
+  region     = local.region
+}
+
+locals {
+  region = "ap-guangzhou"
+  cdc_id = "cluster-262n63e8"
+}
+
 data "tencentcloud_user_info" "info" {}
 
 locals {
@@ -39,10 +51,40 @@ locals {
 
 resource "tencentcloud_cos_bucket" "private_bucket" {
   bucket            = "private-bucket-${local.app_id}"
-  cdc_id            = "cluster-262n63e8"
   acl               = "private"
   versioning_enable = true
   force_clean       = true
+}
+```
+
+### Enable SSE-KMS encryption
+
+```hcl
+data "tencentcloud_user_info" "info" {}
+
+locals {
+  app_id = data.tencentcloud_user_info.info.app_id
+}
+
+resource "tencentcloud_kms_key" "example" {
+  alias                = "tf-example-kms-key"
+  description          = "example of kms key"
+  key_rotation_enabled = false
+  is_enabled           = true
+
+  tags = {
+    "createdBy" = "terraform"
+  }
+}
+
+resource "tencentcloud_cos_bucket" "bucket_basic" {
+  bucket               = "tf-bucket-cdc-${local.app_id}"
+  acl                  = "private"
+  encryption_algorithm = "KMS" #cos/kms for cdc cos
+  kms_id               = tencentcloud_kms_key.example.id
+  versioning_enable    = true
+  acceleration_enable  = false
+  force_clean          = true
 }
 ```
 
@@ -141,6 +183,55 @@ EOF
 }
 ```
 
+### Using verbose acl with CDC cluster
+
+```hcl
+provider "tencentcloud" {
+  cos_domain = "https://${local.cdc_id}.cos-cdc.${local.region}.myqcloud.com/"
+  region     = local.region
+}
+
+locals {
+  region = "ap-guangzhou"
+  cdc_id = "cluster-262n63e8"
+}
+
+data "tencentcloud_user_info" "info" {}
+
+locals {
+  app_id = data.tencentcloud_user_info.info.app_id
+}
+
+resource "tencentcloud_cos_bucket" "bucket_with_acl" {
+  bucket   = "private-bucket-${local.app_id}"
+  acl      = "private"
+  acl_body = <<EOF
+<AccessControlPolicy>
+    <Owner>
+        <ID>qcs::cam::uin/100023201586:uin/100023201586</ID>
+        <DisplayName>qcs::cam::uin/100023201586:uin/100023201586</DisplayName>
+    </Owner>
+    <AccessControlList>
+        <Grant>
+            <Grantee type="CanonicalUser">
+                <ID>qcs::cam::uin/100015006748:uin/100015006748</ID>
+                <DisplayName>qcs::cam::uin/100015006748:uin/100015006748</DisplayName>
+            </Grantee>
+            <Permission>WRITE</Permission>
+        </Grant>
+        <Grant>
+            <Grantee type="CanonicalUser">
+                <ID>qcs::cam::uin/100023201586:uin/100023201586</ID>
+                <DisplayName>qcs::cam::uin/100023201586:uin/100023201586</DisplayName>
+            </Grantee>
+            <Permission>FULL_CONTROL</Permission>
+        </Grant>
+    </AccessControlList>
+</AccessControlPolicy>
+EOF
+}
+```
+
 ### Static Website
 
 ```hcl
@@ -190,6 +281,16 @@ resource "tencentcloud_cos_bucket" "bucket_with_cors" {
 ### Using CORS with CDC
 
 ```hcl
+provider "tencentcloud" {
+  cos_domain = "https://${local.cdc_id}.cos-cdc.${local.region}.myqcloud.com/"
+  region     = local.region
+}
+
+locals {
+  region = "ap-guangzhou"
+  cdc_id = "cluster-262n63e8"
+}
+
 data "tencentcloud_user_info" "info" {}
 
 locals {
@@ -198,7 +299,6 @@ locals {
 
 resource "tencentcloud_cos_bucket" "bucket_with_cors" {
   bucket = "bucket-with-cors-${local.app_id}"
-  cdc_id = "cluster-262n63e8"
 
   cors_rules {
     allowed_origins = ["http://*.abc.com"]
@@ -241,6 +341,16 @@ resource "tencentcloud_cos_bucket" "bucket_with_lifecycle" {
 ### Using object lifecycle with CDC
 
 ```hcl
+provider "tencentcloud" {
+  cos_domain = "https://${local.cdc_id}.cos-cdc.${local.region}.myqcloud.com/"
+  region     = local.region
+}
+
+locals {
+  region = "ap-guangzhou"
+  cdc_id = "cluster-262n63e8"
+}
+
 data "tencentcloud_user_info" "info" {}
 
 locals {
@@ -249,7 +359,6 @@ locals {
 
 resource "tencentcloud_cos_bucket" "bucket_with_lifecycle" {
   bucket = "bucket-with-lifecycle-${local.app_id}"
-  cdc_id = "cluster-262n63e8"
   acl    = "private"
 
   lifecycle_rules {
@@ -305,10 +414,11 @@ The following arguments are supported:
 * `cdc_id` - (Optional, String, ForceNew) CDC cluster ID.
 * `cors_rules` - (Optional, List) A rule of Cross-Origin Resource Sharing (documented below).
 * `enable_intelligent_tiering` - (Optional, Bool) Enable intelligent tiering. NOTE: When intelligent tiering configuration is enabled, it cannot be turned off or modified.
-* `encryption_algorithm` - (Optional, String) The server-side encryption algorithm to use. Valid value is `AES256`.
+* `encryption_algorithm` - (Optional, String) The server-side encryption algorithm to use. Valid values are `AES256`, `KMS` and `cos/kms`, `cos/kms` is for cdc cos scenario.
 * `force_clean` - (Optional, Bool) Force cleanup all objects before delete bucket.
 * `intelligent_tiering_days` - (Optional, Int) Specifies the limit of days for standard-tier data to low-frequency data in an intelligent tiered storage configuration, with optional days of 30, 60, 90. Default value is 30.
 * `intelligent_tiering_request_frequent` - (Optional, Int) Specify the access limit for converting standard layer data into low-frequency layer data in the configuration. The default value is once, which can be used in combination with the number of days to achieve the conversion effect. For example, if the parameter is set to 1 and the number of access days is 30, it means that objects with less than one visit in 30 consecutive days will be reduced from the standard layer to the low frequency layer.
+* `kms_id` - (Optional, String) The KMS Master Key ID. This value is valid only when `encryption_algorithm` is set to KMS or cos/kms. Set kms id to the specified value. If not specified, the default kms id is used.
 * `lifecycle_rules` - (Optional, List) A configuration of object lifecycle management (documented below).
 * `log_enable` - (Optional, Bool) Indicate the access log of this bucket to be saved or not. Default is `false`. If set `true`, the access log will be saved with `log_target_bucket`. To enable log, the full access of log service must be granted. [Full Access Role Policy](https://intl.cloud.tencent.com/document/product/436/16920).
 * `log_prefix` - (Optional, String) The prefix log name which saves the access log of this bucket per 5 minutes. Eg. `MyLogPrefix/`. The log access file format is `log_target_bucket`/`log_prefix`{YYYY}/{MM}/{DD}/{time}_{random}_{index}.gz. Only valid when `log_enable` is `true`.

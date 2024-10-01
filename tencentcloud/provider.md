@@ -155,6 +155,7 @@ Cloud Audit(Audit)
     tencentcloud_audit_cos_regions
     tencentcloud_audit_key_alias
     tencentcloud_audits
+    tencentcloud_audit_events
 
   Resource
     tencentcloud_audit
@@ -428,6 +429,7 @@ Cloud Object Storage(COS)
 Cloud Virtual Machine(CVM)
   Data Source
     tencentcloud_image
+    tencentcloud_image_from_family
     tencentcloud_images
     tencentcloud_instance_types
     tencentcloud_instances
@@ -898,6 +900,7 @@ TencentDB for PostgreSQL(PostgreSQL)
     tencentcloud_postgresql_base_backup
     tencentcloud_postgresql_instance_ha_config
     tencentcloud_postgresql_account
+    tencentcloud_postgresql_apply_parameter_template_operation
 
 TencentDB for Redis(crs)
   Data Source
@@ -933,6 +936,7 @@ TencentDB for Redis(crs)
     tencentcloud_redis_backup_operation
     tencentcloud_redis_security_group_attachment
     tencentcloud_redis_connection_config
+    tencentcloud_redis_log_delivery
 
 Serverless Cloud Function(SCF)
   Data Source
@@ -1431,6 +1435,10 @@ TencentCloud EdgeOne(TEO)
     tencentcloud_teo_acceleration_domain
     tencentcloud_teo_l4_proxy
     tencentcloud_teo_realtime_log_delivery
+    tencentcloud_teo_function
+    tencentcloud_teo_function_rule
+    tencentcloud_teo_function_rule_priority
+    tencentcloud_teo_function_runtime_environment
 
 TencentCloud ServiceMesh(TCM)
   Data Source

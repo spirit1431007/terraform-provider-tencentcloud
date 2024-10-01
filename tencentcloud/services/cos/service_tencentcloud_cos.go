@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 	"strings"
 
 	tccommon "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/common"
@@ -214,21 +215,72 @@ func (me *CosService) TencentCosPutBucketACLBody(
 	cdcId string,
 ) (errRet error) {
 	logId := tccommon.GetLogId(ctx)
-
 	acl := &cos.ACLXml{}
-
 	opt := &cos.BucketPutACLOptions{}
-	if reqBody != "" {
-		err := xml.Unmarshal([]byte(reqBody), acl)
+	if cdcId == "" && me.client.CosDomain == "" {
+		if reqBody != "" {
+			err := xml.Unmarshal([]byte(reqBody), acl)
+			if err != nil {
+				errRet = fmt.Errorf("cos [PutBucketACLBody] XML Unmarshal error: %s, bucket: %s", err.Error(), bucket)
+				return
+			}
 
+			opt.Body = acl
+		} else if header != "" {
+			opt.Header = &cos.ACLHeaderOptions{
+				XCosACL: header,
+			}
+		}
+	} else {
+		err := xml.Unmarshal([]byte(reqBody), acl)
 		if err != nil {
 			errRet = fmt.Errorf("cos [PutBucketACLBody] XML Unmarshal error: %s, bucket: %s", err.Error(), bucket)
 			return
 		}
-		opt.Body = acl
-	} else if header != "" {
+
+		var (
+			uin         string
+			fullControl string
+			read        string
+			write       string
+			readAcp     string
+			writeAcp    string
+		)
+
+		for _, v := range acl.AccessControlList {
+			tmpList := regexp.MustCompile(`\d+`).FindAllString(v.Grantee.ID, 1)
+			if len(tmpList) > 0 {
+				uin = tmpList[0]
+			}
+
+			if v.Permission == "FULL_CONTROL" {
+				fullControl = fmt.Sprintf("id=\"%s\"", uin)
+			}
+
+			if v.Permission == "READ" {
+				read = fmt.Sprintf("id=\"%s\"", uin)
+			}
+
+			if v.Permission == "WRITE" {
+				write = fmt.Sprintf("id=\"%s\"", uin)
+			}
+
+			if v.Permission == "READ_ACP" {
+				readAcp = fmt.Sprintf("id=\"%s\"", uin)
+			}
+
+			if v.Permission == "WRITE_ACP" {
+				writeAcp = fmt.Sprintf("id=\"%s\"", uin)
+			}
+		}
+
 		opt.Header = &cos.ACLHeaderOptions{
-			XCosACL: header,
+			XCosACL:              header,
+			XCosGrantFullControl: fullControl,
+			XCosGrantRead:        read,
+			XCosGrantWrite:       write,
+			XCosGrantReadACP:     readAcp,
+			XCosGrantWriteACP:    writeAcp,
 		}
 	}
 
@@ -732,7 +784,7 @@ func (me *CosService) GetBucketWebsite(ctx context.Context, bucket string, cdcId
 	return
 }
 
-func (me *CosService) GetBucketEncryption(ctx context.Context, bucket string, cdcId string) (encryption string, errRet error) {
+func (me *CosService) GetBucketEncryption(ctx context.Context, bucket string, cdcId string) (encryption string, kmsId string, errRet error) {
 	logId := tccommon.GetLogId(ctx)
 
 	request := s3.GetBucketEncryptionInput{
@@ -757,6 +809,10 @@ func (me *CosService) GetBucketEncryption(ctx context.Context, bucket string, cd
 
 	if len(response.ServerSideEncryptionConfiguration.Rules) > 0 {
 		encryption = *response.ServerSideEncryptionConfiguration.Rules[0].ApplyServerSideEncryptionByDefault.SSEAlgorithm
+		kMSMasterKeyID := response.ServerSideEncryptionConfiguration.Rules[0].ApplyServerSideEncryptionByDefault.KMSMasterKeyID
+		if kMSMasterKeyID != nil {
+			kmsId = *kMSMasterKeyID
+		}
 	}
 	return
 }

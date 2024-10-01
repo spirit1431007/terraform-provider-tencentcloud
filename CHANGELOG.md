@@ -1,3 +1,71 @@
+## 1.81.131 (October 1 , 2024)
+
+ENHANCEMENTS:
+
+* resource/tencentcloud_security_group_rule: Supports setting the `ip_protocol` parameter to `ALL`. ([#2870](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2870))
+
+## 1.81.130 (September 30 , 2024)
+
+FEATURES:
+
+* **New Data Source:** `tencentcloud_Fimage_from_family` ([#2869](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2869))
+* **New Resource:** `tencentcloud_postgresql_apply_parameter_template_operation` ([#2867](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2867))
+* **New Resource:** `tencentcloud_teo_security_ip_group` ([#2867](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2864))
+* **New Resource:** `tencentcloud_teo_function` ([#2865](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2865))
+* **New Resource:** `tencentcloud_teo_function_rule` ([#2865](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2865))
+* **New Resource:** `tencentcloud_teo_function_rule_priority` ([#2865](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2865))
+* **New Resource:** `tencentcloud_teo_function_runtime_environment` ([#2865](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2865))
+
+ENHANCEMENTS:
+
+* resource/tencentcloud_as_scaling_config: support `image_family` params ([#2869](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2869))
+* resource/tencentcloud_cos_bucket: fix the issue where acl_body a cannot be modified ([#2868](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2868))
+* resource/tencentcloud_image: support `image_family` params ([#2869](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2869))
+* resource/tencentcloud_kubernetes_cluster_attachment: support param `security_groups` ([#2866](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2866))
+* resource/tencentcloud_kubernetes_cluster_attachment: support param `taints` of worker_config ([#2866](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2866))
+* resource/tencentcloud_kubernetes_scale_worker:  support `taints` parameter ([#2859](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2859))
+
+## 1.81.129 (September 29 , 2024)
+
+ENHANCEMENTS:
+
+* resource/tencentcloud_cos_bucket: support acl for cdc ([#2860](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2860))
+* resource/tencentcloud_redis_instance: support force_delete to postpaid instance ([#2861](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2861))
+* resource/tencentcloud_redis_startup_instance_operation: adjust startup status logic ([#2862](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2862))
+
+BUG FIXES:
+
+* resource/tencentcloud_kubernetes_native_node_pool: fix node pool creating timeout ([#2858](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2858))
+* resource/tencentcloud_security_group_rule: fix delete rule failed ([#2863](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2863))
+
+## 1.81.128 (September 27 , 2024)
+
+FEATURES:
+
+* **New Data Source:** `tencentcloud_audit_events` ([#2857](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2857))
+* **New Resource:** `tencentcloud_redis_log_delivery` ([#2853](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2853))
+
+ENHANCEMENTS:
+
+* data_source/tencentcloud_enis: support `cdc_id` params ([#2855](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2855))
+* data_source/tencentcloud_vpc_subnets: support `cdc_id` params ([#2855](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2855))
+* resource/tencentcloud_cos_bucket: support SSE-KMS encryption ([#2848](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2848))
+* resource/tencentcloud_eip: support `cdc_id` params ([#2855](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2855))
+* resource/tencentcloud_kubernetes_node_pool:  support delete `taints` and `labels` params ([#2837](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2837))
+* resource/tencentcloud_kubernetes_scale_worker: Lift the upper limit of 100 ([#2850](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2850))
+* resource/tencentcloud_monitor_binding_object: update monitor region map ([#2856](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2856))
+* resource/tencentcloud_organization_org_member: support `tags` params ([#2852](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2852))
+* resource/tencentcloud_organization_org_node: support `tags` params ([#2852](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2852))
+* resource/tencentcloud_vpc_end_point: support `cdc_id` params ([#2855](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2855))
+* resource/tencentcloud_vpc_end_point_service: support `cdc_id` params ([#2855](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2855))
+
+## 1.81.127 (September 26 , 2024)
+
+ENHANCEMENTS:
+
+* resource/tencentcloud_eip: support `cdc_id` params ([#2849](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2849))
+* resource/tencentcloud_teo_certificate_config: update teo_certificate_config doc ([#2847](https://github.com/tencentcloudstack/terraform-provider-tencentcloud/pull/2847))
+
 ## 1.81.126 (September 25 , 2024)
 
 FEATURES:
