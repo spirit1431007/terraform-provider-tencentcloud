@@ -5,8 +5,11 @@ import (
 	tcacctest "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/acctest"
 	"github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/common"
 	tccommon "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/common"
+	"github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/connectivity"
+	"github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/internal/helper"
 	"github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/services/cvm"
 	svccvm "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/services/cvm"
+	svctag "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/services/tag"
 	svcvpc "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/services/vpc"
 
 	"context"
@@ -15,8 +18,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/agiledragon/gomonkey/v2"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/stretchr/testify/assert"
+	cvmsdk "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
 )
 
 func init() {
@@ -75,7 +82,7 @@ func testSweepCvmInstance(region string) error {
 			continue
 		}
 
-		if err = cvmService.DeleteInstance(ctx, instanceId); err != nil {
+		if err = cvmService.DeleteInstance(ctx, instanceId, false); err != nil {
 			log.Printf("[ERROR] sweep instance %s error: %s", instanceId, err.Error())
 		}
 	}
@@ -101,9 +108,80 @@ func TestAccTencentCloudInstanceResourceBasic(t *testing.T) {
 				Check:  resource.ComposeTestCheckFunc(testAccCheckCvmInstanceExists("tencentcloud_instance.cvm_basic"), resource.TestCheckResourceAttrSet("tencentcloud_instance.cvm_basic", "instance_type"), resource.TestCheckResourceAttr("tencentcloud_instance.cvm_basic", "instance_status", "RUNNING")),
 			},
 			{
+				Config: testAccCvmInstanceResource_BasicChangeCamRoleName,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCvmInstanceExists("tencentcloud_instance.cvm_basic"),
+					resource.TestCheckResourceAttr("tencentcloud_instance.cvm_basic", "cam_role_name", "CVM_QcsRole"),
+					resource.TestCheckResourceAttr("tencentcloud_instance.cvm_basic", "instance_status", "RUNNING"),
+				),
+			},
+			{
 				ResourceName:            "tencentcloud_instance.cvm_basic",
 				ImportState:             true,
-				ImportStateVerifyIgnore: []string{"disable_monitor_service", "disable_security_service", "hostname", "password", "force_delete"},
+				ImportStateVerifyIgnore: []string{"disable_monitor_service", "disable_security_service", "disable_automation_service", "hostname", "password", "force_delete"},
+			},
+		},
+	})
+}
+func TestAccTencentCloudInstanceResource_UserDataRaw(t *testing.T) {
+	t.Parallel()
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			acctest.AccPreCheck(t)
+		},
+		Providers:    acctest.AccProviders,
+		CheckDestroy: testAccCheckCvmInstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCvmInstanceResource_UserDataRaw,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCvmInstanceExists("tencentcloud_instance.cvm_user_data_raw"),
+					resource.TestCheckResourceAttr("tencentcloud_instance.cvm_user_data_raw", "user_data_raw", "test"),
+				),
+			},
+			{
+				Config: testAccCvmInstanceResource_UserDataRawUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCvmInstanceExists("tencentcloud_instance.cvm_user_data_raw"),
+					resource.TestCheckResourceAttr("tencentcloud_instance.cvm_user_data_raw", "user_data_raw", "test-update"),
+				),
+			},
+			{
+				ResourceName:            "tencentcloud_instance.cvm_user_data_raw",
+				ImportState:             true,
+				ImportStateVerifyIgnore: []string{"disable_monitor_service", "disable_security_service", "disable_automation_service", "hostname", "password", "force_delete"},
+			},
+		},
+	})
+}
+
+func TestAccTencentCloudInstanceResource_UserData(t *testing.T) {
+	t.Parallel()
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			acctest.AccPreCheck(t)
+		},
+		Providers:    acctest.AccProviders,
+		CheckDestroy: testAccCheckCvmInstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCvmInstanceResource_UserData,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCvmInstanceExists("tencentcloud_instance.cvm_user_data"),
+					resource.TestCheckResourceAttr("tencentcloud_instance.cvm_user_data", "user_data", "dGVzdA=="),
+				),
+			},
+			{
+				Config: testAccCvmInstanceResource_UserDataUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCvmInstanceExists("tencentcloud_instance.cvm_user_data"),
+					resource.TestCheckResourceAttr("tencentcloud_instance.cvm_user_data", "user_data", "dGVzdC11cGRhdGU="),
+				),
+			},
+			{
+				ResourceName:            "tencentcloud_instance.cvm_user_data",
+				ImportState:             true,
+				ImportStateVerifyIgnore: []string{"disable_monitor_service", "disable_security_service", "disable_automation_service", "hostname", "password", "force_delete"},
 			},
 		},
 	})
@@ -154,6 +232,232 @@ func testAccCheckCvmInstanceDestroy(s *terraform.State) error {
 	}
 	return nil
 }
+
+const testAccCvmInstanceResource_UserData = `
+
+data "tencentcloud_availability_zones" "default" {
+}
+data "tencentcloud_images" "default" {
+    image_type = ["PUBLIC_IMAGE"]
+    image_name_regex = "Final"
+}
+data "tencentcloud_images" "testing" {
+    image_type = ["PUBLIC_IMAGE"]
+}
+data "tencentcloud_instance_types" "default" {
+    memory_size = 2
+    exclude_sold_out = true
+    
+    filter {
+        name = "instance-family"
+        values = ["S1","S2","S3","S4","S5"]
+    }
+    filter {
+        name = "zone"
+        values = ["ap-guangzhou-7"]
+    }
+    cpu_core_count = 2
+}
+resource "tencentcloud_vpc" "vpc" {
+    name = "cvm-basic-vpc"
+    cidr_block = "10.0.0.0/16"
+}
+resource "tencentcloud_subnet" "subnet" {
+    availability_zone = "ap-guangzhou-7"
+    vpc_id = tencentcloud_vpc.vpc.id
+    name = "cvm-basic-subnet"
+    cidr_block = "10.0.0.0/16"
+}
+resource "tencentcloud_instance" "cvm_user_data" {
+    instance_name = "tf-test-user-data"
+    availability_zone = "ap-guangzhou-7"
+    image_id = data.tencentcloud_images.default.images.0.image_id
+    vpc_id = tencentcloud_vpc.vpc.id
+    
+    tags = {
+        hostname = "tci"
+    }
+    
+    lifecycle {
+        ignore_changes = [instance_type]
+    }
+    instance_type = data.tencentcloud_instance_types.default.instance_types.0.instance_type
+    subnet_id = tencentcloud_subnet.subnet.id
+    system_disk_type = "CLOUD_PREMIUM"
+    project_id = 0
+    user_data = "dGVzdA=="
+}
+
+`
+const testAccCvmInstanceResource_UserDataUpdate = `
+
+data "tencentcloud_availability_zones" "default" {
+}
+data "tencentcloud_images" "default" {
+    image_type = ["PUBLIC_IMAGE"]
+    image_name_regex = "Final"
+}
+data "tencentcloud_images" "testing" {
+    image_type = ["PUBLIC_IMAGE"]
+}
+data "tencentcloud_instance_types" "default" {
+    memory_size = 2
+    exclude_sold_out = true
+    
+    filter {
+        name = "instance-family"
+        values = ["S1","S2","S3","S4","S5"]
+    }
+    filter {
+        name = "zone"
+        values = ["ap-guangzhou-7"]
+    }
+    cpu_core_count = 2
+}
+resource "tencentcloud_vpc" "vpc" {
+    name = "cvm-basic-vpc"
+    cidr_block = "10.0.0.0/16"
+}
+resource "tencentcloud_subnet" "subnet" {
+    availability_zone = "ap-guangzhou-7"
+    vpc_id = tencentcloud_vpc.vpc.id
+    name = "cvm-basic-subnet"
+    cidr_block = "10.0.0.0/16"
+}
+resource "tencentcloud_instance" "cvm_user_data" {
+    instance_name = "tf-test-user-data"
+    availability_zone = "ap-guangzhou-7"
+    image_id = data.tencentcloud_images.default.images.0.image_id
+    vpc_id = tencentcloud_vpc.vpc.id
+    
+    tags = {
+        hostname = "tci"
+    }
+    
+    lifecycle {
+        ignore_changes = [instance_type]
+    }
+    instance_type = data.tencentcloud_instance_types.default.instance_types.0.instance_type
+    subnet_id = tencentcloud_subnet.subnet.id
+    system_disk_type = "CLOUD_PREMIUM"
+    project_id = 0
+    user_data = "dGVzdC11cGRhdGU="
+}
+
+`
+
+const testAccCvmInstanceResource_UserDataRaw = `
+
+data "tencentcloud_availability_zones" "default" {
+}
+data "tencentcloud_images" "default" {
+    image_type = ["PUBLIC_IMAGE"]
+    image_name_regex = "Final"
+}
+data "tencentcloud_images" "testing" {
+    image_type = ["PUBLIC_IMAGE"]
+}
+data "tencentcloud_instance_types" "default" {
+    memory_size = 2
+    exclude_sold_out = true
+    
+    filter {
+        name = "instance-family"
+        values = ["S1","S2","S3","S4","S5"]
+    }
+    filter {
+        name = "zone"
+        values = ["ap-guangzhou-7"]
+    }
+    cpu_core_count = 2
+}
+resource "tencentcloud_vpc" "vpc" {
+    name = "cvm-basic-vpc"
+    cidr_block = "10.0.0.0/16"
+}
+resource "tencentcloud_subnet" "subnet" {
+    availability_zone = "ap-guangzhou-7"
+    vpc_id = tencentcloud_vpc.vpc.id
+    name = "cvm-basic-subnet"
+    cidr_block = "10.0.0.0/16"
+}
+resource "tencentcloud_instance" "cvm_user_data_raw" {
+    instance_name = "tf-test-user-data-raw"
+    availability_zone = "ap-guangzhou-7"
+    image_id = data.tencentcloud_images.default.images.0.image_id
+    vpc_id = tencentcloud_vpc.vpc.id
+    
+    tags = {
+        hostname = "tci"
+    }
+    
+    lifecycle {
+        ignore_changes = [instance_type]
+    }
+    instance_type = data.tencentcloud_instance_types.default.instance_types.0.instance_type
+    subnet_id = tencentcloud_subnet.subnet.id
+    system_disk_type = "CLOUD_PREMIUM"
+    project_id = 0
+    user_data_raw = "test"
+}
+
+`
+const testAccCvmInstanceResource_UserDataRawUpdate = `
+
+data "tencentcloud_availability_zones" "default" {
+}
+data "tencentcloud_images" "default" {
+    image_type = ["PUBLIC_IMAGE"]
+    image_name_regex = "Final"
+}
+data "tencentcloud_images" "testing" {
+    image_type = ["PUBLIC_IMAGE"]
+}
+data "tencentcloud_instance_types" "default" {
+    memory_size = 2
+    exclude_sold_out = true
+    
+    filter {
+        name = "instance-family"
+        values = ["S1","S2","S3","S4","S5"]
+    }
+    filter {
+        name = "zone"
+        values = ["ap-guangzhou-7"]
+    }
+    cpu_core_count = 2
+}
+resource "tencentcloud_vpc" "vpc" {
+    name = "cvm-basic-vpc"
+    cidr_block = "10.0.0.0/16"
+}
+resource "tencentcloud_subnet" "subnet" {
+    availability_zone = "ap-guangzhou-7"
+    vpc_id = tencentcloud_vpc.vpc.id
+    name = "cvm-basic-subnet"
+    cidr_block = "10.0.0.0/16"
+}
+resource "tencentcloud_instance" "cvm_user_data_raw" {
+    instance_name = "tf-test-user-data-raw"
+    availability_zone = "ap-guangzhou-7"
+    image_id = data.tencentcloud_images.default.images.0.image_id
+    vpc_id = tencentcloud_vpc.vpc.id
+    
+    tags = {
+        hostname = "tci"
+    }
+    
+    lifecycle {
+        ignore_changes = [instance_type]
+    }
+    instance_type = data.tencentcloud_instance_types.default.instance_types.0.instance_type
+    subnet_id = tencentcloud_subnet.subnet.id
+    system_disk_type = "CLOUD_PREMIUM"
+    project_id = 0
+    user_data_raw = "test-update"
+}
+
+`
 
 const testAccCvmInstanceResource_BasicCreate = `
 
@@ -262,6 +566,63 @@ resource "tencentcloud_instance" "cvm_basic" {
     subnet_id = tencentcloud_subnet.subnet.id
     system_disk_type = "CLOUD_PREMIUM"
     project_id = 0
+}
+
+`
+
+const testAccCvmInstanceResource_BasicChangeCamRoleName = `
+
+data "tencentcloud_availability_zones" "default" {
+}
+data "tencentcloud_images" "default" {
+    image_type = ["PUBLIC_IMAGE"]
+    image_name_regex = "Final"
+}
+data "tencentcloud_images" "testing" {
+    image_type = ["PUBLIC_IMAGE"]
+}
+data "tencentcloud_instance_types" "default" {
+    memory_size = 2
+    exclude_sold_out = true
+    
+    filter {
+        name = "instance-family"
+        values = ["S1","S2","S3","S4","S5"]
+    }
+    filter {
+        values = ["ap-guangzhou-7"]
+        name = "zone"
+    }
+    cpu_core_count = 2
+}
+resource "tencentcloud_vpc" "vpc" {
+    name = "cvm-basic-vpc"
+    cidr_block = "10.0.0.0/16"
+}
+resource "tencentcloud_subnet" "subnet" {
+    availability_zone = "ap-guangzhou-7"
+    vpc_id = tencentcloud_vpc.vpc.id
+    name = "cvm-basic-subnet"
+    cidr_block = "10.0.0.0/16"
+}
+resource "tencentcloud_instance" "cvm_basic" {
+    instance_name = "tf-ci-test"
+    availability_zone = "ap-guangzhou-7"
+    image_id = data.tencentcloud_images.default.images.0.image_id
+    vpc_id = tencentcloud_vpc.vpc.id
+    
+    tags = {
+        hostname = "tci"
+    }
+    
+    lifecycle {
+        ignore_changes = [instance_type]
+    }
+    instance_type = data.tencentcloud_instance_types.default.instance_types.0.instance_type
+    subnet_id = tencentcloud_subnet.subnet.id
+    system_disk_type = "CLOUD_PREMIUM"
+    project_id = 0
+    cam_role_name = "CVM_QcsRole"
 }
 
 `
@@ -527,18 +888,22 @@ resource "tencentcloud_instance" "foo" {
     image_id = data.tencentcloud_images.default.images.0.image_id
     instance_type = data.tencentcloud_instance_types.default.instance_types.0.instance_type
     system_disk_size = 100
+    system_disk_name = "sys_cbs_test1"
     
     data_disks {
         delete_with_instance = true
         data_disk_type = "CLOUD_PREMIUM"
         data_disk_size = 100
+        data_disk_name = "data_cbs_test1"
     }
     data_disks {
         data_disk_type = "CLOUD_PREMIUM"
         data_disk_size = 100
         delete_with_instance = true
+        data_disk_name = "data_cbs_test2"
     }
     disable_security_service = true
+    disable_automation_service = true
     
     lifecycle {
         ignore_changes = [instance_type]
@@ -579,18 +944,22 @@ resource "tencentcloud_instance" "foo" {
     image_id = data.tencentcloud_images.default.images.0.image_id
     instance_type = data.tencentcloud_instance_types.default.instance_types.0.instance_type
     system_disk_size = 100
+    system_disk_name = "sys_cbs_test1"
     
     data_disks {
         data_disk_size = 150
         delete_with_instance = true
         data_disk_type = "CLOUD_PREMIUM"
+        data_disk_name = "data_cbs_test1_update"
     }
     data_disks {
         data_disk_size = 150
         delete_with_instance = true
         data_disk_type = "CLOUD_PREMIUM"
+        data_disk_name = "data_cbs_test2_update"
     }
     disable_security_service = true
+    disable_automation_service = true
     
     lifecycle {
         ignore_changes = [instance_type]
@@ -1447,6 +1816,60 @@ resource "tencentcloud_instance" "foo" {
 
 `
 
+func TestAccTencentCloudInstanceResourceWithDisasterRecoverGroupIds(t *testing.T) {
+	t.Parallel()
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			acctest.AccPreCheck(t)
+		},
+		Providers:    acctest.AccProviders,
+		CheckDestroy: testAccCheckCvmInstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCvmInstanceResource_WithDisasterRecoverGroupIdsCreate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCvmInstanceExists("tencentcloud_instance.foo"),
+					resource.TestCheckResourceAttr("tencentcloud_instance.foo", "instance_status", "RUNNING"),
+					resource.TestCheckResourceAttr("tencentcloud_instance.foo", "disaster_recover_group_ids.#", "1"),
+				),
+			},
+		},
+	})
+}
+
+const testAccCvmInstanceResource_WithDisasterRecoverGroupIdsCreate = `
+
+data "tencentcloud_availability_zones" "default" {
+}
+data "tencentcloud_images" "default" {
+    image_name_regex = "Final"
+    image_type = ["PUBLIC_IMAGE"]
+}
+data "tencentcloud_instance_types" "default" {
+    exclude_sold_out = true
+    
+    filter {
+        name = "instance-family"
+        values = ["S1","S2","S3","S4","S5"]
+    }
+    filter {
+        name = "zone"
+        values = ["ap-guangzhou-7"]
+    }
+    cpu_core_count = 2
+    memory_size = 2
+}
+resource "tencentcloud_instance" "foo" {
+    image_id = data.tencentcloud_images.default.images.0.image_id
+    instance_type = data.tencentcloud_instance_types.default.instance_types.0.instance_type
+    system_disk_type = "CLOUD_PREMIUM"
+    disaster_recover_group_ids = ["ps-1y147q03"]
+    instance_name = "tf-ci-test-disaster-recover"
+    availability_zone = "ap-guangzhou-7"
+}
+
+`
+
 func TestAccTencentCloudInstanceResourceWithSpotpaid(t *testing.T) {
 	t.Parallel()
 	resource.Test(t, resource.TestCase{
@@ -1670,6 +2093,75 @@ resource "tencentcloud_cbs_storage_attachment" "attachment_cbs_disk2" {
     instance_id = tencentcloud_instance.cvm_add_data_disk_by_cbs.id
 }
 
+`
+
+func TestAccTencentCloudInstanceResourceWithLocalDisk(t *testing.T) {
+	t.Parallel()
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			acctest.AccPreCheck(t)
+		},
+		Providers:    acctest.AccProviders,
+		CheckDestroy: testAccCheckCvmInstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCvmInstanceResource_LocalDiskCreate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCvmInstanceExists("tencentcloud_instance.local_disk"),
+					resource.TestCheckResourceAttr("tencentcloud_instance.local_disk", "instance_status", "RUNNING")),
+			},
+		},
+	})
+}
+
+const testAccCvmInstanceResource_LocalDiskCreate = `
+data "tencentcloud_images" "default" {
+  image_type       = ["PUBLIC_IMAGE"]
+  image_name_regex = "Final"
+}
+
+resource "tencentcloud_vpc" "vpc" {
+  name       = "vpc"
+  cidr_block = "10.0.0.0/16"
+}
+
+resource "tencentcloud_subnet" "subnet" {
+  vpc_id            = tencentcloud_vpc.vpc.id
+  name              = "subnet"
+  cidr_block        = "10.0.0.0/16"
+  availability_zone = "ap-guangzhou-6"
+}
+
+resource "tencentcloud_instance" "local_disk" {
+  instance_name     = "tf-example"
+  availability_zone = "ap-guangzhou-6"
+  image_id          = data.tencentcloud_images.default.images.0.image_id
+  instance_type     = "IT5.4XLARGE64"
+  system_disk_type  = "LOCAL_BASIC"
+  system_disk_size  = 50
+  hostname          = "user"
+  project_id        = 0
+  vpc_id            = tencentcloud_vpc.vpc.id
+  subnet_id         = tencentcloud_subnet.subnet.id
+
+  data_disks {
+    data_disk_type = "CLOUD_HSSD"
+    data_disk_size = 50
+    encrypt        = false
+    data_disk_name = "tf-test1"
+  }
+
+  data_disks {
+    data_disk_type = "CLOUD_HSSD"
+    data_disk_size = 60
+    encrypt        = false
+    data_disk_name = "tf-test2"
+  }
+
+  tags = {
+    tagKey = "tagValue"
+  }
+}
 `
 
 func TestAccTencentCloudNeedFixInstancePostpaidToPrepaid(t *testing.T) {
@@ -2140,6 +2632,7 @@ resource "tencentcloud_instance" "foo" {
 
   disable_security_service = true
   disable_monitor_service  = true
+  disable_automation_service = true
   lifecycle {
 	ignore_changes = [instance_type]
   }
@@ -2240,6 +2733,7 @@ resource "tencentcloud_instance" "foo" {
 
   disable_security_service = true
   disable_monitor_service  = true
+  disable_automation_service = true
   lifecycle {
 	ignore_changes = [instance_type]
   }
@@ -2498,3 +2992,798 @@ resource "tencentcloud_instance" "cvm_with_orderly_sg" {
 	orderly_security_groups    = ["sg-cm7fbbf3", "sg-kensue7b", "sg-05f7wnhn"]
 }
 `
+
+func TestAccTencentCloudInstanceResourceHPC(t *testing.T) {
+	t.Parallel()
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			acctest.AccPreCheck(t)
+		},
+		Providers:    acctest.AccProviders,
+		CheckDestroy: testAccCheckCvmInstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTencentCloudInstanceHPC,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCvmInstanceExists("tencentcloud_instance.hpc"),
+					resource.TestCheckResourceAttr("tencentcloud_instance.hpc", "instance_status", "RUNNING"),
+					resource.TestCheckResourceAttrSet("tencentcloud_instance.hpc", "hpc_cluster_id"),
+				),
+			},
+		},
+	})
+}
+
+const testAccTencentCloudInstanceHPC = `
+locals {
+  availability_zone = "ap-shanghai-5"
+  instance_type     = "HCCS5.24XLARGE384"
+}
+
+resource "tencentcloud_cvm_hpc_cluster" "hpc_cluster" {
+  zone   = local.availability_zone
+  name   = "terraform-test"
+  remark = "create for test"
+}
+
+data "tencentcloud_images" "default" {
+  instance_type = local.instance_type
+}
+
+resource "tencentcloud_vpc" "vpc" {
+  cidr_block = "10.0.0.0/16"
+  name       = "vpc"
+}
+
+resource "tencentcloud_subnet" "subnet" {
+  vpc_id            = tencentcloud_vpc.vpc.id
+  availability_zone = local.availability_zone
+  name              = "subnet"
+  cidr_block        = "10.0.1.0/24"
+}
+
+resource "tencentcloud_instance" "hpc" {
+  instance_name     = "tf-example"
+  availability_zone = local.availability_zone
+  image_id          = data.tencentcloud_images.default.images.0.image_id
+  instance_type     = local.instance_type
+  system_disk_type  = "LOCAL_BASIC"
+  system_disk_size  = 440
+  hostname          = "user"
+  project_id        = 0
+  vpc_id            = tencentcloud_vpc.vpc.id
+  subnet_id         = tencentcloud_subnet.subnet.id
+  hpc_cluster_id    = tencentcloud_cvm_hpc_cluster.hpc_cluster.id
+}
+`
+
+func TestAccTencentCloudNeedFixCvmInstanceResource_IPv6AddressType(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			acctest.AccPreCheck(t)
+		},
+		Providers:    acctest.AccProviders,
+		CheckDestroy: testAccCheckCvmInstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCvmInstanceResource_IPv6AddressType,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCvmInstanceExists("tencentcloud_instance.foo"),
+					resource.TestCheckResourceAttr("tencentcloud_instance.foo", "ipv6_address_type", "EIPv6"),
+				),
+			},
+		},
+	})
+}
+
+const testAccCvmInstanceResource_IPv6AddressType = `
+data "tencentcloud_instance_types" "default" {
+  filter {
+    name   = "instance-family"
+    values = ["S3"]
+  }
+  cpu_core_count = 2
+  memory_size    = 2
+}
+resource "tencentcloud_instance" "foo" {
+  instance_name                           = "tf-ci-test"
+  availability_zone                       = "ap-guangzhou-3"
+  vpc_id                                  = "vpc-mvhjjprd"
+  subnet_id                               = "subnet-2qfyfvv8"
+  lifecycle {
+    ignore_changes = [instance_type]
+  }
+  image_id          = "img-2lr9q49h"
+  instance_type     = data.tencentcloud_instance_types.default.instance_types.0.instance_type
+  system_disk_type  = "CLOUD_PREMIUM"
+  force_delete      = true
+  orderly_security_groups = ["sg-05f7wnhn"]
+  ipv6_address_type = "EIPv6"
+}
+`
+
+func TestAccTencentCloudNeedFixCvmInstanceResource_ReleaseAddress(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			acctest.AccPreCheck(t)
+			tcacctest.AccStepSetRegion(t, "ap-hongkong")
+		},
+		Providers:    acctest.AccProviders,
+		CheckDestroy: testAccCheckCvmInstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCvmInstanceResource_ReleaseAddress,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCvmInstanceExists("tencentcloud_instance.foo"),
+					resource.TestCheckResourceAttr("tencentcloud_instance.foo", "ipv4_address_type", "HighQualityEIP"),
+					resource.TestCheckResourceAttr("tencentcloud_instance.foo", "ipv6_address_type", "HighQualityEIPv6"),
+					resource.TestCheckResourceAttr("tencentcloud_instance.foo", "ipv6_address_count", "1"),
+					resource.TestCheckResourceAttr("tencentcloud_instance.foo", "release_address", "true"),
+					resource.TestCheckResourceAttr("tencentcloud_instance.foo", "ipv6_addresses.#", "1"),
+				),
+			},
+		},
+	})
+}
+
+const testAccCvmInstanceResource_ReleaseAddress = `
+data "tencentcloud_instance_types" "default" {
+  filter {
+    name   = "instance-family"
+    values = ["S5"]
+  }
+  cpu_core_count = 2
+  memory_size    = 2
+}
+
+resource "tencentcloud_instance" "foo" {
+  instance_name     = "tf-ci-test"
+  availability_zone = "ap-hongkong-3"
+  vpc_id            = "vpc-0rlhss58"
+  subnet_id         = "subnet-73ckwxez"
+  lifecycle {
+    ignore_changes = [instance_type]
+  }
+  image_id                   = "img-l8og963d"
+  instance_type              = data.tencentcloud_instance_types.default.instance_types.0.instance_type
+  system_disk_type           = "CLOUD_PREMIUM"
+  force_delete               = true
+  internet_charge_type       = "BANDWIDTH_PACKAGE"
+  bandwidth_package_id       = "bwp-rcql8f4c"
+  ipv4_address_type          = "HighQualityEIP"
+  ipv6_address_type          = "HighQualityEIPv6"
+  ipv6_address_count         = 1
+  allocate_public_ip         = true
+  internet_max_bandwidth_out = 1
+  release_address            = true
+}
+`
+
+func TestAccTencentCloudInstanceResource_dedicatedResourcePack(t *testing.T) {
+	t.Parallel()
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { tcacctest.AccPreCheck(t) },
+		Providers:    tcacctest.AccProviders,
+		CheckDestroy: testAccCheckCvmInstanceDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTencentCloudInstanceWithDedicatedResourcePack,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCvmInstanceExists("tencentcloud_instance.dedicated_resource_pack"),
+					resource.TestCheckResourceAttr("tencentcloud_instance.dedicated_resource_pack", "dedicated_resource_pack_tenancy", "dedicated"),
+					resource.TestCheckResourceAttr("tencentcloud_instance.dedicated_resource_pack", "dedicated_resource_pack_ids.#", "1"),
+				),
+			},
+		},
+	})
+}
+
+const testAccTencentCloudInstanceWithDedicatedResourcePack = `
+data "tencentcloud_availability_zones_by_product" "default" {
+  product = "cvm"
+}
+
+data "tencentcloud_images" "default" {
+  image_type = ["PUBLIC_IMAGE"]
+  os_name    = "TencentOS Server 3.2"
+}
+
+data "tencentcloud_instance_types" "default" {
+  filter {
+    name   = "instance-family"
+    values = ["S5"]
+  }
+
+  cpu_core_count = 2
+  memory_size    = 4
+}
+
+# Note: This test requires a valid dedicated resource pool pack ID
+# Replace "drp-xxxxxx" with an actual resource pool pack ID in your test environment
+resource "tencentcloud_instance" "dedicated_resource_pack" {
+  instance_name              = "tf-test-drp-instance"
+  availability_zone          = data.tencentcloud_availability_zones_by_product.default.zones.0.name
+  image_id                   = data.tencentcloud_images.default.images.0.image_id
+  instance_type              = data.tencentcloud_instance_types.default.instance_types.0.instance_type
+  system_disk_type           = "CLOUD_PREMIUM"
+  system_disk_size           = 50
+  allocate_public_ip         = true
+  internet_max_bandwidth_out = 10
+  force_delete               = true
+  
+  # Dedicated resource pack placement parameters
+  dedicated_resource_pack_tenancy = "dedicated"
+  dedicated_resource_pack_ids     = ["drp-xxxxxx"]
+}
+`
+
+// go test ./tencentcloud/services/cvm/ -run "TestCvmInstanceSystemDiskKmsKeyId" -v -count=1 -gcflags="all=-l"
+
+func TestCvmInstanceSystemDiskKmsKeyId_Create(t *testing.T) {
+	patches := gomonkey.NewPatches()
+	defer patches.Reset()
+
+	// Mock the TencentCloudClient and CVM client
+	mockClient := &connectivity.TencentCloudClient{}
+	cvmSDKClient := &cvmsdk.Client{}
+	patches.ApplyMethodReturn(mockClient, "UseCvmClient", cvmSDKClient)
+
+	// Track the captured RunInstances request
+	var capturedRunReq *cvmsdk.RunInstancesRequest
+	patches.ApplyMethodFunc(cvmSDKClient, "RunInstances", func(request *cvmsdk.RunInstancesRequest) (*cvmsdk.RunInstancesResponse, error) {
+		capturedRunReq = request
+		resp := cvmsdk.NewRunInstancesResponse()
+		instanceId := "ins-test-kms"
+		resp.Response = &cvmsdk.RunInstancesResponseParams{
+			InstanceIdSet: []*string{&instanceId},
+			RequestId:     helper.String("fake-request-id"),
+		}
+		return resp, nil
+	})
+
+	// Mock DescribeImages to return the image used in test
+	patches.ApplyMethodFunc(cvmSDKClient, "DescribeImages", func(request *cvmsdk.DescribeImagesRequest) (*cvmsdk.DescribeImagesResponse, error) {
+		resp := cvmsdk.NewDescribeImagesResponse()
+		resp.Response = &cvmsdk.DescribeImagesResponseParams{
+			TotalCount: helper.Int64(1),
+			ImageSet: []*cvmsdk.Image{
+				{
+					ImageId: helper.String("img-xxxxxxxx"),
+				},
+			},
+			RequestId: helper.String("fake-request-id"),
+		}
+		return resp, nil
+	})
+
+	// Mock DescribeInstancesAttributes to return empty attributes
+	patches.ApplyMethodFunc(cvmSDKClient, "DescribeInstancesAttributes", func(request *cvmsdk.DescribeInstancesAttributesRequest) (*cvmsdk.DescribeInstancesAttributesResponse, error) {
+		resp := cvmsdk.NewDescribeInstancesAttributesResponse()
+		resp.Response = &cvmsdk.DescribeInstancesAttributesResponseParams{
+			InstanceSet: []*cvmsdk.InstanceAttribute{
+				{
+					InstanceId: helper.String("ins-test-kms"),
+				},
+			},
+			RequestId: helper.String("fake-request-id"),
+		}
+		return resp, nil
+	})
+
+	// Mock DescribeInstanceById to return a running instance
+	var svccvmService svccvm.CvmService
+	patches.ApplyMethodFunc(&svccvmService, "DescribeInstanceById", func(ctx context.Context, instanceId string) (*cvmsdk.Instance, error) {
+		return &cvmsdk.Instance{
+			InstanceId:         &instanceId,
+			InstanceState:      helper.String("RUNNING"),
+			SystemDisk:         &cvmsdk.SystemDisk{},
+			InstanceName:       helper.String("test-instance"),
+			InstanceType:       helper.String("S5.MEDIUM4"),
+			ImageId:            helper.String("img-xxxxxxxx"),
+			InstanceChargeType: helper.String("POSTPAID_BY_HOUR"),
+			VirtualPrivateCloud: &cvmsdk.VirtualPrivateCloud{
+				VpcId:    helper.String("vpc-xxxxxxxx"),
+				SubnetId: helper.String("subnet-xxxxxxxx"),
+			},
+			SecurityGroupIds: []*string{helper.String("sg-xxxxxxxx")},
+			Placement: &cvmsdk.Placement{
+				Zone:      helper.String("ap-guangzhou-3"),
+				ProjectId: helper.Int64(0),
+			},
+			InternetAccessible: &cvmsdk.InternetAccessible{
+				InternetMaxBandwidthOut: helper.Int64(1),
+				InternetChargeType:      helper.String("BANDWIDTH_PREPAID"),
+			},
+			PublicIpAddresses: []*string{helper.String("1.2.3.4")},
+			OsName:            helper.String("TencentOS"),
+			CreatedTime:       helper.String("2024-01-01T00:00:00Z"),
+			CPU:               helper.Int64(4),
+			Memory:            helper.Int64(8),
+			LoginSettings:     &cvmsdk.LoginSettings{},
+		}, nil
+	})
+
+	// Mock DescribeResourceTags to return empty tags
+	var tagService svctag.TagService
+	patches.ApplyMethodFunc(&tagService, "DescribeResourceTags", func(ctx context.Context, serviceType, resourceType, region, resourceId string) (map[string]string, error) {
+		return map[string]string{}, nil
+	})
+
+	meta := &mockMeta{client: mockClient}
+	res := svccvm.ResourceTencentCloudInstance()
+
+	testKmsKeyId := "kms-abcd1234"
+	d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+		"image_id":               "img-xxxxxxxx",
+		"availability_zone":      "ap-guangzhou-3",
+		"instance_name":          "test-instance",
+		"instance_type":          "S5.MEDIUM4",
+		"system_disk_type":       "CLOUD_PREMIUM",
+		"system_disk_size":       50,
+		"kms_key_id":             testKmsKeyId,
+		"allocate_public_ip":     true,
+		"internet_max_bandwidth": 1,
+		"vpc_id":                 "vpc-xxxxxxxx",
+		"subnet_id":              "subnet-xxxxxxxx",
+	})
+
+	err := res.Create(d, meta)
+	assert.NoError(t, err)
+	assert.Equal(t, "ins-test-kms", d.Id())
+
+	// Verify kms_key_id was passed to SystemDisk.KmsKeyId in RunInstances
+	assert.NotNil(t, capturedRunReq)
+	assert.NotNil(t, capturedRunReq.SystemDisk)
+	assert.NotNil(t, capturedRunReq.SystemDisk.KmsKeyId)
+	assert.Equal(t, testKmsKeyId, *capturedRunReq.SystemDisk.KmsKeyId)
+}
+
+func TestCvmInstanceSystemDiskKmsKeyId_CreateWithoutKmsKey(t *testing.T) {
+	patches := gomonkey.NewPatches()
+	defer patches.Reset()
+
+	mockClient := &connectivity.TencentCloudClient{}
+	cvmSDKClient := &cvmsdk.Client{}
+	patches.ApplyMethodReturn(mockClient, "UseCvmClient", cvmSDKClient)
+
+	var capturedRunReq *cvmsdk.RunInstancesRequest
+	patches.ApplyMethodFunc(cvmSDKClient, "RunInstances", func(request *cvmsdk.RunInstancesRequest) (*cvmsdk.RunInstancesResponse, error) {
+		capturedRunReq = request
+		resp := cvmsdk.NewRunInstancesResponse()
+		instanceId := "ins-test-no-kms"
+		resp.Response = &cvmsdk.RunInstancesResponseParams{
+			InstanceIdSet: []*string{&instanceId},
+			RequestId:     helper.String("fake-request-id"),
+		}
+		return resp, nil
+	})
+
+	// Mock DescribeImages
+	patches.ApplyMethodFunc(cvmSDKClient, "DescribeImages", func(request *cvmsdk.DescribeImagesRequest) (*cvmsdk.DescribeImagesResponse, error) {
+		resp := cvmsdk.NewDescribeImagesResponse()
+		resp.Response = &cvmsdk.DescribeImagesResponseParams{
+			TotalCount: helper.Int64(1),
+			ImageSet: []*cvmsdk.Image{
+				{
+					ImageId: helper.String("img-xxxxxxxx"),
+				},
+			},
+			RequestId: helper.String("fake-request-id"),
+		}
+		return resp, nil
+	})
+
+	// Mock DescribeInstancesAttributes
+	patches.ApplyMethodFunc(cvmSDKClient, "DescribeInstancesAttributes", func(request *cvmsdk.DescribeInstancesAttributesRequest) (*cvmsdk.DescribeInstancesAttributesResponse, error) {
+		resp := cvmsdk.NewDescribeInstancesAttributesResponse()
+		resp.Response = &cvmsdk.DescribeInstancesAttributesResponseParams{
+			InstanceSet: []*cvmsdk.InstanceAttribute{
+				{
+					InstanceId: helper.String("ins-test-no-kms"),
+				},
+			},
+			RequestId: helper.String("fake-request-id"),
+		}
+		return resp, nil
+	})
+
+	var svccvmService svccvm.CvmService
+	patches.ApplyMethodFunc(&svccvmService, "DescribeInstanceById", func(ctx context.Context, instanceId string) (*cvmsdk.Instance, error) {
+		return &cvmsdk.Instance{
+			InstanceId:         &instanceId,
+			InstanceState:      helper.String("RUNNING"),
+			SystemDisk:         &cvmsdk.SystemDisk{},
+			InstanceName:       helper.String("test-instance"),
+			InstanceType:       helper.String("S5.MEDIUM4"),
+			ImageId:            helper.String("img-xxxxxxxx"),
+			InstanceChargeType: helper.String("POSTPAID_BY_HOUR"),
+			VirtualPrivateCloud: &cvmsdk.VirtualPrivateCloud{
+				VpcId:    helper.String("vpc-xxxxxxxx"),
+				SubnetId: helper.String("subnet-xxxxxxxx"),
+			},
+			SecurityGroupIds: []*string{helper.String("sg-xxxxxxxx")},
+			Placement: &cvmsdk.Placement{
+				Zone:      helper.String("ap-guangzhou-3"),
+				ProjectId: helper.Int64(0),
+			},
+			InternetAccessible: &cvmsdk.InternetAccessible{
+				InternetMaxBandwidthOut: helper.Int64(1),
+				InternetChargeType:      helper.String("BANDWIDTH_PREPAID"),
+			},
+			PublicIpAddresses: []*string{helper.String("1.2.3.4")},
+			OsName:            helper.String("TencentOS"),
+			CreatedTime:       helper.String("2024-01-01T00:00:00Z"),
+			CPU:               helper.Int64(4),
+			Memory:            helper.Int64(8),
+			LoginSettings:     &cvmsdk.LoginSettings{},
+		}, nil
+	})
+
+	// Mock DescribeResourceTags
+	var tagService svctag.TagService
+	patches.ApplyMethodFunc(&tagService, "DescribeResourceTags", func(ctx context.Context, serviceType, resourceType, region, resourceId string) (map[string]string, error) {
+		return map[string]string{}, nil
+	})
+
+	meta := &mockMeta{client: mockClient}
+	res := svccvm.ResourceTencentCloudInstance()
+
+	d := schema.TestResourceDataRaw(t, res.Schema, map[string]interface{}{
+		"image_id":               "img-xxxxxxxx",
+		"availability_zone":      "ap-guangzhou-3",
+		"instance_name":          "test-instance",
+		"instance_type":          "S5.MEDIUM4",
+		"system_disk_type":       "CLOUD_PREMIUM",
+		"system_disk_size":       50,
+		"allocate_public_ip":     true,
+		"internet_max_bandwidth": 1,
+		"vpc_id":                 "vpc-xxxxxxxx",
+		"subnet_id":              "subnet-xxxxxxxx",
+	})
+
+	err := res.Create(d, meta)
+	assert.NoError(t, err)
+	assert.Equal(t, "ins-test-no-kms", d.Id())
+
+	// Verify kms_key_id is NOT set in SystemDisk when not provided
+	assert.NotNil(t, capturedRunReq)
+	if capturedRunReq.SystemDisk != nil {
+		assert.Nil(t, capturedRunReq.SystemDisk.KmsKeyId)
+	}
+}
+
+type mockMeta struct {
+	client *connectivity.TencentCloudClient
+}
+
+func (m *mockMeta) GetAPIV3Conn() *connectivity.TencentCloudClient {
+	return m.client
+}
+
+// Unit tests for disaster_recover_group_ids, partition_number, force_replace_placement_group_id
+// Run all unit tests below with:
+//   go test -v -run "TestUnitInstance_" ./tencentcloud/services/cvm/
+
+func TestUnitInstance_DisasterRecoverGroupIdsSchemaDefinition(t *testing.T) {
+	res := svccvm.ResourceTencentCloudInstance()
+	s := res.Schema
+
+	drgiSchema, ok := s["disaster_recover_group_ids"]
+	assert.True(t, ok, "disaster_recover_group_ids field should exist in schema")
+	assert.Equal(t, schema.TypeSet, drgiSchema.Type)
+	assert.True(t, drgiSchema.Optional)
+	assert.True(t, drgiSchema.Computed)
+	assert.Equal(t, 3, drgiSchema.MaxItems)
+
+	elemSchema, ok := drgiSchema.Elem.(*schema.Schema)
+	assert.True(t, ok, "disaster_recover_group_ids Elem should be *schema.Schema")
+	assert.Equal(t, schema.TypeString, elemSchema.Type)
+}
+
+func TestUnitInstance_PartitionNumberSchemaDefinition(t *testing.T) {
+	res := svccvm.ResourceTencentCloudInstance()
+	s := res.Schema
+
+	pnSchema, ok := s["partition_number"]
+	assert.True(t, ok, "partition_number field should exist in schema")
+	assert.Equal(t, schema.TypeInt, pnSchema.Type)
+	assert.True(t, pnSchema.Optional)
+	assert.NotNil(t, pnSchema.ValidateFunc)
+}
+
+func TestUnitInstance_ForceReplacePlacementGroupIdSchemaDefinition(t *testing.T) {
+	res := svccvm.ResourceTencentCloudInstance()
+	s := res.Schema
+
+	frpgiSchema, ok := s["force_replace_placement_group_id"]
+	assert.True(t, ok, "force_replace_placement_group_id field should exist in schema")
+	assert.Equal(t, schema.TypeBool, frpgiSchema.Type)
+	assert.True(t, frpgiSchema.Optional)
+}
+
+func TestUnitInstance_CreateRequestWithDisasterRecoverGroupIds(t *testing.T) {
+	request := cvmsdk.NewRunInstancesRequest()
+
+	disasterRecoverGroupIds := []string{"ps-001", "ps-002"}
+	partitionNumber := 3
+
+	for i := range disasterRecoverGroupIds {
+		id := disasterRecoverGroupIds[i]
+		request.DisasterRecoverGroupIds = append(request.DisasterRecoverGroupIds, &id)
+	}
+	request.PartitionNumber = helper.IntInt64(partitionNumber)
+
+	assert.Equal(t, 2, len(request.DisasterRecoverGroupIds))
+	assert.Equal(t, "ps-001", *request.DisasterRecoverGroupIds[0])
+	assert.Equal(t, "ps-002", *request.DisasterRecoverGroupIds[1])
+	assert.Equal(t, int64(3), *request.PartitionNumber)
+}
+
+func TestUnitInstance_CreateRequestWithDisasterRecoverGroupIdsNoPartition(t *testing.T) {
+	request := cvmsdk.NewRunInstancesRequest()
+
+	disasterRecoverGroupIds := []string{"ps-abc"}
+
+	for i := range disasterRecoverGroupIds {
+		id := disasterRecoverGroupIds[i]
+		request.DisasterRecoverGroupIds = append(request.DisasterRecoverGroupIds, &id)
+	}
+
+	assert.Equal(t, 1, len(request.DisasterRecoverGroupIds))
+	assert.Equal(t, "ps-abc", *request.DisasterRecoverGroupIds[0])
+	assert.Nil(t, request.PartitionNumber, "partition_number should not be set when not specified")
+}
+
+func TestUnitInstance_CreateRequestWithPlacementGroupIdFallback(t *testing.T) {
+	request := cvmsdk.NewRunInstancesRequest()
+
+	rpgFlag := false
+	placementGroupId := "ps-legacy"
+
+	if !rpgFlag {
+		request.DisasterRecoverGroupIds = []*string{helper.String(placementGroupId)}
+	}
+
+	assert.Equal(t, 1, len(request.DisasterRecoverGroupIds))
+	assert.Equal(t, "ps-legacy", *request.DisasterRecoverGroupIds[0])
+}
+
+func TestUnitInstance_CreateRequestWithRpgFlagTrue(t *testing.T) {
+	request := cvmsdk.NewRunInstancesRequest()
+
+	rpgFlag := true
+	placementGroupId := "ps-legacy"
+
+	if !rpgFlag {
+		request.DisasterRecoverGroupIds = []*string{helper.String(placementGroupId)}
+	}
+
+	assert.Nil(t, request.DisasterRecoverGroupIds, "DisasterRecoverGroupIds should not be set when rpgFlag is true")
+}
+
+func TestUnitInstance_ReadStateWithDisasterRecoverGroupIds(t *testing.T) {
+	instance := &cvmsdk.Instance{
+		InstanceId:              helper.String("ins-12345"),
+		DisasterRecoverGroupIds: []*string{helper.String("ps-001"), helper.String("ps-002")},
+		PartitionNumber:         helper.Int64(5),
+		DisasterRecoverGroupId:  helper.String("ps-001"),
+	}
+
+	result := make(map[string]interface{})
+
+	if len(instance.DisasterRecoverGroupIds) > 0 {
+		ids := make([]string, 0, len(instance.DisasterRecoverGroupIds))
+		for _, id := range instance.DisasterRecoverGroupIds {
+			ids = append(ids, *id)
+		}
+		result["disaster_recover_group_ids"] = ids
+		if instance.PartitionNumber != nil {
+			result["partition_number"] = int(*instance.PartitionNumber)
+		}
+	}
+
+	drgi, ok := result["disaster_recover_group_ids"]
+	assert.True(t, ok)
+	assert.Equal(t, []string{"ps-001", "ps-002"}, drgi)
+	assert.Equal(t, 5, result["partition_number"])
+}
+
+func TestUnitInstance_ReadStateWithDisasterRecoverGroupIdsNoPartition(t *testing.T) {
+	instance := &cvmsdk.Instance{
+		InstanceId:              helper.String("ins-12345"),
+		DisasterRecoverGroupIds: []*string{helper.String("ps-001")},
+		PartitionNumber:         nil,
+	}
+
+	result := make(map[string]interface{})
+
+	if len(instance.DisasterRecoverGroupIds) > 0 {
+		ids := make([]string, 0, len(instance.DisasterRecoverGroupIds))
+		for _, id := range instance.DisasterRecoverGroupIds {
+			ids = append(ids, *id)
+		}
+		result["disaster_recover_group_ids"] = ids
+		if instance.PartitionNumber != nil {
+			result["partition_number"] = int(*instance.PartitionNumber)
+		}
+	}
+
+	_, ok := result["disaster_recover_group_ids"]
+	assert.True(t, ok)
+	_, hasPartition := result["partition_number"]
+	assert.False(t, hasPartition, "partition_number should not be set when nil")
+}
+
+func TestUnitInstance_ReadStateWithEmptyDisasterRecoverGroupIds(t *testing.T) {
+	instance := &cvmsdk.Instance{
+		InstanceId:              helper.String("ins-12345"),
+		DisasterRecoverGroupIds: []*string{},
+		PartitionNumber:         helper.Int64(3),
+		DisasterRecoverGroupId:  helper.String("ps-legacy"),
+	}
+
+	result := make(map[string]interface{})
+
+	if len(instance.DisasterRecoverGroupIds) > 0 {
+		ids := make([]string, 0, len(instance.DisasterRecoverGroupIds))
+		for _, id := range instance.DisasterRecoverGroupIds {
+			ids = append(ids, *id)
+		}
+		result["disaster_recover_group_ids"] = ids
+		if instance.PartitionNumber != nil {
+			result["partition_number"] = int(*instance.PartitionNumber)
+		}
+	}
+
+	if instance.DisasterRecoverGroupId != nil {
+		result["placement_group_id"] = *instance.DisasterRecoverGroupId
+	}
+
+	_, hasDrgi := result["disaster_recover_group_ids"]
+	assert.False(t, hasDrgi, "disaster_recover_group_ids should not be set when empty")
+	_, hasPartition := result["partition_number"]
+	assert.False(t, hasPartition, "partition_number should not be set when disaster_recover_group_ids is empty")
+	assert.Equal(t, "ps-legacy", result["placement_group_id"])
+}
+
+func TestUnitInstance_UpdateRequestWithDisasterRecoverGroupIds(t *testing.T) {
+	request := cvmsdk.NewModifyInstancesDisasterRecoverGroupRequest()
+
+	instanceId := "ins-12345"
+	groupIds := []string{"ps-new-001", "ps-new-002"}
+	partitionNumber := 7
+	force := true
+
+	request.InstanceIds = helper.Strings([]string{instanceId})
+	gids := make([]*string, 0, len(groupIds))
+	for i := range groupIds {
+		gids = append(gids, &groupIds[i])
+	}
+	request.DisasterRecoverGroupIds = gids
+	request.Force = helper.Bool(force)
+	request.PartitionNumber = helper.IntInt64(partitionNumber)
+
+	assert.Equal(t, 1, len(request.InstanceIds))
+	assert.Equal(t, "ins-12345", *request.InstanceIds[0])
+	assert.Equal(t, 2, len(request.DisasterRecoverGroupIds))
+	assert.Equal(t, "ps-new-001", *request.DisasterRecoverGroupIds[0])
+	assert.Equal(t, "ps-new-002", *request.DisasterRecoverGroupIds[1])
+	assert.Equal(t, true, *request.Force)
+	assert.Equal(t, int64(7), *request.PartitionNumber)
+}
+
+func TestUnitInstance_UpdateRequestWithDisasterRecoverGroupIdsNoPartition(t *testing.T) {
+	request := cvmsdk.NewModifyInstancesDisasterRecoverGroupRequest()
+
+	instanceId := "ins-12345"
+	groupIds := []string{"ps-new-001"}
+
+	request.InstanceIds = helper.Strings([]string{instanceId})
+	gids := make([]*string, 0, len(groupIds))
+	for i := range groupIds {
+		gids = append(gids, &groupIds[i])
+	}
+	request.DisasterRecoverGroupIds = gids
+
+	assert.Equal(t, 1, len(request.DisasterRecoverGroupIds))
+	assert.Equal(t, "ps-new-001", *request.DisasterRecoverGroupIds[0])
+	assert.Nil(t, request.PartitionNumber)
+	assert.Nil(t, request.Force)
+}
+
+func TestUnitInstance_UpdateRequestWithLegacyPlacementGroupId(t *testing.T) {
+	request := cvmsdk.NewModifyInstancesDisasterRecoverGroupRequest()
+
+	instanceId := "ins-12345"
+	newPlacementGroupId := "ps-legacy-new"
+	force := false
+
+	request.InstanceIds = helper.Strings([]string{instanceId})
+	request.DisasterRecoverGroupId = helper.String(newPlacementGroupId)
+	request.Force = helper.Bool(force)
+
+	assert.Equal(t, "ins-12345", *request.InstanceIds[0])
+	assert.Equal(t, "ps-legacy-new", *request.DisasterRecoverGroupId)
+	assert.Equal(t, false, *request.Force)
+	assert.Nil(t, request.DisasterRecoverGroupIds, "DisasterRecoverGroupIds should not be set in legacy mode")
+	assert.Nil(t, request.PartitionNumber, "PartitionNumber should not be set in legacy mode")
+}
+
+func TestUnitInstance_DisasterRecoverGroupIdsPriority(t *testing.T) {
+	disasterRecoverGroupIds := []string{"ps-001"}
+	placementGroupId := "ps-legacy"
+	rpgFlag := false
+
+	request := cvmsdk.NewRunInstancesRequest()
+
+	if len(disasterRecoverGroupIds) > 0 {
+		for i := range disasterRecoverGroupIds {
+			id := disasterRecoverGroupIds[i]
+			request.DisasterRecoverGroupIds = append(request.DisasterRecoverGroupIds, &id)
+		}
+	} else {
+		if !rpgFlag {
+			request.DisasterRecoverGroupIds = []*string{helper.String(placementGroupId)}
+		}
+	}
+
+	assert.Equal(t, 1, len(request.DisasterRecoverGroupIds))
+	assert.Equal(t, "ps-001", *request.DisasterRecoverGroupIds[0])
+}
+
+func TestUnitInstance_PlacementGroupIdUsedWhenNoDisasterRecoverGroupIds(t *testing.T) {
+	disasterRecoverGroupIds := []string{}
+	placementGroupId := "ps-legacy"
+	rpgFlag := false
+
+	request := cvmsdk.NewRunInstancesRequest()
+
+	if len(disasterRecoverGroupIds) > 0 {
+		for i := range disasterRecoverGroupIds {
+			id := disasterRecoverGroupIds[i]
+			request.DisasterRecoverGroupIds = append(request.DisasterRecoverGroupIds, &id)
+		}
+	} else {
+		if !rpgFlag {
+			request.DisasterRecoverGroupIds = []*string{helper.String(placementGroupId)}
+		}
+	}
+
+	assert.Equal(t, 1, len(request.DisasterRecoverGroupIds))
+	assert.Equal(t, "ps-legacy", *request.DisasterRecoverGroupIds[0])
+}
+
+func TestUnitInstance_ReadPlacementGroupIdNotOverwritten(t *testing.T) {
+	instance := &cvmsdk.Instance{
+		InstanceId:              helper.String("ins-12345"),
+		DisasterRecoverGroupId:  helper.String("ps-001"),
+		DisasterRecoverGroupIds: []*string{helper.String("ps-001"), helper.String("ps-002")},
+		PartitionNumber:         helper.Int64(2),
+	}
+
+	result := make(map[string]interface{})
+	disasterRecoverGroupIdsInUse := len(instance.DisasterRecoverGroupIds) > 0
+
+	if instance.DisasterRecoverGroupId != nil {
+		if !disasterRecoverGroupIdsInUse {
+			result["placement_group_id"] = *instance.DisasterRecoverGroupId
+		}
+	}
+
+	if len(instance.DisasterRecoverGroupIds) > 0 {
+		ids := make([]string, 0, len(instance.DisasterRecoverGroupIds))
+		for _, id := range instance.DisasterRecoverGroupIds {
+			ids = append(ids, *id)
+		}
+		result["disaster_recover_group_ids"] = ids
+		if instance.PartitionNumber != nil {
+			result["partition_number"] = int(*instance.PartitionNumber)
+		}
+	}
+
+	_, hasPlacementGroupId := result["placement_group_id"]
+	assert.False(t, hasPlacementGroupId, "placement_group_id should not be set when disaster_recover_group_ids is in use")
+	assert.Equal(t, []string{"ps-001", "ps-002"}, result["disaster_recover_group_ids"])
+	assert.Equal(t, 2, result["partition_number"])
+}

@@ -10,13 +10,13 @@ import (
 	"github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/internal/helper"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	dnspodintl "github.com/tencentcloud/tencentcloud-sdk-go-intl-en/tencentcloud/dnspod/v20210323"
+	sdkErrors "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
 	dnspod "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/dnspod/v20210323"
 
 	"github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/connectivity"
 	"github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/ratelimit"
 )
-
-// basic information
 
 func NewDnspodService(client *connectivity.TencentCloudClient) DnspodService {
 	return DnspodService{client: client}
@@ -26,7 +26,6 @@ type DnspodService struct {
 	client *connectivity.TencentCloudClient
 }
 
-// ////////api
 func (me *DnspodService) ModifyDnsPodDomainStatus(ctx context.Context, domain string, status string) (errRet error) {
 	logId := tccommon.GetLogId(ctx)
 	request := dnspod.NewModifyDomainStatusRequest()
@@ -528,7 +527,7 @@ func (me *DnspodService) DescribeDnspodRecordListByFilter(ctx context.Context, p
 
 	var (
 		offset uint64 = 0
-		limit  uint64 = 20
+		limit  uint64 = 1000
 	)
 	for {
 		request.Offset = &offset
@@ -793,5 +792,185 @@ func (me *DnspodService) DescribeDnspodSnapshotConfigById(ctx context.Context, d
 	}
 
 	snapshotConfig = response.Response.SnapshotConfig
+	return
+}
+
+func (me *DnspodService) DescribeSubdomainValidateStatusByFilter(ctx context.Context, param map[string]interface{}) (status int, errRet error) {
+	var (
+		logId   = tccommon.GetLogId(ctx)
+		request = dnspod.NewDescribeSubdomainValidateStatusRequest()
+	)
+
+	defer func() {
+		if errRet != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n", logId, request.GetAction(), request.ToJsonString(), errRet.Error())
+		}
+	}()
+
+	for k, v := range param {
+		if k == "DomainZone" {
+			request.DomainZone = v.(*string)
+		}
+	}
+
+	ratelimit.Check(request.GetAction())
+
+	response, err := me.client.UseDnsPodClient().DescribeSubdomainValidateStatus(request)
+	if err != nil {
+		if sdkerr, ok := err.(*sdkErrors.TencentCloudSDKError); ok {
+			if sdkerr.Code == "InvalidParameter.QuhuiTxtNotMatch" || sdkerr.Code == "InvalidParameter.QuhuiTxtRecordWait" {
+				status = 0
+				return
+			}
+		}
+		errRet = err
+		return
+	}
+	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
+	status = 1
+	return
+}
+
+func (me *DnspodService) DescribeDnspodLineGroupById(ctx context.Context, domain string, lineGroupId uint64) (lineGroup *dnspod.LineGroupItem, errRet error) {
+	logId := tccommon.GetLogId(ctx)
+
+	request := dnspod.NewDescribeLineGroupListRequest()
+	request.Domain = helper.String(domain)
+
+	defer func() {
+		if errRet != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n", logId, request.GetAction(), request.ToJsonString(), errRet.Error())
+		}
+	}()
+
+	var (
+		offset uint64 = 0
+		length uint64 = 20
+	)
+
+	for {
+		request.Offset = &offset
+		request.Length = &length
+
+		var response *dnspod.DescribeLineGroupListResponse
+		err := resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
+			ratelimit.Check(request.GetAction())
+			result, e := me.client.UseDnsPodClient().DescribeLineGroupList(request)
+			if e != nil {
+				return tccommon.RetryError(e, tccommon.InternalError)
+			}
+			response = result
+			return nil
+		})
+
+		if err != nil {
+			errRet = err
+			return
+		}
+
+		log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
+
+		if response == nil || response.Response == nil || len(response.Response.LineGroups) == 0 {
+			break
+		}
+
+		// Search for the target line group in the current page
+		for _, item := range response.Response.LineGroups {
+			if item.Id != nil && *item.Id == lineGroupId {
+				lineGroup = item
+				return
+			}
+		}
+
+		// If the number of returned results is less than length, no more pages
+		if len(response.Response.LineGroups) < int(length) {
+			break
+		}
+
+		offset += length
+	}
+
+	return
+}
+
+func (me *DnspodService) DescribeDnspodPackageOrderById(ctx context.Context, domain string) (ret *dnspodintl.DomainInfo, errRet error) {
+	logId := tccommon.GetLogId(ctx)
+
+	request := dnspodintl.NewDescribeDomainRequest()
+	response := dnspodintl.NewDescribeDomainResponse()
+	request.Domain = &domain
+
+	defer func() {
+		if errRet != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n", logId, request.GetAction(), request.ToJsonString(), errRet.Error())
+		}
+	}()
+
+	err := resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
+		ratelimit.Check(request.GetAction())
+		result, e := me.client.UseDnsPodIntlClient().DescribeDomain(request)
+		if e != nil {
+			return tccommon.RetryError(e)
+		}
+
+		if result == nil || result.Response == nil {
+			return resource.NonRetryableError(fmt.Errorf("Describe domain failed, Response is nil."))
+		}
+
+		response = result
+		return nil
+	})
+
+	if err != nil {
+		errRet = err
+		return
+	}
+
+	ret = response.Response.DomainInfo
+	return
+}
+
+func (me *DnspodService) DescribeDnspodPackageDomainById(ctx context.Context, resourceId string) (ret *dnspod.PackageListItem, errRet error) {
+	logId := tccommon.GetLogId(ctx)
+
+	request := dnspod.NewDescribeDomainVipListRequest()
+	response := dnspod.NewDescribeDomainVipListResponse()
+	request.ResourceIdList = []*string{helper.String(resourceId)}
+	request.Offset = helper.IntUint64(0)
+	request.Limit = helper.IntUint64(100)
+
+	defer func() {
+		if errRet != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n", logId, request.GetAction(), request.ToJsonString(), errRet.Error())
+		}
+	}()
+
+	err := resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
+		ratelimit.Check(request.GetAction())
+		result, e := me.client.UseDnsPodClient().DescribeDomainVipListWithContext(ctx, request)
+		if e != nil {
+			return tccommon.RetryError(e)
+		}
+
+		if result == nil || result.Response == nil {
+			return resource.NonRetryableError(fmt.Errorf("Describe dnspod package domain failed, Response is nil."))
+		}
+
+		response = result
+		return nil
+	})
+
+	if err != nil {
+		errRet = err
+		return
+	}
+
+	for _, item := range response.Response.PackageList {
+		if item != nil && item.ResourceId != nil && *item.ResourceId == resourceId {
+			ret = item
+			break
+		}
+	}
+
 	return
 }

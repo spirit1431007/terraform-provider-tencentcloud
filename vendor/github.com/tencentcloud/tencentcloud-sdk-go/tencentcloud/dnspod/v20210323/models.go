@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+// Copyright (c) 2017-2025 Tencent. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,122 +22,164 @@ import (
 
 type AddRecordBatch struct {
 	// 记录类型, 详见 DescribeRecordType 接口。
-	RecordType *string `json:"RecordType,omitnil" name:"RecordType"`
+	RecordType *string `json:"RecordType,omitnil,omitempty" name:"RecordType"`
 
 	// 记录值。
-	Value *string `json:"Value,omitnil" name:"Value"`
+	Value *string `json:"Value,omitnil,omitempty" name:"Value"`
 
 	// 子域名(主机记录)，默认为@。
-	SubDomain *string `json:"SubDomain,omitnil" name:"SubDomain"`
+	SubDomain *string `json:"SubDomain,omitnil,omitempty" name:"SubDomain"`
 
 	// 解析记录的线路，详见 DescribeRecordLineList 接口，RecordLine和RecordLineId都未填时，默认为「默认」线路。
-	RecordLine *string `json:"RecordLine,omitnil" name:"RecordLine"`
+	RecordLine *string `json:"RecordLine,omitnil,omitempty" name:"RecordLine"`
 
 	// 解析记录的线路 ID，RecordLine和RecordLineId都有时，系统优先取 RecordLineId。
-	RecordLineId *string `json:"RecordLineId,omitnil" name:"RecordLineId"`
-
-	// 记录权重值(暂未支持)。
-	Weight *uint64 `json:"Weight,omitnil" name:"Weight"`
+	RecordLineId *string `json:"RecordLineId,omitnil,omitempty" name:"RecordLineId"`
 
 	// 记录的 MX 记录值，非 MX 记录类型，默认为 0，MX记录则必选。
-	MX *uint64 `json:"MX,omitnil" name:"MX"`
+	MX *uint64 `json:"MX,omitnil,omitempty" name:"MX"`
 
 	// 记录的 TTL 值，默认600。
-	TTL *uint64 `json:"TTL,omitnil" name:"TTL"`
-
-	// 记录状态(暂未支持)。0表示禁用，1表示启用。默认启用。
-	Enabled *uint64 `json:"Enabled,omitnil" name:"Enabled"`
-
-	// 记录备注(暂未支持)。
-	Remark *string `json:"Remark,omitnil" name:"Remark"`
+	TTL *uint64 `json:"TTL,omitnil,omitempty" name:"TTL"`
 }
 
 type BatchRecordInfo struct {
 	// 记录 ID
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	RecordId *uint64 `json:"RecordId,omitnil" name:"RecordId"`
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
 
 	// 子域名(主机记录)。
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	SubDomain *string `json:"SubDomain,omitnil" name:"SubDomain"`
+	SubDomain *string `json:"SubDomain,omitnil,omitempty" name:"SubDomain"`
 
 	// 记录类型, 详见 DescribeRecordType 接口
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	RecordType *string `json:"RecordType,omitnil" name:"RecordType"`
+	RecordType *string `json:"RecordType,omitnil,omitempty" name:"RecordType"`
 
 	// 解析记录的线路，详见 DescribeRecordLineList 接口
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	RecordLine *string `json:"RecordLine,omitnil" name:"RecordLine"`
+	RecordLine *string `json:"RecordLine,omitnil,omitempty" name:"RecordLine"`
 
 	// 记录值
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Value *string `json:"Value,omitnil" name:"Value"`
+	Value *string `json:"Value,omitnil,omitempty" name:"Value"`
 
 	// 记录的 TTL 值
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	TTL *uint64 `json:"TTL,omitnil" name:"TTL"`
+	TTL *uint64 `json:"TTL,omitnil,omitempty" name:"TTL"`
 
 	// 记录添加状态
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Status *string `json:"Status,omitnil" name:"Status"`
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 
 	// 操作类型
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Operation *string `json:"Operation,omitnil" name:"Operation"`
+	Operation *string `json:"Operation,omitnil,omitempty" name:"Operation"`
 
 	// 错误信息
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	ErrMsg *string `json:"ErrMsg,omitnil" name:"ErrMsg"`
+	ErrMsg *string `json:"ErrMsg,omitnil,omitempty" name:"ErrMsg"`
 
 	// 此条记录在列表中的ID
-	Id *uint64 `json:"Id,omitnil" name:"Id"`
+	Id *uint64 `json:"Id,omitnil,omitempty" name:"Id"`
 
 	// 记录生效状态
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Enabled *uint64 `json:"Enabled,omitnil" name:"Enabled"`
+	Enabled *uint64 `json:"Enabled,omitnil,omitempty" name:"Enabled"`
 
 	// 记录的MX权重
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	MX *uint64 `json:"MX,omitnil" name:"MX"`
+	MX *uint64 `json:"MX,omitnil,omitempty" name:"MX"`
 
 	// 记录权重
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Weight *uint64 `json:"Weight,omitnil" name:"Weight"`
+	Weight *uint64 `json:"Weight,omitnil,omitempty" name:"Weight"`
 
 	// 备注信息
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Remark *string `json:"Remark,omitnil" name:"Remark"`
+	Remark *string `json:"Remark,omitnil,omitempty" name:"Remark"`
+}
+
+type BatchSearchDomainInfo struct {
+	// 域名
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 域名 ID
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+
+	// 域名套餐等级
+	DomainGrade *string `json:"DomainGrade,omitnil,omitempty" name:"DomainGrade"`
+
+	// 记录信息列表
+	RecordList []*BatchSearchRecordInfo `json:"RecordList,omitnil,omitempty" name:"RecordList"`
+}
+
+type BatchSearchRecordInfo struct {
+	// 解析记录 ID
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
+
+	// 解析线路
+	Area *string `json:"Area,omitnil,omitempty" name:"Area"`
+
+	// 记录备注
+	Remark *string `json:"Remark,omitnil,omitempty" name:"Remark"`
+
+	// TTL(秒)
+	TTL *uint64 `json:"TTL,omitnil,omitempty" name:"TTL"`
+
+	// 记录类型
+	RecordType *string `json:"RecordType,omitnil,omitempty" name:"RecordType"`
+
+	// 记录是否启用
+	Enabled *uint64 `json:"Enabled,omitnil,omitempty" name:"Enabled"`
+
+	// 权重
+	// 注意：此字段可能返回 null，表示取不到有效值。
+	Weight *uint64 `json:"Weight,omitnil,omitempty" name:"Weight"`
+
+	// 记录分组 ID
+	GroupId *uint64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
+
+	// 子域名
+	SubDomain *string `json:"SubDomain,omitnil,omitempty" name:"SubDomain"`
+
+	// 解析值
+	Value *string `json:"Value,omitnil,omitempty" name:"Value"`
+
+	// MX优先级
+	// 注意：此字段可能返回 null，表示取不到有效值。
+	MX *uint64 `json:"MX,omitnil,omitempty" name:"MX"`
 }
 
 // Predefined struct for user
 type CheckRecordSnapshotRollbackRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 快照 ID
-	SnapshotId *string `json:"SnapshotId,omitnil" name:"SnapshotId"`
+	// 快照记录 ID
+	SnapshotId *string `json:"SnapshotId,omitnil,omitempty" name:"SnapshotId"`
 
 	// 解析记录信息
-	Record *SnapshotRecord `json:"Record,omitnil" name:"Record"`
+	Record *SnapshotRecord `json:"Record,omitnil,omitempty" name:"Record"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type CheckRecordSnapshotRollbackRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 快照 ID
-	SnapshotId *string `json:"SnapshotId,omitnil" name:"SnapshotId"`
+	// 快照记录 ID
+	SnapshotId *string `json:"SnapshotId,omitnil,omitempty" name:"SnapshotId"`
 
 	// 解析记录信息
-	Record *SnapshotRecord `json:"Record,omitnil" name:"Record"`
+	Record *SnapshotRecord `json:"Record,omitnil,omitempty" name:"Record"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *CheckRecordSnapshotRollbackRequest) ToJsonString() string {
@@ -165,11 +207,10 @@ func (r *CheckRecordSnapshotRollbackRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type CheckRecordSnapshotRollbackResponseParams struct {
 	// 错误原因
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	Reason *string `json:"Reason,omitnil" name:"Reason"`
+	Reason *string `json:"Reason,omitnil,omitempty" name:"Reason"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type CheckRecordSnapshotRollbackResponse struct {
@@ -191,26 +232,26 @@ func (r *CheckRecordSnapshotRollbackResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type CheckSnapshotRollbackRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 快照记录 ID
-	SnapshotId *string `json:"SnapshotId,omitnil" name:"SnapshotId"`
+	SnapshotId *string `json:"SnapshotId,omitnil,omitempty" name:"SnapshotId"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type CheckSnapshotRollbackRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 快照记录 ID
-	SnapshotId *string `json:"SnapshotId,omitnil" name:"SnapshotId"`
+	SnapshotId *string `json:"SnapshotId,omitnil,omitempty" name:"SnapshotId"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *CheckSnapshotRollbackRequest) ToJsonString() string {
@@ -237,31 +278,29 @@ func (r *CheckSnapshotRollbackRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type CheckSnapshotRollbackResponseParams struct {
 	// 快照记录 ID
-	SnapshotId *string `json:"SnapshotId,omitnil" name:"SnapshotId"`
+	SnapshotId *string `json:"SnapshotId,omitnil,omitempty" name:"SnapshotId"`
 
 	// 回滚时长（分钟）
-	CostMinutes *uint64 `json:"CostMinutes,omitnil" name:"CostMinutes"`
+	CostMinutes *uint64 `json:"CostMinutes,omitnil,omitempty" name:"CostMinutes"`
 
 	// 快照所属域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 解析记录总数
-	Total *uint64 `json:"Total,omitnil" name:"Total"`
+	Total *uint64 `json:"Total,omitnil,omitempty" name:"Total"`
 
 	// 值为 1，表示超时
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Timeout *uint64 `json:"Timeout,omitnil" name:"Timeout"`
+	Timeout *uint64 `json:"Timeout,omitnil,omitempty" name:"Timeout"`
 
 	// 检查失败数量
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	Failed *uint64 `json:"Failed,omitnil" name:"Failed"`
+	Failed *uint64 `json:"Failed,omitnil,omitempty" name:"Failed"`
 
 	// 失败记录信息
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	FailedRecordList []*SnapshotRecord `json:"FailedRecordList,omitnil" name:"FailedRecordList"`
+	FailedRecordList []*SnapshotRecord `json:"FailedRecordList,omitnil,omitempty" name:"FailedRecordList"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type CheckSnapshotRollbackResponse struct {
@@ -281,86 +320,174 @@ func (r *CheckSnapshotRollbackResponse) FromJsonString(s string) error {
 }
 
 // Predefined struct for user
+type CreateAndPayDealRequestParams struct {
+	// <p>询价类型，1 新购，2 续费，3 套餐升级（增值服务暂时只支持新购）</p>
+	DealType *uint64 `json:"DealType,omitnil,omitempty" name:"DealType"`
+
+	// <p>商品类型，1 域名套餐 2 增值服务</p>
+	GoodsType *uint64 `json:"GoodsType,omitnil,omitempty" name:"GoodsType"`
+
+	// <p>套餐类型 或 增值服务类型</p><p>枚举值：</p><ul><li>DP_PLUS： 专业版</li><li>DP_EXPERT： 企业版</li><li>DP_ULTRA： 尊享版</li><li>LB： 负载均衡</li><li>URL： URL转发</li><li>DMONITOR_TASKS： D监控任务数</li><li>DMONITOR_IP： D监控备用 IP 数</li><li>CUSTOMLINE： 自定义线路数</li></ul><p>升级场景，需传入当前域名绑定的套餐类型</p>
+	GoodsChildType *string `json:"GoodsChildType,omitnil,omitempty" name:"GoodsChildType"`
+
+	// <p>增值服务购买数量，如果是域名套餐固定为1，如果是增值服务则按以下规则：<br>负载均衡、D监控任务数、D监控备用 IP 数、自定义线路数、URL 转发（必须是5的正整数倍，如 5、10、15 等）</p>
+	GoodsNum *uint64 `json:"GoodsNum,omitnil,omitempty" name:"GoodsNum"`
+
+	// <p>是否开启自动续费，1 开启，2 不开启（增值服务暂不支持自动续费），默认值为 2 不开启</p>
+	AutoRenew *uint64 `json:"AutoRenew,omitnil,omitempty" name:"AutoRenew"`
+
+	// <p>需要绑定套餐的域名，如 dnspod.cn，如果是续费或升级，domain 参数必须要传，新购可不传。</p>
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// <p>套餐时长：</p><ol><li>套餐以月为单位（按月只能是 3、6 还有 12 的倍数），套餐例如购买一年则传12，最大120 。（续费最低一年）</li><li>升级套餐时不需要传。</li><li>增值服务的时长单位为年，买一年传1（增值服务新购按年只能是 1，增值服务续费最大为 10）</li></ol>
+	TimeSpan *uint64 `json:"TimeSpan,omitnil,omitempty" name:"TimeSpan"`
+
+	// <p>套餐类型，需要升级到的套餐类型，只有升级时需要。</p>
+	NewPackageType *string `json:"NewPackageType,omitnil,omitempty" name:"NewPackageType"`
+
+	// <p>可重入ID，避免接口重试场景生成额外订单和实例</p><p>入参限制：长度不超过70个字符</p>
+	ClientToken *string `json:"ClientToken,omitnil,omitempty" name:"ClientToken"`
+}
+
+type CreateAndPayDealRequest struct {
+	*tchttp.BaseRequest
+	
+	// <p>询价类型，1 新购，2 续费，3 套餐升级（增值服务暂时只支持新购）</p>
+	DealType *uint64 `json:"DealType,omitnil,omitempty" name:"DealType"`
+
+	// <p>商品类型，1 域名套餐 2 增值服务</p>
+	GoodsType *uint64 `json:"GoodsType,omitnil,omitempty" name:"GoodsType"`
+
+	// <p>套餐类型 或 增值服务类型</p><p>枚举值：</p><ul><li>DP_PLUS： 专业版</li><li>DP_EXPERT： 企业版</li><li>DP_ULTRA： 尊享版</li><li>LB： 负载均衡</li><li>URL： URL转发</li><li>DMONITOR_TASKS： D监控任务数</li><li>DMONITOR_IP： D监控备用 IP 数</li><li>CUSTOMLINE： 自定义线路数</li></ul><p>升级场景，需传入当前域名绑定的套餐类型</p>
+	GoodsChildType *string `json:"GoodsChildType,omitnil,omitempty" name:"GoodsChildType"`
+
+	// <p>增值服务购买数量，如果是域名套餐固定为1，如果是增值服务则按以下规则：<br>负载均衡、D监控任务数、D监控备用 IP 数、自定义线路数、URL 转发（必须是5的正整数倍，如 5、10、15 等）</p>
+	GoodsNum *uint64 `json:"GoodsNum,omitnil,omitempty" name:"GoodsNum"`
+
+	// <p>是否开启自动续费，1 开启，2 不开启（增值服务暂不支持自动续费），默认值为 2 不开启</p>
+	AutoRenew *uint64 `json:"AutoRenew,omitnil,omitempty" name:"AutoRenew"`
+
+	// <p>需要绑定套餐的域名，如 dnspod.cn，如果是续费或升级，domain 参数必须要传，新购可不传。</p>
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// <p>套餐时长：</p><ol><li>套餐以月为单位（按月只能是 3、6 还有 12 的倍数），套餐例如购买一年则传12，最大120 。（续费最低一年）</li><li>升级套餐时不需要传。</li><li>增值服务的时长单位为年，买一年传1（增值服务新购按年只能是 1，增值服务续费最大为 10）</li></ol>
+	TimeSpan *uint64 `json:"TimeSpan,omitnil,omitempty" name:"TimeSpan"`
+
+	// <p>套餐类型，需要升级到的套餐类型，只有升级时需要。</p>
+	NewPackageType *string `json:"NewPackageType,omitnil,omitempty" name:"NewPackageType"`
+
+	// <p>可重入ID，避免接口重试场景生成额外订单和实例</p><p>入参限制：长度不超过70个字符</p>
+	ClientToken *string `json:"ClientToken,omitnil,omitempty" name:"ClientToken"`
+}
+
+func (r *CreateAndPayDealRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *CreateAndPayDealRequest) FromJsonString(s string) error {
+	f := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(s), &f); err != nil {
+		return err
+	}
+	delete(f, "DealType")
+	delete(f, "GoodsType")
+	delete(f, "GoodsChildType")
+	delete(f, "GoodsNum")
+	delete(f, "AutoRenew")
+	delete(f, "Domain")
+	delete(f, "TimeSpan")
+	delete(f, "NewPackageType")
+	delete(f, "ClientToken")
+	if len(f) > 0 {
+		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "CreateAndPayDealRequest has unknown keys!", "")
+	}
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type CreateAndPayDealResponseParams struct {
+	// <p>大订单号，一个大订单号下可以有多个子订单，说明是同一次下单</p>
+	BigDealId *string `json:"BigDealId,omitnil,omitempty" name:"BigDealId"`
+
+	// <p>子订单列表</p>
+	DealList []*Deals `json:"DealList,omitnil,omitempty" name:"DealList"`
+
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
+}
+
+type CreateAndPayDealResponse struct {
+	*tchttp.BaseResponse
+	Response *CreateAndPayDealResponseParams `json:"Response"`
+}
+
+func (r *CreateAndPayDealResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *CreateAndPayDealResponse) FromJsonString(s string) error {
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
 type CreateDealRequestParams struct {
-	// 询价类型，1 新购，2 续费，3 套餐升级（增值服务暂时只支持新购）
-	DealType *uint64 `json:"DealType,omitnil" name:"DealType"`
+	// <p>询价类型，1 新购，2 续费，3 套餐升级（增值服务暂时只支持新购）</p>
+	DealType *uint64 `json:"DealType,omitnil,omitempty" name:"DealType"`
 
-	// 商品类型，1 域名套餐 2 增值服务
-	GoodsType *uint64 `json:"GoodsType,omitnil" name:"GoodsType"`
+	// <p>商品类型，1 域名套餐 2 增值服务</p>
+	GoodsType *uint64 `json:"GoodsType,omitnil,omitempty" name:"GoodsType"`
 
-	// 套餐类型：
-	// DP_PLUS：专业版
-	// DP_EXPERT：企业版
-	// DP_ULTRA：尊享版
-	// 
-	// 增值服务类型
-	// LB：负载均衡
-	// URL：URL转发
-	// DMONITOR_TASKS：D监控任务数
-	// DMONITOR_IP：D监控备用 IP 数
-	// CUSTOMLINE：自定义线路数
-	GoodsChildType *string `json:"GoodsChildType,omitnil" name:"GoodsChildType"`
+	// <p>套餐类型 或 增值服务类型</p><p>枚举值：</p><ul><li>DP_PLUS： 专业版</li><li>DP_EXPERT： 企业版</li><li>DP_ULTRA： 尊享版</li><li>LB： 负载均衡</li><li>URL： URL转发</li><li>DMONITOR_TASKS： D监控任务数</li><li>DMONITOR_IP： D监控备用 IP 数</li><li>CUSTOMLINE： 自定义线路数</li></ul><p>升级场景，需传入当前域名绑定的套餐类型</p>
+	GoodsChildType *string `json:"GoodsChildType,omitnil,omitempty" name:"GoodsChildType"`
 
-	// 增值服务购买数量，如果是域名套餐固定为1，如果是增值服务则按以下规则：
-	// 负载均衡、D监控任务数、D监控备用 IP 数、自定义线路数、URL 转发（必须是5的正整数倍，如 5、10、15 等）
-	GoodsNum *uint64 `json:"GoodsNum,omitnil" name:"GoodsNum"`
+	// <p>增值服务购买数量，如果是域名套餐固定为1，如果是增值服务则按以下规则：<br>负载均衡、D监控任务数、D监控备用 IP 数、自定义线路数、URL 转发（必须是5的正整数倍，如 5、10、15 等）</p>
+	GoodsNum *uint64 `json:"GoodsNum,omitnil,omitempty" name:"GoodsNum"`
 
-	// 是否开启自动续费，1 开启，2 不开启（增值服务暂不支持自动续费），默认值为 2 不开启
-	AutoRenew *uint64 `json:"AutoRenew,omitnil" name:"AutoRenew"`
+	// <p>是否开启自动续费，1 开启，2 不开启（增值服务暂不支持自动续费），默认值为 2 不开启</p>
+	AutoRenew *uint64 `json:"AutoRenew,omitnil,omitempty" name:"AutoRenew"`
 
-	// 需要绑定套餐的域名，如 dnspod.cn，如果是续费或升级，domain 参数必须要传，新购可不传。
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	// <p>需要绑定套餐的域名，如 dnspod.cn，如果是续费或升级，domain 参数必须要传，新购可不传。</p>
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 套餐时长：
-	// 1. 套餐以月为单位（按月只能是 3、6 还有 12 的倍数），套餐例如购买一年则传12，最大120 。（续费最低一年）
-	// 2. 升级套餐时不需要传。
-	// 3. 增值服务的时长单位为年，买一年传1（增值服务新购按年只能是 1，增值服务续费最大为 10）
-	TimeSpan *uint64 `json:"TimeSpan,omitnil" name:"TimeSpan"`
+	// <p>套餐时长：</p><ol><li>套餐以月为单位（按月只能是 3、6 还有 12 的倍数），套餐例如购买一年则传12，最大120 。（续费最低一年）</li><li>升级套餐时不需要传。</li><li>增值服务的时长单位为年，买一年传1（增值服务新购按年只能是 1，增值服务续费最大为 10）</li></ol>
+	TimeSpan *uint64 `json:"TimeSpan,omitnil,omitempty" name:"TimeSpan"`
 
-	// 套餐类型，需要升级到的套餐类型，只有升级时需要。
-	NewPackageType *string `json:"NewPackageType,omitnil" name:"NewPackageType"`
+	// <p>套餐类型，需要升级到的套餐类型，只有升级时需要。</p>
+	NewPackageType *string `json:"NewPackageType,omitnil,omitempty" name:"NewPackageType"`
 }
 
 type CreateDealRequest struct {
 	*tchttp.BaseRequest
 	
-	// 询价类型，1 新购，2 续费，3 套餐升级（增值服务暂时只支持新购）
-	DealType *uint64 `json:"DealType,omitnil" name:"DealType"`
+	// <p>询价类型，1 新购，2 续费，3 套餐升级（增值服务暂时只支持新购）</p>
+	DealType *uint64 `json:"DealType,omitnil,omitempty" name:"DealType"`
 
-	// 商品类型，1 域名套餐 2 增值服务
-	GoodsType *uint64 `json:"GoodsType,omitnil" name:"GoodsType"`
+	// <p>商品类型，1 域名套餐 2 增值服务</p>
+	GoodsType *uint64 `json:"GoodsType,omitnil,omitempty" name:"GoodsType"`
 
-	// 套餐类型：
-	// DP_PLUS：专业版
-	// DP_EXPERT：企业版
-	// DP_ULTRA：尊享版
-	// 
-	// 增值服务类型
-	// LB：负载均衡
-	// URL：URL转发
-	// DMONITOR_TASKS：D监控任务数
-	// DMONITOR_IP：D监控备用 IP 数
-	// CUSTOMLINE：自定义线路数
-	GoodsChildType *string `json:"GoodsChildType,omitnil" name:"GoodsChildType"`
+	// <p>套餐类型 或 增值服务类型</p><p>枚举值：</p><ul><li>DP_PLUS： 专业版</li><li>DP_EXPERT： 企业版</li><li>DP_ULTRA： 尊享版</li><li>LB： 负载均衡</li><li>URL： URL转发</li><li>DMONITOR_TASKS： D监控任务数</li><li>DMONITOR_IP： D监控备用 IP 数</li><li>CUSTOMLINE： 自定义线路数</li></ul><p>升级场景，需传入当前域名绑定的套餐类型</p>
+	GoodsChildType *string `json:"GoodsChildType,omitnil,omitempty" name:"GoodsChildType"`
 
-	// 增值服务购买数量，如果是域名套餐固定为1，如果是增值服务则按以下规则：
-	// 负载均衡、D监控任务数、D监控备用 IP 数、自定义线路数、URL 转发（必须是5的正整数倍，如 5、10、15 等）
-	GoodsNum *uint64 `json:"GoodsNum,omitnil" name:"GoodsNum"`
+	// <p>增值服务购买数量，如果是域名套餐固定为1，如果是增值服务则按以下规则：<br>负载均衡、D监控任务数、D监控备用 IP 数、自定义线路数、URL 转发（必须是5的正整数倍，如 5、10、15 等）</p>
+	GoodsNum *uint64 `json:"GoodsNum,omitnil,omitempty" name:"GoodsNum"`
 
-	// 是否开启自动续费，1 开启，2 不开启（增值服务暂不支持自动续费），默认值为 2 不开启
-	AutoRenew *uint64 `json:"AutoRenew,omitnil" name:"AutoRenew"`
+	// <p>是否开启自动续费，1 开启，2 不开启（增值服务暂不支持自动续费），默认值为 2 不开启</p>
+	AutoRenew *uint64 `json:"AutoRenew,omitnil,omitempty" name:"AutoRenew"`
 
-	// 需要绑定套餐的域名，如 dnspod.cn，如果是续费或升级，domain 参数必须要传，新购可不传。
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	// <p>需要绑定套餐的域名，如 dnspod.cn，如果是续费或升级，domain 参数必须要传，新购可不传。</p>
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 套餐时长：
-	// 1. 套餐以月为单位（按月只能是 3、6 还有 12 的倍数），套餐例如购买一年则传12，最大120 。（续费最低一年）
-	// 2. 升级套餐时不需要传。
-	// 3. 增值服务的时长单位为年，买一年传1（增值服务新购按年只能是 1，增值服务续费最大为 10）
-	TimeSpan *uint64 `json:"TimeSpan,omitnil" name:"TimeSpan"`
+	// <p>套餐时长：</p><ol><li>套餐以月为单位（按月只能是 3、6 还有 12 的倍数），套餐例如购买一年则传12，最大120 。（续费最低一年）</li><li>升级套餐时不需要传。</li><li>增值服务的时长单位为年，买一年传1（增值服务新购按年只能是 1，增值服务续费最大为 10）</li></ol>
+	TimeSpan *uint64 `json:"TimeSpan,omitnil,omitempty" name:"TimeSpan"`
 
-	// 套餐类型，需要升级到的套餐类型，只有升级时需要。
-	NewPackageType *string `json:"NewPackageType,omitnil" name:"NewPackageType"`
+	// <p>套餐类型，需要升级到的套餐类型，只有升级时需要。</p>
+	NewPackageType *string `json:"NewPackageType,omitnil,omitempty" name:"NewPackageType"`
 }
 
 func (r *CreateDealRequest) ToJsonString() string {
@@ -391,14 +518,14 @@ func (r *CreateDealRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type CreateDealResponseParams struct {
-	// 大订单号，一个大订单号下可以有多个子订单，说明是同一次下单
-	BigDealId *string `json:"BigDealId,omitnil" name:"BigDealId"`
+	// <p>大订单号，一个大订单号下可以有多个子订单，说明是同一次下单</p>
+	BigDealId *string `json:"BigDealId,omitnil,omitempty" name:"BigDealId"`
 
-	// 子订单列表
-	DealList []*Deals `json:"DealList,omitnil" name:"DealList"`
+	// <p>子订单列表</p>
+	DealList []*Deals `json:"DealList,omitnil,omitempty" name:"DealList"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type CreateDealResponse struct {
@@ -420,26 +547,26 @@ func (r *CreateDealResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type CreateDomainAliasRequestParams struct {
 	// 域名别名
-	DomainAlias *string `json:"DomainAlias,omitnil" name:"DomainAlias"`
+	DomainAlias *string `json:"DomainAlias,omitnil,omitempty" name:"DomainAlias"`
 
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名ID，参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *int64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *int64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type CreateDomainAliasRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名别名
-	DomainAlias *string `json:"DomainAlias,omitnil" name:"DomainAlias"`
+	DomainAlias *string `json:"DomainAlias,omitnil,omitempty" name:"DomainAlias"`
 
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名ID，参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *int64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *int64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *CreateDomainAliasRequest) ToJsonString() string {
@@ -466,10 +593,10 @@ func (r *CreateDomainAliasRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type CreateDomainAliasResponseParams struct {
 	// 域名别名ID
-	DomainAliasId *int64 `json:"DomainAliasId,omitnil" name:"DomainAliasId"`
+	DomainAliasId *int64 `json:"DomainAliasId,omitnil,omitempty" name:"DomainAliasId"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type CreateDomainAliasResponse struct {
@@ -490,87 +617,75 @@ func (r *CreateDomainAliasResponse) FromJsonString(s string) error {
 
 type CreateDomainBatchDetail struct {
 	// 见RecordInfoBatch
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	RecordList []*CreateDomainBatchRecord `json:"RecordList,omitnil" name:"RecordList"`
+	RecordList []*CreateDomainBatchRecord `json:"RecordList,omitnil,omitempty" name:"RecordList"`
 
 	// 任务编号
-	Id *uint64 `json:"Id,omitnil" name:"Id"`
+	Id *uint64 `json:"Id,omitnil,omitempty" name:"Id"`
 
 	// 域名
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名等级
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	DomainGrade *string `json:"DomainGrade,omitnil" name:"DomainGrade"`
+	DomainGrade *string `json:"DomainGrade,omitnil,omitempty" name:"DomainGrade"`
 
 	// 错误信息
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	ErrMsg *string `json:"ErrMsg,omitnil" name:"ErrMsg"`
+	ErrMsg *string `json:"ErrMsg,omitnil,omitempty" name:"ErrMsg"`
 
 	// 该条任务运行状态
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	Status *string `json:"Status,omitnil" name:"Status"`
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 
 	// 操作类型
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	Operation *string `json:"Operation,omitnil" name:"Operation"`
+	Operation *string `json:"Operation,omitnil,omitempty" name:"Operation"`
 }
 
 type CreateDomainBatchRecord struct {
 	// 子域名(主机记录)。
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	SubDomain *string `json:"SubDomain,omitnil" name:"SubDomain"`
+	SubDomain *string `json:"SubDomain,omitnil,omitempty" name:"SubDomain"`
 
 	// 记录类型, 详见 DescribeRecordType 接口
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	RecordType *string `json:"RecordType,omitnil" name:"RecordType"`
+	RecordType *string `json:"RecordType,omitnil,omitempty" name:"RecordType"`
 
 	// 解析记录的线路，详见 DescribeRecordLineList 接口
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	RecordLine *string `json:"RecordLine,omitnil" name:"RecordLine"`
+	RecordLine *string `json:"RecordLine,omitnil,omitempty" name:"RecordLine"`
 
 	// 记录值
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	Value *string `json:"Value,omitnil" name:"Value"`
+	Value *string `json:"Value,omitnil,omitempty" name:"Value"`
 
 	// 记录的 TTL 值
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	TTL *uint64 `json:"TTL,omitnil" name:"TTL"`
+	TTL *uint64 `json:"TTL,omitnil,omitempty" name:"TTL"`
 
 	// 记录添加状态
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	Status *string `json:"Status,omitnil" name:"Status"`
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 
 	// 操作类型
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	Operation *string `json:"Operation,omitnil" name:"Operation"`
+	Operation *string `json:"Operation,omitnil,omitempty" name:"Operation"`
 
 	// 错误信息
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	ErrMsg *string `json:"ErrMsg,omitnil" name:"ErrMsg"`
+	ErrMsg *string `json:"ErrMsg,omitnil,omitempty" name:"ErrMsg"`
 
 	// 此条记录在列表中的ID
-	Id *uint64 `json:"Id,omitnil" name:"Id"`
+	Id *uint64 `json:"Id,omitnil,omitempty" name:"Id"`
 }
 
 // Predefined struct for user
 type CreateDomainBatchRequestParams struct {
 	// 域名数组
-	DomainList []*string `json:"DomainList,omitnil" name:"DomainList"`
+	DomainList []*string `json:"DomainList,omitnil,omitempty" name:"DomainList"`
 
 	// 每个域名添加 @ 和 www 的 A 记录值，记录值为IP，如果不传此参数或者传空，将只添加域名，不添加记录。
-	RecordValue *string `json:"RecordValue,omitnil" name:"RecordValue"`
+	RecordValue *string `json:"RecordValue,omitnil,omitempty" name:"RecordValue"`
 }
 
 type CreateDomainBatchRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名数组
-	DomainList []*string `json:"DomainList,omitnil" name:"DomainList"`
+	DomainList []*string `json:"DomainList,omitnil,omitempty" name:"DomainList"`
 
 	// 每个域名添加 @ 和 www 的 A 记录值，记录值为IP，如果不传此参数或者传空，将只添加域名，不添加记录。
-	RecordValue *string `json:"RecordValue,omitnil" name:"RecordValue"`
+	RecordValue *string `json:"RecordValue,omitnil,omitempty" name:"RecordValue"`
 }
 
 func (r *CreateDomainBatchRequest) ToJsonString() string {
@@ -596,13 +711,13 @@ func (r *CreateDomainBatchRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type CreateDomainBatchResponseParams struct {
 	// 批量添加域名信息
-	DetailList []*CreateDomainBatchDetail `json:"DetailList,omitnil" name:"DetailList"`
+	DetailList []*CreateDomainBatchDetail `json:"DetailList,omitnil,omitempty" name:"DetailList"`
 
 	// 批量任务的ID
-	JobId *uint64 `json:"JobId,omitnil" name:"JobId"`
+	JobId *uint64 `json:"JobId,omitnil,omitempty" name:"JobId"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type CreateDomainBatchResponse struct {
@@ -624,32 +739,32 @@ func (r *CreateDomainBatchResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type CreateDomainCustomLineRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 自定义线路名称
-	Name *string `json:"Name,omitnil" name:"Name"`
+	Name *string `json:"Name,omitnil,omitempty" name:"Name"`
 
 	// 自定义线路IP段，用-分割
-	Area *string `json:"Area,omitnil" name:"Area"`
+	Area *string `json:"Area,omitnil,omitempty" name:"Area"`
 
 	// 域名ID，如果传了DomainId，系统将会忽略Domain参数，优先使用DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type CreateDomainCustomLineRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 自定义线路名称
-	Name *string `json:"Name,omitnil" name:"Name"`
+	Name *string `json:"Name,omitnil,omitempty" name:"Name"`
 
 	// 自定义线路IP段，用-分割
-	Area *string `json:"Area,omitnil" name:"Area"`
+	Area *string `json:"Area,omitnil,omitempty" name:"Area"`
 
 	// 域名ID，如果传了DomainId，系统将会忽略Domain参数，优先使用DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *CreateDomainCustomLineRequest) ToJsonString() string {
@@ -676,8 +791,8 @@ func (r *CreateDomainCustomLineRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type CreateDomainCustomLineResponseParams struct {
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type CreateDomainCustomLineResponse struct {
@@ -699,14 +814,14 @@ func (r *CreateDomainCustomLineResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type CreateDomainGroupRequestParams struct {
 	// 域名分组
-	GroupName *string `json:"GroupName,omitnil" name:"GroupName"`
+	GroupName *string `json:"GroupName,omitnil,omitempty" name:"GroupName"`
 }
 
 type CreateDomainGroupRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名分组
-	GroupName *string `json:"GroupName,omitnil" name:"GroupName"`
+	GroupName *string `json:"GroupName,omitnil,omitempty" name:"GroupName"`
 }
 
 func (r *CreateDomainGroupRequest) ToJsonString() string {
@@ -731,10 +846,10 @@ func (r *CreateDomainGroupRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type CreateDomainGroupResponseParams struct {
 	// 域名分组ID
-	GroupId *int64 `json:"GroupId,omitnil" name:"GroupId"`
+	GroupId *int64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type CreateDomainGroupResponse struct {
@@ -756,38 +871,38 @@ func (r *CreateDomainGroupResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type CreateDomainRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名分组ID。可以通过接口DescribeDomainGroupList查看当前域名分组信息
-	GroupId *uint64 `json:"GroupId,omitnil" name:"GroupId"`
+	GroupId *uint64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
 
-	// 是否星标域名，”yes”、”no” 分别代表是和否。
-	IsMark *string `json:"IsMark,omitnil" name:"IsMark"`
+	// 是否星标域名，"yes"、"no" 分别代表是和否。
+	IsMark *string `json:"IsMark,omitnil,omitempty" name:"IsMark"`
 
 	// 添加子域名时，是否迁移相关父域名的解析记录。不传默认为 true
-	TransferSubDomain *bool `json:"TransferSubDomain,omitnil" name:"TransferSubDomain"`
+	TransferSubDomain *bool `json:"TransferSubDomain,omitnil,omitempty" name:"TransferSubDomain"`
 
 	// 域名绑定的标签
-	Tags []*TagItem `json:"Tags,omitnil" name:"Tags"`
+	Tags []*TagItem `json:"Tags,omitnil,omitempty" name:"Tags"`
 }
 
 type CreateDomainRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名分组ID。可以通过接口DescribeDomainGroupList查看当前域名分组信息
-	GroupId *uint64 `json:"GroupId,omitnil" name:"GroupId"`
+	GroupId *uint64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
 
-	// 是否星标域名，”yes”、”no” 分别代表是和否。
-	IsMark *string `json:"IsMark,omitnil" name:"IsMark"`
+	// 是否星标域名，"yes"、"no" 分别代表是和否。
+	IsMark *string `json:"IsMark,omitnil,omitempty" name:"IsMark"`
 
 	// 添加子域名时，是否迁移相关父域名的解析记录。不传默认为 true
-	TransferSubDomain *bool `json:"TransferSubDomain,omitnil" name:"TransferSubDomain"`
+	TransferSubDomain *bool `json:"TransferSubDomain,omitnil,omitempty" name:"TransferSubDomain"`
 
 	// 域名绑定的标签
-	Tags []*TagItem `json:"Tags,omitnil" name:"Tags"`
+	Tags []*TagItem `json:"Tags,omitnil,omitempty" name:"Tags"`
 }
 
 func (r *CreateDomainRequest) ToJsonString() string {
@@ -816,10 +931,10 @@ func (r *CreateDomainRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type CreateDomainResponseParams struct {
 	// 域名信息
-	DomainInfo *DomainCreateInfo `json:"DomainInfo,omitnil" name:"DomainInfo"`
+	DomainInfo *DomainCreateInfo `json:"DomainInfo,omitnil,omitempty" name:"DomainInfo"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type CreateDomainResponse struct {
@@ -838,101 +953,316 @@ func (r *CreateDomainResponse) FromJsonString(s string) error {
 	return json.Unmarshal([]byte(s), &r)
 }
 
-type CreateRecordBatchDetail struct {
-	// 见RecordInfoBatch
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	RecordList []*CreateRecordBatchRecord `json:"RecordList,omitnil" name:"RecordList"`
+// Predefined struct for user
+type CreateDomainsAnalyticsFileRequestParams struct {
+	// 需要查询解析量的域名数组。
+	Domains []*string `json:"Domains,omitnil,omitempty" name:"Domains"`
 
-	// 任务编号
-	Id *uint64 `json:"Id,omitnil" name:"Id"`
+	// 查询解析量的时间区间起点。如：2023-01-01。
+	StartDate *string `json:"StartDate,omitnil,omitempty" name:"StartDate"`
+
+	// 查询解析量的统计维度。默认为 DATE。
+	// DATE：按天统计
+	// HOUR：按小时统计
+	DNSFormat *string `json:"DNSFormat,omitnil,omitempty" name:"DNSFormat"`
+
+	// 查询解析量的时间区间终点。如：2023-01-01。默认为当天。
+	EndDate *string `json:"EndDate,omitnil,omitempty" name:"EndDate"`
+}
+
+type CreateDomainsAnalyticsFileRequest struct {
+	*tchttp.BaseRequest
+	
+	// 需要查询解析量的域名数组。
+	Domains []*string `json:"Domains,omitnil,omitempty" name:"Domains"`
+
+	// 查询解析量的时间区间起点。如：2023-01-01。
+	StartDate *string `json:"StartDate,omitnil,omitempty" name:"StartDate"`
+
+	// 查询解析量的统计维度。默认为 DATE。
+	// DATE：按天统计
+	// HOUR：按小时统计
+	DNSFormat *string `json:"DNSFormat,omitnil,omitempty" name:"DNSFormat"`
+
+	// 查询解析量的时间区间终点。如：2023-01-01。默认为当天。
+	EndDate *string `json:"EndDate,omitnil,omitempty" name:"EndDate"`
+}
+
+func (r *CreateDomainsAnalyticsFileRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *CreateDomainsAnalyticsFileRequest) FromJsonString(s string) error {
+	f := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(s), &f); err != nil {
+		return err
+	}
+	delete(f, "Domains")
+	delete(f, "StartDate")
+	delete(f, "DNSFormat")
+	delete(f, "EndDate")
+	if len(f) > 0 {
+		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "CreateDomainsAnalyticsFileRequest has unknown keys!", "")
+	}
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type CreateDomainsAnalyticsFileResponseParams struct {
+	// 当前批量任务 id。
+	JobId *uint64 `json:"JobId,omitnil,omitempty" name:"JobId"`
+
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
+}
+
+type CreateDomainsAnalyticsFileResponse struct {
+	*tchttp.BaseResponse
+	Response *CreateDomainsAnalyticsFileResponseParams `json:"Response"`
+}
+
+func (r *CreateDomainsAnalyticsFileResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *CreateDomainsAnalyticsFileResponse) FromJsonString(s string) error {
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type CreateLineGroupCopyRequestParams struct {
+	// 域名
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 要复制的域名ID。要从多个域名复制线路分组时，用英文逗号分隔，例如1002,1005
+	DomainIds *string `json:"DomainIds,omitnil,omitempty" name:"DomainIds"`
+
+	// 域名ID，如果传了DomainId，系统将会忽略Domain参数，优先使用DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+}
+
+type CreateLineGroupCopyRequest struct {
+	*tchttp.BaseRequest
+	
+	// 域名
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 要复制的域名ID。要从多个域名复制线路分组时，用英文逗号分隔，例如1002,1005
+	DomainIds *string `json:"DomainIds,omitnil,omitempty" name:"DomainIds"`
+
+	// 域名ID，如果传了DomainId，系统将会忽略Domain参数，优先使用DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+}
+
+func (r *CreateLineGroupCopyRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *CreateLineGroupCopyRequest) FromJsonString(s string) error {
+	f := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(s), &f); err != nil {
+		return err
+	}
+	delete(f, "Domain")
+	delete(f, "DomainIds")
+	delete(f, "DomainId")
+	if len(f) > 0 {
+		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "CreateLineGroupCopyRequest has unknown keys!", "")
+	}
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type CreateLineGroupCopyResponseParams struct {
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
+}
+
+type CreateLineGroupCopyResponse struct {
+	*tchttp.BaseResponse
+	Response *CreateLineGroupCopyResponseParams `json:"Response"`
+}
+
+func (r *CreateLineGroupCopyResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *CreateLineGroupCopyResponse) FromJsonString(s string) error {
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type CreateLineGroupRequestParams struct {
+	// 自定义线路分组的名称。
+	Name *string `json:"Name,omitnil,omitempty" name:"Name"`
+
+	// 自定义线路分组包含的线路列表，包含多个线路时用英文逗号分隔。例如，铁通,奇虎
+	Lines *string `json:"Lines,omitnil,omitempty" name:"Lines"`
 
 	// 域名
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 域名ID，如果传了DomainId，系统将会忽略Domain参数，优先使用DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+}
+
+type CreateLineGroupRequest struct {
+	*tchttp.BaseRequest
+	
+	// 自定义线路分组的名称。
+	Name *string `json:"Name,omitnil,omitempty" name:"Name"`
+
+	// 自定义线路分组包含的线路列表，包含多个线路时用英文逗号分隔。例如，铁通,奇虎
+	Lines *string `json:"Lines,omitnil,omitempty" name:"Lines"`
+
+	// 域名
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 域名ID，如果传了DomainId，系统将会忽略Domain参数，优先使用DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+}
+
+func (r *CreateLineGroupRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *CreateLineGroupRequest) FromJsonString(s string) error {
+	f := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(s), &f); err != nil {
+		return err
+	}
+	delete(f, "Name")
+	delete(f, "Lines")
+	delete(f, "Domain")
+	delete(f, "DomainId")
+	if len(f) > 0 {
+		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "CreateLineGroupRequest has unknown keys!", "")
+	}
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type CreateLineGroupResponseParams struct {
+	// 自定义线路分组详情
+	Data *LineGroupDetail `json:"Data,omitnil,omitempty" name:"Data"`
+
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
+}
+
+type CreateLineGroupResponse struct {
+	*tchttp.BaseResponse
+	Response *CreateLineGroupResponseParams `json:"Response"`
+}
+
+func (r *CreateLineGroupResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *CreateLineGroupResponse) FromJsonString(s string) error {
+	return json.Unmarshal([]byte(s), &r)
+}
+
+type CreateRecordBatchDetail struct {
+	// 见RecordInfoBatch
+	RecordList []*CreateRecordBatchRecord `json:"RecordList,omitnil,omitempty" name:"RecordList"`
+
+	// 任务编号
+	Id *uint64 `json:"Id,omitnil,omitempty" name:"Id"`
+
+	// 域名
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名等级
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	DomainGrade *string `json:"DomainGrade,omitnil" name:"DomainGrade"`
+	DomainGrade *string `json:"DomainGrade,omitnil,omitempty" name:"DomainGrade"`
 
 	// 错误信息
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	ErrMsg *string `json:"ErrMsg,omitnil" name:"ErrMsg"`
+	ErrMsg *string `json:"ErrMsg,omitnil,omitempty" name:"ErrMsg"`
 
 	// 该条任务运行状态
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	Status *string `json:"Status,omitnil" name:"Status"`
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 
 	// 操作类型
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Operation *string `json:"Operation,omitnil" name:"Operation"`
+	Operation *string `json:"Operation,omitnil,omitempty" name:"Operation"`
 
 	// 域名ID
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type CreateRecordBatchRecord struct {
 	// 子域名(主机记录)。
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	SubDomain *string `json:"SubDomain,omitnil" name:"SubDomain"`
+	SubDomain *string `json:"SubDomain,omitnil,omitempty" name:"SubDomain"`
 
 	// 记录类型, 详见 DescribeRecordType 接口
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	RecordType *string `json:"RecordType,omitnil" name:"RecordType"`
+	RecordType *string `json:"RecordType,omitnil,omitempty" name:"RecordType"`
 
 	// 解析记录的线路，详见 DescribeRecordLineList 接口
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	RecordLine *string `json:"RecordLine,omitnil" name:"RecordLine"`
+	RecordLine *string `json:"RecordLine,omitnil,omitempty" name:"RecordLine"`
 
 	// 记录值
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	Value *string `json:"Value,omitnil" name:"Value"`
+	Value *string `json:"Value,omitnil,omitempty" name:"Value"`
 
 	// 记录的 TTL 值
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	TTL *uint64 `json:"TTL,omitnil" name:"TTL"`
+	TTL *uint64 `json:"TTL,omitnil,omitempty" name:"TTL"`
 
 	// 记录添加状态
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	Status *string `json:"Status,omitnil" name:"Status"`
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 
 	// 操作类型
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Operation *string `json:"Operation,omitnil" name:"Operation"`
+	Operation *string `json:"Operation,omitnil,omitempty" name:"Operation"`
 
 	// 错误信息
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	ErrMsg *string `json:"ErrMsg,omitnil" name:"ErrMsg"`
+	ErrMsg *string `json:"ErrMsg,omitnil,omitempty" name:"ErrMsg"`
 
 	// 此条记录在列表中的ID
-	Id *uint64 `json:"Id,omitnil" name:"Id"`
+	Id *uint64 `json:"Id,omitnil,omitempty" name:"Id"`
 
 	// 记录的MX权重
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	MX *uint64 `json:"MX,omitnil" name:"MX"`
+	MX *uint64 `json:"MX,omitnil,omitempty" name:"MX"`
 
 	// 记录的权重
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	Weight *uint64 `json:"Weight,omitnil" name:"Weight"`
+	Weight *uint64 `json:"Weight,omitnil,omitempty" name:"Weight"`
 }
 
 // Predefined struct for user
 type CreateRecordBatchRequestParams struct {
-	// 域名ID，多个 domain_id 用英文逗号进行分割。
-	DomainIdList []*string `json:"DomainIdList,omitnil" name:"DomainIdList"`
+	// 域名ID，多个域名ID用英文逗号进行分割。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
+	DomainIdList []*string `json:"DomainIdList,omitnil,omitempty" name:"DomainIdList"`
 
 	// 记录数组
-	RecordList []*AddRecordBatch `json:"RecordList,omitnil" name:"RecordList"`
+	RecordList []*AddRecordBatch `json:"RecordList,omitnil,omitempty" name:"RecordList"`
 }
 
 type CreateRecordBatchRequest struct {
 	*tchttp.BaseRequest
 	
-	// 域名ID，多个 domain_id 用英文逗号进行分割。
-	DomainIdList []*string `json:"DomainIdList,omitnil" name:"DomainIdList"`
+	// 域名ID，多个域名ID用英文逗号进行分割。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
+	DomainIdList []*string `json:"DomainIdList,omitnil,omitempty" name:"DomainIdList"`
 
 	// 记录数组
-	RecordList []*AddRecordBatch `json:"RecordList,omitnil" name:"RecordList"`
+	RecordList []*AddRecordBatch `json:"RecordList,omitnil,omitempty" name:"RecordList"`
 }
 
 func (r *CreateRecordBatchRequest) ToJsonString() string {
@@ -958,13 +1288,13 @@ func (r *CreateRecordBatchRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type CreateRecordBatchResponseParams struct {
 	// 批量添加域名信息
-	DetailList []*CreateRecordBatchDetail `json:"DetailList,omitnil" name:"DetailList"`
+	DetailList []*CreateRecordBatchDetail `json:"DetailList,omitnil,omitempty" name:"DetailList"`
 
 	// 批量任务的ID
-	JobId *uint64 `json:"JobId,omitnil" name:"JobId"`
+	JobId *uint64 `json:"JobId,omitnil,omitempty" name:"JobId"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type CreateRecordBatchResponse struct {
@@ -986,26 +1316,26 @@ func (r *CreateRecordBatchResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type CreateRecordGroupRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 分组名称
-	GroupName *string `json:"GroupName,omitnil" name:"GroupName"`
+	GroupName *string `json:"GroupName,omitnil,omitempty" name:"GroupName"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type CreateRecordGroupRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 分组名称
-	GroupName *string `json:"GroupName,omitnil" name:"GroupName"`
+	GroupName *string `json:"GroupName,omitnil,omitempty" name:"GroupName"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *CreateRecordGroupRequest) ToJsonString() string {
@@ -1032,10 +1362,10 @@ func (r *CreateRecordGroupRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type CreateRecordGroupResponseParams struct {
 	// 新增的分组 ID
-	GroupId *uint64 `json:"GroupId,omitnil" name:"GroupId"`
+	GroupId *uint64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type CreateRecordGroupResponse struct {
@@ -1056,81 +1386,93 @@ func (r *CreateRecordGroupResponse) FromJsonString(s string) error {
 
 // Predefined struct for user
 type CreateRecordRequestParams struct {
-	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	// <p>域名</p>
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 记录类型，通过 API 记录类型获得，大写英文，比如：A 。
-	RecordType *string `json:"RecordType,omitnil" name:"RecordType"`
+	// <p>记录类型，可通过接口DescribeRecordType获得，大写英文，比如：A 。</p>
+	RecordType *string `json:"RecordType,omitnil,omitempty" name:"RecordType"`
 
-	// 记录线路，通过 API 记录线路获得，中文，比如：默认。
-	RecordLine *string `json:"RecordLine,omitnil" name:"RecordLine"`
+	// <p>记录线路，可以通过接口DescribeRecordLineList查看当前域名允许的线路信息，中文，比如：默认。</p>
+	RecordLine *string `json:"RecordLine,omitnil,omitempty" name:"RecordLine"`
 
-	// 记录值，如 IP : 200.200.200.200， CNAME : cname.dnspod.com.， MX : mail.dnspod.com.。
-	Value *string `json:"Value,omitnil" name:"Value"`
+	// <p>记录值，如 IP : 200.200.200.200， CNAME : cname.dnspod.com.， MX : mail.dnspod.com.。</p>
+	Value *string `json:"Value,omitnil,omitempty" name:"Value"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// <p>域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。</p>
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
-	// 主机记录，如 www，如果不传，默认为 @。
-	SubDomain *string `json:"SubDomain,omitnil" name:"SubDomain"`
+	// <p>主机记录，如 www，如果不传，默认为 @。</p>
+	SubDomain *string `json:"SubDomain,omitnil,omitempty" name:"SubDomain"`
 
-	// 线路的 ID，通过 API 记录线路获得，英文字符串，比如：10=1。参数RecordLineId优先级高于RecordLine，如果同时传递二者，优先使用RecordLineId参数。
-	RecordLineId *string `json:"RecordLineId,omitnil" name:"RecordLineId"`
+	// <p>线路的 ID，可以通过接口DescribeRecordLineList查看当前域名允许的线路信息，英文字符串，比如：10=1。参数RecordLineId优先级高于RecordLine，如果同时传递二者，优先使用RecordLineId参数。</p>
+	RecordLineId *string `json:"RecordLineId,omitnil,omitempty" name:"RecordLineId"`
 
-	// MX 优先级，当记录类型是 MX 时有效，范围1-20，MX 记录时必选。
-	MX *uint64 `json:"MX,omitnil" name:"MX"`
+	// <p>MX 优先级，当记录类型是 MX、HTTPS、SVCB 时必填，范围0-65535。</p><p>取值范围：[0, 65535]</p>
+	MX *uint64 `json:"MX,omitnil,omitempty" name:"MX"`
 
-	// TTL，范围1-604800，不同等级域名最小值不同。
-	TTL *uint64 `json:"TTL,omitnil" name:"TTL"`
+	// <p>TTL，范围1-604800，不同套餐域名最小值不同。</p>
+	TTL *uint64 `json:"TTL,omitnil,omitempty" name:"TTL"`
 
-	// 权重信息，0到100的整数。仅企业 VIP 域名可用，0 表示关闭，不传该参数，表示不设置权重信息。
-	Weight *uint64 `json:"Weight,omitnil" name:"Weight"`
+	// <p>权重信息，0到100的整数。0 表示关闭，不传该参数，表示不设置权重信息。</p>
+	Weight *uint64 `json:"Weight,omitnil,omitempty" name:"Weight"`
 
-	// 记录初始状态，取值范围为 ENABLE 和 DISABLE 。默认为 ENABLE ，如果传入 DISABLE，解析不会生效，也不会验证负载均衡的限制。
-	Status *string `json:"Status,omitnil" name:"Status"`
+	// <p>记录初始状态，取值范围为 ENABLE 和 DISABLE 。默认为 ENABLE ，如果传入 DISABLE，解析不会生效，也不会验证负载均衡的限制。</p>
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 
-	// 备注
-	Remark *string `json:"Remark,omitnil" name:"Remark"`
+	// <p>备注</p>
+	Remark *string `json:"Remark,omitnil,omitempty" name:"Remark"`
+
+	// <p>开启DNSSEC时，强制添加CNAME/URL记录</p>
+	DnssecConflictMode *string `json:"DnssecConflictMode,omitnil,omitempty" name:"DnssecConflictMode"`
+
+	// <p>记录分组 Id。可以通过接口 DescribeRecordGroupList 接口 GroupId 字段获取。</p><p>取值参考：<a href="https://cloud.tencent.com/document/api/1427/83225">DescribeRecordGroupList</a></p>
+	GroupId *uint64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
 }
 
 type CreateRecordRequest struct {
 	*tchttp.BaseRequest
 	
-	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	// <p>域名</p>
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 记录类型，通过 API 记录类型获得，大写英文，比如：A 。
-	RecordType *string `json:"RecordType,omitnil" name:"RecordType"`
+	// <p>记录类型，可通过接口DescribeRecordType获得，大写英文，比如：A 。</p>
+	RecordType *string `json:"RecordType,omitnil,omitempty" name:"RecordType"`
 
-	// 记录线路，通过 API 记录线路获得，中文，比如：默认。
-	RecordLine *string `json:"RecordLine,omitnil" name:"RecordLine"`
+	// <p>记录线路，可以通过接口DescribeRecordLineList查看当前域名允许的线路信息，中文，比如：默认。</p>
+	RecordLine *string `json:"RecordLine,omitnil,omitempty" name:"RecordLine"`
 
-	// 记录值，如 IP : 200.200.200.200， CNAME : cname.dnspod.com.， MX : mail.dnspod.com.。
-	Value *string `json:"Value,omitnil" name:"Value"`
+	// <p>记录值，如 IP : 200.200.200.200， CNAME : cname.dnspod.com.， MX : mail.dnspod.com.。</p>
+	Value *string `json:"Value,omitnil,omitempty" name:"Value"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// <p>域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。</p>
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
-	// 主机记录，如 www，如果不传，默认为 @。
-	SubDomain *string `json:"SubDomain,omitnil" name:"SubDomain"`
+	// <p>主机记录，如 www，如果不传，默认为 @。</p>
+	SubDomain *string `json:"SubDomain,omitnil,omitempty" name:"SubDomain"`
 
-	// 线路的 ID，通过 API 记录线路获得，英文字符串，比如：10=1。参数RecordLineId优先级高于RecordLine，如果同时传递二者，优先使用RecordLineId参数。
-	RecordLineId *string `json:"RecordLineId,omitnil" name:"RecordLineId"`
+	// <p>线路的 ID，可以通过接口DescribeRecordLineList查看当前域名允许的线路信息，英文字符串，比如：10=1。参数RecordLineId优先级高于RecordLine，如果同时传递二者，优先使用RecordLineId参数。</p>
+	RecordLineId *string `json:"RecordLineId,omitnil,omitempty" name:"RecordLineId"`
 
-	// MX 优先级，当记录类型是 MX 时有效，范围1-20，MX 记录时必选。
-	MX *uint64 `json:"MX,omitnil" name:"MX"`
+	// <p>MX 优先级，当记录类型是 MX、HTTPS、SVCB 时必填，范围0-65535。</p><p>取值范围：[0, 65535]</p>
+	MX *uint64 `json:"MX,omitnil,omitempty" name:"MX"`
 
-	// TTL，范围1-604800，不同等级域名最小值不同。
-	TTL *uint64 `json:"TTL,omitnil" name:"TTL"`
+	// <p>TTL，范围1-604800，不同套餐域名最小值不同。</p>
+	TTL *uint64 `json:"TTL,omitnil,omitempty" name:"TTL"`
 
-	// 权重信息，0到100的整数。仅企业 VIP 域名可用，0 表示关闭，不传该参数，表示不设置权重信息。
-	Weight *uint64 `json:"Weight,omitnil" name:"Weight"`
+	// <p>权重信息，0到100的整数。0 表示关闭，不传该参数，表示不设置权重信息。</p>
+	Weight *uint64 `json:"Weight,omitnil,omitempty" name:"Weight"`
 
-	// 记录初始状态，取值范围为 ENABLE 和 DISABLE 。默认为 ENABLE ，如果传入 DISABLE，解析不会生效，也不会验证负载均衡的限制。
-	Status *string `json:"Status,omitnil" name:"Status"`
+	// <p>记录初始状态，取值范围为 ENABLE 和 DISABLE 。默认为 ENABLE ，如果传入 DISABLE，解析不会生效，也不会验证负载均衡的限制。</p>
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 
-	// 备注
-	Remark *string `json:"Remark,omitnil" name:"Remark"`
+	// <p>备注</p>
+	Remark *string `json:"Remark,omitnil,omitempty" name:"Remark"`
+
+	// <p>开启DNSSEC时，强制添加CNAME/URL记录</p>
+	DnssecConflictMode *string `json:"DnssecConflictMode,omitnil,omitempty" name:"DnssecConflictMode"`
+
+	// <p>记录分组 Id。可以通过接口 DescribeRecordGroupList 接口 GroupId 字段获取。</p><p>取值参考：<a href="https://cloud.tencent.com/document/api/1427/83225">DescribeRecordGroupList</a></p>
+	GroupId *uint64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
 }
 
 func (r *CreateRecordRequest) ToJsonString() string {
@@ -1157,6 +1499,8 @@ func (r *CreateRecordRequest) FromJsonString(s string) error {
 	delete(f, "Weight")
 	delete(f, "Status")
 	delete(f, "Remark")
+	delete(f, "DnssecConflictMode")
+	delete(f, "GroupId")
 	if len(f) > 0 {
 		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "CreateRecordRequest has unknown keys!", "")
 	}
@@ -1165,11 +1509,11 @@ func (r *CreateRecordRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type CreateRecordResponseParams struct {
-	// 记录ID
-	RecordId *uint64 `json:"RecordId,omitnil" name:"RecordId"`
+	// <p>记录ID</p>
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type CreateRecordResponse struct {
@@ -1191,20 +1535,20 @@ func (r *CreateRecordResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type CreateSnapshotRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type CreateSnapshotRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *CreateSnapshotRequest) ToJsonString() string {
@@ -1229,8 +1573,8 @@ func (r *CreateSnapshotRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type CreateSnapshotResponseParams struct {
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type CreateSnapshotResponse struct {
@@ -1249,54 +1593,339 @@ func (r *CreateSnapshotResponse) FromJsonString(s string) error {
 	return json.Unmarshal([]byte(s), &r)
 }
 
+// Predefined struct for user
+type CreateSubDomainsAnalyticsFileRequestParams struct {
+	// 需要查询解析量的域名数组。
+	Domains []*SubDomainsAnalyticsParamsItem `json:"Domains,omitnil,omitempty" name:"Domains"`
+
+	// 查询解析量的时间区间起点。如：2023-01-01。
+	StartDate *string `json:"StartDate,omitnil,omitempty" name:"StartDate"`
+
+	// 查询解析量子域名类型。
+	// 1：子域名
+	// 2：无解析量子域名
+	SubDomainType *uint64 `json:"SubDomainType,omitnil,omitempty" name:"SubDomainType"`
+
+	// 查询解析量的统计维度。默认为 DATE。
+	// DATE：按天统计
+	// HOUR：按小时统计
+	DNSFormat *string `json:"DNSFormat,omitnil,omitempty" name:"DNSFormat"`
+
+	// 查询解析量的时间区间终点。如：2023-01-01。默认为当天。
+	EndDate *string `json:"EndDate,omitnil,omitempty" name:"EndDate"`
+}
+
+type CreateSubDomainsAnalyticsFileRequest struct {
+	*tchttp.BaseRequest
+	
+	// 需要查询解析量的域名数组。
+	Domains []*SubDomainsAnalyticsParamsItem `json:"Domains,omitnil,omitempty" name:"Domains"`
+
+	// 查询解析量的时间区间起点。如：2023-01-01。
+	StartDate *string `json:"StartDate,omitnil,omitempty" name:"StartDate"`
+
+	// 查询解析量子域名类型。
+	// 1：子域名
+	// 2：无解析量子域名
+	SubDomainType *uint64 `json:"SubDomainType,omitnil,omitempty" name:"SubDomainType"`
+
+	// 查询解析量的统计维度。默认为 DATE。
+	// DATE：按天统计
+	// HOUR：按小时统计
+	DNSFormat *string `json:"DNSFormat,omitnil,omitempty" name:"DNSFormat"`
+
+	// 查询解析量的时间区间终点。如：2023-01-01。默认为当天。
+	EndDate *string `json:"EndDate,omitnil,omitempty" name:"EndDate"`
+}
+
+func (r *CreateSubDomainsAnalyticsFileRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *CreateSubDomainsAnalyticsFileRequest) FromJsonString(s string) error {
+	f := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(s), &f); err != nil {
+		return err
+	}
+	delete(f, "Domains")
+	delete(f, "StartDate")
+	delete(f, "SubDomainType")
+	delete(f, "DNSFormat")
+	delete(f, "EndDate")
+	if len(f) > 0 {
+		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "CreateSubDomainsAnalyticsFileRequest has unknown keys!", "")
+	}
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type CreateSubDomainsAnalyticsFileResponseParams struct {
+	// 当前批量任务 id。
+	JobId *uint64 `json:"JobId,omitnil,omitempty" name:"JobId"`
+
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
+}
+
+type CreateSubDomainsAnalyticsFileResponse struct {
+	*tchttp.BaseResponse
+	Response *CreateSubDomainsAnalyticsFileResponseParams `json:"Response"`
+}
+
+func (r *CreateSubDomainsAnalyticsFileResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *CreateSubDomainsAnalyticsFileResponse) FromJsonString(s string) error {
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type CreateSubdomainValidateTXTValueRequestParams struct {
+	// 要添加的子域名 Zone 域。
+	DomainZone *string `json:"DomainZone,omitnil,omitempty" name:"DomainZone"`
+}
+
+type CreateSubdomainValidateTXTValueRequest struct {
+	*tchttp.BaseRequest
+	
+	// 要添加的子域名 Zone 域。
+	DomainZone *string `json:"DomainZone,omitnil,omitempty" name:"DomainZone"`
+}
+
+func (r *CreateSubdomainValidateTXTValueRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *CreateSubdomainValidateTXTValueRequest) FromJsonString(s string) error {
+	f := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(s), &f); err != nil {
+		return err
+	}
+	delete(f, "DomainZone")
+	if len(f) > 0 {
+		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "CreateSubdomainValidateTXTValueRequest has unknown keys!", "")
+	}
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type CreateSubdomainValidateTXTValueResponseParams struct {
+	// 需要添加 TXT 记录的主域名。
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 需要添加 TXT 记录的主机记录。
+	Subdomain *string `json:"Subdomain,omitnil,omitempty" name:"Subdomain"`
+
+	// 需要添加记录类型。
+	RecordType *string `json:"RecordType,omitnil,omitempty" name:"RecordType"`
+
+	// 需要添加 TXT 记录的记录值。
+	Value *string `json:"Value,omitnil,omitempty" name:"Value"`
+
+	// 需要添加 TXT 记录的上级域名(可选，主域名和上级域名任选一个添加即可)。
+	ParentDomain *string `json:"ParentDomain,omitnil,omitempty" name:"ParentDomain"`
+
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
+}
+
+type CreateSubdomainValidateTXTValueResponse struct {
+	*tchttp.BaseResponse
+	Response *CreateSubdomainValidateTXTValueResponseParams `json:"Response"`
+}
+
+func (r *CreateSubdomainValidateTXTValueResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *CreateSubdomainValidateTXTValueResponse) FromJsonString(s string) error {
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type CreateTXTRecordRequestParams struct {
+	// 域名
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 记录线路
+	RecordLine *string `json:"RecordLine,omitnil,omitempty" name:"RecordLine"`
+
+	// 记录值，如 IP : 200.200.200.200， CNAME : cname.dnspod.com.， MX : mail.dnspod.com.。
+	Value *string `json:"Value,omitnil,omitempty" name:"Value"`
+
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+
+	// 主机记录，如 www，如果不传，默认为 @。
+	SubDomain *string `json:"SubDomain,omitnil,omitempty" name:"SubDomain"`
+
+	// 线路的 ID，英文字符串，比如：10=1。参数RecordLineId优先级高于RecordLine，如果同时传递二者，优先使用RecordLineId参数。
+	RecordLineId *string `json:"RecordLineId,omitnil,omitempty" name:"RecordLineId"`
+
+	// TTL，范围1-604800，不同套餐域名最小值不同。
+	TTL *uint64 `json:"TTL,omitnil,omitempty" name:"TTL"`
+
+	// 记录初始状态，取值范围为 ENABLE 和 DISABLE 。默认为 ENABLE ，如果传入 DISABLE，解析不会生效，也不会验证负载均衡的限制。
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
+
+	// 备注
+	Remark *string `json:"Remark,omitnil,omitempty" name:"Remark"`
+
+	// 记录分组 Id。
+	GroupId *uint64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
+}
+
+type CreateTXTRecordRequest struct {
+	*tchttp.BaseRequest
+	
+	// 域名
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 记录线路
+	RecordLine *string `json:"RecordLine,omitnil,omitempty" name:"RecordLine"`
+
+	// 记录值，如 IP : 200.200.200.200， CNAME : cname.dnspod.com.， MX : mail.dnspod.com.。
+	Value *string `json:"Value,omitnil,omitempty" name:"Value"`
+
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+
+	// 主机记录，如 www，如果不传，默认为 @。
+	SubDomain *string `json:"SubDomain,omitnil,omitempty" name:"SubDomain"`
+
+	// 线路的 ID，英文字符串，比如：10=1。参数RecordLineId优先级高于RecordLine，如果同时传递二者，优先使用RecordLineId参数。
+	RecordLineId *string `json:"RecordLineId,omitnil,omitempty" name:"RecordLineId"`
+
+	// TTL，范围1-604800，不同套餐域名最小值不同。
+	TTL *uint64 `json:"TTL,omitnil,omitempty" name:"TTL"`
+
+	// 记录初始状态，取值范围为 ENABLE 和 DISABLE 。默认为 ENABLE ，如果传入 DISABLE，解析不会生效，也不会验证负载均衡的限制。
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
+
+	// 备注
+	Remark *string `json:"Remark,omitnil,omitempty" name:"Remark"`
+
+	// 记录分组 Id。
+	GroupId *uint64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
+}
+
+func (r *CreateTXTRecordRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *CreateTXTRecordRequest) FromJsonString(s string) error {
+	f := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(s), &f); err != nil {
+		return err
+	}
+	delete(f, "Domain")
+	delete(f, "RecordLine")
+	delete(f, "Value")
+	delete(f, "DomainId")
+	delete(f, "SubDomain")
+	delete(f, "RecordLineId")
+	delete(f, "TTL")
+	delete(f, "Status")
+	delete(f, "Remark")
+	delete(f, "GroupId")
+	if len(f) > 0 {
+		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "CreateTXTRecordRequest has unknown keys!", "")
+	}
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type CreateTXTRecordResponseParams struct {
+	// 记录ID
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
+
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
+}
+
+type CreateTXTRecordResponse struct {
+	*tchttp.BaseResponse
+	Response *CreateTXTRecordResponseParams `json:"Response"`
+}
+
+func (r *CreateTXTRecordResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *CreateTXTRecordResponse) FromJsonString(s string) error {
+	return json.Unmarshal([]byte(s), &r)
+}
+
 type CustomLineInfo struct {
 	// 域名ID
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
 	// 自定义线路名称
-	Name *string `json:"Name,omitnil" name:"Name"`
+	Name *string `json:"Name,omitnil,omitempty" name:"Name"`
 
 	// 自定义线路IP段
-	Area *string `json:"Area,omitnil" name:"Area"`
+	Area *string `json:"Area,omitnil,omitempty" name:"Area"`
 
 	// 已使用IP段个数
-	UseCount *uint64 `json:"UseCount,omitnil" name:"UseCount"`
+	UseCount *uint64 `json:"UseCount,omitnil,omitempty" name:"UseCount"`
 
 	// 允许使用IP段最大个数
-	MaxCount *uint64 `json:"MaxCount,omitnil" name:"MaxCount"`
+	MaxCount *uint64 `json:"MaxCount,omitnil,omitempty" name:"MaxCount"`
 }
 
 type Deals struct {
-	// 子订单ID
-	DealId *string `json:"DealId,omitnil" name:"DealId"`
+	// <p>子订单ID</p>
+	DealId *string `json:"DealId,omitnil,omitempty" name:"DealId"`
 
-	// 子订单号
-	DealName *string `json:"DealName,omitnil" name:"DealName"`
+	// <p>子订单号</p>
+	DealName *string `json:"DealName,omitnil,omitempty" name:"DealName"`
+
+	// <p>资源ID</p>
+	ResourceId *string `json:"ResourceId,omitnil,omitempty" name:"ResourceId"`
 }
 
 // Predefined struct for user
 type DeleteDomainAliasRequestParams struct {
 	// 域名别名ID。可以通过接口DescribeDomainAliasList查到所有的域名别名列表以及对应的ID
-	DomainAliasId *int64 `json:"DomainAliasId,omitnil" name:"DomainAliasId"`
+	DomainAliasId *int64 `json:"DomainAliasId,omitnil,omitempty" name:"DomainAliasId"`
 
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名ID，参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *int64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *int64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type DeleteDomainAliasRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名别名ID。可以通过接口DescribeDomainAliasList查到所有的域名别名列表以及对应的ID
-	DomainAliasId *int64 `json:"DomainAliasId,omitnil" name:"DomainAliasId"`
+	DomainAliasId *int64 `json:"DomainAliasId,omitnil,omitempty" name:"DomainAliasId"`
 
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名ID，参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *int64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *int64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *DeleteDomainAliasRequest) ToJsonString() string {
@@ -1322,8 +1951,8 @@ func (r *DeleteDomainAliasRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type DeleteDomainAliasResponseParams struct {
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DeleteDomainAliasResponse struct {
@@ -1344,33 +1973,33 @@ func (r *DeleteDomainAliasResponse) FromJsonString(s string) error {
 
 type DeleteDomainBatchDetail struct {
 	// 域名 ID
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 错误信息
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Error *string `json:"Error,omitnil" name:"Error"`
+	Error *string `json:"Error,omitnil,omitempty" name:"Error"`
 
 	// 删除状态
-	Status *string `json:"Status,omitnil" name:"Status"`
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 
 	// 操作
-	Operation *string `json:"Operation,omitnil" name:"Operation"`
+	Operation *string `json:"Operation,omitnil,omitempty" name:"Operation"`
 }
 
 // Predefined struct for user
 type DeleteDomainBatchRequestParams struct {
 	// 域名数组
-	DomainList []*string `json:"DomainList,omitnil" name:"DomainList"`
+	DomainList []*string `json:"DomainList,omitnil,omitempty" name:"DomainList"`
 }
 
 type DeleteDomainBatchRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名数组
-	DomainList []*string `json:"DomainList,omitnil" name:"DomainList"`
+	DomainList []*string `json:"DomainList,omitnil,omitempty" name:"DomainList"`
 }
 
 func (r *DeleteDomainBatchRequest) ToJsonString() string {
@@ -1395,13 +2024,13 @@ func (r *DeleteDomainBatchRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DeleteDomainBatchResponseParams struct {
 	// 任务 ID
-	JobId *uint64 `json:"JobId,omitnil" name:"JobId"`
+	JobId *uint64 `json:"JobId,omitnil,omitempty" name:"JobId"`
 
 	// 任务详情数组
-	DetailList []*DeleteDomainBatchDetail `json:"DetailList,omitnil" name:"DetailList"`
+	DetailList []*DeleteDomainBatchDetail `json:"DetailList,omitnil,omitempty" name:"DetailList"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DeleteDomainBatchResponse struct {
@@ -1423,26 +2052,26 @@ func (r *DeleteDomainBatchResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type DeleteDomainCustomLineRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 自定义线路名称
-	Name *string `json:"Name,omitnil" name:"Name"`
+	Name *string `json:"Name,omitnil,omitempty" name:"Name"`
 
 	// 域名ID，如果传了DomainId，系统将会忽略Domain参数，优先使用DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type DeleteDomainCustomLineRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 自定义线路名称
-	Name *string `json:"Name,omitnil" name:"Name"`
+	Name *string `json:"Name,omitnil,omitempty" name:"Name"`
 
 	// 域名ID，如果传了DomainId，系统将会忽略Domain参数，优先使用DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *DeleteDomainCustomLineRequest) ToJsonString() string {
@@ -1468,8 +2097,8 @@ func (r *DeleteDomainCustomLineRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type DeleteDomainCustomLineResponseParams struct {
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DeleteDomainCustomLineResponse struct {
@@ -1491,20 +2120,20 @@ func (r *DeleteDomainCustomLineResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type DeleteDomainRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type DeleteDomainRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *DeleteDomainRequest) ToJsonString() string {
@@ -1529,8 +2158,8 @@ func (r *DeleteDomainRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type DeleteDomainResponseParams struct {
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DeleteDomainResponse struct {
@@ -1549,38 +2178,106 @@ func (r *DeleteDomainResponse) FromJsonString(s string) error {
 	return json.Unmarshal([]byte(s), &r)
 }
 
+// Predefined struct for user
+type DeleteLineGroupRequestParams struct {
+	// 域名
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 自定义线路分组ID
+	LineGroupId *uint64 `json:"LineGroupId,omitnil,omitempty" name:"LineGroupId"`
+
+	// 域名ID，如果传了DomainId，系统将会忽略Domain参数，优先使用DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+}
+
+type DeleteLineGroupRequest struct {
+	*tchttp.BaseRequest
+	
+	// 域名
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 自定义线路分组ID
+	LineGroupId *uint64 `json:"LineGroupId,omitnil,omitempty" name:"LineGroupId"`
+
+	// 域名ID，如果传了DomainId，系统将会忽略Domain参数，优先使用DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+}
+
+func (r *DeleteLineGroupRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *DeleteLineGroupRequest) FromJsonString(s string) error {
+	f := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(s), &f); err != nil {
+		return err
+	}
+	delete(f, "Domain")
+	delete(f, "LineGroupId")
+	delete(f, "DomainId")
+	if len(f) > 0 {
+		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "DeleteLineGroupRequest has unknown keys!", "")
+	}
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type DeleteLineGroupResponseParams struct {
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
+}
+
+type DeleteLineGroupResponse struct {
+	*tchttp.BaseResponse
+	Response *DeleteLineGroupResponseParams `json:"Response"`
+}
+
+func (r *DeleteLineGroupResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *DeleteLineGroupResponse) FromJsonString(s string) error {
+	return json.Unmarshal([]byte(s), &r)
+}
+
 type DeleteRecordBatchDetail struct {
 	// 域名 ID
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 错误信息
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Error *string `json:"Error,omitnil" name:"Error"`
+	Error *string `json:"Error,omitnil,omitempty" name:"Error"`
 
 	// 删除状态
-	Status *string `json:"Status,omitnil" name:"Status"`
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 
 	// 操作
-	Operation *string `json:"Operation,omitnil" name:"Operation"`
+	Operation *string `json:"Operation,omitnil,omitempty" name:"Operation"`
 
 	// 解析记录列表，json 序列化之后的字符串形式
-	RecordList *string `json:"RecordList,omitnil" name:"RecordList"`
+	RecordList *string `json:"RecordList,omitnil,omitempty" name:"RecordList"`
 }
 
 // Predefined struct for user
 type DeleteRecordBatchRequestParams struct {
 	// 解析记录 ID 数组
-	RecordIdList []*uint64 `json:"RecordIdList,omitnil" name:"RecordIdList"`
+	RecordIdList []*uint64 `json:"RecordIdList,omitnil,omitempty" name:"RecordIdList"`
 }
 
 type DeleteRecordBatchRequest struct {
 	*tchttp.BaseRequest
 	
 	// 解析记录 ID 数组
-	RecordIdList []*uint64 `json:"RecordIdList,omitnil" name:"RecordIdList"`
+	RecordIdList []*uint64 `json:"RecordIdList,omitnil,omitempty" name:"RecordIdList"`
 }
 
 func (r *DeleteRecordBatchRequest) ToJsonString() string {
@@ -1605,13 +2302,13 @@ func (r *DeleteRecordBatchRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DeleteRecordBatchResponseParams struct {
 	// 批量任务 ID
-	JobId *uint64 `json:"JobId,omitnil" name:"JobId"`
+	JobId *uint64 `json:"JobId,omitnil,omitempty" name:"JobId"`
 
 	// 任务详情
-	DetailList []*DeleteRecordBatchDetail `json:"DetailList,omitnil" name:"DetailList"`
+	DetailList []*DeleteRecordBatchDetail `json:"DetailList,omitnil,omitempty" name:"DetailList"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DeleteRecordBatchResponse struct {
@@ -1633,26 +2330,26 @@ func (r *DeleteRecordBatchResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type DeleteRecordGroupRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 分组 ID
-	GroupId *uint64 `json:"GroupId,omitnil" name:"GroupId"`
+	// 分组 ID，可通过DescribeRecordGroupList接口获取所有记录分组
+	GroupId *uint64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type DeleteRecordGroupRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 分组 ID
-	GroupId *uint64 `json:"GroupId,omitnil" name:"GroupId"`
+	// 分组 ID，可通过DescribeRecordGroupList接口获取所有记录分组
+	GroupId *uint64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *DeleteRecordGroupRequest) ToJsonString() string {
@@ -1678,8 +2375,8 @@ func (r *DeleteRecordGroupRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type DeleteRecordGroupResponseParams struct {
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DeleteRecordGroupResponse struct {
@@ -1701,26 +2398,26 @@ func (r *DeleteRecordGroupResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type DeleteRecordRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 记录 ID 。可以通过接口DescribeRecordList查到所有的解析记录列表以及对应的RecordId
-	RecordId *uint64 `json:"RecordId,omitnil" name:"RecordId"`
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type DeleteRecordRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 记录 ID 。可以通过接口DescribeRecordList查到所有的解析记录列表以及对应的RecordId
-	RecordId *uint64 `json:"RecordId,omitnil" name:"RecordId"`
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *DeleteRecordRequest) ToJsonString() string {
@@ -1746,8 +2443,8 @@ func (r *DeleteRecordRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type DeleteRecordResponseParams struct {
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DeleteRecordResponse struct {
@@ -1769,26 +2466,26 @@ func (r *DeleteRecordResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type DeleteShareDomainRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名共享的账号
-	Account *string `json:"Account,omitnil" name:"Account"`
+	Account *string `json:"Account,omitnil,omitempty" name:"Account"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type DeleteShareDomainRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名共享的账号
-	Account *string `json:"Account,omitnil" name:"Account"`
+	Account *string `json:"Account,omitnil,omitempty" name:"Account"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *DeleteShareDomainRequest) ToJsonString() string {
@@ -1814,8 +2511,8 @@ func (r *DeleteShareDomainRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type DeleteShareDomainResponseParams struct {
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DeleteShareDomainResponse struct {
@@ -1837,26 +2534,26 @@ func (r *DeleteShareDomainResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type DeleteSnapshotRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 快照记录 ID
-	SnapshotId *string `json:"SnapshotId,omitnil" name:"SnapshotId"`
+	// 快照 ID。可以通过接口DescribeSnapshotList查询快照 ID
+	SnapshotId *string `json:"SnapshotId,omitnil,omitempty" name:"SnapshotId"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type DeleteSnapshotRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 快照记录 ID
-	SnapshotId *string `json:"SnapshotId,omitnil" name:"SnapshotId"`
+	// 快照 ID。可以通过接口DescribeSnapshotList查询快照 ID
+	SnapshotId *string `json:"SnapshotId,omitnil,omitempty" name:"SnapshotId"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *DeleteSnapshotRequest) ToJsonString() string {
@@ -1882,8 +2579,8 @@ func (r *DeleteSnapshotRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type DeleteSnapshotResponseParams struct {
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DeleteSnapshotResponse struct {
@@ -1904,48 +2601,45 @@ func (r *DeleteSnapshotResponse) FromJsonString(s string) error {
 
 type DescribeBatchTaskDetail struct {
 	// 见BatchRecordInfo
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	RecordList []*BatchRecordInfo `json:"RecordList,omitnil" name:"RecordList"`
+	RecordList []*BatchRecordInfo `json:"RecordList,omitnil,omitempty" name:"RecordList"`
 
 	// 任务编号
-	Id *uint64 `json:"Id,omitnil" name:"Id"`
+	Id *uint64 `json:"Id,omitnil,omitempty" name:"Id"`
 
 	// 域名
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名等级
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	DomainGrade *string `json:"DomainGrade,omitnil" name:"DomainGrade"`
+	DomainGrade *string `json:"DomainGrade,omitnil,omitempty" name:"DomainGrade"`
 
 	// 错误信息
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	ErrMsg *string `json:"ErrMsg,omitnil" name:"ErrMsg"`
+	ErrMsg *string `json:"ErrMsg,omitnil,omitempty" name:"ErrMsg"`
 
 	// 该条任务运行状态
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	Status *string `json:"Status,omitnil" name:"Status"`
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 
 	// 操作类型
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Operation *string `json:"Operation,omitnil" name:"Operation"`
+	Operation *string `json:"Operation,omitnil,omitempty" name:"Operation"`
 
 	// 域名ID
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 // Predefined struct for user
 type DescribeBatchTaskRequestParams struct {
 	// 任务ID。操作批量接口时会返回JobId
-	JobId *uint64 `json:"JobId,omitnil" name:"JobId"`
+	JobId *uint64 `json:"JobId,omitnil,omitempty" name:"JobId"`
 }
 
 type DescribeBatchTaskRequest struct {
 	*tchttp.BaseRequest
 	
 	// 任务ID。操作批量接口时会返回JobId
-	JobId *uint64 `json:"JobId,omitnil" name:"JobId"`
+	JobId *uint64 `json:"JobId,omitnil,omitempty" name:"JobId"`
 }
 
 func (r *DescribeBatchTaskRequest) ToJsonString() string {
@@ -1970,25 +2664,25 @@ func (r *DescribeBatchTaskRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeBatchTaskResponseParams struct {
 	// 批量任务详情
-	DetailList []*DescribeBatchTaskDetail `json:"DetailList,omitnil" name:"DetailList"`
+	DetailList []*DescribeBatchTaskDetail `json:"DetailList,omitnil,omitempty" name:"DetailList"`
 
 	// 总任务条数
-	TotalCount *uint64 `json:"TotalCount,omitnil" name:"TotalCount"`
+	TotalCount *uint64 `json:"TotalCount,omitnil,omitempty" name:"TotalCount"`
 
 	// 成功条数
-	SuccessCount *uint64 `json:"SuccessCount,omitnil" name:"SuccessCount"`
+	SuccessCount *uint64 `json:"SuccessCount,omitnil,omitempty" name:"SuccessCount"`
 
 	// 失败条数
-	FailCount *uint64 `json:"FailCount,omitnil" name:"FailCount"`
+	FailCount *uint64 `json:"FailCount,omitnil,omitempty" name:"FailCount"`
 
 	// 批量任务类型
-	JobType *string `json:"JobType,omitnil" name:"JobType"`
+	JobType *string `json:"JobType,omitnil,omitempty" name:"JobType"`
 
 	// 任务创建时间
-	CreatedAt *string `json:"CreatedAt,omitnil" name:"CreatedAt"`
+	CreatedAt *string `json:"CreatedAt,omitnil,omitempty" name:"CreatedAt"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeBatchTaskResponse struct {
@@ -2010,20 +2704,20 @@ func (r *DescribeBatchTaskResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeDomainAliasListRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名ID,域名ID，参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *int64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *int64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type DescribeDomainAliasListRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名ID,域名ID，参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *int64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *int64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *DescribeDomainAliasListRequest) ToJsonString() string {
@@ -2049,10 +2743,10 @@ func (r *DescribeDomainAliasListRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeDomainAliasListResponseParams struct {
 	// 域名别名列表
-	DomainAliasList []*DomainAliasInfo `json:"DomainAliasList,omitnil" name:"DomainAliasList"`
+	DomainAliasList []*DomainAliasInfo `json:"DomainAliasList,omitnil,omitempty" name:"DomainAliasList"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeDomainAliasListResponse struct {
@@ -2074,38 +2768,38 @@ func (r *DescribeDomainAliasListResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeDomainAnalyticsRequestParams struct {
 	// 要查询解析量的域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 查询的开始时间，格式：YYYY-MM-DD
-	StartDate *string `json:"StartDate,omitnil" name:"StartDate"`
+	StartDate *string `json:"StartDate,omitnil,omitempty" name:"StartDate"`
 
 	// 查询的结束时间，格式：YYYY-MM-DD
-	EndDate *string `json:"EndDate,omitnil" name:"EndDate"`
+	EndDate *string `json:"EndDate,omitnil,omitempty" name:"EndDate"`
 
 	// DATE:按天维度统计 HOUR:按小时维度统计
-	DnsFormat *string `json:"DnsFormat,omitnil" name:"DnsFormat"`
+	DnsFormat *string `json:"DnsFormat,omitnil,omitempty" name:"DnsFormat"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type DescribeDomainAnalyticsRequest struct {
 	*tchttp.BaseRequest
 	
 	// 要查询解析量的域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 查询的开始时间，格式：YYYY-MM-DD
-	StartDate *string `json:"StartDate,omitnil" name:"StartDate"`
+	StartDate *string `json:"StartDate,omitnil,omitempty" name:"StartDate"`
 
 	// 查询的结束时间，格式：YYYY-MM-DD
-	EndDate *string `json:"EndDate,omitnil" name:"EndDate"`
+	EndDate *string `json:"EndDate,omitnil,omitempty" name:"EndDate"`
 
 	// DATE:按天维度统计 HOUR:按小时维度统计
-	DnsFormat *string `json:"DnsFormat,omitnil" name:"DnsFormat"`
+	DnsFormat *string `json:"DnsFormat,omitnil,omitempty" name:"DnsFormat"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *DescribeDomainAnalyticsRequest) ToJsonString() string {
@@ -2134,16 +2828,16 @@ func (r *DescribeDomainAnalyticsRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeDomainAnalyticsResponseParams struct {
 	// 当前统计维度解析量小计
-	Data []*DomainAnalyticsDetail `json:"Data,omitnil" name:"Data"`
+	Data []*DomainAnalyticsDetail `json:"Data,omitnil,omitempty" name:"Data"`
 
 	// 域名解析量统计查询信息
-	Info *DomainAnalyticsInfo `json:"Info,omitnil" name:"Info"`
+	Info *DomainAnalyticsInfo `json:"Info,omitnil,omitempty" name:"Info"`
 
 	// 域名别名解析量统计信息
-	AliasData []*DomainAliasAnalyticsItem `json:"AliasData,omitnil" name:"AliasData"`
+	AliasData []*DomainAliasAnalyticsItem `json:"AliasData,omitnil,omitempty" name:"AliasData"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeDomainAnalyticsResponse struct {
@@ -2163,22 +2857,146 @@ func (r *DescribeDomainAnalyticsResponse) FromJsonString(s string) error {
 }
 
 // Predefined struct for user
+type DescribeDomainAndRecordListRequestParams struct {
+	// 搜索所有域名。AllDomain、GroupIdList、DomainList、DomainIdList 参数传任一个即可。优先级为：AllDomain > GroupIdList  > DomainList > DomainIdList。
+	AllDomain *string `json:"AllDomain,omitnil,omitempty" name:"AllDomain"`
+
+	// 要搜索的域名列表。
+	DomainList []*string `json:"DomainList,omitnil,omitempty" name:"DomainList"`
+
+	// 要搜索的域名 ID 列表。
+	DomainIdList []*uint64 `json:"DomainIdList,omitnil,omitempty" name:"DomainIdList"`
+
+	// 要搜索的域名分组 ID 列表。
+	GroupIdList []*uint64 `json:"GroupIdList,omitnil,omitempty" name:"GroupIdList"`
+
+	// 记录类型筛选
+	RecordType *string `json:"RecordType,omitnil,omitempty" name:"RecordType"`
+
+	// 子域名筛选
+	SubKeyword *string `json:"SubKeyword,omitnil,omitempty" name:"SubKeyword"`
+
+	// 记录值筛选
+	ValueKeyword *string `json:"ValueKeyword,omitnil,omitempty" name:"ValueKeyword"`
+
+	// 线路筛选
+	Area *string `json:"Area,omitnil,omitempty" name:"Area"`
+
+	// 备注筛选
+	Remark *string `json:"Remark,omitnil,omitempty" name:"Remark"`
+
+	// 记录状态筛选
+	// 1：正常
+	// 0：暂停
+	Enabled *string `json:"Enabled,omitnil,omitempty" name:"Enabled"`
+}
+
+type DescribeDomainAndRecordListRequest struct {
+	*tchttp.BaseRequest
+	
+	// 搜索所有域名。AllDomain、GroupIdList、DomainList、DomainIdList 参数传任一个即可。优先级为：AllDomain > GroupIdList  > DomainList > DomainIdList。
+	AllDomain *string `json:"AllDomain,omitnil,omitempty" name:"AllDomain"`
+
+	// 要搜索的域名列表。
+	DomainList []*string `json:"DomainList,omitnil,omitempty" name:"DomainList"`
+
+	// 要搜索的域名 ID 列表。
+	DomainIdList []*uint64 `json:"DomainIdList,omitnil,omitempty" name:"DomainIdList"`
+
+	// 要搜索的域名分组 ID 列表。
+	GroupIdList []*uint64 `json:"GroupIdList,omitnil,omitempty" name:"GroupIdList"`
+
+	// 记录类型筛选
+	RecordType *string `json:"RecordType,omitnil,omitempty" name:"RecordType"`
+
+	// 子域名筛选
+	SubKeyword *string `json:"SubKeyword,omitnil,omitempty" name:"SubKeyword"`
+
+	// 记录值筛选
+	ValueKeyword *string `json:"ValueKeyword,omitnil,omitempty" name:"ValueKeyword"`
+
+	// 线路筛选
+	Area *string `json:"Area,omitnil,omitempty" name:"Area"`
+
+	// 备注筛选
+	Remark *string `json:"Remark,omitnil,omitempty" name:"Remark"`
+
+	// 记录状态筛选
+	// 1：正常
+	// 0：暂停
+	Enabled *string `json:"Enabled,omitnil,omitempty" name:"Enabled"`
+}
+
+func (r *DescribeDomainAndRecordListRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *DescribeDomainAndRecordListRequest) FromJsonString(s string) error {
+	f := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(s), &f); err != nil {
+		return err
+	}
+	delete(f, "AllDomain")
+	delete(f, "DomainList")
+	delete(f, "DomainIdList")
+	delete(f, "GroupIdList")
+	delete(f, "RecordType")
+	delete(f, "SubKeyword")
+	delete(f, "ValueKeyword")
+	delete(f, "Area")
+	delete(f, "Remark")
+	delete(f, "Enabled")
+	if len(f) > 0 {
+		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "DescribeDomainAndRecordListRequest has unknown keys!", "")
+	}
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type DescribeDomainAndRecordListResponseParams struct {
+	// 域名列表
+	DetailList []*BatchSearchDomainInfo `json:"DetailList,omitnil,omitempty" name:"DetailList"`
+
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
+}
+
+type DescribeDomainAndRecordListResponse struct {
+	*tchttp.BaseResponse
+	Response *DescribeDomainAndRecordListResponseParams `json:"Response"`
+}
+
+func (r *DescribeDomainAndRecordListResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *DescribeDomainAndRecordListResponse) FromJsonString(s string) error {
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
 type DescribeDomainCustomLineListRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 域名ID，如果传了DomainId，系统将会忽略Domain参数，优先使用DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type DescribeDomainCustomLineListRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 域名ID，如果传了DomainId，系统将会忽略Domain参数，优先使用DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *DescribeDomainCustomLineListRequest) ToJsonString() string {
@@ -2204,13 +3022,13 @@ func (r *DescribeDomainCustomLineListRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeDomainCustomLineListResponseParams struct {
 	// 自定义线路列表
-	LineList []*CustomLineInfo `json:"LineList,omitnil" name:"LineList"`
+	LineList []*CustomLineInfo `json:"LineList,omitnil,omitempty" name:"LineList"`
 
 	// 可添加的自定义线路条数
-	AvailableCount *uint64 `json:"AvailableCount,omitnil" name:"AvailableCount"`
+	AvailableCount *uint64 `json:"AvailableCount,omitnil,omitempty" name:"AvailableCount"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeDomainCustomLineListResponse struct {
@@ -2231,131 +3049,105 @@ func (r *DescribeDomainCustomLineListResponse) FromJsonString(s string) error {
 
 // Predefined struct for user
 type DescribeDomainFilterListRequestParams struct {
-	// 根据域名分组类型获取域名。可取值为 ALL，MINE，SHARE，RECENT。
-	// ALL：全部
-	// MINE：我的域名
-	// SHARE：共享给我的域名
-	// RECENT：最近操作过的域名
-	Type *string `json:"Type,omitnil" name:"Type"`
+	// <p>根据域名分组类型获取域名。可取值为 ALL，MINE，SHARE，RECENT。<br>ALL：全部<br>MINE：我的域名<br>SHARE：共享给我的域名<br>RECENT：最近操作过的域名</p>
+	Type *string `json:"Type,omitnil,omitempty" name:"Type"`
 
-	// 记录开始的偏移, 第一条记录为 0, 依次类推。默认值为 0。
-	Offset *uint64 `json:"Offset,omitnil" name:"Offset"`
+	// <p>记录开始的偏移, 第一条记录为 0, 依次类推。默认值为 0。</p>
+	Offset *uint64 `json:"Offset,omitnil,omitempty" name:"Offset"`
 
-	// 要获取的域名数量, 比如获取 20 个, 则为 20。默认值为 5000。如果账户中的域名数量超过了 5000, 将会强制分页并且只返回前 5000 条, 这时需要通过 Offset 和 Limit 参数去获取其它域名。
-	Limit *uint64 `json:"Limit,omitnil" name:"Limit"`
+	// <p>要获取的域名数量, 比如获取 20 个, 则为 20。默认值为 5000。如果账户中的域名数量超过了 5000, 将会强制分页并且只返回前 5000 条, 这时需要通过 Offset 和 Limit 参数去获取其它域名。</p>
+	Limit *uint64 `json:"Limit,omitnil,omitempty" name:"Limit"`
 
-	// 根据域名分组 id 获取域名，可通过 DescribeDomain 或 DescribeDomainList 接口 GroupId 字段获取。
-	GroupId []*int64 `json:"GroupId,omitnil" name:"GroupId"`
+	// <p>根据域名分组 id 获取域名</p><p>取值参考：<a href="https://cloud.tencent.com/document/api/1427/56172">DescribeDomainList</a></p>
+	GroupId []*int64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
 
-	// 根据关键字获取域名。
-	Keyword *string `json:"Keyword,omitnil" name:"Keyword"`
+	// <p>根据关键字获取域名。</p>
+	Keyword *string `json:"Keyword,omitnil,omitempty" name:"Keyword"`
 
-	// 排序字段。可取值为 NAME，STATUS，RECORDS，GRADE，UPDATED_ON。
-	// NAME：域名名称
-	// STATUS：域名状态
-	// RECORDS：记录数量
-	// GRADE：套餐等级
-	// UPDATED_ON：更新时间
-	SortField *string `json:"SortField,omitnil" name:"SortField"`
+	// <p>排序字段。可取值为 NAME，STATUS，RECORDS，GRADE，UPDATED_ON。<br>NAME：域名名称<br>STATUS：域名状态<br>RECORDS：记录数量<br>GRADE：套餐等级<br>UPDATED_ON：更新时间</p>
+	SortField *string `json:"SortField,omitnil,omitempty" name:"SortField"`
 
-	// 排序类型，升序：ASC，降序：DESC。
-	SortType *string `json:"SortType,omitnil" name:"SortType"`
+	// <p>排序类型，升序：ASC，降序：DESC。</p>
+	SortType *string `json:"SortType,omitnil,omitempty" name:"SortType"`
 
-	// 根据域名状态获取域名。可取值为 ENABLE，LOCK，PAUSE，SPAM。
-	// ENABLE：正常
-	// LOCK：锁定
-	// PAUSE：暂停
-	// SPAM：封禁
-	Status []*string `json:"Status,omitnil" name:"Status"`
+	// <p>根据域名状态获取域名。可取值为 ENABLE，LOCK，PAUSE，SPAM。<br>ENABLE：正常<br>LOCK：锁定<br>PAUSE：暂停<br>SPAM：封禁</p>
+	Status []*string `json:"Status,omitnil,omitempty" name:"Status"`
 
-	// 根据套餐获取域名，可通过 DescribeDomain 或 DescribeDomainList 接口 Grade 字段获取。
-	Package []*string `json:"Package,omitnil" name:"Package"`
+	// <p>根据套餐获取域名，可通过 DescribeDomain 或 DescribeDomainList 接口 Grade 字段获取。</p>
+	Package []*string `json:"Package,omitnil,omitempty" name:"Package"`
 
-	// 根据备注信息获取域名。
-	Remark *string `json:"Remark,omitnil" name:"Remark"`
+	// <p>根据备注信息获取域名。</p>
+	Remark *string `json:"Remark,omitnil,omitempty" name:"Remark"`
 
-	// 要获取域名的更新时间起始时间点，如 '2021-05-01 03:00:00'。
-	UpdatedAtBegin *string `json:"UpdatedAtBegin,omitnil" name:"UpdatedAtBegin"`
+	// <p>要获取域名的更新时间起始时间点，如 &#39;2021-05-01 03:00:00&#39;。</p>
+	UpdatedAtBegin *string `json:"UpdatedAtBegin,omitnil,omitempty" name:"UpdatedAtBegin"`
 
-	// 要获取域名的更新时间终止时间点，如 '2021-05-10 20:00:00'。
-	UpdatedAtEnd *string `json:"UpdatedAtEnd,omitnil" name:"UpdatedAtEnd"`
+	// <p>要获取域名的更新时间终止时间点，如 &#39;2021-05-10 20:00:00&#39;。</p>
+	UpdatedAtEnd *string `json:"UpdatedAtEnd,omitnil,omitempty" name:"UpdatedAtEnd"`
 
-	// 要获取域名的记录数查询区间起点。
-	RecordCountBegin *uint64 `json:"RecordCountBegin,omitnil" name:"RecordCountBegin"`
+	// <p>要获取域名的记录数查询区间起点。</p>
+	RecordCountBegin *uint64 `json:"RecordCountBegin,omitnil,omitempty" name:"RecordCountBegin"`
 
-	// 要获取域名的记录数查询区间终点。
-	RecordCountEnd *uint64 `json:"RecordCountEnd,omitnil" name:"RecordCountEnd"`
+	// <p>要获取域名的记录数查询区间终点。</p>
+	RecordCountEnd *uint64 `json:"RecordCountEnd,omitnil,omitempty" name:"RecordCountEnd"`
 
-	// 项目ID
-	ProjectId *int64 `json:"ProjectId,omitnil" name:"ProjectId"`
+	// <p>项目ID，&quot;账号中心-项目管理&quot;拿到项目ID</p>
+	ProjectId *int64 `json:"ProjectId,omitnil,omitempty" name:"ProjectId"`
 
-	// 标签过滤
-	Tags []*TagItemFilter `json:"Tags,omitnil" name:"Tags"`
+	// <p>标签过滤</p>
+	Tags []*TagItemFilter `json:"Tags,omitnil,omitempty" name:"Tags"`
 }
 
 type DescribeDomainFilterListRequest struct {
 	*tchttp.BaseRequest
 	
-	// 根据域名分组类型获取域名。可取值为 ALL，MINE，SHARE，RECENT。
-	// ALL：全部
-	// MINE：我的域名
-	// SHARE：共享给我的域名
-	// RECENT：最近操作过的域名
-	Type *string `json:"Type,omitnil" name:"Type"`
+	// <p>根据域名分组类型获取域名。可取值为 ALL，MINE，SHARE，RECENT。<br>ALL：全部<br>MINE：我的域名<br>SHARE：共享给我的域名<br>RECENT：最近操作过的域名</p>
+	Type *string `json:"Type,omitnil,omitempty" name:"Type"`
 
-	// 记录开始的偏移, 第一条记录为 0, 依次类推。默认值为 0。
-	Offset *uint64 `json:"Offset,omitnil" name:"Offset"`
+	// <p>记录开始的偏移, 第一条记录为 0, 依次类推。默认值为 0。</p>
+	Offset *uint64 `json:"Offset,omitnil,omitempty" name:"Offset"`
 
-	// 要获取的域名数量, 比如获取 20 个, 则为 20。默认值为 5000。如果账户中的域名数量超过了 5000, 将会强制分页并且只返回前 5000 条, 这时需要通过 Offset 和 Limit 参数去获取其它域名。
-	Limit *uint64 `json:"Limit,omitnil" name:"Limit"`
+	// <p>要获取的域名数量, 比如获取 20 个, 则为 20。默认值为 5000。如果账户中的域名数量超过了 5000, 将会强制分页并且只返回前 5000 条, 这时需要通过 Offset 和 Limit 参数去获取其它域名。</p>
+	Limit *uint64 `json:"Limit,omitnil,omitempty" name:"Limit"`
 
-	// 根据域名分组 id 获取域名，可通过 DescribeDomain 或 DescribeDomainList 接口 GroupId 字段获取。
-	GroupId []*int64 `json:"GroupId,omitnil" name:"GroupId"`
+	// <p>根据域名分组 id 获取域名</p><p>取值参考：<a href="https://cloud.tencent.com/document/api/1427/56172">DescribeDomainList</a></p>
+	GroupId []*int64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
 
-	// 根据关键字获取域名。
-	Keyword *string `json:"Keyword,omitnil" name:"Keyword"`
+	// <p>根据关键字获取域名。</p>
+	Keyword *string `json:"Keyword,omitnil,omitempty" name:"Keyword"`
 
-	// 排序字段。可取值为 NAME，STATUS，RECORDS，GRADE，UPDATED_ON。
-	// NAME：域名名称
-	// STATUS：域名状态
-	// RECORDS：记录数量
-	// GRADE：套餐等级
-	// UPDATED_ON：更新时间
-	SortField *string `json:"SortField,omitnil" name:"SortField"`
+	// <p>排序字段。可取值为 NAME，STATUS，RECORDS，GRADE，UPDATED_ON。<br>NAME：域名名称<br>STATUS：域名状态<br>RECORDS：记录数量<br>GRADE：套餐等级<br>UPDATED_ON：更新时间</p>
+	SortField *string `json:"SortField,omitnil,omitempty" name:"SortField"`
 
-	// 排序类型，升序：ASC，降序：DESC。
-	SortType *string `json:"SortType,omitnil" name:"SortType"`
+	// <p>排序类型，升序：ASC，降序：DESC。</p>
+	SortType *string `json:"SortType,omitnil,omitempty" name:"SortType"`
 
-	// 根据域名状态获取域名。可取值为 ENABLE，LOCK，PAUSE，SPAM。
-	// ENABLE：正常
-	// LOCK：锁定
-	// PAUSE：暂停
-	// SPAM：封禁
-	Status []*string `json:"Status,omitnil" name:"Status"`
+	// <p>根据域名状态获取域名。可取值为 ENABLE，LOCK，PAUSE，SPAM。<br>ENABLE：正常<br>LOCK：锁定<br>PAUSE：暂停<br>SPAM：封禁</p>
+	Status []*string `json:"Status,omitnil,omitempty" name:"Status"`
 
-	// 根据套餐获取域名，可通过 DescribeDomain 或 DescribeDomainList 接口 Grade 字段获取。
-	Package []*string `json:"Package,omitnil" name:"Package"`
+	// <p>根据套餐获取域名，可通过 DescribeDomain 或 DescribeDomainList 接口 Grade 字段获取。</p>
+	Package []*string `json:"Package,omitnil,omitempty" name:"Package"`
 
-	// 根据备注信息获取域名。
-	Remark *string `json:"Remark,omitnil" name:"Remark"`
+	// <p>根据备注信息获取域名。</p>
+	Remark *string `json:"Remark,omitnil,omitempty" name:"Remark"`
 
-	// 要获取域名的更新时间起始时间点，如 '2021-05-01 03:00:00'。
-	UpdatedAtBegin *string `json:"UpdatedAtBegin,omitnil" name:"UpdatedAtBegin"`
+	// <p>要获取域名的更新时间起始时间点，如 &#39;2021-05-01 03:00:00&#39;。</p>
+	UpdatedAtBegin *string `json:"UpdatedAtBegin,omitnil,omitempty" name:"UpdatedAtBegin"`
 
-	// 要获取域名的更新时间终止时间点，如 '2021-05-10 20:00:00'。
-	UpdatedAtEnd *string `json:"UpdatedAtEnd,omitnil" name:"UpdatedAtEnd"`
+	// <p>要获取域名的更新时间终止时间点，如 &#39;2021-05-10 20:00:00&#39;。</p>
+	UpdatedAtEnd *string `json:"UpdatedAtEnd,omitnil,omitempty" name:"UpdatedAtEnd"`
 
-	// 要获取域名的记录数查询区间起点。
-	RecordCountBegin *uint64 `json:"RecordCountBegin,omitnil" name:"RecordCountBegin"`
+	// <p>要获取域名的记录数查询区间起点。</p>
+	RecordCountBegin *uint64 `json:"RecordCountBegin,omitnil,omitempty" name:"RecordCountBegin"`
 
-	// 要获取域名的记录数查询区间终点。
-	RecordCountEnd *uint64 `json:"RecordCountEnd,omitnil" name:"RecordCountEnd"`
+	// <p>要获取域名的记录数查询区间终点。</p>
+	RecordCountEnd *uint64 `json:"RecordCountEnd,omitnil,omitempty" name:"RecordCountEnd"`
 
-	// 项目ID
-	ProjectId *int64 `json:"ProjectId,omitnil" name:"ProjectId"`
+	// <p>项目ID，&quot;账号中心-项目管理&quot;拿到项目ID</p>
+	ProjectId *int64 `json:"ProjectId,omitnil,omitempty" name:"ProjectId"`
 
-	// 标签过滤
-	Tags []*TagItemFilter `json:"Tags,omitnil" name:"Tags"`
+	// <p>标签过滤</p>
+	Tags []*TagItemFilter `json:"Tags,omitnil,omitempty" name:"Tags"`
 }
 
 func (r *DescribeDomainFilterListRequest) ToJsonString() string {
@@ -2394,14 +3186,14 @@ func (r *DescribeDomainFilterListRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type DescribeDomainFilterListResponseParams struct {
-	// 列表页统计信息
-	DomainCountInfo *DomainCountInfo `json:"DomainCountInfo,omitnil" name:"DomainCountInfo"`
+	// <p>列表页统计信息</p>
+	DomainCountInfo *DomainCountInfo `json:"DomainCountInfo,omitnil,omitempty" name:"DomainCountInfo"`
 
-	// 域名列表
-	DomainList []*DomainListItem `json:"DomainList,omitnil" name:"DomainList"`
+	// <p>域名列表</p>
+	DomainList []*DomainListItem `json:"DomainList,omitnil,omitempty" name:"DomainList"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeDomainFilterListResponse struct {
@@ -2452,10 +3244,10 @@ func (r *DescribeDomainGroupListRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeDomainGroupListResponseParams struct {
 	// 分组列表
-	GroupList []*GroupInfo `json:"GroupList,omitnil" name:"GroupList"`
+	GroupList []*GroupInfo `json:"GroupList,omitnil,omitempty" name:"GroupList"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeDomainGroupListResponse struct {
@@ -2477,44 +3269,44 @@ func (r *DescribeDomainGroupListResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeDomainListRequestParams struct {
 	// 域名分组类型，默认为ALL。可取值为ALL，MINE，SHARE，ISMARK，PAUSE，VIP，RECENT，SHARE_OUT，FREE。
-	Type *string `json:"Type,omitnil" name:"Type"`
+	Type *string `json:"Type,omitnil,omitempty" name:"Type"`
 
 	// 记录开始的偏移, 第一条记录为 0, 依次类推。默认值为0。
-	Offset *int64 `json:"Offset,omitnil" name:"Offset"`
+	Offset *int64 `json:"Offset,omitnil,omitempty" name:"Offset"`
 
 	// 要获取的域名数量, 比如获取20个, 则为20。默认值为3000。
-	Limit *int64 `json:"Limit,omitnil" name:"Limit"`
+	Limit *int64 `json:"Limit,omitnil,omitempty" name:"Limit"`
 
-	// 分组ID, 获取指定分组的域名
-	GroupId *int64 `json:"GroupId,omitnil" name:"GroupId"`
+	// 分组ID, 获取指定分组的域名，可以通过接口DescribeDomainGroupList查看当前域名分组信息
+	GroupId *int64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
 
 	// 根据关键字搜索域名
-	Keyword *string `json:"Keyword,omitnil" name:"Keyword"`
+	Keyword *string `json:"Keyword,omitnil,omitempty" name:"Keyword"`
 
 	// 标签过滤
-	Tags []*TagItemFilter `json:"Tags,omitnil" name:"Tags"`
+	Tags []*TagItemFilter `json:"Tags,omitnil,omitempty" name:"Tags"`
 }
 
 type DescribeDomainListRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名分组类型，默认为ALL。可取值为ALL，MINE，SHARE，ISMARK，PAUSE，VIP，RECENT，SHARE_OUT，FREE。
-	Type *string `json:"Type,omitnil" name:"Type"`
+	Type *string `json:"Type,omitnil,omitempty" name:"Type"`
 
 	// 记录开始的偏移, 第一条记录为 0, 依次类推。默认值为0。
-	Offset *int64 `json:"Offset,omitnil" name:"Offset"`
+	Offset *int64 `json:"Offset,omitnil,omitempty" name:"Offset"`
 
 	// 要获取的域名数量, 比如获取20个, 则为20。默认值为3000。
-	Limit *int64 `json:"Limit,omitnil" name:"Limit"`
+	Limit *int64 `json:"Limit,omitnil,omitempty" name:"Limit"`
 
-	// 分组ID, 获取指定分组的域名
-	GroupId *int64 `json:"GroupId,omitnil" name:"GroupId"`
+	// 分组ID, 获取指定分组的域名，可以通过接口DescribeDomainGroupList查看当前域名分组信息
+	GroupId *int64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
 
 	// 根据关键字搜索域名
-	Keyword *string `json:"Keyword,omitnil" name:"Keyword"`
+	Keyword *string `json:"Keyword,omitnil,omitempty" name:"Keyword"`
 
 	// 标签过滤
-	Tags []*TagItemFilter `json:"Tags,omitnil" name:"Tags"`
+	Tags []*TagItemFilter `json:"Tags,omitnil,omitempty" name:"Tags"`
 }
 
 func (r *DescribeDomainListRequest) ToJsonString() string {
@@ -2544,13 +3336,13 @@ func (r *DescribeDomainListRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeDomainListResponseParams struct {
 	// 列表页统计信息
-	DomainCountInfo *DomainCountInfo `json:"DomainCountInfo,omitnil" name:"DomainCountInfo"`
+	DomainCountInfo *DomainCountInfo `json:"DomainCountInfo,omitnil,omitempty" name:"DomainCountInfo"`
 
 	// 域名列表
-	DomainList []*DomainListItem `json:"DomainList,omitnil" name:"DomainList"`
+	DomainList []*DomainListItem `json:"DomainList,omitnil,omitempty" name:"DomainList"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeDomainListResponse struct {
@@ -2570,34 +3362,140 @@ func (r *DescribeDomainListResponse) FromJsonString(s string) error {
 }
 
 // Predefined struct for user
+type DescribeDomainLogFilterFileRequestParams struct {
+	// 要获取操作日志的域名
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 要获取操作日志的域名 Id，如果传了 DomainId，系统将会忽略 Domain 参数。 可以通过接口 DescribeDomainList 查到所有的 Domain 以及 DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+
+	// 通过关键字搜索，支持搜索字段：账户 UIN、操作 IP、操作内容
+	Keyword *string `json:"Keyword,omitnil,omitempty" name:"Keyword"`
+
+	// 操作时间范围起始时间(仅支持近6个月的日志查询)
+	OperateBegin *string `json:"OperateBegin,omitnil,omitempty" name:"OperateBegin"`
+
+	// 操作时间范围截止时间(仅支持近6个月的日志查询)
+	OperateEnd *string `json:"OperateEnd,omitnil,omitempty" name:"OperateEnd"`
+
+	// 操作账号 UIN 精确匹配
+	OperateUin *uint64 `json:"OperateUin,omitnil,omitempty" name:"OperateUin"`
+
+	// 操作 IP 精确匹配
+	OperateClientIP *string `json:"OperateClientIP,omitnil,omitempty" name:"OperateClientIP"`
+
+	// 操作内容 模糊匹配
+	OperateContent *string `json:"OperateContent,omitnil,omitempty" name:"OperateContent"`
+}
+
+type DescribeDomainLogFilterFileRequest struct {
+	*tchttp.BaseRequest
+	
+	// 要获取操作日志的域名
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 要获取操作日志的域名 Id，如果传了 DomainId，系统将会忽略 Domain 参数。 可以通过接口 DescribeDomainList 查到所有的 Domain 以及 DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+
+	// 通过关键字搜索，支持搜索字段：账户 UIN、操作 IP、操作内容
+	Keyword *string `json:"Keyword,omitnil,omitempty" name:"Keyword"`
+
+	// 操作时间范围起始时间(仅支持近6个月的日志查询)
+	OperateBegin *string `json:"OperateBegin,omitnil,omitempty" name:"OperateBegin"`
+
+	// 操作时间范围截止时间(仅支持近6个月的日志查询)
+	OperateEnd *string `json:"OperateEnd,omitnil,omitempty" name:"OperateEnd"`
+
+	// 操作账号 UIN 精确匹配
+	OperateUin *uint64 `json:"OperateUin,omitnil,omitempty" name:"OperateUin"`
+
+	// 操作 IP 精确匹配
+	OperateClientIP *string `json:"OperateClientIP,omitnil,omitempty" name:"OperateClientIP"`
+
+	// 操作内容 模糊匹配
+	OperateContent *string `json:"OperateContent,omitnil,omitempty" name:"OperateContent"`
+}
+
+func (r *DescribeDomainLogFilterFileRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *DescribeDomainLogFilterFileRequest) FromJsonString(s string) error {
+	f := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(s), &f); err != nil {
+		return err
+	}
+	delete(f, "Domain")
+	delete(f, "DomainId")
+	delete(f, "Keyword")
+	delete(f, "OperateBegin")
+	delete(f, "OperateEnd")
+	delete(f, "OperateUin")
+	delete(f, "OperateClientIP")
+	delete(f, "OperateContent")
+	if len(f) > 0 {
+		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "DescribeDomainLogFilterFileRequest has unknown keys!", "")
+	}
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type DescribeDomainLogFilterFileResponseParams struct {
+	// 文件下载地址。
+	DownloadURL *string `json:"DownloadURL,omitnil,omitempty" name:"DownloadURL"`
+
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
+}
+
+type DescribeDomainLogFilterFileResponse struct {
+	*tchttp.BaseResponse
+	Response *DescribeDomainLogFilterFileResponseParams `json:"Response"`
+}
+
+func (r *DescribeDomainLogFilterFileResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *DescribeDomainLogFilterFileResponse) FromJsonString(s string) error {
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
 type DescribeDomainLogListRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
 	// 记录开始的偏移，第一条记录为 0，依次类推，默认为0
-	Offset *uint64 `json:"Offset,omitnil" name:"Offset"`
+	Offset *uint64 `json:"Offset,omitnil,omitempty" name:"Offset"`
 
 	// 共要获取的日志条数，比如获取20条，则为20，默认为500条，单次最多获取500条。
-	Limit *uint64 `json:"Limit,omitnil" name:"Limit"`
+	Limit *uint64 `json:"Limit,omitnil,omitempty" name:"Limit"`
 }
 
 type DescribeDomainLogListRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
 	// 记录开始的偏移，第一条记录为 0，依次类推，默认为0
-	Offset *uint64 `json:"Offset,omitnil" name:"Offset"`
+	Offset *uint64 `json:"Offset,omitnil,omitempty" name:"Offset"`
 
 	// 共要获取的日志条数，比如获取20条，则为20，默认为500条，单次最多获取500条。
-	Limit *uint64 `json:"Limit,omitnil" name:"Limit"`
+	Limit *uint64 `json:"Limit,omitnil,omitempty" name:"Limit"`
 }
 
 func (r *DescribeDomainLogListRequest) ToJsonString() string {
@@ -2624,18 +3522,17 @@ func (r *DescribeDomainLogListRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type DescribeDomainLogListResponseParams struct {
-	// 域名信息
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	LogList []*string `json:"LogList,omitnil" name:"LogList"`
+	// 域名日志信息
+	LogList []*string `json:"LogList,omitnil,omitempty" name:"LogList"`
 
 	// 分页大小
-	PageSize *uint64 `json:"PageSize,omitnil" name:"PageSize"`
+	PageSize *uint64 `json:"PageSize,omitnil,omitempty" name:"PageSize"`
 
 	// 日志总条数
-	TotalCount *uint64 `json:"TotalCount,omitnil" name:"TotalCount"`
+	TotalCount *uint64 `json:"TotalCount,omitnil,omitempty" name:"TotalCount"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeDomainLogListResponse struct {
@@ -2657,20 +3554,20 @@ func (r *DescribeDomainLogListResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeDomainPreviewRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type DescribeDomainPreviewRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *DescribeDomainPreviewRequest) ToJsonString() string {
@@ -2696,10 +3593,10 @@ func (r *DescribeDomainPreviewRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeDomainPreviewResponseParams struct {
 	// 域名概览信息
-	Domain *PreviewDetail `json:"Domain,omitnil" name:"Domain"`
+	Domain *PreviewDetail `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeDomainPreviewResponse struct {
@@ -2721,20 +3618,20 @@ func (r *DescribeDomainPreviewResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeDomainPurviewRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type DescribeDomainPurviewRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *DescribeDomainPurviewRequest) ToJsonString() string {
@@ -2760,10 +3657,10 @@ func (r *DescribeDomainPurviewRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeDomainPurviewResponseParams struct {
 	// 域名权限列表
-	PurviewList []*PurviewInfo `json:"PurviewList,omitnil" name:"PurviewList"`
+	PurviewList []*PurviewInfo `json:"PurviewList,omitnil,omitempty" name:"PurviewList"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeDomainPurviewResponse struct {
@@ -2785,20 +3682,20 @@ func (r *DescribeDomainPurviewResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeDomainRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type DescribeDomainRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *DescribeDomainRequest) ToJsonString() string {
@@ -2824,10 +3721,10 @@ func (r *DescribeDomainRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeDomainResponseParams struct {
 	// 域名信息
-	DomainInfo *DomainInfo `json:"DomainInfo,omitnil" name:"DomainInfo"`
+	DomainInfo *DomainInfo `json:"DomainInfo,omitnil,omitempty" name:"DomainInfo"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeDomainResponse struct {
@@ -2849,20 +3746,20 @@ func (r *DescribeDomainResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeDomainShareInfoRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type DescribeDomainShareInfoRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *DescribeDomainShareInfoRequest) ToJsonString() string {
@@ -2888,13 +3785,13 @@ func (r *DescribeDomainShareInfoRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeDomainShareInfoResponseParams struct {
 	// 域名共享信息
-	ShareList []*DomainShareInfo `json:"ShareList,omitnil" name:"ShareList"`
+	ShareList []*DomainShareInfo `json:"ShareList,omitnil,omitempty" name:"ShareList"`
 
 	// 域名拥有者账号
-	Owner *string `json:"Owner,omitnil" name:"Owner"`
+	Owner *string `json:"Owner,omitnil,omitempty" name:"Owner"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeDomainShareInfoResponse struct {
@@ -2914,16 +3811,175 @@ func (r *DescribeDomainShareInfoResponse) FromJsonString(s string) error {
 }
 
 // Predefined struct for user
+type DescribeDomainShareUserListRequestParams struct {
+	// 域名
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+}
+
+type DescribeDomainShareUserListRequest struct {
+	*tchttp.BaseRequest
+	
+	// 域名
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+}
+
+func (r *DescribeDomainShareUserListRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *DescribeDomainShareUserListRequest) FromJsonString(s string) error {
+	f := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(s), &f); err != nil {
+		return err
+	}
+	delete(f, "Domain")
+	delete(f, "DomainId")
+	if len(f) > 0 {
+		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "DescribeDomainShareUserListRequest has unknown keys!", "")
+	}
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type DescribeDomainShareUserListResponseParams struct {
+	// 域名套餐信息
+	DomainShareList []*DomainShareUserInfo `json:"DomainShareList,omitnil,omitempty" name:"DomainShareList"`
+
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
+}
+
+type DescribeDomainShareUserListResponse struct {
+	*tchttp.BaseResponse
+	Response *DescribeDomainShareUserListResponseParams `json:"Response"`
+}
+
+func (r *DescribeDomainShareUserListResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *DescribeDomainShareUserListResponse) FromJsonString(s string) error {
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type DescribeDomainVipListRequestParams struct {
+	// 偏移量，默认值为0。
+	Offset *uint64 `json:"Offset,omitnil,omitempty" name:"Offset"`
+
+	// 限制数量，默认值为20。
+	Limit *uint64 `json:"Limit,omitnil,omitempty" name:"Limit"`
+
+	// 通过关键字搜索域名关联的套餐，默认值为空，为空时不作为筛选条件。
+	Keyword *string `json:"Keyword,omitnil,omitempty" name:"Keyword"`
+
+	// 使用资源ID列表查询
+	ResourceIdList []*string `json:"ResourceIdList,omitnil,omitempty" name:"ResourceIdList"`
+
+	// 需要筛选的套餐版本
+	GradeList []*string `json:"GradeList,omitnil,omitempty" name:"GradeList"`
+
+	// 是否只获取未绑定域名套餐
+	GetUnbindResource *bool `json:"GetUnbindResource,omitnil,omitempty" name:"GetUnbindResource"`
+}
+
+type DescribeDomainVipListRequest struct {
+	*tchttp.BaseRequest
+	
+	// 偏移量，默认值为0。
+	Offset *uint64 `json:"Offset,omitnil,omitempty" name:"Offset"`
+
+	// 限制数量，默认值为20。
+	Limit *uint64 `json:"Limit,omitnil,omitempty" name:"Limit"`
+
+	// 通过关键字搜索域名关联的套餐，默认值为空，为空时不作为筛选条件。
+	Keyword *string `json:"Keyword,omitnil,omitempty" name:"Keyword"`
+
+	// 使用资源ID列表查询
+	ResourceIdList []*string `json:"ResourceIdList,omitnil,omitempty" name:"ResourceIdList"`
+
+	// 需要筛选的套餐版本
+	GradeList []*string `json:"GradeList,omitnil,omitempty" name:"GradeList"`
+
+	// 是否只获取未绑定域名套餐
+	GetUnbindResource *bool `json:"GetUnbindResource,omitnil,omitempty" name:"GetUnbindResource"`
+}
+
+func (r *DescribeDomainVipListRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *DescribeDomainVipListRequest) FromJsonString(s string) error {
+	f := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(s), &f); err != nil {
+		return err
+	}
+	delete(f, "Offset")
+	delete(f, "Limit")
+	delete(f, "Keyword")
+	delete(f, "ResourceIdList")
+	delete(f, "GradeList")
+	delete(f, "GetUnbindResource")
+	if len(f) > 0 {
+		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "DescribeDomainVipListRequest has unknown keys!", "")
+	}
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type DescribeDomainVipListResponseParams struct {
+	// 符合筛选条件的套餐总数
+	TotalCount *uint64 `json:"TotalCount,omitnil,omitempty" name:"TotalCount"`
+
+	// 套餐信息列表
+	PackageList []*PackageListItem `json:"PackageList,omitnil,omitempty" name:"PackageList"`
+
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
+}
+
+type DescribeDomainVipListResponse struct {
+	*tchttp.BaseResponse
+	Response *DescribeDomainVipListResponseParams `json:"Response"`
+}
+
+func (r *DescribeDomainVipListResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *DescribeDomainVipListResponse) FromJsonString(s string) error {
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
 type DescribeDomainWhoisRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 }
 
 type DescribeDomainWhoisRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 }
 
 func (r *DescribeDomainWhoisRequest) ToJsonString() string {
@@ -2948,10 +4004,10 @@ func (r *DescribeDomainWhoisRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeDomainWhoisResponseParams struct {
 	// 域名Whois信息
-	Info *WhoisInfo `json:"Info,omitnil" name:"Info"`
+	Info *WhoisInfo `json:"Info,omitnil,omitempty" name:"Info"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeDomainWhoisResponse struct {
@@ -2967,6 +4023,151 @@ func (r *DescribeDomainWhoisResponse) ToJsonString() string {
 // FromJsonString It is highly **NOT** recommended to use this function
 // because it has no param check, nor strict type check
 func (r *DescribeDomainWhoisResponse) FromJsonString(s string) error {
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type DescribeFileInfoByJobIdRequestParams struct {
+	// 任务ID
+	JobId *uint64 `json:"JobId,omitnil,omitempty" name:"JobId"`
+}
+
+type DescribeFileInfoByJobIdRequest struct {
+	*tchttp.BaseRequest
+	
+	// 任务ID
+	JobId *uint64 `json:"JobId,omitnil,omitempty" name:"JobId"`
+}
+
+func (r *DescribeFileInfoByJobIdRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *DescribeFileInfoByJobIdRequest) FromJsonString(s string) error {
+	f := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(s), &f); err != nil {
+		return err
+	}
+	delete(f, "JobId")
+	if len(f) > 0 {
+		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "DescribeFileInfoByJobIdRequest has unknown keys!", "")
+	}
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type DescribeFileInfoByJobIdResponseParams struct {
+	// 生成文件相关信息
+	FileInfo *FileInfo `json:"FileInfo,omitnil,omitempty" name:"FileInfo"`
+
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
+}
+
+type DescribeFileInfoByJobIdResponse struct {
+	*tchttp.BaseResponse
+	Response *DescribeFileInfoByJobIdResponseParams `json:"Response"`
+}
+
+func (r *DescribeFileInfoByJobIdResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *DescribeFileInfoByJobIdResponse) FromJsonString(s string) error {
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type DescribeLineGroupListRequestParams struct {
+	// 域名
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 偏移量，默认值为0。
+	Offset *uint64 `json:"Offset,omitnil,omitempty" name:"Offset"`
+
+	// 限制数量，传0或不传会返回所有。
+	Length *uint64 `json:"Length,omitnil,omitempty" name:"Length"`
+
+	// 按自定义线路分组名称排序的方向。升序传asc，降序传desc。
+	SortType *string `json:"SortType,omitnil,omitempty" name:"SortType"`
+
+	// 域名ID，如果传了DomainId，系统将会忽略Domain参数，优先使用DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+}
+
+type DescribeLineGroupListRequest struct {
+	*tchttp.BaseRequest
+	
+	// 域名
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 偏移量，默认值为0。
+	Offset *uint64 `json:"Offset,omitnil,omitempty" name:"Offset"`
+
+	// 限制数量，传0或不传会返回所有。
+	Length *uint64 `json:"Length,omitnil,omitempty" name:"Length"`
+
+	// 按自定义线路分组名称排序的方向。升序传asc，降序传desc。
+	SortType *string `json:"SortType,omitnil,omitempty" name:"SortType"`
+
+	// 域名ID，如果传了DomainId，系统将会忽略Domain参数，优先使用DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+}
+
+func (r *DescribeLineGroupListRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *DescribeLineGroupListRequest) FromJsonString(s string) error {
+	f := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(s), &f); err != nil {
+		return err
+	}
+	delete(f, "Domain")
+	delete(f, "Offset")
+	delete(f, "Length")
+	delete(f, "SortType")
+	delete(f, "DomainId")
+	if len(f) > 0 {
+		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "DescribeLineGroupListRequest has unknown keys!", "")
+	}
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type DescribeLineGroupListResponseParams struct {
+	// 自定义线路分组列表
+	LineGroups []*LineGroupItem `json:"LineGroups,omitnil,omitempty" name:"LineGroups"`
+
+	// 自定义线路分组数量信息
+	Info *LineGroupSum `json:"Info,omitnil,omitempty" name:"Info"`
+
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
+}
+
+type DescribeLineGroupListResponse struct {
+	*tchttp.BaseResponse
+	Response *DescribeLineGroupListResponseParams `json:"Response"`
+}
+
+func (r *DescribeLineGroupListResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *DescribeLineGroupListResponse) FromJsonString(s string) error {
 	return json.Unmarshal([]byte(s), &r)
 }
 
@@ -3002,13 +4203,13 @@ func (r *DescribePackageDetailRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribePackageDetailResponseParams struct {
 	// 套餐配置详情
-	Info []*PackageDetailItem `json:"Info,omitnil" name:"Info"`
+	Info []*PackageDetailItem `json:"Info,omitnil,omitempty" name:"Info"`
 
 	// 套餐代码列表
-	LevelMap []*string `json:"LevelMap,omitnil" name:"LevelMap"`
+	LevelMap []*string `json:"LevelMap,omitnil,omitempty" name:"LevelMap"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribePackageDetailResponse struct {
@@ -3030,20 +4231,20 @@ func (r *DescribePackageDetailResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeRecordExistExceptDefaultNSRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type DescribeRecordExistExceptDefaultNSRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *DescribeRecordExistExceptDefaultNSRequest) ToJsonString() string {
@@ -3069,10 +4270,10 @@ func (r *DescribeRecordExistExceptDefaultNSRequest) FromJsonString(s string) err
 // Predefined struct for user
 type DescribeRecordExistExceptDefaultNSResponseParams struct {
 	// true 是 false 否
-	Exist *bool `json:"Exist,omitnil" name:"Exist"`
+	Exist *bool `json:"Exist,omitnil,omitempty" name:"Exist"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeRecordExistExceptDefaultNSResponse struct {
@@ -3094,25 +4295,25 @@ func (r *DescribeRecordExistExceptDefaultNSResponse) FromJsonString(s string) er
 // Predefined struct for user
 type DescribeRecordFilterListRequestParams struct {
 	// 要获取的解析记录所属的域名。
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 要获取的解析记录所属的域名 Id，如果传了 DomainId，系统将会忽略 Domain 参数。 可以通过接口 DescribeDomainList 查到所有的 Domain 以及 DomainId。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 要获取的解析记录所属的域名 Id，如果传了 DomainId，系统将会忽略 Domain 参数。 
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
 	// 根据解析记录的主机头获取解析记录。默认模糊匹配。可以通过设置 IsExactSubdomain 参数为 true 进行精确查找。
-	SubDomain *string `json:"SubDomain,omitnil" name:"SubDomain"`
+	SubDomain *string `json:"SubDomain,omitnil,omitempty" name:"SubDomain"`
 
 	// 获取某些类型的解析记录，如 A，CNAME，NS，AAAA，显性URL，隐性URL，CAA，SPF等。
-	RecordType []*string `json:"RecordType,omitnil" name:"RecordType"`
+	RecordType []*string `json:"RecordType,omitnil,omitempty" name:"RecordType"`
 
-	// 获取某些线路ID的解析记录。可以通过接口 DescribeRecordLineList 查看当前域名允许的线路信息。
-	RecordLine []*string `json:"RecordLine,omitnil" name:"RecordLine"`
+	// 获取某些线路ID的解析记录。
+	RecordLine []*string `json:"RecordLine,omitnil,omitempty" name:"RecordLine"`
 
-	// 获取某些分组下的解析记录时，传这个分组 Id。可以通过接口 DescribeRecordGroupList 接口 GroupId 字段获取。
-	GroupId []*uint64 `json:"GroupId,omitnil" name:"GroupId"`
+	// 获取某些分组下的解析记录时，传这个分组 Id。
+	GroupId []*uint64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
 
 	// 通过关键字搜索解析记录，当前支持搜索主机头和记录值
-	Keyword *string `json:"Keyword,omitnil" name:"Keyword"`
+	Keyword *string `json:"Keyword,omitnil,omitempty" name:"Keyword"`
 
 	// 排序字段，支持 NAME，LINE，TYPE，VALUE，WEIGHT，MX，TTL，UPDATED_ON 几个字段。
 	// NAME：解析记录的主机头
@@ -3123,82 +4324,82 @@ type DescribeRecordFilterListRequestParams struct {
 	// MX：MX 优先级
 	// TTL：解析记录缓存时间
 	// UPDATED_ON：解析记录更新时间
-	SortField *string `json:"SortField,omitnil" name:"SortField"`
+	SortField *string `json:"SortField,omitnil,omitempty" name:"SortField"`
 
 	// 排序方式，升序：ASC，降序：DESC。默认值为ASC。
-	SortType *string `json:"SortType,omitnil" name:"SortType"`
+	SortType *string `json:"SortType,omitnil,omitempty" name:"SortType"`
 
-	// 偏移量，默认值为0。
-	Offset *uint64 `json:"Offset,omitnil" name:"Offset"`
+	// 偏移量，默认值为0。如果入参携带"Domain","offset","Limit" 这3个以外的参数，记录结果限制最大3000条
+	Offset *uint64 `json:"Offset,omitnil,omitempty" name:"Offset"`
 
 	// 限制数量，当前Limit最大支持3000。默认值为100。
-	Limit *uint64 `json:"Limit,omitnil" name:"Limit"`
+	Limit *uint64 `json:"Limit,omitnil,omitempty" name:"Limit"`
 
 	// 根据解析记录的值获取解析记录
-	RecordValue *string `json:"RecordValue,omitnil" name:"RecordValue"`
+	RecordValue *string `json:"RecordValue,omitnil,omitempty" name:"RecordValue"`
 
 	// 根据解析记录的状态获取解析记录。可取值为 ENABLE，DISABLE。
 	// ENABLE：正常 
 	// DISABLE：暂停 
-	RecordStatus []*string `json:"RecordStatus,omitnil" name:"RecordStatus"`
+	RecordStatus []*string `json:"RecordStatus,omitnil,omitempty" name:"RecordStatus"`
 
 	// 要获取解析记录权重查询区间起点。
-	WeightBegin *uint64 `json:"WeightBegin,omitnil" name:"WeightBegin"`
+	WeightBegin *uint64 `json:"WeightBegin,omitnil,omitempty" name:"WeightBegin"`
 
 	// 要获取解析记录权重查询区间终点。
-	WeightEnd *uint64 `json:"WeightEnd,omitnil" name:"WeightEnd"`
+	WeightEnd *uint64 `json:"WeightEnd,omitnil,omitempty" name:"WeightEnd"`
 
 	// 要获取解析记录 MX 优先级查询区间起点。
-	MXBegin *uint64 `json:"MXBegin,omitnil" name:"MXBegin"`
+	MXBegin *uint64 `json:"MXBegin,omitnil,omitempty" name:"MXBegin"`
 
 	// 要获取解析记录 MX 优先级查询区间终点。
-	MXEnd *uint64 `json:"MXEnd,omitnil" name:"MXEnd"`
+	MXEnd *uint64 `json:"MXEnd,omitnil,omitempty" name:"MXEnd"`
 
 	// 要获取解析记录 TTL 查询区间起点。
-	TTLBegin *uint64 `json:"TTLBegin,omitnil" name:"TTLBegin"`
+	TTLBegin *uint64 `json:"TTLBegin,omitnil,omitempty" name:"TTLBegin"`
 
 	// 要获取解析记录 TTL 查询区间终点。
-	TTLEnd *uint64 `json:"TTLEnd,omitnil" name:"TTLEnd"`
+	TTLEnd *uint64 `json:"TTLEnd,omitnil,omitempty" name:"TTLEnd"`
 
 	// 要获取解析记录更新时间查询区间起点。
-	UpdatedAtBegin *string `json:"UpdatedAtBegin,omitnil" name:"UpdatedAtBegin"`
+	UpdatedAtBegin *string `json:"UpdatedAtBegin,omitnil,omitempty" name:"UpdatedAtBegin"`
 
 	// 要获取解析记录更新时间查询区间终点。
-	UpdatedAtEnd *string `json:"UpdatedAtEnd,omitnil" name:"UpdatedAtEnd"`
+	UpdatedAtEnd *string `json:"UpdatedAtEnd,omitnil,omitempty" name:"UpdatedAtEnd"`
 
 	// 根据解析记录的备注获取解析记录。
-	Remark *string `json:"Remark,omitnil" name:"Remark"`
+	Remark *string `json:"Remark,omitnil,omitempty" name:"Remark"`
 
 	// 是否根据 Subdomain 参数进行精确查找。
-	IsExactSubDomain *bool `json:"IsExactSubDomain,omitnil" name:"IsExactSubDomain"`
+	IsExactSubDomain *bool `json:"IsExactSubDomain,omitnil,omitempty" name:"IsExactSubDomain"`
 
 	// 项目ID
-	ProjectId *int64 `json:"ProjectId,omitnil" name:"ProjectId"`
+	ProjectId *int64 `json:"ProjectId,omitnil,omitempty" name:"ProjectId"`
 }
 
 type DescribeRecordFilterListRequest struct {
 	*tchttp.BaseRequest
 	
 	// 要获取的解析记录所属的域名。
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 要获取的解析记录所属的域名 Id，如果传了 DomainId，系统将会忽略 Domain 参数。 可以通过接口 DescribeDomainList 查到所有的 Domain 以及 DomainId。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 要获取的解析记录所属的域名 Id，如果传了 DomainId，系统将会忽略 Domain 参数。 
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
 	// 根据解析记录的主机头获取解析记录。默认模糊匹配。可以通过设置 IsExactSubdomain 参数为 true 进行精确查找。
-	SubDomain *string `json:"SubDomain,omitnil" name:"SubDomain"`
+	SubDomain *string `json:"SubDomain,omitnil,omitempty" name:"SubDomain"`
 
 	// 获取某些类型的解析记录，如 A，CNAME，NS，AAAA，显性URL，隐性URL，CAA，SPF等。
-	RecordType []*string `json:"RecordType,omitnil" name:"RecordType"`
+	RecordType []*string `json:"RecordType,omitnil,omitempty" name:"RecordType"`
 
-	// 获取某些线路ID的解析记录。可以通过接口 DescribeRecordLineList 查看当前域名允许的线路信息。
-	RecordLine []*string `json:"RecordLine,omitnil" name:"RecordLine"`
+	// 获取某些线路ID的解析记录。
+	RecordLine []*string `json:"RecordLine,omitnil,omitempty" name:"RecordLine"`
 
-	// 获取某些分组下的解析记录时，传这个分组 Id。可以通过接口 DescribeRecordGroupList 接口 GroupId 字段获取。
-	GroupId []*uint64 `json:"GroupId,omitnil" name:"GroupId"`
+	// 获取某些分组下的解析记录时，传这个分组 Id。
+	GroupId []*uint64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
 
 	// 通过关键字搜索解析记录，当前支持搜索主机头和记录值
-	Keyword *string `json:"Keyword,omitnil" name:"Keyword"`
+	Keyword *string `json:"Keyword,omitnil,omitempty" name:"Keyword"`
 
 	// 排序字段，支持 NAME，LINE，TYPE，VALUE，WEIGHT，MX，TTL，UPDATED_ON 几个字段。
 	// NAME：解析记录的主机头
@@ -3209,57 +4410,57 @@ type DescribeRecordFilterListRequest struct {
 	// MX：MX 优先级
 	// TTL：解析记录缓存时间
 	// UPDATED_ON：解析记录更新时间
-	SortField *string `json:"SortField,omitnil" name:"SortField"`
+	SortField *string `json:"SortField,omitnil,omitempty" name:"SortField"`
 
 	// 排序方式，升序：ASC，降序：DESC。默认值为ASC。
-	SortType *string `json:"SortType,omitnil" name:"SortType"`
+	SortType *string `json:"SortType,omitnil,omitempty" name:"SortType"`
 
-	// 偏移量，默认值为0。
-	Offset *uint64 `json:"Offset,omitnil" name:"Offset"`
+	// 偏移量，默认值为0。如果入参携带"Domain","offset","Limit" 这3个以外的参数，记录结果限制最大3000条
+	Offset *uint64 `json:"Offset,omitnil,omitempty" name:"Offset"`
 
 	// 限制数量，当前Limit最大支持3000。默认值为100。
-	Limit *uint64 `json:"Limit,omitnil" name:"Limit"`
+	Limit *uint64 `json:"Limit,omitnil,omitempty" name:"Limit"`
 
 	// 根据解析记录的值获取解析记录
-	RecordValue *string `json:"RecordValue,omitnil" name:"RecordValue"`
+	RecordValue *string `json:"RecordValue,omitnil,omitempty" name:"RecordValue"`
 
 	// 根据解析记录的状态获取解析记录。可取值为 ENABLE，DISABLE。
 	// ENABLE：正常 
 	// DISABLE：暂停 
-	RecordStatus []*string `json:"RecordStatus,omitnil" name:"RecordStatus"`
+	RecordStatus []*string `json:"RecordStatus,omitnil,omitempty" name:"RecordStatus"`
 
 	// 要获取解析记录权重查询区间起点。
-	WeightBegin *uint64 `json:"WeightBegin,omitnil" name:"WeightBegin"`
+	WeightBegin *uint64 `json:"WeightBegin,omitnil,omitempty" name:"WeightBegin"`
 
 	// 要获取解析记录权重查询区间终点。
-	WeightEnd *uint64 `json:"WeightEnd,omitnil" name:"WeightEnd"`
+	WeightEnd *uint64 `json:"WeightEnd,omitnil,omitempty" name:"WeightEnd"`
 
 	// 要获取解析记录 MX 优先级查询区间起点。
-	MXBegin *uint64 `json:"MXBegin,omitnil" name:"MXBegin"`
+	MXBegin *uint64 `json:"MXBegin,omitnil,omitempty" name:"MXBegin"`
 
 	// 要获取解析记录 MX 优先级查询区间终点。
-	MXEnd *uint64 `json:"MXEnd,omitnil" name:"MXEnd"`
+	MXEnd *uint64 `json:"MXEnd,omitnil,omitempty" name:"MXEnd"`
 
 	// 要获取解析记录 TTL 查询区间起点。
-	TTLBegin *uint64 `json:"TTLBegin,omitnil" name:"TTLBegin"`
+	TTLBegin *uint64 `json:"TTLBegin,omitnil,omitempty" name:"TTLBegin"`
 
 	// 要获取解析记录 TTL 查询区间终点。
-	TTLEnd *uint64 `json:"TTLEnd,omitnil" name:"TTLEnd"`
+	TTLEnd *uint64 `json:"TTLEnd,omitnil,omitempty" name:"TTLEnd"`
 
 	// 要获取解析记录更新时间查询区间起点。
-	UpdatedAtBegin *string `json:"UpdatedAtBegin,omitnil" name:"UpdatedAtBegin"`
+	UpdatedAtBegin *string `json:"UpdatedAtBegin,omitnil,omitempty" name:"UpdatedAtBegin"`
 
 	// 要获取解析记录更新时间查询区间终点。
-	UpdatedAtEnd *string `json:"UpdatedAtEnd,omitnil" name:"UpdatedAtEnd"`
+	UpdatedAtEnd *string `json:"UpdatedAtEnd,omitnil,omitempty" name:"UpdatedAtEnd"`
 
 	// 根据解析记录的备注获取解析记录。
-	Remark *string `json:"Remark,omitnil" name:"Remark"`
+	Remark *string `json:"Remark,omitnil,omitempty" name:"Remark"`
 
 	// 是否根据 Subdomain 参数进行精确查找。
-	IsExactSubDomain *bool `json:"IsExactSubDomain,omitnil" name:"IsExactSubDomain"`
+	IsExactSubDomain *bool `json:"IsExactSubDomain,omitnil,omitempty" name:"IsExactSubDomain"`
 
 	// 项目ID
-	ProjectId *int64 `json:"ProjectId,omitnil" name:"ProjectId"`
+	ProjectId *int64 `json:"ProjectId,omitnil,omitempty" name:"ProjectId"`
 }
 
 func (r *DescribeRecordFilterListRequest) ToJsonString() string {
@@ -3307,13 +4508,13 @@ func (r *DescribeRecordFilterListRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeRecordFilterListResponseParams struct {
 	// 记录的数量统计信息
-	RecordCountInfo *RecordCountInfo `json:"RecordCountInfo,omitnil" name:"RecordCountInfo"`
+	RecordCountInfo *RecordCountInfo `json:"RecordCountInfo,omitnil,omitempty" name:"RecordCountInfo"`
 
 	// 获取的记录列表
-	RecordList []*RecordListItem `json:"RecordList,omitnil" name:"RecordList"`
+	RecordList []*RecordListItem `json:"RecordList,omitnil,omitempty" name:"RecordList"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeRecordFilterListResponse struct {
@@ -3335,32 +4536,32 @@ func (r *DescribeRecordFilterListResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeRecordGroupListRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
 	// 分页开始位置
-	Offset *uint64 `json:"Offset,omitnil" name:"Offset"`
+	Offset *uint64 `json:"Offset,omitnil,omitempty" name:"Offset"`
 
 	// 分页每页数
-	Limit *uint64 `json:"Limit,omitnil" name:"Limit"`
+	Limit *uint64 `json:"Limit,omitnil,omitempty" name:"Limit"`
 }
 
 type DescribeRecordGroupListRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
 	// 分页开始位置
-	Offset *uint64 `json:"Offset,omitnil" name:"Offset"`
+	Offset *uint64 `json:"Offset,omitnil,omitempty" name:"Offset"`
 
 	// 分页每页数
-	Limit *uint64 `json:"Limit,omitnil" name:"Limit"`
+	Limit *uint64 `json:"Limit,omitnil,omitempty" name:"Limit"`
 }
 
 func (r *DescribeRecordGroupListRequest) ToJsonString() string {
@@ -3388,10 +4589,10 @@ func (r *DescribeRecordGroupListRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeRecordGroupListResponseParams struct {
 	// 分组列表
-	GroupList []*RecordGroupInfo `json:"GroupList,omitnil" name:"GroupList"`
+	GroupList []*RecordGroupInfo `json:"GroupList,omitnil,omitempty" name:"GroupList"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeRecordGroupListResponse struct {
@@ -3411,32 +4612,92 @@ func (r *DescribeRecordGroupListResponse) FromJsonString(s string) error {
 }
 
 // Predefined struct for user
+type DescribeRecordLineCategoryListRequestParams struct {
+	// 要查询线路列表的域名。
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 要查询线路列表的域名 ID。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain。
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+}
+
+type DescribeRecordLineCategoryListRequest struct {
+	*tchttp.BaseRequest
+	
+	// 要查询线路列表的域名。
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 要查询线路列表的域名 ID。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain。
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+}
+
+func (r *DescribeRecordLineCategoryListRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *DescribeRecordLineCategoryListRequest) FromJsonString(s string) error {
+	f := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(s), &f); err != nil {
+		return err
+	}
+	delete(f, "Domain")
+	delete(f, "DomainId")
+	if len(f) > 0 {
+		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "DescribeRecordLineCategoryListRequest has unknown keys!", "")
+	}
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type DescribeRecordLineCategoryListResponseParams struct {
+	// 按分类返回的线路列表。
+	LineList []*LineItem `json:"LineList,omitnil,omitempty" name:"LineList"`
+
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
+}
+
+type DescribeRecordLineCategoryListResponse struct {
+	*tchttp.BaseResponse
+	Response *DescribeRecordLineCategoryListResponseParams `json:"Response"`
+}
+
+func (r *DescribeRecordLineCategoryListResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *DescribeRecordLineCategoryListResponse) FromJsonString(s string) error {
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
 type DescribeRecordLineListRequestParams struct {
 	// 域名。
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 域名等级。
-	// + 旧套餐：D_FREE、D_PLUS、D_EXTRA、D_EXPERT、D_ULTRA 分别对应免费套餐、个人豪华、企业1、企业2、企业3。
-	// + 新套餐：DP_FREE、DP_PLUS、DP_EXTRA、DP_EXPERT、DP_ULTRA 分别对应新免费、个人专业版、企业创业版、企业标准版、企业旗舰版。
-	DomainGrade *string `json:"DomainGrade,omitnil" name:"DomainGrade"`
+	// 域名套餐等级。  旧套餐：D_FREE、D_PLUS、D_EXTRA、D_EXPERT、D_ULTRA 、DP_EXTRA 分别对应免费套餐、个人豪华、企业 I、企业 II、企业 III、企业基础版。 新套餐：DP_FREE、DP_PLUS、DP_EXPERT、DP_ULTRA 分别对应新免费、专业版、企业版、尊享版。
+	DomainGrade *string `json:"DomainGrade,omitnil,omitempty" name:"DomainGrade"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type DescribeRecordLineListRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名。
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 域名等级。
-	// + 旧套餐：D_FREE、D_PLUS、D_EXTRA、D_EXPERT、D_ULTRA 分别对应免费套餐、个人豪华、企业1、企业2、企业3。
-	// + 新套餐：DP_FREE、DP_PLUS、DP_EXTRA、DP_EXPERT、DP_ULTRA 分别对应新免费、个人专业版、企业创业版、企业标准版、企业旗舰版。
-	DomainGrade *string `json:"DomainGrade,omitnil" name:"DomainGrade"`
+	// 域名套餐等级。  旧套餐：D_FREE、D_PLUS、D_EXTRA、D_EXPERT、D_ULTRA 、DP_EXTRA 分别对应免费套餐、个人豪华、企业 I、企业 II、企业 III、企业基础版。 新套餐：DP_FREE、DP_PLUS、DP_EXPERT、DP_ULTRA 分别对应新免费、专业版、企业版、尊享版。
+	DomainGrade *string `json:"DomainGrade,omitnil,omitempty" name:"DomainGrade"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *DescribeRecordLineListRequest) ToJsonString() string {
@@ -3463,13 +4724,13 @@ func (r *DescribeRecordLineListRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeRecordLineListResponseParams struct {
 	// 线路列表。
-	LineList []*LineInfo `json:"LineList,omitnil" name:"LineList"`
+	LineList []*LineInfo `json:"LineList,omitnil,omitempty" name:"LineList"`
 
 	// 线路分组列表。
-	LineGroupList []*LineGroupInfo `json:"LineGroupList,omitnil" name:"LineGroupList"`
+	LineGroupList []*LineGroupInfo `json:"LineGroupList,omitnil,omitempty" name:"LineGroupList"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeRecordLineListResponse struct {
@@ -3490,81 +4751,87 @@ func (r *DescribeRecordLineListResponse) FromJsonString(s string) error {
 
 // Predefined struct for user
 type DescribeRecordListRequestParams struct {
-	// 要获取的解析记录所属的域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	// <p>域名</p>
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 要获取的解析记录所属的域名Id，如果传了DomainId，系统将会忽略Domain参数。 可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// <p>域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId</p>
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
-	// 解析记录的主机头，如果传了此参数，则只会返回此主机头对应的解析记录
-	Subdomain *string `json:"Subdomain,omitnil" name:"Subdomain"`
+	// <p>解析记录的主机头，如果传了此参数，则只会返回此主机头对应的解析记录</p>
+	Subdomain *string `json:"Subdomain,omitnil,omitempty" name:"Subdomain"`
 
-	// 获取某种类型的解析记录，如 A，CNAME，NS，AAAA，显性URL，隐性URL，CAA，SPF等
-	RecordType *string `json:"RecordType,omitnil" name:"RecordType"`
+	// <p>获取某种类型的解析记录，如 A，CNAME，NS，AAAA，显性URL，隐性URL，CAA，SPF等</p>
+	RecordType *string `json:"RecordType,omitnil,omitempty" name:"RecordType"`
 
-	// 获取某条线路名称的解析记录。可以通过接口DescribeRecordLineList查看当前域名允许的线路信息
-	RecordLine *string `json:"RecordLine,omitnil" name:"RecordLine"`
+	// <p>获取某条线路名称的解析记录。可以通过接口DescribeRecordLineList查看当前域名允许的线路信息</p>
+	RecordLine *string `json:"RecordLine,omitnil,omitempty" name:"RecordLine"`
 
-	// 获取某个线路Id对应的解析记录，如果传RecordLineId，系统会忽略RecordLine参数。可以通过接口DescribeRecordLineList查看当前域名允许的线路信息
-	RecordLineId *string `json:"RecordLineId,omitnil" name:"RecordLineId"`
+	// <p>获取某个线路Id对应的解析记录，如果传RecordLineId，系统会忽略RecordLine参数。可以通过接口DescribeRecordLineList查看当前域名允许的线路信息</p>
+	RecordLineId *string `json:"RecordLineId,omitnil,omitempty" name:"RecordLineId"`
 
-	// 获取某个分组下的解析记录时，传这个分组Id。
-	GroupId *uint64 `json:"GroupId,omitnil" name:"GroupId"`
+	// <p>获取某个分组下的解析记录时，传这个分组Id。可通过DescribeRecordGroupList接口获取所有分组</p>
+	GroupId *uint64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
 
-	// 通过关键字搜索解析记录，当前支持搜索主机头和记录值
-	Keyword *string `json:"Keyword,omitnil" name:"Keyword"`
+	// <p>通过关键字搜索解析记录，当前支持搜索主机头和记录值</p>
+	Keyword *string `json:"Keyword,omitnil,omitempty" name:"Keyword"`
 
-	// 排序字段，支持 name,line,type,value,weight,mx,ttl,updated_on 几个字段。
-	SortField *string `json:"SortField,omitnil" name:"SortField"`
+	// <p>排序字段，支持 name,line,type,value,weight,mx,ttl,updated_on 几个字段。</p>
+	SortField *string `json:"SortField,omitnil,omitempty" name:"SortField"`
 
-	// 排序方式，正序：ASC，逆序：DESC。默认值为ASC。
-	SortType *string `json:"SortType,omitnil" name:"SortType"`
+	// <p>排序方式，正序：ASC，逆序：DESC。默认值为ASC。</p>
+	SortType *string `json:"SortType,omitnil,omitempty" name:"SortType"`
 
-	// 偏移量，默认值为0。
-	Offset *uint64 `json:"Offset,omitnil" name:"Offset"`
+	// <p>偏移量，默认值为0。</p>
+	Offset *uint64 `json:"Offset,omitnil,omitempty" name:"Offset"`
 
-	// 限制数量，当前Limit最大支持3000。默认值为100。
-	Limit *uint64 `json:"Limit,omitnil" name:"Limit"`
+	// <p>限制数量，当前Limit最大支持3000。默认值为100。</p>
+	Limit *uint64 `json:"Limit,omitnil,omitempty" name:"Limit"`
+
+	// <p>查询不到数据时是否报错</p>枚举值：<ul><li> yes： 报错</li><li> no： 不报错，返回空列表</li></ul>默认值：yes
+	ErrorOnEmpty *string `json:"ErrorOnEmpty,omitnil,omitempty" name:"ErrorOnEmpty"`
 }
 
 type DescribeRecordListRequest struct {
 	*tchttp.BaseRequest
 	
-	// 要获取的解析记录所属的域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	// <p>域名</p>
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 要获取的解析记录所属的域名Id，如果传了DomainId，系统将会忽略Domain参数。 可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// <p>域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId</p>
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
-	// 解析记录的主机头，如果传了此参数，则只会返回此主机头对应的解析记录
-	Subdomain *string `json:"Subdomain,omitnil" name:"Subdomain"`
+	// <p>解析记录的主机头，如果传了此参数，则只会返回此主机头对应的解析记录</p>
+	Subdomain *string `json:"Subdomain,omitnil,omitempty" name:"Subdomain"`
 
-	// 获取某种类型的解析记录，如 A，CNAME，NS，AAAA，显性URL，隐性URL，CAA，SPF等
-	RecordType *string `json:"RecordType,omitnil" name:"RecordType"`
+	// <p>获取某种类型的解析记录，如 A，CNAME，NS，AAAA，显性URL，隐性URL，CAA，SPF等</p>
+	RecordType *string `json:"RecordType,omitnil,omitempty" name:"RecordType"`
 
-	// 获取某条线路名称的解析记录。可以通过接口DescribeRecordLineList查看当前域名允许的线路信息
-	RecordLine *string `json:"RecordLine,omitnil" name:"RecordLine"`
+	// <p>获取某条线路名称的解析记录。可以通过接口DescribeRecordLineList查看当前域名允许的线路信息</p>
+	RecordLine *string `json:"RecordLine,omitnil,omitempty" name:"RecordLine"`
 
-	// 获取某个线路Id对应的解析记录，如果传RecordLineId，系统会忽略RecordLine参数。可以通过接口DescribeRecordLineList查看当前域名允许的线路信息
-	RecordLineId *string `json:"RecordLineId,omitnil" name:"RecordLineId"`
+	// <p>获取某个线路Id对应的解析记录，如果传RecordLineId，系统会忽略RecordLine参数。可以通过接口DescribeRecordLineList查看当前域名允许的线路信息</p>
+	RecordLineId *string `json:"RecordLineId,omitnil,omitempty" name:"RecordLineId"`
 
-	// 获取某个分组下的解析记录时，传这个分组Id。
-	GroupId *uint64 `json:"GroupId,omitnil" name:"GroupId"`
+	// <p>获取某个分组下的解析记录时，传这个分组Id。可通过DescribeRecordGroupList接口获取所有分组</p>
+	GroupId *uint64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
 
-	// 通过关键字搜索解析记录，当前支持搜索主机头和记录值
-	Keyword *string `json:"Keyword,omitnil" name:"Keyword"`
+	// <p>通过关键字搜索解析记录，当前支持搜索主机头和记录值</p>
+	Keyword *string `json:"Keyword,omitnil,omitempty" name:"Keyword"`
 
-	// 排序字段，支持 name,line,type,value,weight,mx,ttl,updated_on 几个字段。
-	SortField *string `json:"SortField,omitnil" name:"SortField"`
+	// <p>排序字段，支持 name,line,type,value,weight,mx,ttl,updated_on 几个字段。</p>
+	SortField *string `json:"SortField,omitnil,omitempty" name:"SortField"`
 
-	// 排序方式，正序：ASC，逆序：DESC。默认值为ASC。
-	SortType *string `json:"SortType,omitnil" name:"SortType"`
+	// <p>排序方式，正序：ASC，逆序：DESC。默认值为ASC。</p>
+	SortType *string `json:"SortType,omitnil,omitempty" name:"SortType"`
 
-	// 偏移量，默认值为0。
-	Offset *uint64 `json:"Offset,omitnil" name:"Offset"`
+	// <p>偏移量，默认值为0。</p>
+	Offset *uint64 `json:"Offset,omitnil,omitempty" name:"Offset"`
 
-	// 限制数量，当前Limit最大支持3000。默认值为100。
-	Limit *uint64 `json:"Limit,omitnil" name:"Limit"`
+	// <p>限制数量，当前Limit最大支持3000。默认值为100。</p>
+	Limit *uint64 `json:"Limit,omitnil,omitempty" name:"Limit"`
+
+	// <p>查询不到数据时是否报错</p>枚举值：<ul><li> yes： 报错</li><li> no： 不报错，返回空列表</li></ul>默认值：yes
+	ErrorOnEmpty *string `json:"ErrorOnEmpty,omitnil,omitempty" name:"ErrorOnEmpty"`
 }
 
 func (r *DescribeRecordListRequest) ToJsonString() string {
@@ -3591,6 +4858,7 @@ func (r *DescribeRecordListRequest) FromJsonString(s string) error {
 	delete(f, "SortType")
 	delete(f, "Offset")
 	delete(f, "Limit")
+	delete(f, "ErrorOnEmpty")
 	if len(f) > 0 {
 		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "DescribeRecordListRequest has unknown keys!", "")
 	}
@@ -3599,14 +4867,14 @@ func (r *DescribeRecordListRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type DescribeRecordListResponseParams struct {
-	// 记录的数量统计信息
-	RecordCountInfo *RecordCountInfo `json:"RecordCountInfo,omitnil" name:"RecordCountInfo"`
+	// <p>记录的数量统计信息</p>
+	RecordCountInfo *RecordCountInfo `json:"RecordCountInfo,omitnil,omitempty" name:"RecordCountInfo"`
 
-	// 获取的记录列表
-	RecordList []*RecordListItem `json:"RecordList,omitnil" name:"RecordList"`
+	// <p>获取的记录列表</p>
+	RecordList []*RecordListItem `json:"RecordList,omitnil,omitempty" name:"RecordList"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeRecordListResponse struct {
@@ -3628,26 +4896,26 @@ func (r *DescribeRecordListResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeRecordRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 记录 ID 。可以通过接口DescribeRecordList查到所有的解析记录列表以及对应的RecordId
-	RecordId *uint64 `json:"RecordId,omitnil" name:"RecordId"`
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type DescribeRecordRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 记录 ID 。可以通过接口DescribeRecordList查到所有的解析记录列表以及对应的RecordId
-	RecordId *uint64 `json:"RecordId,omitnil" name:"RecordId"`
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *DescribeRecordRequest) ToJsonString() string {
@@ -3674,10 +4942,10 @@ func (r *DescribeRecordRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeRecordResponseParams struct {
 	// 记录信息
-	RecordInfo *RecordInfo `json:"RecordInfo,omitnil" name:"RecordInfo"`
+	RecordInfo *RecordInfo `json:"RecordInfo,omitnil,omitempty" name:"RecordInfo"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeRecordResponse struct {
@@ -3699,26 +4967,26 @@ func (r *DescribeRecordResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeRecordSnapshotRollbackResultRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 回滚任务 ID
-	JobId *uint64 `json:"JobId,omitnil" name:"JobId"`
+	JobId *uint64 `json:"JobId,omitnil,omitempty" name:"JobId"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type DescribeRecordSnapshotRollbackResultRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 回滚任务 ID
-	JobId *uint64 `json:"JobId,omitnil" name:"JobId"`
+	JobId *uint64 `json:"JobId,omitnil,omitempty" name:"JobId"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *DescribeRecordSnapshotRollbackResultRequest) ToJsonString() string {
@@ -3745,45 +5013,44 @@ func (r *DescribeRecordSnapshotRollbackResultRequest) FromJsonString(s string) e
 // Predefined struct for user
 type DescribeRecordSnapshotRollbackResultResponseParams struct {
 	// 回滚任务 ID
-	JobId *uint64 `json:"JobId,omitnil" name:"JobId"`
+	JobId *uint64 `json:"JobId,omitnil,omitempty" name:"JobId"`
 
 	// 回滚状态
-	Status *string `json:"Status,omitnil" name:"Status"`
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 
 	// 失败的记录信息
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	FailedRecordList []*SnapshotRecord `json:"FailedRecordList,omitnil" name:"FailedRecordList"`
+	FailedRecordList []*SnapshotRecord `json:"FailedRecordList,omitnil,omitempty" name:"FailedRecordList"`
 
 	// 所属域名
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 回滚进度
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Progress *uint64 `json:"Progress,omitnil" name:"Progress"`
+	Progress *uint64 `json:"Progress,omitnil,omitempty" name:"Progress"`
 
 	// 回滚剩余时间（单位：分钟）
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	LeftMinutes *uint64 `json:"LeftMinutes,omitnil" name:"LeftMinutes"`
+	LeftMinutes *uint64 `json:"LeftMinutes,omitnil,omitempty" name:"LeftMinutes"`
 
 	// 总记录数
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Total *uint64 `json:"Total,omitnil" name:"Total"`
+	Total *uint64 `json:"Total,omitnil,omitempty" name:"Total"`
 
 	// 失败记录数
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Failed *uint64 `json:"Failed,omitnil" name:"Failed"`
+	Failed *uint64 `json:"Failed,omitnil,omitempty" name:"Failed"`
 
 	// 成功记录数
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Success *uint64 `json:"Success,omitnil" name:"Success"`
+	Success *uint64 `json:"Success,omitnil,omitempty" name:"Success"`
 
 	// 快照下载地址
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	CosUrl *string `json:"CosUrl,omitnil" name:"CosUrl"`
+	CosUrl *string `json:"CosUrl,omitnil,omitempty" name:"CosUrl"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeRecordSnapshotRollbackResultResponse struct {
@@ -3807,7 +5074,7 @@ type DescribeRecordTypeRequestParams struct {
 	// 域名等级。
 	// + 旧套餐：D_FREE、D_PLUS、D_EXTRA、D_EXPERT、D_ULTRA 分别对应免费套餐、个人豪华、企业1、企业2、企业3。
 	// + 新套餐：DP_FREE、DP_PLUS、DP_EXTRA、DP_EXPERT、DP_ULTRA 分别对应新免费、个人专业版、企业创业版、企业标准版、企业旗舰版。
-	DomainGrade *string `json:"DomainGrade,omitnil" name:"DomainGrade"`
+	DomainGrade *string `json:"DomainGrade,omitnil,omitempty" name:"DomainGrade"`
 }
 
 type DescribeRecordTypeRequest struct {
@@ -3816,7 +5083,7 @@ type DescribeRecordTypeRequest struct {
 	// 域名等级。
 	// + 旧套餐：D_FREE、D_PLUS、D_EXTRA、D_EXPERT、D_ULTRA 分别对应免费套餐、个人豪华、企业1、企业2、企业3。
 	// + 新套餐：DP_FREE、DP_PLUS、DP_EXTRA、DP_EXPERT、DP_ULTRA 分别对应新免费、个人专业版、企业创业版、企业标准版、企业旗舰版。
-	DomainGrade *string `json:"DomainGrade,omitnil" name:"DomainGrade"`
+	DomainGrade *string `json:"DomainGrade,omitnil,omitempty" name:"DomainGrade"`
 }
 
 func (r *DescribeRecordTypeRequest) ToJsonString() string {
@@ -3841,10 +5108,10 @@ func (r *DescribeRecordTypeRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeRecordTypeResponseParams struct {
 	// 记录类型列表
-	TypeList []*string `json:"TypeList,omitnil" name:"TypeList"`
+	TypeList []*string `json:"TypeList,omitnil,omitempty" name:"TypeList"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeRecordTypeResponse struct {
@@ -3864,22 +5131,113 @@ func (r *DescribeRecordTypeResponse) FromJsonString(s string) error {
 }
 
 // Predefined struct for user
+type DescribeResolveCountRequestParams struct {
+	// 要查询解析量的域名
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 查询的开始时间，格式：YYYY-MM-DD，最多允许查询最近32天的数据。
+	StartDate *string `json:"StartDate,omitnil,omitempty" name:"StartDate"`
+
+	// 查询的结束时间，格式：YYYY-MM-DD，最多允许查询最近32天的数据。
+	EndDate *string `json:"EndDate,omitnil,omitempty" name:"EndDate"`
+
+	// 数据统计格式，取值为minute、hour、day，分别表示按十分钟、小时、天统计数据
+	DnsFormat *string `json:"DnsFormat,omitnil,omitempty" name:"DnsFormat"`
+
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+}
+
+type DescribeResolveCountRequest struct {
+	*tchttp.BaseRequest
+	
+	// 要查询解析量的域名
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 查询的开始时间，格式：YYYY-MM-DD，最多允许查询最近32天的数据。
+	StartDate *string `json:"StartDate,omitnil,omitempty" name:"StartDate"`
+
+	// 查询的结束时间，格式：YYYY-MM-DD，最多允许查询最近32天的数据。
+	EndDate *string `json:"EndDate,omitnil,omitempty" name:"EndDate"`
+
+	// 数据统计格式，取值为minute、hour、day，分别表示按十分钟、小时、天统计数据
+	DnsFormat *string `json:"DnsFormat,omitnil,omitempty" name:"DnsFormat"`
+
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+}
+
+func (r *DescribeResolveCountRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *DescribeResolveCountRequest) FromJsonString(s string) error {
+	f := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(s), &f); err != nil {
+		return err
+	}
+	delete(f, "Domain")
+	delete(f, "StartDate")
+	delete(f, "EndDate")
+	delete(f, "DnsFormat")
+	delete(f, "DomainId")
+	if len(f) > 0 {
+		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "DescribeResolveCountRequest has unknown keys!", "")
+	}
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type DescribeResolveCountResponseParams struct {
+	// 解析量明细
+	Data []*ResolveCountDataItem `json:"Data,omitnil,omitempty" name:"Data"`
+
+	// 解析量统计信息
+	Info *ResolveCountInfo `json:"Info,omitnil,omitempty" name:"Info"`
+
+	// 别名解析量明细
+	AliasData []*ResolveCountAliasItem `json:"AliasData,omitnil,omitempty" name:"AliasData"`
+
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
+}
+
+type DescribeResolveCountResponse struct {
+	*tchttp.BaseResponse
+	Response *DescribeResolveCountResponseParams `json:"Response"`
+}
+
+func (r *DescribeResolveCountResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *DescribeResolveCountResponse) FromJsonString(s string) error {
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
 type DescribeSnapshotConfigRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type DescribeSnapshotConfigRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *DescribeSnapshotConfigRequest) ToJsonString() string {
@@ -3905,10 +5263,10 @@ func (r *DescribeSnapshotConfigRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeSnapshotConfigResponseParams struct {
 	// 解析快照配置
-	SnapshotConfig *SnapshotConfig `json:"SnapshotConfig,omitnil" name:"SnapshotConfig"`
+	SnapshotConfig *SnapshotConfig `json:"SnapshotConfig,omitnil,omitempty" name:"SnapshotConfig"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeSnapshotConfigResponse struct {
@@ -3930,20 +5288,20 @@ func (r *DescribeSnapshotConfigResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeSnapshotListRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type DescribeSnapshotListRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *DescribeSnapshotListRequest) ToJsonString() string {
@@ -3969,13 +5327,13 @@ func (r *DescribeSnapshotListRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeSnapshotListResponseParams struct {
 	// 分页信息
-	Info *SnapshotPageInfo `json:"Info,omitnil" name:"Info"`
+	Info *SnapshotPageInfo `json:"Info,omitnil,omitempty" name:"Info"`
 
 	// 快照列表
-	SnapshotList []*SnapshotInfo `json:"SnapshotList,omitnil" name:"SnapshotList"`
+	SnapshotList []*SnapshotInfo `json:"SnapshotList,omitnil,omitempty" name:"SnapshotList"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeSnapshotListResponse struct {
@@ -3997,26 +5355,26 @@ func (r *DescribeSnapshotListResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeSnapshotRollbackResultRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 快照回滚任务 ID
-	TaskId *uint64 `json:"TaskId,omitnil" name:"TaskId"`
+	TaskId *uint64 `json:"TaskId,omitnil,omitempty" name:"TaskId"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type DescribeSnapshotRollbackResultRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 快照回滚任务 ID
-	TaskId *uint64 `json:"TaskId,omitnil" name:"TaskId"`
+	TaskId *uint64 `json:"TaskId,omitnil,omitempty" name:"TaskId"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *DescribeSnapshotRollbackResultRequest) ToJsonString() string {
@@ -4043,45 +5401,45 @@ func (r *DescribeSnapshotRollbackResultRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeSnapshotRollbackResultResponseParams struct {
 	// 快照所属域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 回滚剩余时间（分钟）
-	LeftMinutes *uint64 `json:"LeftMinutes,omitnil" name:"LeftMinutes"`
+	LeftMinutes *uint64 `json:"LeftMinutes,omitnil,omitempty" name:"LeftMinutes"`
 
 	// 回滚进度百分比
-	Progress *uint64 `json:"Progress,omitnil" name:"Progress"`
+	Progress *uint64 `json:"Progress,omitnil,omitempty" name:"Progress"`
 
 	// 快照 ID
-	SnapshotId *string `json:"SnapshotId,omitnil" name:"SnapshotId"`
+	SnapshotId *string `json:"SnapshotId,omitnil,omitempty" name:"SnapshotId"`
 
 	// 回滚状态
-	Status *string `json:"Status,omitnil" name:"Status"`
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 
 	// 快照回滚任务 ID
-	TaskId *uint64 `json:"TaskId,omitnil" name:"TaskId"`
+	TaskId *uint64 `json:"TaskId,omitnil,omitempty" name:"TaskId"`
 
 	// 成功数量
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Success *uint64 `json:"Success,omitnil" name:"Success"`
+	Success *uint64 `json:"Success,omitnil,omitempty" name:"Success"`
 
 	// 失败数量
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Failed *uint64 `json:"Failed,omitnil" name:"Failed"`
+	Failed *uint64 `json:"Failed,omitnil,omitempty" name:"Failed"`
 
 	// 总数量
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Total *uint64 `json:"Total,omitnil" name:"Total"`
+	Total *uint64 `json:"Total,omitnil,omitempty" name:"Total"`
 
 	// 失败详细信息
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	FailedRecordList []*SnapshotRecord `json:"FailedRecordList,omitnil" name:"FailedRecordList"`
+	FailedRecordList []*SnapshotRecord `json:"FailedRecordList,omitnil,omitempty" name:"FailedRecordList"`
 
 	// 快照的下载地址
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	CosUrl *string `json:"CosUrl,omitnil" name:"CosUrl"`
+	CosUrl *string `json:"CosUrl,omitnil,omitempty" name:"CosUrl"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeSnapshotRollbackResultResponse struct {
@@ -4103,20 +5461,20 @@ func (r *DescribeSnapshotRollbackResultResponse) FromJsonString(s string) error 
 // Predefined struct for user
 type DescribeSnapshotRollbackTaskRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type DescribeSnapshotRollbackTaskRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *DescribeSnapshotRollbackTaskRequest) ToJsonString() string {
@@ -4142,25 +5500,25 @@ func (r *DescribeSnapshotRollbackTaskRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeSnapshotRollbackTaskResponseParams struct {
 	// 快照所属域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 快照 ID
-	SnapshotId *string `json:"SnapshotId,omitnil" name:"SnapshotId"`
+	SnapshotId *string `json:"SnapshotId,omitnil,omitempty" name:"SnapshotId"`
 
 	// 回滚状态
-	Status *string `json:"Status,omitnil" name:"Status"`
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 
 	// 快照回滚任务 ID
-	TaskId *uint64 `json:"TaskId,omitnil" name:"TaskId"`
+	TaskId *uint64 `json:"TaskId,omitnil,omitempty" name:"TaskId"`
 
 	// 总数量
-	RecordCount *uint64 `json:"RecordCount,omitnil" name:"RecordCount"`
+	RecordCount *uint64 `json:"RecordCount,omitnil,omitempty" name:"RecordCount"`
 
 	// 开始回滚时间
-	CreatedOn *string `json:"CreatedOn,omitnil" name:"CreatedOn"`
+	CreatedOn *string `json:"CreatedOn,omitnil,omitempty" name:"CreatedOn"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeSnapshotRollbackTaskResponse struct {
@@ -4182,44 +5540,44 @@ func (r *DescribeSnapshotRollbackTaskResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeSubdomainAnalyticsRequestParams struct {
 	// 要查询解析量的域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 查询的开始时间，格式：YYYY-MM-DD
-	StartDate *string `json:"StartDate,omitnil" name:"StartDate"`
+	StartDate *string `json:"StartDate,omitnil,omitempty" name:"StartDate"`
 
 	// 查询的结束时间，格式：YYYY-MM-DD
-	EndDate *string `json:"EndDate,omitnil" name:"EndDate"`
+	EndDate *string `json:"EndDate,omitnil,omitempty" name:"EndDate"`
 
 	// 要查询解析量的子域名
-	Subdomain *string `json:"Subdomain,omitnil" name:"Subdomain"`
+	Subdomain *string `json:"Subdomain,omitnil,omitempty" name:"Subdomain"`
 
 	// DATE:按天维度统计 HOUR:按小时维度统计
-	DnsFormat *string `json:"DnsFormat,omitnil" name:"DnsFormat"`
+	DnsFormat *string `json:"DnsFormat,omitnil,omitempty" name:"DnsFormat"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type DescribeSubdomainAnalyticsRequest struct {
 	*tchttp.BaseRequest
 	
 	// 要查询解析量的域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 查询的开始时间，格式：YYYY-MM-DD
-	StartDate *string `json:"StartDate,omitnil" name:"StartDate"`
+	StartDate *string `json:"StartDate,omitnil,omitempty" name:"StartDate"`
 
 	// 查询的结束时间，格式：YYYY-MM-DD
-	EndDate *string `json:"EndDate,omitnil" name:"EndDate"`
+	EndDate *string `json:"EndDate,omitnil,omitempty" name:"EndDate"`
 
 	// 要查询解析量的子域名
-	Subdomain *string `json:"Subdomain,omitnil" name:"Subdomain"`
+	Subdomain *string `json:"Subdomain,omitnil,omitempty" name:"Subdomain"`
 
 	// DATE:按天维度统计 HOUR:按小时维度统计
-	DnsFormat *string `json:"DnsFormat,omitnil" name:"DnsFormat"`
+	DnsFormat *string `json:"DnsFormat,omitnil,omitempty" name:"DnsFormat"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *DescribeSubdomainAnalyticsRequest) ToJsonString() string {
@@ -4249,16 +5607,16 @@ func (r *DescribeSubdomainAnalyticsRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeSubdomainAnalyticsResponseParams struct {
 	// 当前统计维度解析量小计
-	Data []*DomainAnalyticsDetail `json:"Data,omitnil" name:"Data"`
+	Data []*DomainAnalyticsDetail `json:"Data,omitnil,omitempty" name:"Data"`
 
 	// 子域名解析量统计查询信息
-	Info *SubdomainAnalyticsInfo `json:"Info,omitnil" name:"Info"`
+	Info *SubdomainAnalyticsInfo `json:"Info,omitnil,omitempty" name:"Info"`
 
 	// 子域名别名解析量统计信息
-	AliasData []*SubdomainAliasAnalyticsItem `json:"AliasData,omitnil" name:"AliasData"`
+	AliasData []*SubdomainAliasAnalyticsItem `json:"AliasData,omitnil,omitempty" name:"AliasData"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeSubdomainAnalyticsResponse struct {
@@ -4274,6 +5632,60 @@ func (r *DescribeSubdomainAnalyticsResponse) ToJsonString() string {
 // FromJsonString It is highly **NOT** recommended to use this function
 // because it has no param check, nor strict type check
 func (r *DescribeSubdomainAnalyticsResponse) FromJsonString(s string) error {
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type DescribeSubdomainValidateStatusRequestParams struct {
+	// 要查看 TXT 记录校验状态的子域名 Zone 域。
+	DomainZone *string `json:"DomainZone,omitnil,omitempty" name:"DomainZone"`
+}
+
+type DescribeSubdomainValidateStatusRequest struct {
+	*tchttp.BaseRequest
+	
+	// 要查看 TXT 记录校验状态的子域名 Zone 域。
+	DomainZone *string `json:"DomainZone,omitnil,omitempty" name:"DomainZone"`
+}
+
+func (r *DescribeSubdomainValidateStatusRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *DescribeSubdomainValidateStatusRequest) FromJsonString(s string) error {
+	f := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(s), &f); err != nil {
+		return err
+	}
+	delete(f, "DomainZone")
+	if len(f) > 0 {
+		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "DescribeSubdomainValidateStatusRequest has unknown keys!", "")
+	}
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type DescribeSubdomainValidateStatusResponseParams struct {
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
+}
+
+type DescribeSubdomainValidateStatusResponse struct {
+	*tchttp.BaseResponse
+	Response *DescribeSubdomainValidateStatusResponseParams `json:"Response"`
+}
+
+func (r *DescribeSubdomainValidateStatusResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *DescribeSubdomainValidateStatusResponse) FromJsonString(s string) error {
 	return json.Unmarshal([]byte(s), &r)
 }
 
@@ -4309,10 +5721,10 @@ func (r *DescribeUserDetailRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeUserDetailResponseParams struct {
 	// 账户信息
-	UserInfo *UserInfo `json:"UserInfo,omitnil" name:"UserInfo"`
+	UserInfo *UserInfo `json:"UserInfo,omitnil,omitempty" name:"UserInfo"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeUserDetailResponse struct {
@@ -4334,14 +5746,14 @@ func (r *DescribeUserDetailResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeVASStatisticRequestParams struct {
 	// 域名ID
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type DescribeVASStatisticRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名ID
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *DescribeVASStatisticRequest) ToJsonString() string {
@@ -4366,10 +5778,10 @@ func (r *DescribeVASStatisticRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DescribeVASStatisticResponseParams struct {
 	// 增值服务用量列表
-	VASList []*VASStatisticItem `json:"VASList,omitnil" name:"VASList"`
+	VASList []*VASStatisticItem `json:"VASList,omitnil,omitempty" name:"VASList"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DescribeVASStatisticResponse struct {
@@ -4388,324 +5800,425 @@ func (r *DescribeVASStatisticResponse) FromJsonString(s string) error {
 	return json.Unmarshal([]byte(s), &r)
 }
 
+// Predefined struct for user
+type DescribeVasListRequestParams struct {
+	// 偏移量，默认值为0。
+	Offset *uint64 `json:"Offset,omitnil,omitempty" name:"Offset"`
+
+	// 限制数量，默认值为20。
+	Limit *uint64 `json:"Limit,omitnil,omitempty" name:"Limit"`
+
+	// 域名ID
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+
+	// 使用资源 ID 列表查询
+	ResourceIdList []*string `json:"ResourceIdList,omitnil,omitempty" name:"ResourceIdList"`
+
+	// 增值服务类型
+	LimitType *string `json:"LimitType,omitnil,omitempty" name:"LimitType"`
+}
+
+type DescribeVasListRequest struct {
+	*tchttp.BaseRequest
+	
+	// 偏移量，默认值为0。
+	Offset *uint64 `json:"Offset,omitnil,omitempty" name:"Offset"`
+
+	// 限制数量，默认值为20。
+	Limit *uint64 `json:"Limit,omitnil,omitempty" name:"Limit"`
+
+	// 域名ID
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+
+	// 使用资源 ID 列表查询
+	ResourceIdList []*string `json:"ResourceIdList,omitnil,omitempty" name:"ResourceIdList"`
+
+	// 增值服务类型
+	LimitType *string `json:"LimitType,omitnil,omitempty" name:"LimitType"`
+}
+
+func (r *DescribeVasListRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *DescribeVasListRequest) FromJsonString(s string) error {
+	f := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(s), &f); err != nil {
+		return err
+	}
+	delete(f, "Offset")
+	delete(f, "Limit")
+	delete(f, "DomainId")
+	delete(f, "ResourceIdList")
+	delete(f, "LimitType")
+	if len(f) > 0 {
+		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "DescribeVasListRequest has unknown keys!", "")
+	}
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type DescribeVasListResponseParams struct {
+	// 符合筛选条件的套餐总数
+	TotalCount *uint64 `json:"TotalCount,omitnil,omitempty" name:"TotalCount"`
+
+	// 增值服务信息列表
+	VasList []*VasListItem `json:"VasList,omitnil,omitempty" name:"VasList"`
+
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
+}
+
+type DescribeVasListResponse struct {
+	*tchttp.BaseResponse
+	Response *DescribeVasListResponseParams `json:"Response"`
+}
+
+func (r *DescribeVasListResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *DescribeVasListResponse) FromJsonString(s string) error {
+	return json.Unmarshal([]byte(s), &r)
+}
+
 type DomainAliasAnalyticsItem struct {
 	// 域名解析量统计查询信息
-	Info *DomainAnalyticsInfo `json:"Info,omitnil" name:"Info"`
+	Info *DomainAnalyticsInfo `json:"Info,omitnil,omitempty" name:"Info"`
 
 	// 当前统计维度解析量小计
-	Data []*DomainAnalyticsDetail `json:"Data,omitnil" name:"Data"`
+	Data []*DomainAnalyticsDetail `json:"Data,omitnil,omitempty" name:"Data"`
 }
 
 type DomainAliasInfo struct {
 	// 域名别名ID
-	Id *int64 `json:"Id,omitnil" name:"Id"`
+	Id *int64 `json:"Id,omitnil,omitempty" name:"Id"`
 
 	// 域名别名
-	DomainAlias *string `json:"DomainAlias,omitnil" name:"DomainAlias"`
+	DomainAlias *string `json:"DomainAlias,omitnil,omitempty" name:"DomainAlias"`
 
 	// 别名状态：1-DNS不正确；2-正常；3-封禁。
-	Status *uint64 `json:"Status,omitnil" name:"Status"`
+	Status *uint64 `json:"Status,omitnil,omitempty" name:"Status"`
 }
 
 type DomainAnalyticsDetail struct {
 	// 当前统计维度解析量小计
-	Num *uint64 `json:"Num,omitnil" name:"Num"`
+	Num *uint64 `json:"Num,omitnil,omitempty" name:"Num"`
 
 	// 按天统计时，为统计日期
-	DateKey *string `json:"DateKey,omitnil" name:"DateKey"`
+	DateKey *string `json:"DateKey,omitnil,omitempty" name:"DateKey"`
 
 	// 按小时统计时，为统计的当前时间的小时数(0-23)，例：HourKey为23时，统计周期为22点-23点的解析量
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	HourKey *uint64 `json:"HourKey,omitnil" name:"HourKey"`
+	HourKey *uint64 `json:"HourKey,omitnil,omitempty" name:"HourKey"`
 }
 
 type DomainAnalyticsInfo struct {
 	// DATE:按天维度统计 HOUR:按小时维度统计
-	DnsFormat *string `json:"DnsFormat,omitnil" name:"DnsFormat"`
+	DnsFormat *string `json:"DnsFormat,omitnil,omitempty" name:"DnsFormat"`
 
 	// 当前统计周期解析量总计
-	DnsTotal *uint64 `json:"DnsTotal,omitnil" name:"DnsTotal"`
+	DnsTotal *uint64 `json:"DnsTotal,omitnil,omitempty" name:"DnsTotal"`
 
 	// 当前查询的域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 当前统计周期开始时间
-	StartDate *string `json:"StartDate,omitnil" name:"StartDate"`
+	StartDate *string `json:"StartDate,omitnil,omitempty" name:"StartDate"`
 
 	// 当前统计周期结束时间
-	EndDate *string `json:"EndDate,omitnil" name:"EndDate"`
+	EndDate *string `json:"EndDate,omitnil,omitempty" name:"EndDate"`
 }
 
 type DomainCountInfo struct {
 	// 符合条件的域名数量
-	DomainTotal *uint64 `json:"DomainTotal,omitnil" name:"DomainTotal"`
+	DomainTotal *uint64 `json:"DomainTotal,omitnil,omitempty" name:"DomainTotal"`
 
 	// 用户可以查看的所有域名数量
-	AllTotal *uint64 `json:"AllTotal,omitnil" name:"AllTotal"`
+	AllTotal *uint64 `json:"AllTotal,omitnil,omitempty" name:"AllTotal"`
 
 	// 用户账号添加的域名数量
-	MineTotal *uint64 `json:"MineTotal,omitnil" name:"MineTotal"`
+	MineTotal *uint64 `json:"MineTotal,omitnil,omitempty" name:"MineTotal"`
 
 	// 共享给用户的域名数量
-	ShareTotal *uint64 `json:"ShareTotal,omitnil" name:"ShareTotal"`
+	ShareTotal *uint64 `json:"ShareTotal,omitnil,omitempty" name:"ShareTotal"`
 
 	// 付费域名数量
-	VipTotal *uint64 `json:"VipTotal,omitnil" name:"VipTotal"`
+	VipTotal *uint64 `json:"VipTotal,omitnil,omitempty" name:"VipTotal"`
 
 	// 暂停的域名数量
-	PauseTotal *uint64 `json:"PauseTotal,omitnil" name:"PauseTotal"`
+	PauseTotal *uint64 `json:"PauseTotal,omitnil,omitempty" name:"PauseTotal"`
 
 	// dns设置错误的域名数量
-	ErrorTotal *uint64 `json:"ErrorTotal,omitnil" name:"ErrorTotal"`
+	ErrorTotal *uint64 `json:"ErrorTotal,omitnil,omitempty" name:"ErrorTotal"`
 
 	// 锁定的域名数量
-	LockTotal *uint64 `json:"LockTotal,omitnil" name:"LockTotal"`
+	LockTotal *uint64 `json:"LockTotal,omitnil,omitempty" name:"LockTotal"`
 
 	// 封禁的域名数量
-	SpamTotal *uint64 `json:"SpamTotal,omitnil" name:"SpamTotal"`
+	SpamTotal *uint64 `json:"SpamTotal,omitnil,omitempty" name:"SpamTotal"`
 
 	// 30天内即将到期的域名数量
-	VipExpire *uint64 `json:"VipExpire,omitnil" name:"VipExpire"`
+	VipExpire *uint64 `json:"VipExpire,omitnil,omitempty" name:"VipExpire"`
 
 	// 分享给其它人的域名数量
-	ShareOutTotal *uint64 `json:"ShareOutTotal,omitnil" name:"ShareOutTotal"`
+	ShareOutTotal *uint64 `json:"ShareOutTotal,omitnil,omitempty" name:"ShareOutTotal"`
 
 	// 指定分组内的域名数量
-	GroupTotal *uint64 `json:"GroupTotal,omitnil" name:"GroupTotal"`
+	GroupTotal *uint64 `json:"GroupTotal,omitnil,omitempty" name:"GroupTotal"`
 }
 
 type DomainCreateInfo struct {
 	// 域名ID
-	Id *uint64 `json:"Id,omitnil" name:"Id"`
+	Id *uint64 `json:"Id,omitnil,omitempty" name:"Id"`
 
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名的punycode
-	Punycode *string `json:"Punycode,omitnil" name:"Punycode"`
+	Punycode *string `json:"Punycode,omitnil,omitempty" name:"Punycode"`
 
 	// 域名的NS列表
-	GradeNsList []*string `json:"GradeNsList,omitnil" name:"GradeNsList"`
+	GradeNsList []*string `json:"GradeNsList,omitnil,omitempty" name:"GradeNsList"`
 }
 
 type DomainInfo struct {
 	// 域名ID
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
-	// 域名状态
-	Status *string `json:"Status,omitnil" name:"Status"`
+	// 域名状态，正常：ENABLE，暂停：PAUSE，封禁：SPAM
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 
 	// 域名套餐等级
-	Grade *string `json:"Grade,omitnil" name:"Grade"`
+	Grade *string `json:"Grade,omitnil,omitempty" name:"Grade"`
 
 	// 域名分组ID
-	GroupId *uint64 `json:"GroupId,omitnil" name:"GroupId"`
+	GroupId *uint64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
 
 	// 是否星标域名
-	IsMark *string `json:"IsMark,omitnil" name:"IsMark"`
+	IsMark *string `json:"IsMark,omitnil,omitempty" name:"IsMark"`
 
-	// TTL(DNS记录缓存时间)
-	TTL *uint64 `json:"TTL,omitnil" name:"TTL"`
+	// TTL(DNS记录缓存时间)，单位：秒
+	TTL *uint64 `json:"TTL,omitnil,omitempty" name:"TTL"`
 
 	// cname加速启用状态
-	CnameSpeedup *string `json:"CnameSpeedup,omitnil" name:"CnameSpeedup"`
+	CnameSpeedup *string `json:"CnameSpeedup,omitnil,omitempty" name:"CnameSpeedup"`
 
 	// 域名备注
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	Remark *string `json:"Remark,omitnil" name:"Remark"`
+	Remark *string `json:"Remark,omitnil,omitempty" name:"Remark"`
 
 	// 域名Punycode
-	Punycode *string `json:"Punycode,omitnil" name:"Punycode"`
+	Punycode *string `json:"Punycode,omitnil,omitempty" name:"Punycode"`
 
-	// 域名DNS状态
-	DnsStatus *string `json:"DnsStatus,omitnil" name:"DnsStatus"`
+	// 域名DNS状态，错误：dnserror，正常：空字符串
+	DnsStatus *string `json:"DnsStatus,omitnil,omitempty" name:"DnsStatus"`
 
 	// 域名的NS列表
-	DnspodNsList []*string `json:"DnspodNsList,omitnil" name:"DnspodNsList"`
+	DnspodNsList []*string `json:"DnspodNsList,omitnil,omitempty" name:"DnspodNsList"`
 
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名等级代号
-	GradeLevel *uint64 `json:"GradeLevel,omitnil" name:"GradeLevel"`
+	GradeLevel *uint64 `json:"GradeLevel,omitnil,omitempty" name:"GradeLevel"`
 
 	// 域名所属的用户ID
-	UserId *uint64 `json:"UserId,omitnil" name:"UserId"`
+	UserId *uint64 `json:"UserId,omitnil,omitempty" name:"UserId"`
 
 	// 是否为付费域名
-	IsVip *string `json:"IsVip,omitnil" name:"IsVip"`
+	IsVip *string `json:"IsVip,omitnil,omitempty" name:"IsVip"`
 
 	// 域名所有者的账号
-	Owner *string `json:"Owner,omitnil" name:"Owner"`
+	Owner *string `json:"Owner,omitnil,omitempty" name:"Owner"`
 
 	// 域名等级的描述
-	GradeTitle *string `json:"GradeTitle,omitnil" name:"GradeTitle"`
+	GradeTitle *string `json:"GradeTitle,omitnil,omitempty" name:"GradeTitle"`
 
 	// 域名创建时间
-	CreatedOn *string `json:"CreatedOn,omitnil" name:"CreatedOn"`
+	CreatedOn *string `json:"CreatedOn,omitnil,omitempty" name:"CreatedOn"`
 
 	// 最后操作时间
-	UpdatedOn *string `json:"UpdatedOn,omitnil" name:"UpdatedOn"`
+	UpdatedOn *string `json:"UpdatedOn,omitnil,omitempty" name:"UpdatedOn"`
 
 	// 腾讯云账户Uin
-	Uin *string `json:"Uin,omitnil" name:"Uin"`
+	Uin *string `json:"Uin,omitnil,omitempty" name:"Uin"`
 
 	// 域名实际使用的NS列表
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	ActualNsList []*string `json:"ActualNsList,omitnil" name:"ActualNsList"`
+	ActualNsList []*string `json:"ActualNsList,omitnil,omitempty" name:"ActualNsList"`
 
 	// 域名的记录数量
-	RecordCount *uint64 `json:"RecordCount,omitnil" name:"RecordCount"`
+	RecordCount *uint64 `json:"RecordCount,omitnil,omitempty" name:"RecordCount"`
 
 	// 域名所有者的账户昵称
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	OwnerNick *string `json:"OwnerNick,omitnil" name:"OwnerNick"`
+	OwnerNick *string `json:"OwnerNick,omitnil,omitempty" name:"OwnerNick"`
 
 	// 是否在付费套餐宽限期
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	IsGracePeriod *string `json:"IsGracePeriod,omitnil" name:"IsGracePeriod"`
+	IsGracePeriod *string `json:"IsGracePeriod,omitnil,omitempty" name:"IsGracePeriod"`
 
 	// 是否在付费套餐缓冲期
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	VipBuffered *string `json:"VipBuffered,omitnil" name:"VipBuffered"`
+	VipBuffered *string `json:"VipBuffered,omitnil,omitempty" name:"VipBuffered"`
 
 	// VIP套餐有效期开始时间
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	VipStartAt *string `json:"VipStartAt,omitnil" name:"VipStartAt"`
+	VipStartAt *string `json:"VipStartAt,omitnil,omitempty" name:"VipStartAt"`
 
 	// VIP套餐有效期结束时间
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	VipEndAt *string `json:"VipEndAt,omitnil" name:"VipEndAt"`
+	VipEndAt *string `json:"VipEndAt,omitnil,omitempty" name:"VipEndAt"`
 
 	// VIP套餐自动续费标识。可能的值为：default-默认；no-不自动续费；yes-自动续费
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	VipAutoRenew *string `json:"VipAutoRenew,omitnil" name:"VipAutoRenew"`
+	VipAutoRenew *string `json:"VipAutoRenew,omitnil,omitempty" name:"VipAutoRenew"`
 
 	// VIP套餐资源ID
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	VipResourceId *string `json:"VipResourceId,omitnil" name:"VipResourceId"`
+	VipResourceId *string `json:"VipResourceId,omitnil,omitempty" name:"VipResourceId"`
 
 	// 是否是子域名。
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	IsSubDomain *bool `json:"IsSubDomain,omitnil" name:"IsSubDomain"`
+	IsSubDomain *bool `json:"IsSubDomain,omitnil,omitempty" name:"IsSubDomain"`
 
 	// 域名关联的标签列表
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	TagList []*TagItem `json:"TagList,omitnil" name:"TagList"`
+	TagList []*TagItem `json:"TagList,omitnil,omitempty" name:"TagList"`
 
 	// 是否启用搜索引擎推送
-	SearchEnginePush *string `json:"SearchEnginePush,omitnil" name:"SearchEnginePush"`
+	SearchEnginePush *string `json:"SearchEnginePush,omitnil,omitempty" name:"SearchEnginePush"`
 
 	// 是否开启辅助 DNS
-	SlaveDNS *string `json:"SlaveDNS,omitnil" name:"SlaveDNS"`
+	SlaveDNS *string `json:"SlaveDNS,omitnil,omitempty" name:"SlaveDNS"`
 }
 
 type DomainListItem struct {
 	// 系统分配给域名的唯一标识
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
 	// 域名的原始格式
-	Name *string `json:"Name,omitnil" name:"Name"`
+	Name *string `json:"Name,omitnil,omitempty" name:"Name"`
 
 	// 域名的状态，正常：ENABLE，暂停：PAUSE，封禁：SPAM
-	Status *string `json:"Status,omitnil" name:"Status"`
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 
-	// 域名默认的解析记录默认TTL值
-	TTL *uint64 `json:"TTL,omitnil" name:"TTL"`
+	// 域名默认的解析记录默认TTL值，单位：秒
+	TTL *uint64 `json:"TTL,omitnil,omitempty" name:"TTL"`
 
 	// 是否开启CNAME加速，开启：ENABLE，未开启：DISABLE
-	CNAMESpeedup *string `json:"CNAMESpeedup,omitnil" name:"CNAMESpeedup"`
+	CNAMESpeedup *string `json:"CNAMESpeedup,omitnil,omitempty" name:"CNAMESpeedup"`
 
 	// DNS 设置状态，错误：DNSERROR，正常：空字符串
-	DNSStatus *string `json:"DNSStatus,omitnil" name:"DNSStatus"`
+	DNSStatus *string `json:"DNSStatus,omitnil,omitempty" name:"DNSStatus"`
 
 	// 域名的套餐等级代码
-	Grade *string `json:"Grade,omitnil" name:"Grade"`
+	Grade *string `json:"Grade,omitnil,omitempty" name:"Grade"`
 
 	// 域名所属的分组Id
-	GroupId *uint64 `json:"GroupId,omitnil" name:"GroupId"`
+	GroupId *uint64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
 
 	// 是否开启搜索引擎推送优化，是：YES，否：NO
-	SearchEnginePush *string `json:"SearchEnginePush,omitnil" name:"SearchEnginePush"`
+	SearchEnginePush *string `json:"SearchEnginePush,omitnil,omitempty" name:"SearchEnginePush"`
 
 	// 域名备注说明
-	Remark *string `json:"Remark,omitnil" name:"Remark"`
+	Remark *string `json:"Remark,omitnil,omitempty" name:"Remark"`
 
 	// 经过punycode编码后的域名格式
-	Punycode *string `json:"Punycode,omitnil" name:"Punycode"`
+	Punycode *string `json:"Punycode,omitnil,omitempty" name:"Punycode"`
 
 	// 系统为域名分配的有效DNS
-	EffectiveDNS []*string `json:"EffectiveDNS,omitnil" name:"EffectiveDNS"`
+	EffectiveDNS []*string `json:"EffectiveDNS,omitnil,omitempty" name:"EffectiveDNS"`
 
 	// 域名套餐等级对应的序号
-	GradeLevel *uint64 `json:"GradeLevel,omitnil" name:"GradeLevel"`
+	GradeLevel *uint64 `json:"GradeLevel,omitnil,omitempty" name:"GradeLevel"`
 
 	// 套餐名称
-	GradeTitle *string `json:"GradeTitle,omitnil" name:"GradeTitle"`
+	GradeTitle *string `json:"GradeTitle,omitnil,omitempty" name:"GradeTitle"`
 
 	// 是否是付费套餐
-	IsVip *string `json:"IsVip,omitnil" name:"IsVip"`
+	IsVip *string `json:"IsVip,omitnil,omitempty" name:"IsVip"`
 
 	// 付费套餐开通时间
-	VipStartAt *string `json:"VipStartAt,omitnil" name:"VipStartAt"`
+	VipStartAt *string `json:"VipStartAt,omitnil,omitempty" name:"VipStartAt"`
 
 	// 付费套餐到期时间
-	VipEndAt *string `json:"VipEndAt,omitnil" name:"VipEndAt"`
+	VipEndAt *string `json:"VipEndAt,omitnil,omitempty" name:"VipEndAt"`
 
 	// 域名是否开通VIP自动续费，是：YES，否：NO，默认：DEFAULT
-	VipAutoRenew *string `json:"VipAutoRenew,omitnil" name:"VipAutoRenew"`
+	VipAutoRenew *string `json:"VipAutoRenew,omitnil,omitempty" name:"VipAutoRenew"`
 
 	// 域名下的记录数量
-	RecordCount *uint64 `json:"RecordCount,omitnil" name:"RecordCount"`
+	RecordCount *uint64 `json:"RecordCount,omitnil,omitempty" name:"RecordCount"`
 
 	// 域名添加时间
-	CreatedOn *string `json:"CreatedOn,omitnil" name:"CreatedOn"`
+	CreatedOn *string `json:"CreatedOn,omitnil,omitempty" name:"CreatedOn"`
 
 	// 域名更新时间
-	UpdatedOn *string `json:"UpdatedOn,omitnil" name:"UpdatedOn"`
+	UpdatedOn *string `json:"UpdatedOn,omitnil,omitempty" name:"UpdatedOn"`
 
 	// 域名所属账号
-	Owner *string `json:"Owner,omitnil" name:"Owner"`
+	Owner *string `json:"Owner,omitnil,omitempty" name:"Owner"`
 
 	// 域名关联的标签列表
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	TagList []*TagItem `json:"TagList,omitnil" name:"TagList"`
+	TagList []*TagItem `json:"TagList,omitnil,omitempty" name:"TagList"`
 }
 
 type DomainShareInfo struct {
 	// 域名共享对象的账号
-	ShareTo *string `json:"ShareTo,omitnil" name:"ShareTo"`
+	ShareTo *string `json:"ShareTo,omitnil,omitempty" name:"ShareTo"`
 
 	// 共享模式，“rw”：可读写。 “r”:：只读
-	Mode *string `json:"Mode,omitnil" name:"Mode"`
+	Mode *string `json:"Mode,omitnil,omitempty" name:"Mode"`
 
 	// 共享状态“enabled”：共享成功。“pending”：共享到的账号不存在, 等待注册
-	Status *string `json:"Status,omitnil" name:"Status"`
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
+}
+
+type DomainShareUserInfo struct {
+	// 共享记录ID
+	DomainShareId *uint64 `json:"DomainShareId,omitnil,omitempty" name:"DomainShareId"`
+
+	// 共享模式。r-只读；rw-可读写。
+	Mode *string `json:"Mode,omitnil,omitempty" name:"Mode"`
+
+	// 共享到的用户昵称
+	Nickname *string `json:"Nickname,omitnil,omitempty" name:"Nickname"`
+
+	// 共享到的用户UIN
+	QCloudUIN *string `json:"QCloudUIN,omitnil,omitempty" name:"QCloudUIN"`
+
+	// 共享状态。enabled-有效；pause-无效。
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
+
+	// 共享的子域名
+	SubDomain *string `json:"SubDomain,omitnil,omitempty" name:"SubDomain"`
 }
 
 // Predefined struct for user
 type DownloadSnapshotRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 快照记录 ID
-	SnapshotId *string `json:"SnapshotId,omitnil" name:"SnapshotId"`
+	SnapshotId *string `json:"SnapshotId,omitnil,omitempty" name:"SnapshotId"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type DownloadSnapshotRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 快照记录 ID
-	SnapshotId *string `json:"SnapshotId,omitnil" name:"SnapshotId"`
+	SnapshotId *string `json:"SnapshotId,omitnil,omitempty" name:"SnapshotId"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *DownloadSnapshotRequest) ToJsonString() string {
@@ -4732,10 +6245,10 @@ func (r *DownloadSnapshotRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type DownloadSnapshotResponseParams struct {
 	// 快照下载链接
-	CosUrl *string `json:"CosUrl,omitnil" name:"CosUrl"`
+	CosUrl *string `json:"CosUrl,omitnil,omitempty" name:"CosUrl"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type DownloadSnapshotResponse struct {
@@ -4754,97 +6267,282 @@ func (r *DownloadSnapshotResponse) FromJsonString(s string) error {
 	return json.Unmarshal([]byte(s), &r)
 }
 
+type FileInfo struct {
+	// 文件 id。
+	FileId *uint64 `json:"FileId,omitnil,omitempty" name:"FileId"`
+
+	// 文件生成时间。
+	CreatedOn *string `json:"CreatedOn,omitnil,omitempty" name:"CreatedOn"`
+
+	// 文件最后更新时间。
+	UpdatedOn *string `json:"UpdatedOn,omitnil,omitempty" name:"UpdatedOn"`
+
+	// 文件涉及到的域名。
+	Domains []*string `json:"Domains,omitnil,omitempty" name:"Domains"`
+
+	// 文件名称。
+	Name *string `json:"Name,omitnil,omitempty" name:"Name"`
+
+	// 文件下载链接。
+	// 注意：此字段可能返回 null，表示取不到有效值。
+	FileUrl *string `json:"FileUrl,omitnil,omitempty" name:"FileUrl"`
+
+	// 生成文件的任务 id。
+	JobId *uint64 `json:"JobId,omitnil,omitempty" name:"JobId"`
+
+	// 生成文件的进度。100 表示 完成度为100%。
+	Progress *uint64 `json:"Progress,omitnil,omitempty" name:"Progress"`
+
+	// 文件状态。
+	// OK：已完成
+	// RUNNING：正在生成中
+	// ERROR：生成失败
+	// CANCELED：文件已取消生成
+	// CANCELING：文件正在取消生成
+	// EXPIRED：文件已过期
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
+
+	// 生成文件的任务类型。
+	// RECORD_LOG：解析量数据
+	// RECORD_EXPORT：导出解析记录
+	// DOMAIN_EXPORT：导出域名列表
+	Type *string `json:"Type,omitnil,omitempty" name:"Type"`
+
+	// 剩余时间
+	LeftTime *LeftTime `json:"LeftTime,omitnil,omitempty" name:"LeftTime"`
+}
+
 type GroupInfo struct {
 	// 分组ID
-	GroupId *int64 `json:"GroupId,omitnil" name:"GroupId"`
+	GroupId *int64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
 
 	// 分组名称
-	GroupName *string `json:"GroupName,omitnil" name:"GroupName"`
+	GroupName *string `json:"GroupName,omitnil,omitempty" name:"GroupName"`
 
 	// 分组类型
-	GroupType *string `json:"GroupType,omitnil" name:"GroupType"`
+	GroupType *string `json:"GroupType,omitnil,omitempty" name:"GroupType"`
 
 	// 该分组中域名个数
-	Size *int64 `json:"Size,omitnil" name:"Size"`
+	Size *int64 `json:"Size,omitnil,omitempty" name:"Size"`
 }
 
 type KeyValue struct {
 	// 键
-	Key *string `json:"Key,omitnil" name:"Key"`
+	Key *string `json:"Key,omitnil,omitempty" name:"Key"`
 
 	// 值
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	Value *string `json:"Value,omitnil" name:"Value"`
+	Value *string `json:"Value,omitnil,omitempty" name:"Value"`
+}
+
+type LeftTime struct {
+	// 剩余天数
+	Days *uint64 `json:"Days,omitnil,omitempty" name:"Days"`
+
+	// 剩余小时数
+	Hours *uint64 `json:"Hours,omitnil,omitempty" name:"Hours"`
+
+	// 剩余分钟数
+	Mins *uint64 `json:"Mins,omitnil,omitempty" name:"Mins"`
+}
+
+type LineGroupDetail struct {
+	// 自定义线路分组ID
+	Id *uint64 `json:"Id,omitnil,omitempty" name:"Id"`
+
+	// 自定线路分组名称
+	Name *string `json:"Name,omitnil,omitempty" name:"Name"`
+
+	// 自定义线路分组包含的线路列表
+	Lines []*string `json:"Lines,omitnil,omitempty" name:"Lines"`
 }
 
 type LineGroupInfo struct {
 	// 线路分组ID
-	LineId *string `json:"LineId,omitnil" name:"LineId"`
+	LineId *string `json:"LineId,omitnil,omitempty" name:"LineId"`
 
 	// 线路分组名称
-	Name *string `json:"Name,omitnil" name:"Name"`
+	Name *string `json:"Name,omitnil,omitempty" name:"Name"`
 
 	// 分组类型
-	Type *string `json:"Type,omitnil" name:"Type"`
+	Type *string `json:"Type,omitnil,omitempty" name:"Type"`
 
 	// 线路分组包含的线路列表
-	LineList []*string `json:"LineList,omitnil" name:"LineList"`
+	LineList []*string `json:"LineList,omitnil,omitempty" name:"LineList"`
+}
+
+type LineGroupItem struct {
+	// 域名ID
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+
+	// 自定义线路分组ID
+	Id *uint64 `json:"Id,omitnil,omitempty" name:"Id"`
+
+	// 自定义线路分组名称
+	Name *string `json:"Name,omitnil,omitempty" name:"Name"`
+
+	// 自定义线路分组包含的线路
+	Lines []*string `json:"Lines,omitnil,omitempty" name:"Lines"`
+
+	// 创建时间
+	CreatedOn *string `json:"CreatedOn,omitnil,omitempty" name:"CreatedOn"`
+
+	// 更新时间
+	UpdatedOn *string `json:"UpdatedOn,omitnil,omitempty" name:"UpdatedOn"`
+}
+
+type LineGroupSum struct {
+	// 本次请求返回自定义线路分组个数
+	NowTotal *uint64 `json:"NowTotal,omitnil,omitempty" name:"NowTotal"`
+
+	// 自定义线路分组总数
+	Total *uint64 `json:"Total,omitnil,omitempty" name:"Total"`
+
+	// 还可允许添加的自定义线路分组个数
+	AvailableCount *uint64 `json:"AvailableCount,omitnil,omitempty" name:"AvailableCount"`
 }
 
 type LineInfo struct {
 	// 线路名称
-	Name *string `json:"Name,omitnil" name:"Name"`
+	Name *string `json:"Name,omitnil,omitempty" name:"Name"`
 
 	// 线路ID
-	LineId *string `json:"LineId,omitnil" name:"LineId"`
+	LineId *string `json:"LineId,omitnil,omitempty" name:"LineId"`
+}
+
+type LineItem struct {
+	// 解析线路名称。
+	LineName *string `json:"LineName,omitnil,omitempty" name:"LineName"`
+
+	// 解析线路 ID。
+	// 注意：此字段可能返回 null，表示取不到有效值。
+	LineId *string `json:"LineId,omitnil,omitempty" name:"LineId"`
+
+	// 当前线路在当前域名下是否可用。
+	Useful *bool `json:"Useful,omitnil,omitempty" name:"Useful"`
+
+	// 当前线路最低套餐等级要求。
+	// 注意：此字段可能返回 null，表示取不到有效值。
+	Grade *string `json:"Grade,omitnil,omitempty" name:"Grade"`
+
+	// 当前线路分类下的子线路列表。
+	// 注意：此字段可能返回 null，表示取不到有效值。
+	SubGroup []*LineItem `json:"SubGroup,omitnil,omitempty" name:"SubGroup"`
+
+	// 自定义线路分组内包含的线路。
+	// 注意：此字段可能返回 null，表示取不到有效值。
+	Lines []*string `json:"Lines,omitnil,omitempty" name:"Lines"`
 }
 
 type LockInfo struct {
 	// 域名 ID
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
 	// 域名解锁码
-	LockCode *string `json:"LockCode,omitnil" name:"LockCode"`
+	LockCode *string `json:"LockCode,omitnil,omitempty" name:"LockCode"`
 
 	// 域名自动解锁日期
-	LockEnd *string `json:"LockEnd,omitnil" name:"LockEnd"`
+	LockEnd *string `json:"LockEnd,omitnil,omitempty" name:"LockEnd"`
+}
+
+// Predefined struct for user
+type ModifyDomainCNAMESpeedupStatusBatchRequestParams struct {
+	// 域名列表
+	DomainList []*string `json:"DomainList,omitnil,omitempty" name:"DomainList"`
+
+	// 状态。ENABLE-开启；DISABLE-关闭。
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
+}
+
+type ModifyDomainCNAMESpeedupStatusBatchRequest struct {
+	*tchttp.BaseRequest
+	
+	// 域名列表
+	DomainList []*string `json:"DomainList,omitnil,omitempty" name:"DomainList"`
+
+	// 状态。ENABLE-开启；DISABLE-关闭。
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
+}
+
+func (r *ModifyDomainCNAMESpeedupStatusBatchRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *ModifyDomainCNAMESpeedupStatusBatchRequest) FromJsonString(s string) error {
+	f := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(s), &f); err != nil {
+		return err
+	}
+	delete(f, "DomainList")
+	delete(f, "Status")
+	if len(f) > 0 {
+		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "ModifyDomainCNAMESpeedupStatusBatchRequest has unknown keys!", "")
+	}
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type ModifyDomainCNAMESpeedupStatusBatchResponseParams struct {
+	// 任务 ID
+	JobId *uint64 `json:"JobId,omitnil,omitempty" name:"JobId"`
+
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
+}
+
+type ModifyDomainCNAMESpeedupStatusBatchResponse struct {
+	*tchttp.BaseResponse
+	Response *ModifyDomainCNAMESpeedupStatusBatchResponseParams `json:"Response"`
+}
+
+func (r *ModifyDomainCNAMESpeedupStatusBatchResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *ModifyDomainCNAMESpeedupStatusBatchResponse) FromJsonString(s string) error {
+	return json.Unmarshal([]byte(s), &r)
 }
 
 // Predefined struct for user
 type ModifyDomainCustomLineRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 修改后的自定义线路名称，如果不修改名称，需要和PreName保持一致
-	Name *string `json:"Name,omitnil" name:"Name"`
+	Name *string `json:"Name,omitnil,omitempty" name:"Name"`
 
 	// 自定义线路IP段，用-分割
-	Area *string `json:"Area,omitnil" name:"Area"`
+	Area *string `json:"Area,omitnil,omitempty" name:"Area"`
 
 	// 修改前的自定义线路名称
-	PreName *string `json:"PreName,omitnil" name:"PreName"`
+	PreName *string `json:"PreName,omitnil,omitempty" name:"PreName"`
 
 	// 域名ID，如果传了DomainId，系统将会忽略Domain参数，优先使用DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type ModifyDomainCustomLineRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 修改后的自定义线路名称，如果不修改名称，需要和PreName保持一致
-	Name *string `json:"Name,omitnil" name:"Name"`
+	Name *string `json:"Name,omitnil,omitempty" name:"Name"`
 
 	// 自定义线路IP段，用-分割
-	Area *string `json:"Area,omitnil" name:"Area"`
+	Area *string `json:"Area,omitnil,omitempty" name:"Area"`
 
 	// 修改前的自定义线路名称
-	PreName *string `json:"PreName,omitnil" name:"PreName"`
+	PreName *string `json:"PreName,omitnil,omitempty" name:"PreName"`
 
 	// 域名ID，如果传了DomainId，系统将会忽略Domain参数，优先使用DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *ModifyDomainCustomLineRequest) ToJsonString() string {
@@ -4872,8 +6570,8 @@ func (r *ModifyDomainCustomLineRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type ModifyDomainCustomLineResponseParams struct {
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type ModifyDomainCustomLineResponse struct {
@@ -4895,26 +6593,26 @@ func (r *ModifyDomainCustomLineResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type ModifyDomainLockRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 域名要锁定的天数，最多可锁定的天数可以通过获取域名权限接口获取。
-	LockDays *uint64 `json:"LockDays,omitnil" name:"LockDays"`
+	// 域名要锁定的天数，最多可锁定的天数可以通过DescribeDomainPurview接口获取。
+	LockDays *uint64 `json:"LockDays,omitnil,omitempty" name:"LockDays"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type ModifyDomainLockRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 域名要锁定的天数，最多可锁定的天数可以通过获取域名权限接口获取。
-	LockDays *uint64 `json:"LockDays,omitnil" name:"LockDays"`
+	// 域名要锁定的天数，最多可锁定的天数可以通过DescribeDomainPurview接口获取。
+	LockDays *uint64 `json:"LockDays,omitnil,omitempty" name:"LockDays"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *ModifyDomainLockRequest) ToJsonString() string {
@@ -4941,10 +6639,10 @@ func (r *ModifyDomainLockRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type ModifyDomainLockResponseParams struct {
 	// 域名锁定信息
-	LockInfo *LockInfo `json:"LockInfo,omitnil" name:"LockInfo"`
+	LockInfo *LockInfo `json:"LockInfo,omitnil,omitempty" name:"LockInfo"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type ModifyDomainLockResponse struct {
@@ -4966,26 +6664,26 @@ func (r *ModifyDomainLockResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type ModifyDomainOwnerRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 域名需要转入的账号，支持Uin或者邮箱格式
-	Account *string `json:"Account,omitnil" name:"Account"`
+	// 域名需要转入的账号Uin
+	Account *string `json:"Account,omitnil,omitempty" name:"Account"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type ModifyDomainOwnerRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 域名需要转入的账号，支持Uin或者邮箱格式
-	Account *string `json:"Account,omitnil" name:"Account"`
+	// 域名需要转入的账号Uin
+	Account *string `json:"Account,omitnil,omitempty" name:"Account"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *ModifyDomainOwnerRequest) ToJsonString() string {
@@ -5011,8 +6709,8 @@ func (r *ModifyDomainOwnerRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type ModifyDomainOwnerResponseParams struct {
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type ModifyDomainOwnerResponse struct {
@@ -5032,28 +6730,92 @@ func (r *ModifyDomainOwnerResponse) FromJsonString(s string) error {
 }
 
 // Predefined struct for user
+type ModifyDomainRecursiveStatusBatchRequestParams struct {
+	// 域名列表
+	DomainList []*string `json:"DomainList,omitnil,omitempty" name:"DomainList"`
+
+	// ENABLE-开启；DISABLE-关闭。
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
+}
+
+type ModifyDomainRecursiveStatusBatchRequest struct {
+	*tchttp.BaseRequest
+	
+	// 域名列表
+	DomainList []*string `json:"DomainList,omitnil,omitempty" name:"DomainList"`
+
+	// ENABLE-开启；DISABLE-关闭。
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
+}
+
+func (r *ModifyDomainRecursiveStatusBatchRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *ModifyDomainRecursiveStatusBatchRequest) FromJsonString(s string) error {
+	f := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(s), &f); err != nil {
+		return err
+	}
+	delete(f, "DomainList")
+	delete(f, "Status")
+	if len(f) > 0 {
+		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "ModifyDomainRecursiveStatusBatchRequest has unknown keys!", "")
+	}
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type ModifyDomainRecursiveStatusBatchResponseParams struct {
+	// 任务 ID
+	JobId *uint64 `json:"JobId,omitnil,omitempty" name:"JobId"`
+
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
+}
+
+type ModifyDomainRecursiveStatusBatchResponse struct {
+	*tchttp.BaseResponse
+	Response *ModifyDomainRecursiveStatusBatchResponseParams `json:"Response"`
+}
+
+func (r *ModifyDomainRecursiveStatusBatchResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *ModifyDomainRecursiveStatusBatchResponse) FromJsonString(s string) error {
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
 type ModifyDomainRemarkRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
 	// 域名备注，删除备注请提交空内容。
-	Remark *string `json:"Remark,omitnil" name:"Remark"`
+	Remark *string `json:"Remark,omitnil,omitempty" name:"Remark"`
 }
 
 type ModifyDomainRemarkRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
 	// 域名备注，删除备注请提交空内容。
-	Remark *string `json:"Remark,omitnil" name:"Remark"`
+	Remark *string `json:"Remark,omitnil,omitempty" name:"Remark"`
 }
 
 func (r *ModifyDomainRemarkRequest) ToJsonString() string {
@@ -5079,8 +6841,8 @@ func (r *ModifyDomainRemarkRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type ModifyDomainRemarkResponseParams struct {
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type ModifyDomainRemarkResponse struct {
@@ -5102,26 +6864,26 @@ func (r *ModifyDomainRemarkResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type ModifyDomainStatusRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 域名状态，”enable” 、”disable” 分别代表启用和暂停
-	Status *string `json:"Status,omitnil" name:"Status"`
+	// 域名状态，"enable"、"disable" 分别代表启用和暂停
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type ModifyDomainStatusRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 域名状态，”enable” 、”disable” 分别代表启用和暂停
-	Status *string `json:"Status,omitnil" name:"Status"`
+	// 域名状态，"enable"、"disable" 分别代表启用和暂停
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *ModifyDomainStatusRequest) ToJsonString() string {
@@ -5147,8 +6909,8 @@ func (r *ModifyDomainStatusRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type ModifyDomainStatusResponseParams struct {
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type ModifyDomainStatusResponse struct {
@@ -5168,28 +6930,96 @@ func (r *ModifyDomainStatusResponse) FromJsonString(s string) error {
 }
 
 // Predefined struct for user
+type ModifyDomainToGroupRequestParams struct {
+	// 域名
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 域名分组ID
+	GroupId *int64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
+
+	// 域名ID,域名ID，参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain
+	DomainId *int64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+}
+
+type ModifyDomainToGroupRequest struct {
+	*tchttp.BaseRequest
+	
+	// 域名
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 域名分组ID
+	GroupId *int64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
+
+	// 域名ID,域名ID，参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain
+	DomainId *int64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+}
+
+func (r *ModifyDomainToGroupRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *ModifyDomainToGroupRequest) FromJsonString(s string) error {
+	f := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(s), &f); err != nil {
+		return err
+	}
+	delete(f, "Domain")
+	delete(f, "GroupId")
+	delete(f, "DomainId")
+	if len(f) > 0 {
+		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "ModifyDomainToGroupRequest has unknown keys!", "")
+	}
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type ModifyDomainToGroupResponseParams struct {
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
+}
+
+type ModifyDomainToGroupResponse struct {
+	*tchttp.BaseResponse
+	Response *ModifyDomainToGroupResponseParams `json:"Response"`
+}
+
+func (r *ModifyDomainToGroupResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *ModifyDomainToGroupResponse) FromJsonString(s string) error {
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
 type ModifyDomainUnlockRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名解锁码，锁定的时候会返回。
-	LockCode *string `json:"LockCode,omitnil" name:"LockCode"`
+	LockCode *string `json:"LockCode,omitnil,omitempty" name:"LockCode"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type ModifyDomainUnlockRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名解锁码，锁定的时候会返回。
-	LockCode *string `json:"LockCode,omitnil" name:"LockCode"`
+	LockCode *string `json:"LockCode,omitnil,omitempty" name:"LockCode"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *ModifyDomainUnlockRequest) ToJsonString() string {
@@ -5215,8 +7045,8 @@ func (r *ModifyDomainUnlockRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type ModifyDomainUnlockResponseParams struct {
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type ModifyDomainUnlockResponse struct {
@@ -5238,56 +7068,56 @@ func (r *ModifyDomainUnlockResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type ModifyDynamicDNSRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 记录ID。 可以通过接口DescribeRecordList查到所有的解析记录列表以及对应的RecordId
-	RecordId *uint64 `json:"RecordId,omitnil" name:"RecordId"`
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
 
-	// 记录线路，通过 API 记录线路获得，中文，比如：默认。
-	RecordLine *string `json:"RecordLine,omitnil" name:"RecordLine"`
+	// 记录线路，中文，比如：默认。
+	RecordLine *string `json:"RecordLine,omitnil,omitempty" name:"RecordLine"`
 
-	// 记录值，如 IP : 200.200.200.200， CNAME : cname.dnspod.com.， MX : mail.dnspod.com.。
-	Value *string `json:"Value,omitnil" name:"Value"`
-
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
 	// 主机记录，如 www，如果不传，默认为 @。
-	SubDomain *string `json:"SubDomain,omitnil" name:"SubDomain"`
+	SubDomain *string `json:"SubDomain,omitnil,omitempty" name:"SubDomain"`
 
-	// 线路的 ID，通过 API 记录线路获得，英文字符串，比如：10=1。参数RecordLineId优先级高于RecordLine，如果同时传递二者，优先使用RecordLineId参数。
-	RecordLineId *string `json:"RecordLineId,omitnil" name:"RecordLineId"`
+	// 线路的 ID，英文字符串，比如：10=1。参数RecordLineId优先级高于RecordLine，如果同时传递二者，优先使用RecordLineId参数。
+	RecordLineId *string `json:"RecordLineId,omitnil,omitempty" name:"RecordLineId"`
+
+	// IP 地址，支持 IPv4、IPv6，例如 119.29.29.29 或者 2402:4e00::
+	Value *string `json:"Value,omitnil,omitempty" name:"Value"`
 
 	// TTL值，如果不传，默认为域名的TTL值。
-	Ttl *uint64 `json:"Ttl,omitnil" name:"Ttl"`
+	Ttl *uint64 `json:"Ttl,omitnil,omitempty" name:"Ttl"`
 }
 
 type ModifyDynamicDNSRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 记录ID。 可以通过接口DescribeRecordList查到所有的解析记录列表以及对应的RecordId
-	RecordId *uint64 `json:"RecordId,omitnil" name:"RecordId"`
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
 
-	// 记录线路，通过 API 记录线路获得，中文，比如：默认。
-	RecordLine *string `json:"RecordLine,omitnil" name:"RecordLine"`
+	// 记录线路，中文，比如：默认。
+	RecordLine *string `json:"RecordLine,omitnil,omitempty" name:"RecordLine"`
 
-	// 记录值，如 IP : 200.200.200.200， CNAME : cname.dnspod.com.， MX : mail.dnspod.com.。
-	Value *string `json:"Value,omitnil" name:"Value"`
-
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
 	// 主机记录，如 www，如果不传，默认为 @。
-	SubDomain *string `json:"SubDomain,omitnil" name:"SubDomain"`
+	SubDomain *string `json:"SubDomain,omitnil,omitempty" name:"SubDomain"`
 
-	// 线路的 ID，通过 API 记录线路获得，英文字符串，比如：10=1。参数RecordLineId优先级高于RecordLine，如果同时传递二者，优先使用RecordLineId参数。
-	RecordLineId *string `json:"RecordLineId,omitnil" name:"RecordLineId"`
+	// 线路的 ID，英文字符串，比如：10=1。参数RecordLineId优先级高于RecordLine，如果同时传递二者，优先使用RecordLineId参数。
+	RecordLineId *string `json:"RecordLineId,omitnil,omitempty" name:"RecordLineId"`
+
+	// IP 地址，支持 IPv4、IPv6，例如 119.29.29.29 或者 2402:4e00::
+	Value *string `json:"Value,omitnil,omitempty" name:"Value"`
 
 	// TTL值，如果不传，默认为域名的TTL值。
-	Ttl *uint64 `json:"Ttl,omitnil" name:"Ttl"`
+	Ttl *uint64 `json:"Ttl,omitnil,omitempty" name:"Ttl"`
 }
 
 func (r *ModifyDynamicDNSRequest) ToJsonString() string {
@@ -5305,10 +7135,10 @@ func (r *ModifyDynamicDNSRequest) FromJsonString(s string) error {
 	delete(f, "Domain")
 	delete(f, "RecordId")
 	delete(f, "RecordLine")
-	delete(f, "Value")
 	delete(f, "DomainId")
 	delete(f, "SubDomain")
 	delete(f, "RecordLineId")
+	delete(f, "Value")
 	delete(f, "Ttl")
 	if len(f) > 0 {
 		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "ModifyDynamicDNSRequest has unknown keys!", "")
@@ -5319,10 +7149,10 @@ func (r *ModifyDynamicDNSRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type ModifyDynamicDNSResponseParams struct {
 	// 记录ID
-	RecordId *uint64 `json:"RecordId,omitnil" name:"RecordId"`
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type ModifyDynamicDNSResponse struct {
@@ -5342,22 +7172,104 @@ func (r *ModifyDynamicDNSResponse) FromJsonString(s string) error {
 }
 
 // Predefined struct for user
+type ModifyLineGroupRequestParams struct {
+	// 自定义线路分组的名称。
+	Name *string `json:"Name,omitnil,omitempty" name:"Name"`
+
+	// 自定义线路分组包含的线路列表，包含多个线路时用英文逗号分隔。例如，铁通,奇虎
+	Lines *string `json:"Lines,omitnil,omitempty" name:"Lines"`
+
+	// 域名
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 自定义线路分组ID
+	LineGroupId *uint64 `json:"LineGroupId,omitnil,omitempty" name:"LineGroupId"`
+
+	// 域名ID，如果传了DomainId，系统将会忽略Domain参数，优先使用DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+}
+
+type ModifyLineGroupRequest struct {
+	*tchttp.BaseRequest
+	
+	// 自定义线路分组的名称。
+	Name *string `json:"Name,omitnil,omitempty" name:"Name"`
+
+	// 自定义线路分组包含的线路列表，包含多个线路时用英文逗号分隔。例如，铁通,奇虎
+	Lines *string `json:"Lines,omitnil,omitempty" name:"Lines"`
+
+	// 域名
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 自定义线路分组ID
+	LineGroupId *uint64 `json:"LineGroupId,omitnil,omitempty" name:"LineGroupId"`
+
+	// 域名ID，如果传了DomainId，系统将会忽略Domain参数，优先使用DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+}
+
+func (r *ModifyLineGroupRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *ModifyLineGroupRequest) FromJsonString(s string) error {
+	f := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(s), &f); err != nil {
+		return err
+	}
+	delete(f, "Name")
+	delete(f, "Lines")
+	delete(f, "Domain")
+	delete(f, "LineGroupId")
+	delete(f, "DomainId")
+	if len(f) > 0 {
+		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "ModifyLineGroupRequest has unknown keys!", "")
+	}
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type ModifyLineGroupResponseParams struct {
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
+}
+
+type ModifyLineGroupResponse struct {
+	*tchttp.BaseResponse
+	Response *ModifyLineGroupResponseParams `json:"Response"`
+}
+
+func (r *ModifyLineGroupResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *ModifyLineGroupResponse) FromJsonString(s string) error {
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
 type ModifyPackageAutoRenewRequestParams struct {
-	// 资源ID。可以在控制台查看所有的资源
-	ResourceId *string `json:"ResourceId,omitnil" name:"ResourceId"`
+	// 计费资源ID
+	ResourceId *string `json:"ResourceId,omitnil,omitempty" name:"ResourceId"`
 
 	// enable 开启自动续费；disable 关闭自动续费
-	Status *string `json:"Status,omitnil" name:"Status"`
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 }
 
 type ModifyPackageAutoRenewRequest struct {
 	*tchttp.BaseRequest
 	
-	// 资源ID。可以在控制台查看所有的资源
-	ResourceId *string `json:"ResourceId,omitnil" name:"ResourceId"`
+	// 计费资源ID
+	ResourceId *string `json:"ResourceId,omitnil,omitempty" name:"ResourceId"`
 
 	// enable 开启自动续费；disable 关闭自动续费
-	Status *string `json:"Status,omitnil" name:"Status"`
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 }
 
 func (r *ModifyPackageAutoRenewRequest) ToJsonString() string {
@@ -5382,8 +7294,8 @@ func (r *ModifyPackageAutoRenewRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type ModifyPackageAutoRenewResponseParams struct {
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type ModifyPackageAutoRenewResponse struct {
@@ -5402,74 +7314,144 @@ func (r *ModifyPackageAutoRenewResponse) FromJsonString(s string) error {
 	return json.Unmarshal([]byte(s), &r)
 }
 
+// Predefined struct for user
+type ModifyPackageDomainRequestParams struct {
+	// 操作类型：change: 套餐换域名；unbind: 解绑套餐域名；bind: 套餐绑定域名。
+	Operation *string `json:"Operation,omitnil,omitempty" name:"Operation"`
+
+	// 域名ID。Operation为change时必传，代表更换前的域名。
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+
+	// 域名ID。Operation为change或bind时必传，代表更换后或要绑定的域名。
+	NewDomainId *uint64 `json:"NewDomainId,omitnil,omitempty" name:"NewDomainId"`
+
+	// 套餐资源ID。Operation为bind或unbind时必传，代表将要操作的套餐资源。
+	ResourceId *string `json:"ResourceId,omitnil,omitempty" name:"ResourceId"`
+}
+
+type ModifyPackageDomainRequest struct {
+	*tchttp.BaseRequest
+	
+	// 操作类型：change: 套餐换域名；unbind: 解绑套餐域名；bind: 套餐绑定域名。
+	Operation *string `json:"Operation,omitnil,omitempty" name:"Operation"`
+
+	// 域名ID。Operation为change时必传，代表更换前的域名。
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+
+	// 域名ID。Operation为change或bind时必传，代表更换后或要绑定的域名。
+	NewDomainId *uint64 `json:"NewDomainId,omitnil,omitempty" name:"NewDomainId"`
+
+	// 套餐资源ID。Operation为bind或unbind时必传，代表将要操作的套餐资源。
+	ResourceId *string `json:"ResourceId,omitnil,omitempty" name:"ResourceId"`
+}
+
+func (r *ModifyPackageDomainRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *ModifyPackageDomainRequest) FromJsonString(s string) error {
+	f := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(s), &f); err != nil {
+		return err
+	}
+	delete(f, "Operation")
+	delete(f, "DomainId")
+	delete(f, "NewDomainId")
+	delete(f, "ResourceId")
+	if len(f) > 0 {
+		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "ModifyPackageDomainRequest has unknown keys!", "")
+	}
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type ModifyPackageDomainResponseParams struct {
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
+}
+
+type ModifyPackageDomainResponse struct {
+	*tchttp.BaseResponse
+	Response *ModifyPackageDomainResponseParams `json:"Response"`
+}
+
+func (r *ModifyPackageDomainResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *ModifyPackageDomainResponse) FromJsonString(s string) error {
+	return json.Unmarshal([]byte(s), &r)
+}
+
 type ModifyRecordBatchDetail struct {
 	// 见RecordInfoBatchModify
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	RecordList []*BatchRecordInfo `json:"RecordList,omitnil" name:"RecordList"`
+	RecordList []*BatchRecordInfo `json:"RecordList,omitnil,omitempty" name:"RecordList"`
 
 	// 任务编号
-	Id *uint64 `json:"Id,omitnil" name:"Id"`
+	Id *uint64 `json:"Id,omitnil,omitempty" name:"Id"`
 
 	// 域名
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 域名等级
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	DomainGrade *string `json:"DomainGrade,omitnil" name:"DomainGrade"`
+	DomainGrade *string `json:"DomainGrade,omitnil,omitempty" name:"DomainGrade"`
 
 	// 错误信息
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	ErrMsg *string `json:"ErrMsg,omitnil" name:"ErrMsg"`
+	ErrMsg *string `json:"ErrMsg,omitnil,omitempty" name:"ErrMsg"`
 
 	// 该条任务运行状态
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	Status *string `json:"Status,omitnil" name:"Status"`
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 
 	// 操作类型
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Operation *string `json:"Operation,omitnil" name:"Operation"`
+	Operation *string `json:"Operation,omitnil,omitempty" name:"Operation"`
 
 	// 域名ID
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 // Predefined struct for user
 type ModifyRecordBatchRequestParams struct {
-	// 记录ID数组。可以通过接口DescribeRecordList查到所有的解析记录列表以及对应的RecordId
-	RecordIdList []*uint64 `json:"RecordIdList,omitnil" name:"RecordIdList"`
+	// <p>记录ID数组。可以通过接口DescribeRecordList查到所有的解析记录列表以及对应的RecordId。单次最多修改5000条记录。</p><p>取值参考：<a href="https://cloud.tencent.com/document/api/1427/56166">DescribeRecordList</a></p>
+	RecordIdList []*uint64 `json:"RecordIdList,omitnil,omitempty" name:"RecordIdList"`
 
-	// 要修改的字段，可选值为 [“sub_domain”、”record_type”、”area”、”value”、”mx”、”ttl”、”status”] 中的某一个。
-	Change *string `json:"Change,omitnil" name:"Change"`
+	// <p>要修改的字段，可选值为 [“sub_domain”、”record_type”、”area”、”value”、”mx”、”ttl”、”status”] 中的某一个。</p>
+	Change *string `json:"Change,omitnil,omitempty" name:"Change"`
 
-	// 修改为，具体依赖 change 字段，必填参数。
-	ChangeTo *string `json:"ChangeTo,omitnil" name:"ChangeTo"`
+	// <p>修改为，具体依赖 change 字段，必填参数。</p>
+	ChangeTo *string `json:"ChangeTo,omitnil,omitempty" name:"ChangeTo"`
 
-	// 要修改到的记录值，仅当 change 字段为 “record_type” 时为必填参数。
-	Value *string `json:"Value,omitnil" name:"Value"`
+	// <p>要修改到的记录值，仅当 change 字段为 “record_type” 时为必填参数。</p>
+	Value *string `json:"Value,omitnil,omitempty" name:"Value"`
 
-	// MX记录优先级，仅当修改为 MX 记录时为必填参数。
-	MX *string `json:"MX,omitnil" name:"MX"`
+	// <p>MX 优先级，当记录类型是 MX、HTTPS、SVCB 时必填，范围0-65535。</p>
+	MX *string `json:"MX,omitnil,omitempty" name:"MX"`
 }
 
 type ModifyRecordBatchRequest struct {
 	*tchttp.BaseRequest
 	
-	// 记录ID数组。可以通过接口DescribeRecordList查到所有的解析记录列表以及对应的RecordId
-	RecordIdList []*uint64 `json:"RecordIdList,omitnil" name:"RecordIdList"`
+	// <p>记录ID数组。可以通过接口DescribeRecordList查到所有的解析记录列表以及对应的RecordId。单次最多修改5000条记录。</p><p>取值参考：<a href="https://cloud.tencent.com/document/api/1427/56166">DescribeRecordList</a></p>
+	RecordIdList []*uint64 `json:"RecordIdList,omitnil,omitempty" name:"RecordIdList"`
 
-	// 要修改的字段，可选值为 [“sub_domain”、”record_type”、”area”、”value”、”mx”、”ttl”、”status”] 中的某一个。
-	Change *string `json:"Change,omitnil" name:"Change"`
+	// <p>要修改的字段，可选值为 [“sub_domain”、”record_type”、”area”、”value”、”mx”、”ttl”、”status”] 中的某一个。</p>
+	Change *string `json:"Change,omitnil,omitempty" name:"Change"`
 
-	// 修改为，具体依赖 change 字段，必填参数。
-	ChangeTo *string `json:"ChangeTo,omitnil" name:"ChangeTo"`
+	// <p>修改为，具体依赖 change 字段，必填参数。</p>
+	ChangeTo *string `json:"ChangeTo,omitnil,omitempty" name:"ChangeTo"`
 
-	// 要修改到的记录值，仅当 change 字段为 “record_type” 时为必填参数。
-	Value *string `json:"Value,omitnil" name:"Value"`
+	// <p>要修改到的记录值，仅当 change 字段为 “record_type” 时为必填参数。</p>
+	Value *string `json:"Value,omitnil,omitempty" name:"Value"`
 
-	// MX记录优先级，仅当修改为 MX 记录时为必填参数。
-	MX *string `json:"MX,omitnil" name:"MX"`
+	// <p>MX 优先级，当记录类型是 MX、HTTPS、SVCB 时必填，范围0-65535。</p>
+	MX *string `json:"MX,omitnil,omitempty" name:"MX"`
 }
 
 func (r *ModifyRecordBatchRequest) ToJsonString() string {
@@ -5497,14 +7479,14 @@ func (r *ModifyRecordBatchRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type ModifyRecordBatchResponseParams struct {
-	// 批量任务ID
-	JobId *uint64 `json:"JobId,omitnil" name:"JobId"`
+	// <p>批量任务ID</p>
+	JobId *uint64 `json:"JobId,omitnil,omitempty" name:"JobId"`
 
-	// 见modifyRecordBatchDetail
-	DetailList []*ModifyRecordBatchDetail `json:"DetailList,omitnil" name:"DetailList"`
+	// <p>见ModifyRecordBatchDetail</p>
+	DetailList []*ModifyRecordBatchDetail `json:"DetailList,omitnil,omitempty" name:"DetailList"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type ModifyRecordBatchResponse struct {
@@ -5524,34 +7506,91 @@ func (r *ModifyRecordBatchResponse) FromJsonString(s string) error {
 }
 
 // Predefined struct for user
+type ModifyRecordBatchV3RequestParams struct {
+	// 需要修改的记录列表
+	ModifyRecordList []*ModifyRecordItem `json:"ModifyRecordList,omitnil,omitempty" name:"ModifyRecordList"`
+}
+
+type ModifyRecordBatchV3Request struct {
+	*tchttp.BaseRequest
+	
+	// 需要修改的记录列表
+	ModifyRecordList []*ModifyRecordItem `json:"ModifyRecordList,omitnil,omitempty" name:"ModifyRecordList"`
+}
+
+func (r *ModifyRecordBatchV3Request) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *ModifyRecordBatchV3Request) FromJsonString(s string) error {
+	f := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(s), &f); err != nil {
+		return err
+	}
+	delete(f, "ModifyRecordList")
+	if len(f) > 0 {
+		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "ModifyRecordBatchV3Request has unknown keys!", "")
+	}
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type ModifyRecordBatchV3ResponseParams struct {
+	// 批量任务ID
+	JobId *uint64 `json:"JobId,omitnil,omitempty" name:"JobId"`
+
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
+}
+
+type ModifyRecordBatchV3Response struct {
+	*tchttp.BaseResponse
+	Response *ModifyRecordBatchV3ResponseParams `json:"Response"`
+}
+
+func (r *ModifyRecordBatchV3Response) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *ModifyRecordBatchV3Response) FromJsonString(s string) error {
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
 type ModifyRecordFieldsRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 记录 ID 。
-	RecordId *uint64 `json:"RecordId,omitnil" name:"RecordId"`
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
 
 	// 要修改的记录属性和值，支持：sub_domain，record_line，record_line_id，record_type，value，ttl，status，mx，weight
-	FieldList []*KeyValue `json:"FieldList,omitnil" name:"FieldList"`
+	FieldList []*KeyValue `json:"FieldList,omitnil,omitempty" name:"FieldList"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type ModifyRecordFieldsRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 记录 ID 。
-	RecordId *uint64 `json:"RecordId,omitnil" name:"RecordId"`
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
 
 	// 要修改的记录属性和值，支持：sub_domain，record_line，record_line_id，record_type，value，ttl，status，mx，weight
-	FieldList []*KeyValue `json:"FieldList,omitnil" name:"FieldList"`
+	FieldList []*KeyValue `json:"FieldList,omitnil,omitempty" name:"FieldList"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *ModifyRecordFieldsRequest) ToJsonString() string {
@@ -5579,10 +7618,10 @@ func (r *ModifyRecordFieldsRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type ModifyRecordFieldsResponseParams struct {
 	// 记录ID
-	RecordId *uint64 `json:"RecordId,omitnil" name:"RecordId"`
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type ModifyRecordFieldsResponse struct {
@@ -5604,32 +7643,32 @@ func (r *ModifyRecordFieldsResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type ModifyRecordGroupRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 分组名称
-	GroupName *string `json:"GroupName,omitnil" name:"GroupName"`
+	GroupName *string `json:"GroupName,omitnil,omitempty" name:"GroupName"`
 
-	// 要修改的分组 ID
-	GroupId *uint64 `json:"GroupId,omitnil" name:"GroupId"`
+	// 要修改的分组 ID，可通过DescribeRecordGroupList接口获取所有记录分组
+	GroupId *uint64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type ModifyRecordGroupRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 分组名称
-	GroupName *string `json:"GroupName,omitnil" name:"GroupName"`
+	GroupName *string `json:"GroupName,omitnil,omitempty" name:"GroupName"`
 
-	// 要修改的分组 ID
-	GroupId *uint64 `json:"GroupId,omitnil" name:"GroupId"`
+	// 要修改的分组 ID，可通过DescribeRecordGroupList接口获取所有记录分组
+	GroupId *uint64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *ModifyRecordGroupRequest) ToJsonString() string {
@@ -5657,10 +7696,10 @@ func (r *ModifyRecordGroupRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type ModifyRecordGroupResponseParams struct {
 	// 修改的分组 ID
-	GroupId *uint64 `json:"GroupId,omitnil" name:"GroupId"`
+	GroupId *uint64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type ModifyRecordGroupResponse struct {
@@ -5679,35 +7718,67 @@ func (r *ModifyRecordGroupResponse) FromJsonString(s string) error {
 	return json.Unmarshal([]byte(s), &r)
 }
 
+type ModifyRecordItem struct {
+	// 记录 ID
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
+
+	// 主机记录
+	SubDomain *string `json:"SubDomain,omitnil,omitempty" name:"SubDomain"`
+
+	// 记录类型
+	RecordType *string `json:"RecordType,omitnil,omitempty" name:"RecordType"`
+
+	// 记录线路
+	RecordLine *string `json:"RecordLine,omitnil,omitempty" name:"RecordLine"`
+
+	// 记录值
+	Value *string `json:"Value,omitnil,omitempty" name:"Value"`
+
+	// 解析记录状态 1：开启 0：暂停
+	Enabled *string `json:"Enabled,omitnil,omitempty" name:"Enabled"`
+
+	// 备注信息
+	Remark *string `json:"Remark,omitnil,omitempty" name:"Remark"`
+
+	// 权重
+	Weight *uint64 `json:"Weight,omitnil,omitempty" name:"Weight"`
+
+	// MX优先级
+	MX *uint64 `json:"MX,omitnil,omitempty" name:"MX"`
+
+	// TTL缓存时间
+	TTL *uint64 `json:"TTL,omitnil,omitempty" name:"TTL"`
+}
+
 // Predefined struct for user
 type ModifyRecordRemarkRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 记录 ID 。可以通过接口DescribeRecordList查到所有的解析记录列表以及对应的RecordId
-	RecordId *uint64 `json:"RecordId,omitnil" name:"RecordId"`
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
 	// 解析记录备注，删除备注请提交空内容。
-	Remark *string `json:"Remark,omitnil" name:"Remark"`
+	Remark *string `json:"Remark,omitnil,omitempty" name:"Remark"`
 }
 
 type ModifyRecordRemarkRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 记录 ID 。可以通过接口DescribeRecordList查到所有的解析记录列表以及对应的RecordId
-	RecordId *uint64 `json:"RecordId,omitnil" name:"RecordId"`
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
 	// 解析记录备注，删除备注请提交空内容。
-	Remark *string `json:"Remark,omitnil" name:"Remark"`
+	Remark *string `json:"Remark,omitnil,omitempty" name:"Remark"`
 }
 
 func (r *ModifyRecordRemarkRequest) ToJsonString() string {
@@ -5734,8 +7805,8 @@ func (r *ModifyRecordRemarkRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type ModifyRecordRemarkResponseParams struct {
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type ModifyRecordRemarkResponse struct {
@@ -5756,81 +7827,93 @@ func (r *ModifyRecordRemarkResponse) FromJsonString(s string) error {
 
 // Predefined struct for user
 type ModifyRecordRequestParams struct {
-	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	// <p>域名</p>
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 记录类型，通过 API 记录类型获得，大写英文，比如：A 。
-	RecordType *string `json:"RecordType,omitnil" name:"RecordType"`
+	// <p>记录类型，可通过接口DescribeRecordType获得，大写英文，比如：A 。</p>
+	RecordType *string `json:"RecordType,omitnil,omitempty" name:"RecordType"`
 
-	// 记录线路，通过 API 记录线路获得，中文，比如：默认。
-	RecordLine *string `json:"RecordLine,omitnil" name:"RecordLine"`
+	// <p>记录线路，可以通过接口DescribeRecordLineList查看当前域名允许的线路信息。比如：默认。</p>
+	RecordLine *string `json:"RecordLine,omitnil,omitempty" name:"RecordLine"`
 
-	// 记录值，如 IP : 200.200.200.200， CNAME : cname.dnspod.com.， MX : mail.dnspod.com.。
-	Value *string `json:"Value,omitnil" name:"Value"`
+	// <p>记录值，如 IP : 200.200.200.200， CNAME : cname.dnspod.com.， MX : mail.dnspod.com.。</p>
+	Value *string `json:"Value,omitnil,omitempty" name:"Value"`
 
-	// 记录 ID 。可以通过接口DescribeRecordList查到所有的解析记录列表以及对应的RecordId
-	RecordId *uint64 `json:"RecordId,omitnil" name:"RecordId"`
+	// <p>记录 ID 。可以通过接口DescribeRecordList查到所有的解析记录列表以及对应的RecordId</p>
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// <p>域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId</p>
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
-	// 主机记录，如 www，如果不传，默认为 @。
-	SubDomain *string `json:"SubDomain,omitnil" name:"SubDomain"`
+	// <p>主机记录，如 www，如果不传，默认为 @。</p>
+	SubDomain *string `json:"SubDomain,omitnil,omitempty" name:"SubDomain"`
 
-	// 线路的 ID，通过 API 记录线路获得，英文字符串，比如：10=1。参数RecordLineId优先级高于RecordLine，如果同时传递二者，优先使用RecordLineId参数。
-	RecordLineId *string `json:"RecordLineId,omitnil" name:"RecordLineId"`
+	// <p>线路的 ID，可以通过接口DescribeRecordLineList查看当前域名允许的线路信息，比如：10=1。参数RecordLineId优先级高于RecordLine，如果同时传递二者，优先使用RecordLineId参数。</p>
+	RecordLineId *string `json:"RecordLineId,omitnil,omitempty" name:"RecordLineId"`
 
-	// MX 优先级，当记录类型是 MX 时有效，范围1-20，MX 记录时必选。
-	MX *uint64 `json:"MX,omitnil" name:"MX"`
+	// <p>MX 优先级，当记录类型是 MX、HTTPS、SVCB 时必填，范围0-65535。</p><p>取值范围：[0, 65535]</p>
+	MX *uint64 `json:"MX,omitnil,omitempty" name:"MX"`
 
-	// TTL，范围1-604800，不同等级域名最小值不同。
-	TTL *uint64 `json:"TTL,omitnil" name:"TTL"`
+	// <p>TTL，范围1-604800，不同等级域名最小值不同。</p>
+	TTL *uint64 `json:"TTL,omitnil,omitempty" name:"TTL"`
 
-	// 权重信息，0到100的整数。仅企业 VIP 域名可用，0 表示关闭，不传该参数，表示不设置权重信息。
-	Weight *uint64 `json:"Weight,omitnil" name:"Weight"`
+	// <p>权重信息，0到100的整数。0 表示关闭，不传该参数，表示不设置权重信息。</p>
+	Weight *uint64 `json:"Weight,omitnil,omitempty" name:"Weight"`
 
-	// 记录初始状态，取值范围为 ENABLE 和 DISABLE 。默认为 ENABLE ，如果传入 DISABLE，解析不会生效，也不会验证负载均衡的限制。
-	Status *string `json:"Status,omitnil" name:"Status"`
+	// <p>记录初始状态，取值范围为 ENABLE 和 DISABLE 。默认为 ENABLE ，如果传入 DISABLE，解析不会生效，也不会验证负载均衡的限制。</p>
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
+
+	// <p>记录的备注信息。传空删除备注。</p>
+	Remark *string `json:"Remark,omitnil,omitempty" name:"Remark"`
+
+	// <p>开启DNSSEC时，强制将其它记录修改为CNAME/URL记录</p>
+	DnssecConflictMode *string `json:"DnssecConflictMode,omitnil,omitempty" name:"DnssecConflictMode"`
 }
 
 type ModifyRecordRequest struct {
 	*tchttp.BaseRequest
 	
-	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	// <p>域名</p>
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 记录类型，通过 API 记录类型获得，大写英文，比如：A 。
-	RecordType *string `json:"RecordType,omitnil" name:"RecordType"`
+	// <p>记录类型，可通过接口DescribeRecordType获得，大写英文，比如：A 。</p>
+	RecordType *string `json:"RecordType,omitnil,omitempty" name:"RecordType"`
 
-	// 记录线路，通过 API 记录线路获得，中文，比如：默认。
-	RecordLine *string `json:"RecordLine,omitnil" name:"RecordLine"`
+	// <p>记录线路，可以通过接口DescribeRecordLineList查看当前域名允许的线路信息。比如：默认。</p>
+	RecordLine *string `json:"RecordLine,omitnil,omitempty" name:"RecordLine"`
 
-	// 记录值，如 IP : 200.200.200.200， CNAME : cname.dnspod.com.， MX : mail.dnspod.com.。
-	Value *string `json:"Value,omitnil" name:"Value"`
+	// <p>记录值，如 IP : 200.200.200.200， CNAME : cname.dnspod.com.， MX : mail.dnspod.com.。</p>
+	Value *string `json:"Value,omitnil,omitempty" name:"Value"`
 
-	// 记录 ID 。可以通过接口DescribeRecordList查到所有的解析记录列表以及对应的RecordId
-	RecordId *uint64 `json:"RecordId,omitnil" name:"RecordId"`
+	// <p>记录 ID 。可以通过接口DescribeRecordList查到所有的解析记录列表以及对应的RecordId</p>
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// <p>域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId</p>
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
-	// 主机记录，如 www，如果不传，默认为 @。
-	SubDomain *string `json:"SubDomain,omitnil" name:"SubDomain"`
+	// <p>主机记录，如 www，如果不传，默认为 @。</p>
+	SubDomain *string `json:"SubDomain,omitnil,omitempty" name:"SubDomain"`
 
-	// 线路的 ID，通过 API 记录线路获得，英文字符串，比如：10=1。参数RecordLineId优先级高于RecordLine，如果同时传递二者，优先使用RecordLineId参数。
-	RecordLineId *string `json:"RecordLineId,omitnil" name:"RecordLineId"`
+	// <p>线路的 ID，可以通过接口DescribeRecordLineList查看当前域名允许的线路信息，比如：10=1。参数RecordLineId优先级高于RecordLine，如果同时传递二者，优先使用RecordLineId参数。</p>
+	RecordLineId *string `json:"RecordLineId,omitnil,omitempty" name:"RecordLineId"`
 
-	// MX 优先级，当记录类型是 MX 时有效，范围1-20，MX 记录时必选。
-	MX *uint64 `json:"MX,omitnil" name:"MX"`
+	// <p>MX 优先级，当记录类型是 MX、HTTPS、SVCB 时必填，范围0-65535。</p><p>取值范围：[0, 65535]</p>
+	MX *uint64 `json:"MX,omitnil,omitempty" name:"MX"`
 
-	// TTL，范围1-604800，不同等级域名最小值不同。
-	TTL *uint64 `json:"TTL,omitnil" name:"TTL"`
+	// <p>TTL，范围1-604800，不同等级域名最小值不同。</p>
+	TTL *uint64 `json:"TTL,omitnil,omitempty" name:"TTL"`
 
-	// 权重信息，0到100的整数。仅企业 VIP 域名可用，0 表示关闭，不传该参数，表示不设置权重信息。
-	Weight *uint64 `json:"Weight,omitnil" name:"Weight"`
+	// <p>权重信息，0到100的整数。0 表示关闭，不传该参数，表示不设置权重信息。</p>
+	Weight *uint64 `json:"Weight,omitnil,omitempty" name:"Weight"`
 
-	// 记录初始状态，取值范围为 ENABLE 和 DISABLE 。默认为 ENABLE ，如果传入 DISABLE，解析不会生效，也不会验证负载均衡的限制。
-	Status *string `json:"Status,omitnil" name:"Status"`
+	// <p>记录初始状态，取值范围为 ENABLE 和 DISABLE 。默认为 ENABLE ，如果传入 DISABLE，解析不会生效，也不会验证负载均衡的限制。</p>
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
+
+	// <p>记录的备注信息。传空删除备注。</p>
+	Remark *string `json:"Remark,omitnil,omitempty" name:"Remark"`
+
+	// <p>开启DNSSEC时，强制将其它记录修改为CNAME/URL记录</p>
+	DnssecConflictMode *string `json:"DnssecConflictMode,omitnil,omitempty" name:"DnssecConflictMode"`
 }
 
 func (r *ModifyRecordRequest) ToJsonString() string {
@@ -5857,6 +7940,8 @@ func (r *ModifyRecordRequest) FromJsonString(s string) error {
 	delete(f, "TTL")
 	delete(f, "Weight")
 	delete(f, "Status")
+	delete(f, "Remark")
+	delete(f, "DnssecConflictMode")
 	if len(f) > 0 {
 		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "ModifyRecordRequest has unknown keys!", "")
 	}
@@ -5865,11 +7950,11 @@ func (r *ModifyRecordRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type ModifyRecordResponseParams struct {
-	// 记录ID
-	RecordId *uint64 `json:"RecordId,omitnil" name:"RecordId"`
+	// <p>记录ID</p>
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type ModifyRecordResponse struct {
@@ -5891,32 +7976,32 @@ func (r *ModifyRecordResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type ModifyRecordStatusRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 记录 ID 。可以通过接口DescribeRecordList查到所有的解析记录列表以及对应的RecordId
-	RecordId *uint64 `json:"RecordId,omitnil" name:"RecordId"`
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
 
 	// 记录的状态。取值范围为 ENABLE 和 DISABLE。如果传入 DISABLE，解析不会生效，也不会验证负载均衡的限制。
-	Status *string `json:"Status,omitnil" name:"Status"`
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type ModifyRecordStatusRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 记录 ID 。可以通过接口DescribeRecordList查到所有的解析记录列表以及对应的RecordId
-	RecordId *uint64 `json:"RecordId,omitnil" name:"RecordId"`
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
 
 	// 记录的状态。取值范围为 ENABLE 和 DISABLE。如果传入 DISABLE，解析不会生效，也不会验证负载均衡的限制。
-	Status *string `json:"Status,omitnil" name:"Status"`
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *ModifyRecordStatusRequest) ToJsonString() string {
@@ -5944,10 +8029,10 @@ func (r *ModifyRecordStatusRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type ModifyRecordStatusResponseParams struct {
 	// 记录ID。
-	RecordId *uint64 `json:"RecordId,omitnil" name:"RecordId"`
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type ModifyRecordStatusResponse struct {
@@ -5969,32 +8054,32 @@ func (r *ModifyRecordStatusResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type ModifyRecordToGroupRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 分组 ID
-	GroupId *uint64 `json:"GroupId,omitnil" name:"GroupId"`
+	// 分组 ID，可通过DescribeRecordGroupList接口获取所有记录分组
+	GroupId *uint64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
 
-	// 记录 ID，多个 ID 用竖线“|”分割
-	RecordId *string `json:"RecordId,omitnil" name:"RecordId"`
+	// 记录 ID，多个 ID 用竖线“|”分割，可以通过接口DescribeRecordList查到所有的解析记录列表以及对应的RecordId
+	RecordId *string `json:"RecordId,omitnil,omitempty" name:"RecordId"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type ModifyRecordToGroupRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 分组 ID
-	GroupId *uint64 `json:"GroupId,omitnil" name:"GroupId"`
+	// 分组 ID，可通过DescribeRecordGroupList接口获取所有记录分组
+	GroupId *uint64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
 
-	// 记录 ID，多个 ID 用竖线“|”分割
-	RecordId *string `json:"RecordId,omitnil" name:"RecordId"`
+	// 记录 ID，多个 ID 用竖线“|”分割，可以通过接口DescribeRecordList查到所有的解析记录列表以及对应的RecordId
+	RecordId *string `json:"RecordId,omitnil,omitempty" name:"RecordId"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *ModifyRecordToGroupRequest) ToJsonString() string {
@@ -6021,8 +8106,8 @@ func (r *ModifyRecordToGroupRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type ModifyRecordToGroupResponseParams struct {
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type ModifyRecordToGroupResponse struct {
@@ -6044,26 +8129,26 @@ func (r *ModifyRecordToGroupResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type ModifySnapshotConfigRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 备件间隔：空字符串-不备份，half_hour-每半小时，hourly-每小时，daily-每天，monthly-每月
-	Period *string `json:"Period,omitnil" name:"Period"`
+	Period *string `json:"Period,omitnil,omitempty" name:"Period"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type ModifySnapshotConfigRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 备件间隔：空字符串-不备份，half_hour-每半小时，hourly-每小时，daily-每天，monthly-每月
-	Period *string `json:"Period,omitnil" name:"Period"`
+	Period *string `json:"Period,omitnil,omitempty" name:"Period"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *ModifySnapshotConfigRequest) ToJsonString() string {
@@ -6089,8 +8174,8 @@ func (r *ModifySnapshotConfigRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type ModifySnapshotConfigResponseParams struct {
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type ModifySnapshotConfigResponse struct {
@@ -6112,38 +8197,38 @@ func (r *ModifySnapshotConfigResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type ModifySubdomainStatusRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 记录类型。允许的值为A、CNAME、MX、TXT、NS、AAAA、SPF、SRV、CAA、URL、URL1。若要传多个，用英文逗号分隔，例如A,TXT,CNAME。
-	RecordType *string `json:"RecordType,omitnil" name:"RecordType"`
+	RecordType *string `json:"RecordType,omitnil,omitempty" name:"RecordType"`
 
 	// 记录状态。允许的值为disable。
-	Status *string `json:"Status,omitnil" name:"Status"`
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
 	// 主机记录，如 www，如果不传，默认为 @。
-	SubDomain *string `json:"SubDomain,omitnil" name:"SubDomain"`
+	SubDomain *string `json:"SubDomain,omitnil,omitempty" name:"SubDomain"`
 }
 
 type ModifySubdomainStatusRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 记录类型。允许的值为A、CNAME、MX、TXT、NS、AAAA、SPF、SRV、CAA、URL、URL1。若要传多个，用英文逗号分隔，例如A,TXT,CNAME。
-	RecordType *string `json:"RecordType,omitnil" name:"RecordType"`
+	RecordType *string `json:"RecordType,omitnil,omitempty" name:"RecordType"`
 
 	// 记录状态。允许的值为disable。
-	Status *string `json:"Status,omitnil" name:"Status"`
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
 	// 主机记录，如 www，如果不传，默认为 @。
-	SubDomain *string `json:"SubDomain,omitnil" name:"SubDomain"`
+	SubDomain *string `json:"SubDomain,omitnil,omitempty" name:"SubDomain"`
 }
 
 func (r *ModifySubdomainStatusRequest) ToJsonString() string {
@@ -6171,8 +8256,8 @@ func (r *ModifySubdomainStatusRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type ModifySubdomainStatusResponseParams struct {
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type ModifySubdomainStatusResponse struct {
@@ -6192,22 +8277,142 @@ func (r *ModifySubdomainStatusResponse) FromJsonString(s string) error {
 }
 
 // Predefined struct for user
+type ModifyTXTRecordRequestParams struct {
+	// 域名
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 记录线路，通过 API 记录线路获得，中文，比如：默认。
+	RecordLine *string `json:"RecordLine,omitnil,omitempty" name:"RecordLine"`
+
+	// 记录值，如 IP : 200.200.200.200， CNAME : cname.dnspod.com.， MX : mail.dnspod.com.。
+	Value *string `json:"Value,omitnil,omitempty" name:"Value"`
+
+	// 记录 ID 。
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
+
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+
+	// 主机记录，如 www，如果不传，默认为 @。
+	SubDomain *string `json:"SubDomain,omitnil,omitempty" name:"SubDomain"`
+
+	// 线路的 ID，通过 API 记录线路获得，字符串，比如：10=1。参数RecordLineId优先级高于RecordLine，如果同时传递二者，优先使用RecordLineId参数。
+	RecordLineId *string `json:"RecordLineId,omitnil,omitempty" name:"RecordLineId"`
+
+	// TTL，范围1-604800，不同等级域名最小值不同。单位：秒
+	TTL *uint64 `json:"TTL,omitnil,omitempty" name:"TTL"`
+
+	// 记录初始状态，取值范围为 ENABLE 和 DISABLE 。默认为 ENABLE ，如果传入 DISABLE，解析不会生效，也不会验证负载均衡的限制。
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
+
+	// 记录的备注信息。传空删除备注。
+	Remark *string `json:"Remark,omitnil,omitempty" name:"Remark"`
+}
+
+type ModifyTXTRecordRequest struct {
+	*tchttp.BaseRequest
+	
+	// 域名
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 记录线路，通过 API 记录线路获得，中文，比如：默认。
+	RecordLine *string `json:"RecordLine,omitnil,omitempty" name:"RecordLine"`
+
+	// 记录值，如 IP : 200.200.200.200， CNAME : cname.dnspod.com.， MX : mail.dnspod.com.。
+	Value *string `json:"Value,omitnil,omitempty" name:"Value"`
+
+	// 记录 ID 。
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
+
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+
+	// 主机记录，如 www，如果不传，默认为 @。
+	SubDomain *string `json:"SubDomain,omitnil,omitempty" name:"SubDomain"`
+
+	// 线路的 ID，通过 API 记录线路获得，字符串，比如：10=1。参数RecordLineId优先级高于RecordLine，如果同时传递二者，优先使用RecordLineId参数。
+	RecordLineId *string `json:"RecordLineId,omitnil,omitempty" name:"RecordLineId"`
+
+	// TTL，范围1-604800，不同等级域名最小值不同。单位：秒
+	TTL *uint64 `json:"TTL,omitnil,omitempty" name:"TTL"`
+
+	// 记录初始状态，取值范围为 ENABLE 和 DISABLE 。默认为 ENABLE ，如果传入 DISABLE，解析不会生效，也不会验证负载均衡的限制。
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
+
+	// 记录的备注信息。传空删除备注。
+	Remark *string `json:"Remark,omitnil,omitempty" name:"Remark"`
+}
+
+func (r *ModifyTXTRecordRequest) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *ModifyTXTRecordRequest) FromJsonString(s string) error {
+	f := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(s), &f); err != nil {
+		return err
+	}
+	delete(f, "Domain")
+	delete(f, "RecordLine")
+	delete(f, "Value")
+	delete(f, "RecordId")
+	delete(f, "DomainId")
+	delete(f, "SubDomain")
+	delete(f, "RecordLineId")
+	delete(f, "TTL")
+	delete(f, "Status")
+	delete(f, "Remark")
+	if len(f) > 0 {
+		return tcerr.NewTencentCloudSDKError("ClientError.BuildRequestError", "ModifyTXTRecordRequest has unknown keys!", "")
+	}
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
+type ModifyTXTRecordResponseParams struct {
+	// 记录ID
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
+
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
+}
+
+type ModifyTXTRecordResponse struct {
+	*tchttp.BaseResponse
+	Response *ModifyTXTRecordResponseParams `json:"Response"`
+}
+
+func (r *ModifyTXTRecordResponse) ToJsonString() string {
+    b, _ := json.Marshal(r)
+    return string(b)
+}
+
+// FromJsonString It is highly **NOT** recommended to use this function
+// because it has no param check, nor strict type check
+func (r *ModifyTXTRecordResponse) FromJsonString(s string) error {
+	return json.Unmarshal([]byte(s), &r)
+}
+
+// Predefined struct for user
 type ModifyVasAutoRenewStatusRequestParams struct {
 	// 资源ID。可以从控制台查看所有的资源
-	ResourceId *string `json:"ResourceId,omitnil" name:"ResourceId"`
+	ResourceId *string `json:"ResourceId,omitnil,omitempty" name:"ResourceId"`
 
 	// enable 开启自动续费；disable 关闭自动续费
-	Status *string `json:"Status,omitnil" name:"Status"`
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 }
 
 type ModifyVasAutoRenewStatusRequest struct {
 	*tchttp.BaseRequest
 	
 	// 资源ID。可以从控制台查看所有的资源
-	ResourceId *string `json:"ResourceId,omitnil" name:"ResourceId"`
+	ResourceId *string `json:"ResourceId,omitnil,omitempty" name:"ResourceId"`
 
 	// enable 开启自动续费；disable 关闭自动续费
-	Status *string `json:"Status,omitnil" name:"Status"`
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 }
 
 func (r *ModifyVasAutoRenewStatusRequest) ToJsonString() string {
@@ -6232,8 +8437,8 @@ func (r *ModifyVasAutoRenewStatusRequest) FromJsonString(s string) error {
 
 // Predefined struct for user
 type ModifyVasAutoRenewStatusResponseParams struct {
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type ModifyVasAutoRenewStatusResponse struct {
@@ -6254,56 +8459,107 @@ func (r *ModifyVasAutoRenewStatusResponse) FromJsonString(s string) error {
 
 type PackageDetailItem struct {
 	// 套餐原价
-	RealPrice *uint64 `json:"RealPrice,omitnil" name:"RealPrice"`
+	RealPrice *uint64 `json:"RealPrice,omitnil,omitempty" name:"RealPrice"`
 
 	// 可更换域名次数
-	ChangedTimes *uint64 `json:"ChangedTimes,omitnil" name:"ChangedTimes"`
+	ChangedTimes *uint64 `json:"ChangedTimes,omitnil,omitempty" name:"ChangedTimes"`
 
 	// 允许设置的最小 TTL 值
-	MinTtl *uint64 `json:"MinTtl,omitnil" name:"MinTtl"`
+	MinTtl *uint64 `json:"MinTtl,omitnil,omitempty" name:"MinTtl"`
 
 	// 负载均衡数量
-	RecordRoll *uint64 `json:"RecordRoll,omitnil" name:"RecordRoll"`
+	RecordRoll *uint64 `json:"RecordRoll,omitnil,omitempty" name:"RecordRoll"`
 
 	// 子域名级数
-	SubDomainLevel *uint64 `json:"SubDomainLevel,omitnil" name:"SubDomainLevel"`
+	SubDomainLevel *uint64 `json:"SubDomainLevel,omitnil,omitempty" name:"SubDomainLevel"`
 
 	// 泛解析级数
-	MaxWildcard *uint64 `json:"MaxWildcard,omitnil" name:"MaxWildcard"`
+	MaxWildcard *uint64 `json:"MaxWildcard,omitnil,omitempty" name:"MaxWildcard"`
 
 	// DNS 服务集群个数
-	DnsServerRegion *string `json:"DnsServerRegion,omitnil" name:"DnsServerRegion"`
+	DnsServerRegion *string `json:"DnsServerRegion,omitnil,omitempty" name:"DnsServerRegion"`
 
 	// 套餐名称
-	DomainGradeCn *string `json:"DomainGradeCn,omitnil" name:"DomainGradeCn"`
+	DomainGradeCn *string `json:"DomainGradeCn,omitnil,omitempty" name:"DomainGradeCn"`
 
 	// 套餐代号
-	GradeLevel *uint64 `json:"GradeLevel,omitnil" name:"GradeLevel"`
+	GradeLevel *uint64 `json:"GradeLevel,omitnil,omitempty" name:"GradeLevel"`
 
 	// 套餐对应的 NS
-	Ns []*string `json:"Ns,omitnil" name:"Ns"`
+	Ns []*string `json:"Ns,omitnil,omitempty" name:"Ns"`
 
 	// 套餐代码
-	DomainGrade *string `json:"DomainGrade,omitnil" name:"DomainGrade"`
+	DomainGrade *string `json:"DomainGrade,omitnil,omitempty" name:"DomainGrade"`
+}
+
+type PackageListItem struct {
+	// 域名ID
+	// 注意：此字段可能返回 null，表示取不到有效值。
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
+
+	// 域名的原始格式
+	// 注意：此字段可能返回 null，表示取不到有效值。
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 套餐等级代码
+	Grade *string `json:"Grade,omitnil,omitempty" name:"Grade"`
+
+	// 套餐名称
+	GradeTitle *string `json:"GradeTitle,omitnil,omitempty" name:"GradeTitle"`
+
+	// 付费套餐开通时间
+	VipStartAt *string `json:"VipStartAt,omitnil,omitempty" name:"VipStartAt"`
+
+	// 付费套餐到期时间
+	VipEndAt *string `json:"VipEndAt,omitnil,omitempty" name:"VipEndAt"`
+
+	// 域名是否开通VIP自动续费，是：YES，否：NO，默认：DEFAULT
+	VipAutoRenew *string `json:"VipAutoRenew,omitnil,omitempty" name:"VipAutoRenew"`
+
+	// 套餐剩余换绑/绑定域名次数
+	RemainTimes *uint64 `json:"RemainTimes,omitnil,omitempty" name:"RemainTimes"`
+
+	// 套餐资源ID
+	ResourceId *string `json:"ResourceId,omitnil,omitempty" name:"ResourceId"`
+
+	// 域名等级代号
+	GradeLevel *uint64 `json:"GradeLevel,omitnil,omitempty" name:"GradeLevel"`
+
+	// 套餐绑定的域名的状态
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
+
+	// 套餐是否处于宽限期
+	IsGracePeriod *string `json:"IsGracePeriod,omitnil,omitempty" name:"IsGracePeriod"`
+
+	// 是否降级
+	Downgrade *bool `json:"Downgrade,omitnil,omitempty" name:"Downgrade"`
+
+	// 关联安全防护信息
+	// 注意：此字段可能返回 null，表示取不到有效值。
+	SecurityInfo *SecurityInfo `json:"SecurityInfo,omitnil,omitempty" name:"SecurityInfo"`
+
+	// 套餐绑定的域名是否为子域名
+	// 注意：此字段可能返回 null，表示取不到有效值。
+	IsSubDomain *bool `json:"IsSubDomain,omitnil,omitempty" name:"IsSubDomain"`
 }
 
 // Predefined struct for user
 type PayOrderWithBalanceRequestParams struct {
 	// 需要支付的大订单号数组
-	BigDealIdList []*string `json:"BigDealIdList,omitnil" name:"BigDealIdList"`
+	BigDealIdList []*string `json:"BigDealIdList,omitnil,omitempty" name:"BigDealIdList"`
 
 	// 代金券ID数组。可以从控制台查到拥有的代金券
-	VoucherIdList []*string `json:"VoucherIdList,omitnil" name:"VoucherIdList"`
+	VoucherIdList []*string `json:"VoucherIdList,omitnil,omitempty" name:"VoucherIdList"`
 }
 
 type PayOrderWithBalanceRequest struct {
 	*tchttp.BaseRequest
 	
 	// 需要支付的大订单号数组
-	BigDealIdList []*string `json:"BigDealIdList,omitnil" name:"BigDealIdList"`
+	BigDealIdList []*string `json:"BigDealIdList,omitnil,omitempty" name:"BigDealIdList"`
 
 	// 代金券ID数组。可以从控制台查到拥有的代金券
-	VoucherIdList []*string `json:"VoucherIdList,omitnil" name:"VoucherIdList"`
+	VoucherIdList []*string `json:"VoucherIdList,omitnil,omitempty" name:"VoucherIdList"`
 }
 
 func (r *PayOrderWithBalanceRequest) ToJsonString() string {
@@ -6329,16 +8585,16 @@ func (r *PayOrderWithBalanceRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type PayOrderWithBalanceResponseParams struct {
 	// 此次操作支付成功的订单id数组
-	DealIdList []*string `json:"DealIdList,omitnil" name:"DealIdList"`
+	DealIdList []*string `json:"DealIdList,omitnil,omitempty" name:"DealIdList"`
 
 	// 此次操作支付成功的大订单号数组
-	BigDealIdList []*string `json:"BigDealIdList,omitnil" name:"BigDealIdList"`
+	BigDealIdList []*string `json:"BigDealIdList,omitnil,omitempty" name:"BigDealIdList"`
 
 	// 此次操作支付成功的订单号数组
-	DealNameList []*string `json:"DealNameList,omitnil" name:"DealNameList"`
+	DealNameList []*string `json:"DealNameList,omitnil,omitempty" name:"DealNameList"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type PayOrderWithBalanceResponse struct {
@@ -6359,200 +8615,234 @@ func (r *PayOrderWithBalanceResponse) FromJsonString(s string) error {
 
 type PreviewDetail struct {
 	// 域名
-	Name *string `json:"Name,omitnil" name:"Name"`
+	Name *string `json:"Name,omitnil,omitempty" name:"Name"`
 
 	// 域名套餐代码
-	Grade *string `json:"Grade,omitnil" name:"Grade"`
+	Grade *string `json:"Grade,omitnil,omitempty" name:"Grade"`
 
 	// 域名套餐名称
-	GradeTitle *string `json:"GradeTitle,omitnil" name:"GradeTitle"`
+	GradeTitle *string `json:"GradeTitle,omitnil,omitempty" name:"GradeTitle"`
 
 	// 域名记录数
-	Records *uint64 `json:"Records,omitnil" name:"Records"`
+	Records *uint64 `json:"Records,omitnil,omitempty" name:"Records"`
 
 	// 域名停靠状态。0 未开启 1 已开启 2 已暂停
-	DomainParkingStatus *uint64 `json:"DomainParkingStatus,omitnil" name:"DomainParkingStatus"`
+	DomainParkingStatus *uint64 `json:"DomainParkingStatus,omitnil,omitempty" name:"DomainParkingStatus"`
 
 	// 自定义线路数量
-	LineCount *uint64 `json:"LineCount,omitnil" name:"LineCount"`
+	LineCount *uint64 `json:"LineCount,omitnil,omitempty" name:"LineCount"`
 
 	// 自定义线路分组数量
-	LineGroupCount *uint64 `json:"LineGroupCount,omitnil" name:"LineGroupCount"`
+	LineGroupCount *uint64 `json:"LineGroupCount,omitnil,omitempty" name:"LineGroupCount"`
 
 	// 域名别名数量
-	AliasCount *uint64 `json:"AliasCount,omitnil" name:"AliasCount"`
+	AliasCount *uint64 `json:"AliasCount,omitnil,omitempty" name:"AliasCount"`
 
 	// 允许添加的最大域名别名数量
-	MaxAliasCount *uint64 `json:"MaxAliasCount,omitnil" name:"MaxAliasCount"`
+	MaxAliasCount *uint64 `json:"MaxAliasCount,omitnil,omitempty" name:"MaxAliasCount"`
 
 	// 昨天的解析量
-	ResolveCount *uint64 `json:"ResolveCount,omitnil" name:"ResolveCount"`
+	ResolveCount *uint64 `json:"ResolveCount,omitnil,omitempty" name:"ResolveCount"`
 
 	// 增值服务数量
-	VASCount *uint64 `json:"VASCount,omitnil" name:"VASCount"`
+	VASCount *uint64 `json:"VASCount,omitnil,omitempty" name:"VASCount"`
 }
 
 type PurviewInfo struct {
 	// 权限名称
-	Name *string `json:"Name,omitnil" name:"Name"`
+	Name *string `json:"Name,omitnil,omitempty" name:"Name"`
 
 	// 权限值
-	Value *string `json:"Value,omitnil" name:"Value"`
+	Value *string `json:"Value,omitnil,omitempty" name:"Value"`
 }
 
 type RecordCountInfo struct {
 	// 子域名数量
-	SubdomainCount *uint64 `json:"SubdomainCount,omitnil" name:"SubdomainCount"`
+	SubdomainCount *uint64 `json:"SubdomainCount,omitnil,omitempty" name:"SubdomainCount"`
 
 	// 列表返回的记录数
-	ListCount *uint64 `json:"ListCount,omitnil" name:"ListCount"`
+	ListCount *uint64 `json:"ListCount,omitnil,omitempty" name:"ListCount"`
 
 	// 总的记录数
-	TotalCount *uint64 `json:"TotalCount,omitnil" name:"TotalCount"`
+	TotalCount *uint64 `json:"TotalCount,omitnil,omitempty" name:"TotalCount"`
 }
 
 type RecordGroupInfo struct {
 	// 分组 ID
-	GroupId *uint64 `json:"GroupId,omitnil" name:"GroupId"`
+	GroupId *uint64 `json:"GroupId,omitnil,omitempty" name:"GroupId"`
 
 	// 分组名称
-	GroupName *string `json:"GroupName,omitnil" name:"GroupName"`
+	GroupName *string `json:"GroupName,omitnil,omitempty" name:"GroupName"`
 
 	// 分组类型：system-系统；user-用户
-	GroupType *string `json:"GroupType,omitnil" name:"GroupType"`
+	GroupType *string `json:"GroupType,omitnil,omitempty" name:"GroupType"`
 }
 
 type RecordInfo struct {
 	// 记录 ID 。
-	Id *uint64 `json:"Id,omitnil" name:"Id"`
+	Id *uint64 `json:"Id,omitnil,omitempty" name:"Id"`
 
 	// 子域名(主机记录)。
-	SubDomain *string `json:"SubDomain,omitnil" name:"SubDomain"`
+	SubDomain *string `json:"SubDomain,omitnil,omitempty" name:"SubDomain"`
 
 	// 记录类型, 详见 DescribeRecordType 接口。
-	RecordType *string `json:"RecordType,omitnil" name:"RecordType"`
+	RecordType *string `json:"RecordType,omitnil,omitempty" name:"RecordType"`
 
 	// 解析记录的线路，详见 DescribeRecordLineList 接口。
-	RecordLine *string `json:"RecordLine,omitnil" name:"RecordLine"`
+	RecordLine *string `json:"RecordLine,omitnil,omitempty" name:"RecordLine"`
 
 	// 解析记录的线路 ID ，详见 DescribeRecordLineList 接口。
-	RecordLineId *string `json:"RecordLineId,omitnil" name:"RecordLineId"`
+	RecordLineId *string `json:"RecordLineId,omitnil,omitempty" name:"RecordLineId"`
 
 	// 记录值。
-	Value *string `json:"Value,omitnil" name:"Value"`
+	Value *string `json:"Value,omitnil,omitempty" name:"Value"`
 
 	// 记录权重值。
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Weight *uint64 `json:"Weight,omitnil" name:"Weight"`
+	Weight *uint64 `json:"Weight,omitnil,omitempty" name:"Weight"`
 
 	// 记录的 MX 记录值，非 MX 记录类型，默认为 0。
-	MX *uint64 `json:"MX,omitnil" name:"MX"`
+	MX *uint64 `json:"MX,omitnil,omitempty" name:"MX"`
 
 	// 记录的 TTL 值。
-	TTL *uint64 `json:"TTL,omitnil" name:"TTL"`
+	TTL *uint64 `json:"TTL,omitnil,omitempty" name:"TTL"`
 
 	// 记录状态。0表示禁用，1表示启用。
-	Enabled *uint64 `json:"Enabled,omitnil" name:"Enabled"`
+	Enabled *uint64 `json:"Enabled,omitnil,omitempty" name:"Enabled"`
 
 	// 该记录的 D 监控状态。
 	// "Ok" : 服务器正常。
 	// "Warn" : 该记录有报警, 服务器返回 4XX。
 	// "Down" : 服务器宕机。
 	// "" : 该记录未开启 D 监控。
-	MonitorStatus *string `json:"MonitorStatus,omitnil" name:"MonitorStatus"`
+	MonitorStatus *string `json:"MonitorStatus,omitnil,omitempty" name:"MonitorStatus"`
 
 	// 记录的备注。
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	Remark *string `json:"Remark,omitnil" name:"Remark"`
+	Remark *string `json:"Remark,omitnil,omitempty" name:"Remark"`
 
 	// 记录最后更新时间。
-	UpdatedOn *string `json:"UpdatedOn,omitnil" name:"UpdatedOn"`
+	UpdatedOn *string `json:"UpdatedOn,omitnil,omitempty" name:"UpdatedOn"`
 
 	// 域名 ID 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type RecordListItem struct {
 	// 记录Id
-	RecordId *uint64 `json:"RecordId,omitnil" name:"RecordId"`
+	RecordId *uint64 `json:"RecordId,omitnil,omitempty" name:"RecordId"`
 
 	// 记录值
-	Value *string `json:"Value,omitnil" name:"Value"`
+	Value *string `json:"Value,omitnil,omitempty" name:"Value"`
 
 	// 记录状态，启用：ENABLE，暂停：DISABLE
-	Status *string `json:"Status,omitnil" name:"Status"`
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 
 	// 更新时间
-	UpdatedOn *string `json:"UpdatedOn,omitnil" name:"UpdatedOn"`
+	UpdatedOn *string `json:"UpdatedOn,omitnil,omitempty" name:"UpdatedOn"`
 
 	// 主机名
-	Name *string `json:"Name,omitnil" name:"Name"`
+	Name *string `json:"Name,omitnil,omitempty" name:"Name"`
 
 	// 记录线路
-	Line *string `json:"Line,omitnil" name:"Line"`
+	Line *string `json:"Line,omitnil,omitempty" name:"Line"`
 
 	// 线路Id
-	LineId *string `json:"LineId,omitnil" name:"LineId"`
+	LineId *string `json:"LineId,omitnil,omitempty" name:"LineId"`
 
 	// 记录类型
-	Type *string `json:"Type,omitnil" name:"Type"`
+	Type *string `json:"Type,omitnil,omitempty" name:"Type"`
 
 	// 记录权重，用于负载均衡记录
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Weight *uint64 `json:"Weight,omitnil" name:"Weight"`
+	Weight *uint64 `json:"Weight,omitnil,omitempty" name:"Weight"`
 
 	// 记录监控状态，正常：OK，告警：WARN，宕机：DOWN，未设置监控或监控暂停则为空
-	MonitorStatus *string `json:"MonitorStatus,omitnil" name:"MonitorStatus"`
+	MonitorStatus *string `json:"MonitorStatus,omitnil,omitempty" name:"MonitorStatus"`
 
 	// 记录备注说明
-	Remark *string `json:"Remark,omitnil" name:"Remark"`
+	Remark *string `json:"Remark,omitnil,omitempty" name:"Remark"`
 
-	// 记录缓存时间
-	TTL *uint64 `json:"TTL,omitnil" name:"TTL"`
+	// 记录缓存时间，单位：秒
+	TTL *uint64 `json:"TTL,omitnil,omitempty" name:"TTL"`
 
-	// MX值，只有MX记录有
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	MX *uint64 `json:"MX,omitnil" name:"MX"`
+	// MX值
+	MX *uint64 `json:"MX,omitnil,omitempty" name:"MX"`
 
 	// 是否是默认的ns记录
-	DefaultNS *bool `json:"DefaultNS,omitnil" name:"DefaultNS"`
+	DefaultNS *bool `json:"DefaultNS,omitnil,omitempty" name:"DefaultNS"`
+}
+
+type ResolveCountAliasItem struct {
+	// 域名解析量统计信息
+	Info *ResolveCountInfo `json:"Info,omitnil,omitempty" name:"Info"`
+
+	// 解析量明细
+	Data []*ResolveCountDataItem `json:"Data,omitnil,omitempty" name:"Data"`
+}
+
+type ResolveCountDataItem struct {
+	// 解析量
+	Num *uint64 `json:"Num,omitnil,omitempty" name:"Num"`
+
+	// 统计的时间点
+	DateKey *string `json:"DateKey,omitnil,omitempty" name:"DateKey"`
+}
+
+type ResolveCountInfo struct {
+	// 当前统计周期解析量总计
+	DnsTotal *uint64 `json:"DnsTotal,omitnil,omitempty" name:"DnsTotal"`
+
+	// 当前查询的域名
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 当前统计周期开始时间
+	StartDate *string `json:"StartDate,omitnil,omitempty" name:"StartDate"`
+
+	// 当前统计周期结束时间
+	EndDate *string `json:"EndDate,omitnil,omitempty" name:"EndDate"`
+
+	// 当前统计的子域名
+	SubDomain *string `json:"SubDomain,omitnil,omitempty" name:"SubDomain"`
+
+	// 数据统计格式，取值为minute、hour、day，分别表示按十分钟、小时、天统计数据
+	DnsFormat *string `json:"DnsFormat,omitnil,omitempty" name:"DnsFormat"`
 }
 
 // Predefined struct for user
 type RollbackRecordSnapshotRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 快照 ID
-	SnapshotId *string `json:"SnapshotId,omitnil" name:"SnapshotId"`
+	// 快照 ID。可以通过接口DescribeSnapshotList查询快照 ID
+	SnapshotId *string `json:"SnapshotId,omitnil,omitempty" name:"SnapshotId"`
 
 	// 解析记录信息
-	RecordList []*SnapshotRecord `json:"RecordList,omitnil" name:"RecordList"`
+	RecordList []*SnapshotRecord `json:"RecordList,omitnil,omitempty" name:"RecordList"`
 
-	// 之前的快照回滚任务 ID
-	TaskId *uint64 `json:"TaskId,omitnil" name:"TaskId"`
+	// 之前的快照回滚任务 ID。可从RollbackSnapshot接口获取
+	TaskId *uint64 `json:"TaskId,omitnil,omitempty" name:"TaskId"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 type RollbackRecordSnapshotRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
-	// 快照 ID
-	SnapshotId *string `json:"SnapshotId,omitnil" name:"SnapshotId"`
+	// 快照 ID。可以通过接口DescribeSnapshotList查询快照 ID
+	SnapshotId *string `json:"SnapshotId,omitnil,omitempty" name:"SnapshotId"`
 
 	// 解析记录信息
-	RecordList []*SnapshotRecord `json:"RecordList,omitnil" name:"RecordList"`
+	RecordList []*SnapshotRecord `json:"RecordList,omitnil,omitempty" name:"RecordList"`
 
-	// 之前的快照回滚任务 ID
-	TaskId *uint64 `json:"TaskId,omitnil" name:"TaskId"`
+	// 之前的快照回滚任务 ID。可从RollbackSnapshot接口获取
+	TaskId *uint64 `json:"TaskId,omitnil,omitempty" name:"TaskId"`
 
-	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。可以通过接口DescribeDomainList查到所有的Domain以及DomainId
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 }
 
 func (r *RollbackRecordSnapshotRequest) ToJsonString() string {
@@ -6581,10 +8871,10 @@ func (r *RollbackRecordSnapshotRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type RollbackRecordSnapshotResponseParams struct {
 	// 回滚任务 ID
-	JobId *uint64 `json:"JobId,omitnil" name:"JobId"`
+	JobId *uint64 `json:"JobId,omitnil,omitempty" name:"JobId"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type RollbackRecordSnapshotResponse struct {
@@ -6606,32 +8896,32 @@ func (r *RollbackRecordSnapshotResponse) FromJsonString(s string) error {
 // Predefined struct for user
 type RollbackSnapshotRequestParams struct {
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 快照记录 ID
-	SnapshotId *string `json:"SnapshotId,omitnil" name:"SnapshotId"`
+	SnapshotId *string `json:"SnapshotId,omitnil,omitempty" name:"SnapshotId"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
 	// 指定需要回滚的记录
-	RecordList []*SnapshotRecord `json:"RecordList,omitnil" name:"RecordList"`
+	RecordList []*SnapshotRecord `json:"RecordList,omitnil,omitempty" name:"RecordList"`
 }
 
 type RollbackSnapshotRequest struct {
 	*tchttp.BaseRequest
 	
 	// 域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 快照记录 ID
-	SnapshotId *string `json:"SnapshotId,omitnil" name:"SnapshotId"`
+	SnapshotId *string `json:"SnapshotId,omitnil,omitempty" name:"SnapshotId"`
 
 	// 域名 ID 。参数 DomainId 优先级比参数 Domain 高，如果传递参数 DomainId 将忽略参数 Domain 。
-	DomainId *uint64 `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *uint64 `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
 	// 指定需要回滚的记录
-	RecordList []*SnapshotRecord `json:"RecordList,omitnil" name:"RecordList"`
+	RecordList []*SnapshotRecord `json:"RecordList,omitnil,omitempty" name:"RecordList"`
 }
 
 func (r *RollbackSnapshotRequest) ToJsonString() string {
@@ -6659,10 +8949,10 @@ func (r *RollbackSnapshotRequest) FromJsonString(s string) error {
 // Predefined struct for user
 type RollbackSnapshotResponseParams struct {
 	// 回滚任务 ID，用来查询回滚状态
-	TaskId *uint64 `json:"TaskId,omitnil" name:"TaskId"`
+	TaskId *uint64 `json:"TaskId,omitnil,omitempty" name:"TaskId"`
 
-	// 唯一请求 ID，每次请求都会返回。定位问题时需要提供该次请求的 RequestId。
-	RequestId *string `json:"RequestId,omitnil" name:"RequestId"`
+	// 唯一请求 ID，由服务端生成，每次请求都会返回（若请求因其他原因未能抵达服务端，则该次请求不会获得 RequestId）。定位问题时需要提供该次请求的 RequestId。
+	RequestId *string `json:"RequestId,omitnil,omitempty" name:"RequestId"`
 }
 
 type RollbackSnapshotResponse struct {
@@ -6681,293 +8971,358 @@ func (r *RollbackSnapshotResponse) FromJsonString(s string) error {
 	return json.Unmarshal([]byte(s), &r)
 }
 
+type SecurityInfo struct {
+	// 是否是免费赠送：yes-是；no-不是
+	IsDefendFree *string `json:"IsDefendFree,omitnil,omitempty" name:"IsDefendFree"`
+
+	// 防护类型
+	Key *string `json:"Key,omitnil,omitempty" name:"Key"`
+
+	// 资源 ID
+	ResourceId *string `json:"ResourceId,omitnil,omitempty" name:"ResourceId"`
+}
+
 type SnapshotConfig struct {
 	// 配置类型：空字符串-不备份，half_hour-每半小时，hourly-每小时，daily-每天，monthly-每月
-	Config *string `json:"Config,omitnil" name:"Config"`
+	Config *string `json:"Config,omitnil,omitempty" name:"Config"`
 
 	// 添加时间
-	CreatedOn *string `json:"CreatedOn,omitnil" name:"CreatedOn"`
+	CreatedOn *string `json:"CreatedOn,omitnil,omitempty" name:"CreatedOn"`
 
 	// 所属域名 ID
-	DomainId *string `json:"DomainId,omitnil" name:"DomainId"`
+	DomainId *string `json:"DomainId,omitnil,omitempty" name:"DomainId"`
 
 	// 配置 ID
-	Id *string `json:"Id,omitnil" name:"Id"`
+	Id *string `json:"Id,omitnil,omitempty" name:"Id"`
 
 	// 快照数量
-	SnapshotCount *uint64 `json:"SnapshotCount,omitnil" name:"SnapshotCount"`
+	SnapshotCount *uint64 `json:"SnapshotCount,omitnil,omitempty" name:"SnapshotCount"`
 
 	// 状态：enable-启用，disable-禁用
-	Status *string `json:"Status,omitnil" name:"Status"`
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 
 	// 更新时间
-	UpdatedOn *string `json:"UpdatedOn,omitnil" name:"UpdatedOn"`
+	UpdatedOn *string `json:"UpdatedOn,omitnil,omitempty" name:"UpdatedOn"`
 }
 
 type SnapshotInfo struct {
 	// 快照的对象存储地址
-	CosUrl *string `json:"CosUrl,omitnil" name:"CosUrl"`
+	CosUrl *string `json:"CosUrl,omitnil,omitempty" name:"CosUrl"`
 
 	// 添加时间
-	CreatedOn *string `json:"CreatedOn,omitnil" name:"CreatedOn"`
+	CreatedOn *string `json:"CreatedOn,omitnil,omitempty" name:"CreatedOn"`
 
 	// 所属域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 快照记录 ID
-	Id *string `json:"Id,omitnil" name:"Id"`
+	Id *string `json:"Id,omitnil,omitempty" name:"Id"`
 
 	// 域名解析记录数
-	RecordCount *string `json:"RecordCount,omitnil" name:"RecordCount"`
+	RecordCount *string `json:"RecordCount,omitnil,omitempty" name:"RecordCount"`
 
 	// 状态：normal-正常，create-备份中
-	Status *string `json:"Status,omitnil" name:"Status"`
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 }
 
 type SnapshotPageInfo struct {
 	// 快照总数
-	Total *uint64 `json:"Total,omitnil" name:"Total"`
+	Total *uint64 `json:"Total,omitnil,omitempty" name:"Total"`
 }
 
 type SnapshotRecord struct {
 	// 子域名
-	SubDomain *string `json:"SubDomain,omitnil" name:"SubDomain"`
+	SubDomain *string `json:"SubDomain,omitnil,omitempty" name:"SubDomain"`
 
 	// 记录类型
-	RecordType *string `json:"RecordType,omitnil" name:"RecordType"`
+	RecordType *string `json:"RecordType,omitnil,omitempty" name:"RecordType"`
 
 	// 解析线路
-	RecordLine *string `json:"RecordLine,omitnil" name:"RecordLine"`
+	RecordLine *string `json:"RecordLine,omitnil,omitempty" name:"RecordLine"`
 
 	// 解析值
-	Value *string `json:"Value,omitnil" name:"Value"`
+	Value *string `json:"Value,omitnil,omitempty" name:"Value"`
 
 	// TTL(秒)
-	TTL *string `json:"TTL,omitnil" name:"TTL"`
+	TTL *string `json:"TTL,omitnil,omitempty" name:"TTL"`
 
 	// 解析记录 ID
-	RecordId *string `json:"RecordId,omitnil" name:"RecordId"`
+	RecordId *string `json:"RecordId,omitnil,omitempty" name:"RecordId"`
 
 	// MX优先级
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	MX *string `json:"MX,omitnil" name:"MX"`
+	MX *string `json:"MX,omitnil,omitempty" name:"MX"`
 
 	// 权重
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Weight *string `json:"Weight,omitnil" name:"Weight"`
+	Weight *string `json:"Weight,omitnil,omitempty" name:"Weight"`
 
 	// 失败原因
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Reason *string `json:"Reason,omitnil" name:"Reason"`
+	Reason *string `json:"Reason,omitnil,omitempty" name:"Reason"`
+}
+
+type SubDomainsAnalyticsParamsItem struct {
+	// 要查询解析量的主域名。
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 要查询解析量的子域名主机头。
+	SubDomain *string `json:"SubDomain,omitnil,omitempty" name:"SubDomain"`
+
+	// 查询子域名列表的偏移量。没有指定查询的 Subdomain 参数时，根据分页参数返回每页子域名解析量。
+	Offset *uint64 `json:"Offset,omitnil,omitempty" name:"Offset"`
+
+	// 查询子域名列表的每页条数。没有指定查询的 Subdomain 参数时，根据分页参数返回每页子域名解析量。
+	Limit *uint64 `json:"Limit,omitnil,omitempty" name:"Limit"`
 }
 
 type SubdomainAliasAnalyticsItem struct {
 	// 子域名解析量统计查询信息
-	Info *SubdomainAnalyticsInfo `json:"Info,omitnil" name:"Info"`
+	Info *SubdomainAnalyticsInfo `json:"Info,omitnil,omitempty" name:"Info"`
 
 	// 当前统计维度解析量小计
-	Data []*DomainAnalyticsDetail `json:"Data,omitnil" name:"Data"`
+	Data []*DomainAnalyticsDetail `json:"Data,omitnil,omitempty" name:"Data"`
 }
 
 type SubdomainAnalyticsInfo struct {
 	// DATE:按天维度统计 HOUR:按小时维度统计
-	DnsFormat *string `json:"DnsFormat,omitnil" name:"DnsFormat"`
+	DnsFormat *string `json:"DnsFormat,omitnil,omitempty" name:"DnsFormat"`
 
 	// 当前统计周期解析量总计
-	DnsTotal *uint64 `json:"DnsTotal,omitnil" name:"DnsTotal"`
+	DnsTotal *uint64 `json:"DnsTotal,omitnil,omitempty" name:"DnsTotal"`
 
 	// 当前查询的域名
-	Domain *string `json:"Domain,omitnil" name:"Domain"`
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
 
 	// 当前统计周期开始时间
-	StartDate *string `json:"StartDate,omitnil" name:"StartDate"`
+	StartDate *string `json:"StartDate,omitnil,omitempty" name:"StartDate"`
 
 	// 当前统计周期结束时间
-	EndDate *string `json:"EndDate,omitnil" name:"EndDate"`
+	EndDate *string `json:"EndDate,omitnil,omitempty" name:"EndDate"`
 
 	// 当前统计的子域名
-	Subdomain *string `json:"Subdomain,omitnil" name:"Subdomain"`
+	Subdomain *string `json:"Subdomain,omitnil,omitempty" name:"Subdomain"`
 }
 
 type TagItem struct {
 	// 标签键
-	TagKey *string `json:"TagKey,omitnil" name:"TagKey"`
+	TagKey *string `json:"TagKey,omitnil,omitempty" name:"TagKey"`
 
 	// 标签值
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	TagValue *string `json:"TagValue,omitnil" name:"TagValue"`
+	TagValue *string `json:"TagValue,omitnil,omitempty" name:"TagValue"`
 }
 
 type TagItemFilter struct {
 	// 标签键
-	TagKey *string `json:"TagKey,omitnil" name:"TagKey"`
+	TagKey *string `json:"TagKey,omitnil,omitempty" name:"TagKey"`
 
 	// 标签键
-	TagValue []*string `json:"TagValue,omitnil" name:"TagValue"`
+	TagValue []*string `json:"TagValue,omitnil,omitempty" name:"TagValue"`
 }
 
 type UserInfo struct {
 	// 用户昵称
-	Nick *string `json:"Nick,omitnil" name:"Nick"`
+	Nick *string `json:"Nick,omitnil,omitempty" name:"Nick"`
 
 	// 用户ID
-	Id *int64 `json:"Id,omitnil" name:"Id"`
+	Id *int64 `json:"Id,omitnil,omitempty" name:"Id"`
 
 	// 用户账号, 邮箱格式
-	Email *string `json:"Email,omitnil" name:"Email"`
+	Email *string `json:"Email,omitnil,omitempty" name:"Email"`
 
-	// 账号状态：”enabled”: 正常；”disabled”: 被封禁
-	Status *string `json:"Status,omitnil" name:"Status"`
+	// 账号状态: "enabled": 正常; "disabled": 被封禁
+	Status *string `json:"Status,omitnil,omitempty" name:"Status"`
 
 	// 电话号码
-	Telephone *string `json:"Telephone,omitnil" name:"Telephone"`
+	Telephone *string `json:"Telephone,omitnil,omitempty" name:"Telephone"`
 
-	// 邮箱是否通过验证：”yes”: 通过；”no”: 未通过
-	EmailVerified *string `json:"EmailVerified,omitnil" name:"EmailVerified"`
+	// 邮箱是否通过验证："yes": 通过; "no": 未通过
+	EmailVerified *string `json:"EmailVerified,omitnil,omitempty" name:"EmailVerified"`
 
-	// 手机是否通过验证：”yes”: 通过；”no”: 未通过
-	TelephoneVerified *string `json:"TelephoneVerified,omitnil" name:"TelephoneVerified"`
+	// 手机是否通过验证："yes": 通过； "no": 未通过
+	TelephoneVerified *string `json:"TelephoneVerified,omitnil,omitempty" name:"TelephoneVerified"`
 
 	// 账号等级, 按照用户账号下域名等级排序, 选取一个最高等级为账号等级, 具体对应情况参见域名等级。
-	UserGrade *string `json:"UserGrade,omitnil" name:"UserGrade"`
+	UserGrade *string `json:"UserGrade,omitnil,omitempty" name:"UserGrade"`
 
 	// 用户名称, 企业用户对应为公司名称
-	RealName *string `json:"RealName,omitnil" name:"RealName"`
+	RealName *string `json:"RealName,omitnil,omitempty" name:"RealName"`
 
-	// 是否绑定微信：”yes”: 通过；”no”: 未通过
-	WechatBinded *string `json:"WechatBinded,omitnil" name:"WechatBinded"`
+	// 是否绑定微信： "yes": 通过； "no": 未通过
+	WechatBinded *string `json:"WechatBinded,omitnil,omitempty" name:"WechatBinded"`
 
 	// 用户UIN
-	Uin *int64 `json:"Uin,omitnil" name:"Uin"`
+	Uin *int64 `json:"Uin,omitnil,omitempty" name:"Uin"`
 
 	// 所属 DNS 服务器
-	FreeNs []*string `json:"FreeNs,omitnil" name:"FreeNs"`
+	FreeNs []*string `json:"FreeNs,omitnil,omitempty" name:"FreeNs"`
+
+	// 用户是否允许任何人转移域名到本账号
+	AllowTransferIn *bool `json:"AllowTransferIn,omitnil,omitempty" name:"AllowTransferIn"`
 }
 
 type VASStatisticItem struct {
 	// 增值服务名称
-	Name *string `json:"Name,omitnil" name:"Name"`
+	Name *string `json:"Name,omitnil,omitempty" name:"Name"`
 
 	// 增值服务标识
-	Key *string `json:"Key,omitnil" name:"Key"`
+	Key *string `json:"Key,omitnil,omitempty" name:"Key"`
 
 	// 增值服务最大用量
-	LimitCount *uint64 `json:"LimitCount,omitnil" name:"LimitCount"`
+	LimitCount *uint64 `json:"LimitCount,omitnil,omitempty" name:"LimitCount"`
 
 	// 增值服务已使用的用量
-	UseCount *uint64 `json:"UseCount,omitnil" name:"UseCount"`
+	UseCount *uint64 `json:"UseCount,omitnil,omitempty" name:"UseCount"`
+}
+
+type VasListItem struct {
+	// 规格总数
+	LimitNumber *uint64 `json:"LimitNumber,omitnil,omitempty" name:"LimitNumber"`
+
+	// 购买时间
+	StartedAt *string `json:"StartedAt,omitnil,omitempty" name:"StartedAt"`
+
+	// 到期时间
+	EndedAt *string `json:"EndedAt,omitnil,omitempty" name:"EndedAt"`
+
+	// 资源唯一 ID
+	ResourceId *string `json:"ResourceId,omitnil,omitempty" name:"ResourceId"`
+
+	// 自动续费标识
+	AutoRenew *string `json:"AutoRenew,omitnil,omitempty" name:"AutoRenew"`
+
+	// 已绑定的域名
+	Domain *string `json:"Domain,omitnil,omitempty" name:"Domain"`
+
+	// 绑定类型
+	BindType *string `json:"BindType,omitnil,omitempty" name:"BindType"`
+
+	// 增值服务类型
+	Key *string `json:"Key,omitnil,omitempty" name:"Key"`
+
+	// 增值服务名
+	Name *string `json:"Name,omitnil,omitempty" name:"Name"`
+
+	// 是否可续费
+	CanRenew *bool `json:"CanRenew,omitnil,omitempty" name:"CanRenew"`
+
+	// 是否只允许付费套餐域名可购买
+	VipDomain *bool `json:"VipDomain,omitnil,omitempty" name:"VipDomain"`
 }
 
 type WhoisContact struct {
 	// 无
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Admin *WhoisContactAddress `json:"Admin,omitnil" name:"Admin"`
+	Admin *WhoisContactAddress `json:"Admin,omitnil,omitempty" name:"Admin"`
 
 	// 无
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Billing *WhoisContactAddress `json:"Billing,omitnil" name:"Billing"`
+	Billing *WhoisContactAddress `json:"Billing,omitnil,omitempty" name:"Billing"`
 
 	// 无
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Registrant *WhoisContactAddress `json:"Registrant,omitnil" name:"Registrant"`
+	Registrant *WhoisContactAddress `json:"Registrant,omitnil,omitempty" name:"Registrant"`
 
 	// 无
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Tech *WhoisContactAddress `json:"Tech,omitnil" name:"Tech"`
+	Tech *WhoisContactAddress `json:"Tech,omitnil,omitempty" name:"Tech"`
 }
 
 type WhoisContactAddress struct {
-	// 无
+	// 城市
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	City *string `json:"City,omitnil" name:"City"`
+	City *string `json:"City,omitnil,omitempty" name:"City"`
+
+	// 国家
+	// 注意：此字段可能返回 null，表示取不到有效值。
+	Country *string `json:"Country,omitnil,omitempty" name:"Country"`
+
+	// 电子邮箱
+	// 注意：此字段可能返回 null，表示取不到有效值。
+	Email *string `json:"Email,omitnil,omitempty" name:"Email"`
+
+	// 传真
+	// 注意：此字段可能返回 null，表示取不到有效值。
+	Fax *string `json:"Fax,omitnil,omitempty" name:"Fax"`
+
+	// 传真分机号
+	// 注意：此字段可能返回 null，表示取不到有效值。
+	FaxExt *string `json:"FaxExt,omitnil,omitempty" name:"FaxExt"`
 
 	// 无
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Country *string `json:"Country,omitnil" name:"Country"`
+	Handle *string `json:"Handle,omitnil,omitempty" name:"Handle"`
 
-	// 无
+	// 名称
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Email *string `json:"Email,omitnil" name:"Email"`
+	Name *string `json:"Name,omitnil,omitempty" name:"Name"`
 
-	// 无
+	// 组织机构
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Fax *string `json:"Fax,omitnil" name:"Fax"`
+	Organization *string `json:"Organization,omitnil,omitempty" name:"Organization"`
 
-	// 无
+	// 电话
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	FaxExt *string `json:"FaxExt,omitnil" name:"FaxExt"`
+	Phone *string `json:"Phone,omitnil,omitempty" name:"Phone"`
 
-	// 无
+	// 邮编
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Handle *string `json:"Handle,omitnil" name:"Handle"`
+	PostalCode *string `json:"PostalCode,omitnil,omitempty" name:"PostalCode"`
 
-	// 无
+	// 省份/州
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Name *string `json:"Name,omitnil" name:"Name"`
+	State *string `json:"State,omitnil,omitempty" name:"State"`
 
-	// 无
+	// 街道地址
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Organization *string `json:"Organization,omitnil" name:"Organization"`
-
-	// 无
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	Phone *string `json:"Phone,omitnil" name:"Phone"`
-
-	// 无
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	PostalCode *string `json:"PostalCode,omitnil" name:"PostalCode"`
-
-	// 无
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	State *string `json:"State,omitnil" name:"State"`
-
-	// 无
-	// 注意：此字段可能返回 null，表示取不到有效值。
-	Street *string `json:"Street,omitnil" name:"Street"`
+	Street *string `json:"Street,omitnil,omitempty" name:"Street"`
 }
 
 type WhoisInfo struct {
 	// 联系信息
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Contacts *WhoisContact `json:"Contacts,omitnil" name:"Contacts"`
+	Contacts *WhoisContact `json:"Contacts,omitnil,omitempty" name:"Contacts"`
 
 	// 域名注册时间
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	CreationDate *string `json:"CreationDate,omitnil" name:"CreationDate"`
+	CreationDate *string `json:"CreationDate,omitnil,omitempty" name:"CreationDate"`
 
 	// 域名到期时间
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	ExpirationDate *string `json:"ExpirationDate,omitnil" name:"ExpirationDate"`
+	ExpirationDate *string `json:"ExpirationDate,omitnil,omitempty" name:"ExpirationDate"`
 
 	// 是否是在腾讯云注册的域名
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	IsQcloud *bool `json:"IsQcloud,omitnil" name:"IsQcloud"`
+	IsQcloud *bool `json:"IsQcloud,omitnil,omitempty" name:"IsQcloud"`
 
 	// 是否当前操作账号注册的域名
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	IsQcloudOwner *bool `json:"IsQcloudOwner,omitnil" name:"IsQcloudOwner"`
+	IsQcloudOwner *bool `json:"IsQcloudOwner,omitnil,omitempty" name:"IsQcloudOwner"`
 
 	// 域名配置的NS
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	NameServers []*string `json:"NameServers,omitnil" name:"NameServers"`
+	NameServers []*string `json:"NameServers,omitnil,omitempty" name:"NameServers"`
 
 	// Whois原始信息
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Raw []*string `json:"Raw,omitnil" name:"Raw"`
+	Raw []*string `json:"Raw,omitnil,omitempty" name:"Raw"`
 
 	// 域名注册商
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Registrar []*string `json:"Registrar,omitnil" name:"Registrar"`
+	Registrar []*string `json:"Registrar,omitnil,omitempty" name:"Registrar"`
 
 	// 状态
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Status []*string `json:"Status,omitnil" name:"Status"`
+	Status []*string `json:"Status,omitnil,omitempty" name:"Status"`
 
 	// 更新日期
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	UpdatedDate *string `json:"UpdatedDate,omitnil" name:"UpdatedDate"`
+	UpdatedDate *string `json:"UpdatedDate,omitnil,omitempty" name:"UpdatedDate"`
 
 	// dnssec
 	// 注意：此字段可能返回 null，表示取不到有效值。
-	Dnssec *string `json:"Dnssec,omitnil" name:"Dnssec"`
+	Dnssec *string `json:"Dnssec,omitnil,omitempty" name:"Dnssec"`
+
+	// 腾讯注册商资质
+	RegistrarType *string `json:"RegistrarType,omitnil,omitempty" name:"RegistrarType"`
 }

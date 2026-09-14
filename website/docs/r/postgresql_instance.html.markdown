@@ -12,7 +12,12 @@ description: |-
 Use this resource to create postgresql instance.
 
 -> **Note:** To update the charge type, please update the `charge_type` and specify the `period` for the charging period. It only supports updating from `POSTPAID_BY_HOUR` to `PREPAID`, and the `period` field only valid in that upgrading case.
--> **Note:** If no values are set for the two parameters: `db_major_version` and `engine_version`, then `engine_version` is set to `10.4` by default. Suggest using parameter `db_major_version` to create an instance
+
+-> **Note:** If no values are set for the parameters: `db_kernel_version`, `db_major_version` and `engine_version`, then `engine_version` is set to `10.4` by default. Suggest using parameter `db_major_version` to create an instance
+
+-> **Note:** If you need to upgrade the database version, Please use data source `tencentcloud_postgresql_db_versions` to obtain the valid version value for `db_kernel_version`, `db_major_version` and `engine_version`. And when modifying, `db_kernel_version`, `db_major_version` and `engine_version` must be set.
+
+-> **Note:** If upgrade `db_kernel_version`, will synchronize the upgrade of the read-only instance version; If upgrade `db_major_version`, cannot have read-only instances.
 
 ## Example Usage
 
@@ -56,7 +61,12 @@ resource "tencentcloud_postgresql_instance" "example" {
   storage           = 10
 
   tags = {
-    test = "tf"
+    CreateBy = "Terraform"
+  }
+
+  timeouts {
+    create = "60m"
+    update = "60m"
   }
 }
 ```
@@ -102,7 +112,7 @@ resource "tencentcloud_postgresql_instance" "example" {
   delete_protection = true
 
   tags = {
-    test = "tf"
+    CreateBy = "Terraform"
   }
 }
 ```
@@ -159,7 +169,7 @@ resource "tencentcloud_postgresql_instance" "example" {
   }
 
   tags = {
-    test = "tf"
+    CreateBy = "Terraform"
   }
 }
 ```
@@ -214,7 +224,7 @@ resource "tencentcloud_postgresql_instance" "example" {
   }
 
   tags = {
-    CreateBy = "terraform"
+    CreateBy = "Terraform"
   }
 }
 ```
@@ -252,7 +262,7 @@ resource "tencentcloud_postgresql_instance" "example" {
   }
 
   tags = {
-    tf = "test"
+    CreateBy = "Terraform"
   }
 }
 ```
@@ -271,6 +281,8 @@ resource "tencentcloud_postgresql_instance" "example" {
   vpc_id               = "vpc-86v957zb"
   subnet_id            = "subnet-enm92y0m"
   engine_version       = "13.3"
+  db_kernel_version    = "v13.3_r1.4" # eg:from v13.3_r1.1 to v13.3_r1.4
+  db_major_version     = "13"
   root_password        = "Root123$"
   charset              = "LATIN1"
   project_id           = 0
@@ -286,10 +298,13 @@ resource "tencentcloud_postgresql_instance" "example" {
     backup_period                = ["monday", "thursday", "sunday"]
   }
 
-  db_kernel_version = "v13.3_r1.4" # eg:from v13.3_r1.1 to v13.3_r1.4
-
   tags = {
-    tf = "test"
+    CreateBy = "Terraform"
+  }
+
+  timeouts {
+    create = "60m"
+    update = "60m"
   }
 }
 ```
@@ -307,7 +322,7 @@ The following arguments are supported:
 * `vpc_id` - (Required, String) ID of VPC.
 * `auto_renew_flag` - (Optional, Int) Auto renew flag, `1` for enabled. NOTES: Only support prepaid instance.
 * `auto_voucher` - (Optional, Int) Whether to use voucher, `1` for enabled.
-* `backup_plan` - (Optional, List) Specify DB backup plan.
+* `backup_plan` - (Optional, List, **Deprecated**) This field is deprecated from version 1.83.9. Use resource `tencentcloud_postgresql_backup_plan` to manage PG instance backup plan. Specify DB backup plan.
 * `charge_type` - (Optional, String) Pay type of the postgresql instance. Values `POSTPAID_BY_HOUR` (Default), `PREPAID`. It only support to update the type from `POSTPAID_BY_HOUR` to `PREPAID`.
 * `charset` - (Optional, String, ForceNew) Charset of the root account. Valid values are `UTF8`,`LATIN1`.
 * `cpu` - (Optional, Int) Number of CPU cores. Allowed value must be equal `cpu` that data source `tencentcloud_postgresql_specinfos` provides.
@@ -317,6 +332,7 @@ The following arguments are supported:
 * `db_node_set` - (Optional, Set) Specify instance node info for disaster migration.
 * `delete_protection` - (Optional, Bool) Whether to enable instance deletion protection. Default: false.
 * `engine_version` - (Optional, String) Version of the postgresql database engine. Valid values: `10.4`, `10.17`, `10.23`, `11.8`, `11.12`, `11.22`, `12.4`, `12.7`, `12.18`, `13.3`, `14.2`, `14.11`, `15.1`, `16.0`.
+* `kms_cluster_id` - (Optional, String) Specify the cluster served by KMS. If KMSClusterId is blank, use the KMS of the default cluster. If you choose to specify a KMS cluster, you need to pass in KMSClusterId.
 * `kms_key_id` - (Optional, String) KeyId of the custom key.
 * `kms_region` - (Optional, String) Region of the custom key.
 * `max_standby_archive_delay` - (Optional, Int) max_standby_archive_delay applies when WAL data is being read from WAL archive (and is therefore not current). Units are milliseconds if not specified.
@@ -325,10 +341,12 @@ The following arguments are supported:
 * `period` - (Optional, Int) Specify Prepaid period in month. Default `1`. Values: `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `10`, `11`, `12`, `24`, `36`. This field is valid only when creating a `PREPAID` type instance, or updating the charge type from `POSTPAID_BY_HOUR` to `PREPAID`.
 * `project_id` - (Optional, Int) Project id, default value is `0`.
 * `public_access_switch` - (Optional, Bool) Indicates whether to enable the access to an instance from public network or not.
-* `root_user` - (Optional, String, ForceNew) Instance root account name. This parameter is optional, Default value is `root`.
+* `root_user` - (Optional, String) Instance root account name. This parameter is optional, Default value is `root`.
 * `security_groups` - (Optional, Set: [`String`]) ID of security group. If both vpc_id and subnet_id are not set, this argument should not be set either.
+* `storage_type` - (Optional, String, ForceNew) Storage type of the instance. Valid values: `PHYSICAL_LOCAL_SSD` (default, local SSD), `CLOUD_PREMIUM` (premium cloud disk), `CLOUD_SSD` (cloud SSD), `CLOUD_HSSD` (enhanced cloud SSD). NOTE: This field will force new resource when modified.
 * `tags` - (Optional, Map) The available tags within this postgresql.
 * `voucher_ids` - (Optional, List: [`String`]) Specify Voucher Ids if `auto_voucher` was `1`, only support using 1 vouchers for now.
+* `wait_switch` - (Optional, Int) Switch time after instance configurations are modified. `0`: Switch immediately; `2`: Switch during maintenance time window. Default: `0`. Note: This only takes effect when updating the `memory`, `storage`, `cpu`, `db_node_set`, `db_kernel_version` fields.
 
 The `backup_plan` object supports the following:
 
@@ -336,6 +354,8 @@ The `backup_plan` object supports the following:
 * `base_backup_retention_period` - (Optional, Int) Specify days of the retention.
 * `max_backup_start_time` - (Optional, String) Specify latest backup start time, format `hh:mm:ss`.
 * `min_backup_start_time` - (Optional, String) Specify earliest backup start time, format `hh:mm:ss`.
+* `monthly_backup_period` - (Optional, List) If it is in monthly dimension, the format is numeric characters, such as ["1","2"].
+* `monthly_backup_retention_period` - (Optional, Int) Specify days of the retention.
 
 The `db_node_set` object supports the following:
 
@@ -355,6 +375,16 @@ In addition to all arguments above, the following attributes are exported:
 * `public_access_port` - Port for public access.
 * `uid` - Uid of the postgresql instance.
 
+The `backup_plan` object exports the following:
+
+* `monthly_plan_id` - Monthly plan id.
+
+## Timeouts
+
+The `timeouts` block allows you to specify [timeouts](https://developer.hashicorp.com/terraform/language/resources/syntax#operation-timeouts) for certain actions:
+
+* `create` - (Defaults to `1h0m`) Used when creating the resource.
+* `update` - (Defaults to `1h0m`) Used when updating the resource.
 
 ## Import
 

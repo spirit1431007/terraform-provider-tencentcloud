@@ -122,7 +122,7 @@ func (me *TdmqService) DeleteTdmqInstance(ctx context.Context, clusterId string)
 
 // tdmq namespace
 func (me *TdmqService) CreateTdmqNamespace(ctx context.Context, environName string, msgTtl uint64, clusterId string,
-	remark string, retentionPolicy tdmq.RetentionPolicy) (environId string, errRet error) {
+	remark string, retentionPolicy tdmq.RetentionPolicy, tags []*tdmq.Tag) (environId string, errRet error) {
 	logId := tccommon.GetLogId(ctx)
 	request := tdmq.NewCreateEnvironmentRequest()
 	defer func() {
@@ -137,6 +137,9 @@ func (me *TdmqService) CreateTdmqNamespace(ctx context.Context, environName stri
 	request.ClusterId = &clusterId
 	request.Remark = &remark
 	request.RetentionPolicy = &retentionPolicy
+	if len(tags) > 0 {
+		request.Tags = tags
+	}
 
 	var response *tdmq.CreateEnvironmentResponse
 	if err := resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
@@ -154,6 +157,10 @@ func (me *TdmqService) CreateTdmqNamespace(ctx context.Context, environName stri
 		return
 	}
 
+	if response == nil || response.Response == nil || response.Response.EnvironmentId == nil {
+		errRet = fmt.Errorf("create tdmq_namespace failed, response or EnvironmentId is nil")
+		return
+	}
 	environId = *response.Response.EnvironmentId
 	return
 }
@@ -263,7 +270,7 @@ func (me *TdmqService) DeleteTdmqNamespace(ctx context.Context, environId string
 
 // tdmq topic
 func (me *TdmqService) CreateTdmqTopic(ctx context.Context, environId string, topicName string, partitions uint64,
-	topicType int64, remark string, clusterId string, pulsarTopicType int64) (errRet error) {
+	topicType int64, remark string, clusterId string, pulsarTopicType int64, tags []*tdmq.Tag) (errRet error) {
 	logId := tccommon.GetLogId(ctx)
 	request := tdmq.NewCreateTopicRequest()
 	defer func() {
@@ -283,6 +290,9 @@ func (me *TdmqService) CreateTdmqTopic(ctx context.Context, environId string, to
 	request.ClusterId = &clusterId
 	if pulsarTopicType != NonePulsarTopicType {
 		request.PulsarTopicType = &pulsarTopicType
+	}
+	if len(tags) > 0 {
+		request.Tags = tags
 	}
 
 	if err := resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
@@ -1161,59 +1171,6 @@ func (me *TdmqService) DeleteTdmqSubscriptionById(ctx context.Context, clusterId
 	return
 }
 
-func (me *TdmqService) DescribeTdmqDeadLetterSourceQueueByFilter(ctx context.Context, param map[string]interface{}) (deadLetterSourceQueue []*tdmq.CmqDeadLetterSource, errRet error) {
-	var (
-		logId   = tccommon.GetLogId(ctx)
-		request = tdmq.NewDescribeCmqDeadLetterSourceQueuesRequest()
-	)
-
-	defer func() {
-		if errRet != nil {
-			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n", logId, request.GetAction(), request.ToJsonString(), errRet.Error())
-		}
-	}()
-
-	for k, v := range param {
-		if k == "DeadLetterQueueName" {
-			request.DeadLetterQueueName = v.(*string)
-		}
-		if k == "SourceQueueName" {
-			request.SourceQueueName = v.(*string)
-		}
-	}
-
-	ratelimit.Check(request.GetAction())
-
-	var (
-		offset uint64 = 0
-		limit  uint64 = 20
-	)
-	for {
-		request.Offset = &offset
-		request.Limit = &limit
-		response, err := me.client.UseTdmqClient().DescribeCmqDeadLetterSourceQueues(request)
-		if err != nil {
-			errRet = err
-			return
-		}
-
-		log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
-
-		if response == nil || *response.Response.TotalCount == 0 {
-			break
-		}
-
-		deadLetterSourceQueue = append(deadLetterSourceQueue, response.Response.QueueSet...)
-		if len(response.Response.QueueSet) < int(limit) {
-			break
-		}
-
-		offset += limit
-	}
-
-	return
-}
-
 func (me *TdmqService) DescribeTdmqRabbitmqNodeListByFilter(ctx context.Context, param map[string]interface{}) (rabbitmqNodeList []*tdmq.RabbitMQPrivateNode, errRet error) {
 	var (
 		logId   = tccommon.GetLogId(ctx)
@@ -1501,57 +1458,6 @@ func (me *TdmqService) DescribeTdmqMessageByFilter(ctx context.Context, param ma
 	return
 }
 
-func (me *TdmqService) DescribeTdmqRabbitmqVirtualHostListByFilter(ctx context.Context, param map[string]interface{}) (rabbitmqVirtualHostList []*tdmq.RabbitMQPrivateVirtualHost, errRet error) {
-	var (
-		logId   = tccommon.GetLogId(ctx)
-		request = tdmq.NewDescribeRabbitMQVirtualHostListRequest()
-	)
-
-	defer func() {
-		if errRet != nil {
-			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n", logId, request.GetAction(), request.ToJsonString(), errRet.Error())
-		}
-	}()
-
-	for k, v := range param {
-		if k == "InstanceId" {
-			request.InstanceId = v.(*string)
-		}
-	}
-
-	ratelimit.Check(request.GetAction())
-
-	var (
-		offset uint64 = 0
-		limit  uint64 = 20
-	)
-
-	for {
-		request.Offset = &offset
-		request.Limit = &limit
-		response, err := me.client.UseTdmqClient().DescribeRabbitMQVirtualHostList(request)
-		if err != nil {
-			errRet = err
-			return
-		}
-
-		log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
-
-		if response == nil || len(response.Response.VirtualHostList) < 1 {
-			break
-		}
-
-		rabbitmqVirtualHostList = append(rabbitmqVirtualHostList, response.Response.VirtualHostList...)
-		if len(response.Response.VirtualHostList) < int(limit) {
-			break
-		}
-
-		offset += limit
-	}
-
-	return
-}
-
 func (me *TdmqService) DescribeTdmqRabbitmqUserById(ctx context.Context, instanceId, user string) (rabbitmqUser *tdmq.RabbitMQUser, errRet error) {
 	logId := tccommon.GetLogId(ctx)
 	request := tdmq.NewDescribeRabbitMQUserRequest()
@@ -1672,6 +1578,7 @@ func (me *TdmqService) DescribeTdmqRabbitmqVipInstanceById(ctx context.Context, 
 	logId := tccommon.GetLogId(ctx)
 
 	request := tdmq.NewDescribeRabbitMQVipInstanceRequest()
+	response := tdmq.NewDescribeRabbitMQVipInstanceResponse()
 	request.ClusterId = &instanceId
 
 	defer func() {
@@ -1680,16 +1587,29 @@ func (me *TdmqService) DescribeTdmqRabbitmqVipInstanceById(ctx context.Context, 
 		}
 	}()
 
-	ratelimit.Check(request.GetAction())
 	var iacExtInfo connectivity.IacExtInfo
 	iacExtInfo.InstanceId = instanceId
-	response, err := me.client.UseTdmqClient(iacExtInfo).DescribeRabbitMQVipInstance(request)
+	err := resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
+		ratelimit.Check(request.GetAction())
+		result, e := me.client.UseTdmqClient(iacExtInfo).DescribeRabbitMQVipInstance(request)
+		if e != nil {
+			return tccommon.RetryError(e)
+		} else {
+			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
+		}
+
+		if result == nil || result.Response == nil {
+			return resource.NonRetryableError(fmt.Errorf("Describe rabbitmq vip instance failed, Response is nil."))
+		}
+
+		response = result
+		return nil
+	})
+
 	if err != nil {
 		errRet = err
 		return
 	}
-
-	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
 
 	rabbitmqVipInstance = response.Response
 	return
@@ -1709,15 +1629,106 @@ func (me *TdmqService) DeleteTdmqRabbitmqVipInstanceById(ctx context.Context, in
 		}
 	}()
 
-	ratelimit.Check(request.GetAction())
+	err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+		ratelimit.Check(request.GetAction())
+		result, e := me.client.UseTdmqClient().DeleteRabbitMQVipInstance(request)
+		if e != nil {
+			return tccommon.RetryError(e)
+		} else {
+			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+		}
 
-	response, err := me.client.UseTdmqClient().DeleteRabbitMQVipInstance(request)
+		return nil
+	})
+
 	if err != nil {
 		errRet = err
 		return
 	}
 
+	return
+}
+
+func (me *TdmqService) DescribeTdmqRabbitmqPermissionById(ctx context.Context, instanceId, user, virtualHost string) (rabbitmqPermission *tdmq.RabbitMQPermission, errRet error) {
+	logId := tccommon.GetLogId(ctx)
+
+	request := tdmq.NewDescribeRabbitMQPermissionRequest()
+	request.InstanceId = &instanceId
+	if user != "" {
+		request.User = &user
+	}
+	if virtualHost != "" {
+		request.VirtualHost = &virtualHost
+	}
+
+	defer func() {
+		if errRet != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n", logId, request.GetAction(), request.ToJsonString(), errRet.Error())
+		}
+	}()
+
+	var response *tdmq.DescribeRabbitMQPermissionResponse
+	err := resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
+		ratelimit.Check(request.GetAction())
+		result, e := me.client.UseTdmqClient().DescribeRabbitMQPermission(request)
+		if e != nil {
+			return tccommon.RetryError(e, tccommon.InternalError)
+		}
+		response = result
+		return nil
+	})
+
+	if err != nil {
+		log.Printf("[CRITAL]%s read tdmq rabbitmq permission failed, reason: %v", logId, err)
+		errRet = err
+		return
+	}
+
 	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
+
+	if len(response.Response.RabbitMQPermissionList) < 1 {
+		return
+	}
+
+	for _, permission := range response.Response.RabbitMQPermissionList {
+		if *permission.User == user && *permission.VirtualHost == virtualHost {
+			rabbitmqPermission = permission
+			break
+		}
+	}
+
+	return
+}
+
+func (me *TdmqService) DeleteTdmqRabbitmqPermissionById(ctx context.Context, instanceId, user, virtualHost string) (errRet error) {
+	logId := tccommon.GetLogId(ctx)
+
+	request := tdmq.NewDeleteRabbitMQPermissionRequest()
+	request.InstanceId = &instanceId
+	request.User = &user
+	request.VirtualHost = &virtualHost
+
+	defer func() {
+		if errRet != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n", logId, request.GetAction(), request.ToJsonString(), errRet.Error())
+		}
+	}()
+
+	err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+		ratelimit.Check(request.GetAction())
+		result, e := me.client.UseTdmqClient().DeleteRabbitMQPermission(request)
+		if e != nil {
+			return tccommon.RetryError(e, tccommon.InternalError)
+		}
+		log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+		return nil
+	})
+
+	if err != nil {
+		log.Printf("[CRITAL]%s delete tdmq rabbitmq permission failed, reason: %v", logId, err)
+		errRet = err
+		return
+	}
 
 	return
 }

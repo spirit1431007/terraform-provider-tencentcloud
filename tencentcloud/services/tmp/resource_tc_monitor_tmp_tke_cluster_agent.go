@@ -144,6 +144,12 @@ func ResourceTencentCloudMonitorTmpTkeClusterAgent() *schema.Resource {
 							Optional:    true,
 							Description: "Whether to collect indicators, true means drop all indicators, false means collect default indicators.",
 						},
+						"open_default_record": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: "Whether to enable the default pre-aggregation rule.",
+						},
 						"cluster_name": {
 							Type:        schema.TypeString,
 							Computed:    true,
@@ -247,6 +253,9 @@ func resourceTencentCloudMonitorTmpTkeClusterAgentCreate(d *schema.ResourceData,
 		if v, ok := dMap["not_scrape"]; ok {
 			prometheusClusterAgent.NotScrape = helper.Bool(v.(bool))
 		}
+		if v, ok := dMap["open_default_record"]; ok {
+			prometheusClusterAgent.OpenDefaultRecord = helper.Bool(v.(bool))
+		}
 		var prometheusClusterAgents []*monitor.PrometheusClusterAgentBasic
 		prometheusClusterAgents = append(prometheusClusterAgents, &prometheusClusterAgent)
 		request.Agents = prometheusClusterAgents
@@ -319,11 +328,15 @@ func resourceTencentCloudMonitorTmpTkeClusterAgentRead(d *schema.ResourceData, m
 
 	if clusterAgent == nil {
 		d.SetId("")
-		return fmt.Errorf("resource `global_notification` %s does not exist", instanceId)
+		log.Printf("[WARN]%s resource `cluster_agent` [%s] not found, please check if it has been deleted.\n", logId, d.Id())
+		return nil
 	}
 
 	var agents []map[string]interface{}
 	agent := make(map[string]interface{})
+	if v, ok := d.GetOk("agents"); ok && len(v.([]interface{})) > 0 {
+		agent = v.([]interface{})[0].(map[string]interface{})
+	}
 	agent["cluster_id"] = clusterAgent.ClusterId
 	agent["cluster_type"] = clusterAgent.ClusterType
 	agent["status"] = clusterAgent.Status

@@ -15,43 +15,62 @@ Provides a resource to creating dedicated tunnels instances.
 
 ## Example Usage
 
+### If network_type is VPC
+
 ```hcl
-variable "dc_id" {
-  default = "dc-kax48sg7"
+resource "tencentcloud_dcx" "example" {
+  dc_id            = "dc-ink7y3qf"
+  name             = "tf-example"
+  dc_owner_account = "100017971194"
+  network_type     = "VPC"
+  network_region   = "ap-guangzhou"
+  vpc_id           = "vpc-nzuu8dyj"
+  dcg_id           = "dcg-ehr22qfb"
+  bandwidth        = 100
+  route_type       = "BGP"
+  bgp_asn          = 64511
+  vlan             = 60
+  tencent_address  = "10.8.254.14/30"
+  customer_address = "10.8.254.13/30"
 }
+```
 
-variable "dcg_id" {
-  default = "dcg-dmbhf7jf"
+### If network_type is CCN
+
+```hcl
+resource "tencentcloud_dcx" "example" {
+  dc_id            = "dc-ink7y3qf"
+  name             = "tf-example"
+  dc_owner_account = "100017971194"
+  network_type     = "CCN"
+  network_region   = "ap-guangzhou"
+  dcg_id           = "dcg-6d4uaubp"
+  bandwidth        = 100
+  route_type       = "BGP"
+  bgp_asn          = 64511
+  vlan             = 10
+  tencent_address  = "10.8.254.10/30"
+  customer_address = "10.8.254.9/30"
 }
+```
 
-variable "vpc_id" {
-  default = "vpc-4h9v4mo3"
-}
+### Update bandwidth in place
 
-resource "tencentcloud_dcx" "bgp_main" {
-  bandwidth    = 900
-  dc_id        = var.dc_id
-  dcg_id       = var.dcg_id
-  name         = "bgp_main"
-  network_type = "VPC"
-  route_type   = "BGP"
-  vlan         = 306
-  vpc_id       = var.vpc_id
-}
-
-resource "tencentcloud_dcx" "static_main" {
-  bandwidth             = 900
-  dc_id                 = var.dc_id
-  dcg_id                = var.dcg_id
-  name                  = "static_main"
-  dc_owner_account      = "xxxxxxxx"
-  network_type          = "VPC"
-  route_type            = "STATIC"
-  vlan                  = 301
-  vpc_id                = var.vpc_id
-  route_filter_prefixes = ["10.10.10.101/32"]
-  tencent_address       = "100.93.46.1/30"
-  customer_address      = "100.93.46.2/30"
+```hcl
+resource "tencentcloud_dcx" "example" {
+  dc_id            = "dc-ink7y3qf"
+  name             = "tf-example"
+  dc_owner_account = "100017971194"
+  network_type     = "VPC"
+  network_region   = "ap-guangzhou"
+  vpc_id           = "vpc-nzuu8dyj"
+  dcg_id           = "dcg-ehr22qfb"
+  bandwidth        = 200
+  route_type       = "BGP"
+  bgp_asn          = 64511
+  vlan             = 60
+  tencent_address  = "10.8.254.14/30"
+  customer_address = "10.8.254.13/30"
 }
 ```
 
@@ -62,7 +81,7 @@ The following arguments are supported:
 * `dc_id` - (Required, String, ForceNew) ID of the DC to be queried, application deployment offline.
 * `dcg_id` - (Required, String, ForceNew) ID of the DC Gateway. Currently only new in the console.
 * `name` - (Required, String) Name of the dedicated tunnel.
-* `bandwidth` - (Optional, Int, ForceNew) Bandwidth of the DC.
+* `bandwidth` - (Optional, Int) Bandwidth of the DC.
 * `bgp_asn` - (Optional, Int, ForceNew) BGP ASN of the user. A required field within BGP.
 * `bgp_auth_key` - (Optional, String, ForceNew) BGP key of the user.
 * `customer_address` - (Optional, String, ForceNew) Interconnect IP of the DC within client.
@@ -89,6 +108,6 @@ In addition to all arguments above, the following attributes are exported:
 DCX instance can be imported using the id, e.g.
 
 ```
-$ terraform import tencentcloud_dcx.foo dcx-cbbr1gjk
+$ terraform import tencentcloud_dcx.example dcx-cbbr1gjk
 ```
 

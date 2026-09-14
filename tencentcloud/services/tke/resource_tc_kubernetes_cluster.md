@@ -5,6 +5,12 @@ Provide a resource to create a kubernetes cluster.
 ~> **NOTE:** We recommend this usage that uses the `tencentcloud_kubernetes_cluster` resource to create a cluster without any `worker_config`, then adds nodes by the `tencentcloud_kubernetes_node_pool` resource.
 It's more flexible than managing worker config directly with `tencentcloud_kubernetes_cluster`, `tencentcloud_kubernetes_scale_worker`, or existing node management of `tencentcloud_kubernetes_attachment`. The reason is that `worker_config` is unchangeable and may cause the whole cluster resource to `ForceNew`.
 
+~> **NOTE:** Executing `terraform destroy` to destroy the resource will default to deleting the node resource, If it is necessary to preserve node instance resources, Please set `instance_delete_mode` to `retain`.
+
+~> **NOTE:** If you want to set up addon for the tke cluster, it is recommended to use resource `tencentcloud_kubernetes_addon`.
+
+~> **NOTE:** Please do not use this resource and resource `tencentcloud_kubernetes_cluster_endpoint` to operate cluster public network/intranet access at the same time.
+
 Example Usage
 
 Create a basic cluster with two worker nodes
@@ -80,60 +86,11 @@ resource "tencentcloud_kubernetes_cluster" "example" {
   cluster_version                 = "1.22.5"
   cluster_deploy_type             = "MANAGED_CLUSTER"
 
-  worker_config {
-    count                      = 1
-    availability_zone          = var.availability_zone_first
-    instance_type              = var.default_instance_type
-    system_disk_type           = "CLOUD_SSD"
-    system_disk_size           = 60
-    internet_charge_type       = "TRAFFIC_POSTPAID_BY_HOUR"
-    internet_max_bandwidth_out = 100
-    public_ip_assigned         = true
-    subnet_id                  = local.first_subnet_id
-    # img_id                     = local.image_id
-
-    data_disk {
-      disk_type = "CLOUD_PREMIUM"
-      disk_size = 50
-    }
-
-    enhanced_security_service = false
-    enhanced_monitor_service  = false
-    user_data                 = "dGVzdA=="
-    # key_ids                   = ["skey-11112222"]
-    password = "ZZXXccvv1212" // Optional, should be set if key_ids not set.
-  }
-
-  worker_config {
-    count                      = 1
-    availability_zone          = var.availability_zone_second
-    instance_type              = var.default_instance_type
-    system_disk_type           = "CLOUD_SSD"
-    system_disk_size           = 60
-    internet_charge_type       = "TRAFFIC_POSTPAID_BY_HOUR"
-    internet_max_bandwidth_out = 100
-    public_ip_assigned         = true
-    subnet_id                  = local.second_subnet_id
-
-    data_disk {
-      disk_type = "CLOUD_PREMIUM"
-      disk_size = 50
-    }
-
-    enhanced_security_service = false
-    enhanced_monitor_service  = false
-    user_data                 = "dGVzdA=="
-    key_ids                   = ["skey-11112222"]
-    cam_role_name             = "CVM_QcsRole"
-    # password                  = "ZZXXccvv1212" // Optional, should be set if key_ids not set.
-  }
-
   labels = {
     "test1" = "test1",
     "test2" = "test2",
   }
 }
-
 ```
 
 Create an empty cluster with a node pool
@@ -160,7 +117,7 @@ variable "example_cluster_cidr" {
 locals {
   first_vpc_id    = data.tencentcloud_vpc_subnets.vpc_one.instance_list.0.vpc_id
   first_subnet_id = data.tencentcloud_vpc_subnets.vpc_one.instance_list.0.subnet_id
-  sg_id    = tencentcloud_security_group.sg.id
+  sg_id           = tencentcloud_security_group.sg.id
 }
 
 data "tencentcloud_vpc_subnets" "vpc_one" {
@@ -200,7 +157,6 @@ resource "tencentcloud_kubernetes_cluster" "example" {
   cluster_max_service_num = 32
   cluster_version         = "1.22.5"
   cluster_deploy_type     = "MANAGED_CLUSTER"
-  # without any worker config
 }
 
 resource "tencentcloud_kubernetes_node_pool" "example" {
@@ -259,7 +215,6 @@ resource "tencentcloud_kubernetes_node_pool" "example" {
     ]
   }
 }
-
 ````
 
 Create a cluster with a node pool and open the network access with cluster endpoint
@@ -286,7 +241,7 @@ variable "example_cluster_cidr" {
 locals {
   first_vpc_id    = data.tencentcloud_vpc_subnets.vpc_one.instance_list.0.vpc_id
   first_subnet_id = data.tencentcloud_vpc_subnets.vpc_one.instance_list.0.subnet_id
-  sg_id    = tencentcloud_security_group.sg.id
+  sg_id           = tencentcloud_security_group.sg.id
 }
 
 data "tencentcloud_vpc_subnets" "vpc_one" {
@@ -327,7 +282,6 @@ resource "tencentcloud_kubernetes_cluster" "example" {
   cluster_internet        = false # (can be ignored) open it after the nodes added
   cluster_version         = "1.22.5"
   cluster_deploy_type     = "MANAGED_CLUSTER"
-  # without any worker config
 }
 
 resource "tencentcloud_kubernetes_node_pool" "example" {
@@ -397,7 +351,6 @@ resource "tencentcloud_kubernetes_cluster_endpoint" "example" {
     tencentcloud_kubernetes_node_pool.example
   ]
 }
-
 ````
 
 Use Kubelet
@@ -474,59 +427,6 @@ resource "tencentcloud_kubernetes_cluster" "example" {
   cluster_version                 = "1.22.5"
   cluster_deploy_type             = "MANAGED_CLUSTER"
 
-  worker_config {
-    count                      = 1
-    availability_zone          = var.availability_zone_first
-    instance_type              = var.default_instance_type
-    system_disk_type           = "CLOUD_SSD"
-    system_disk_size           = 60
-    internet_charge_type       = "TRAFFIC_POSTPAID_BY_HOUR"
-    internet_max_bandwidth_out = 100
-    public_ip_assigned         = true
-    subnet_id                  = local.first_subnet_id
-    # img_id                     = local.image_id
-
-    data_disk {
-      disk_type = "CLOUD_PREMIUM"
-      disk_size = 50
-      encrypt   = false
-    }
-
-    enhanced_security_service  = false
-    enhanced_monitor_service   = false
-    user_data                  = "dGVzdA=="
-    disaster_recover_group_ids = []
-    security_group_ids         = []
-    key_ids                    = []
-    password                   = "ZZXXccvv1212" // Optional, should be set if key_ids not set.
-  }
-
-  worker_config {
-    count                      = 1
-    availability_zone          = var.availability_zone_second
-    instance_type              = var.default_instance_type
-    system_disk_type           = "CLOUD_SSD"
-    system_disk_size           = 60
-    internet_charge_type       = "TRAFFIC_POSTPAID_BY_HOUR"
-    internet_max_bandwidth_out = 100
-    public_ip_assigned         = true
-    subnet_id                  = local.second_subnet_id
-
-    data_disk {
-      disk_type = "CLOUD_PREMIUM"
-      disk_size = 50
-    }
-
-    enhanced_security_service  = false
-    enhanced_monitor_service   = false
-    user_data                  = "dGVzdA=="
-    disaster_recover_group_ids = []
-    security_group_ids         = []
-    key_ids                    = []
-    cam_role_name              = "CVM_QcsRole"
-    password                   = "ZZXXccvv1212" // Optional, should be set if key_ids not set.
-  }
-
   labels = {
     "test1" = "test1",
     "test2" = "test2",
@@ -575,26 +475,7 @@ resource "tencentcloud_kubernetes_cluster" "cluster_with_addon" {
   cluster_desc                               = "test cluster desc"
   cluster_max_service_num                    = 32
   cluster_internet                           = true
-  # managed_cluster_internet_security_policies = ["3.3.3.3", "1.1.1.1"]
   cluster_deploy_type                        = "MANAGED_CLUSTER"
-
-  worker_config {
-    count                      = 1
-    availability_zone          = var.availability_zone_first
-    instance_type              = var.default_instance_type
-    system_disk_type           = "CLOUD_SSD"
-    system_disk_size           = 60
-    internet_charge_type       = "TRAFFIC_POSTPAID_BY_HOUR"
-    internet_max_bandwidth_out = 100
-    public_ip_assigned         = true
-    subnet_id                  = data.tencentcloud_vpc_subnets.vpc_first.instance_list.0.subnet_id
-    # img_id                     = "img-rkiynh11"
-    enhanced_security_service = false
-    enhanced_monitor_service  = false
-    user_data                 = "dGVzdA=="
-    # password                  = "ZZXXccvv1212" // Optional, should be set if key_ids not set.
-    key_ids                   = "skey-11112222"
-  }
 
   extension_addon {
     name  = "COS"
@@ -605,18 +486,21 @@ resource "tencentcloud_kubernetes_cluster" "cluster_with_addon" {
       }
     })
   }
+
   extension_addon {
     name  = "SecurityGroupPolicy"
     param = jsonencode({
       "kind" : "App", "spec" : { "chart" : { "chartName" : "securitygrouppolicy", "chartVersion" : local.chartMap["securitygrouppolicy"] } }
     })
   }
+
   extension_addon {
     name  = "OOMGuard"
     param = jsonencode({
       "kind" : "App", "spec" : { "chart" : { "chartName" : "oomguard", "chartVersion" : local.chartMap["oomguard"] } }
     })
   }
+
   extension_addon {
     name  = "OLM"
     param = jsonencode({
@@ -653,7 +537,6 @@ resource "tencentcloud_kubernetes_cluster" "test_node_pool_global_config" {
   cluster_desc                               = "test cluster desc"
   cluster_max_service_num                    = 32
   cluster_internet                           = true
-  # managed_cluster_internet_security_policies = ["3.3.3.3", "1.1.1.1"]
   cluster_deploy_type                        = "MANAGED_CLUSTER"
 
   worker_config {
@@ -675,7 +558,7 @@ resource "tencentcloud_kubernetes_cluster" "test_node_pool_global_config" {
     enhanced_security_service = false
     enhanced_monitor_service  = false
     user_data                 = "dGVzdA=="
-    # password                  = "ZZXXccvv1212" // Optional, should be set if key_ids not set.
+    # password                = "ZZXXccvv1212" // Optional, should be set if key_ids not set.
     key_ids                   = "skey-11112222"
   }
 
@@ -699,6 +582,7 @@ resource "tencentcloud_kubernetes_cluster" "test_node_pool_global_config" {
 ```
 
 Using VPC-CNI network type
+
 ```hcl
 variable "availability_zone" {
   default = "ap-guangzhou-1"
@@ -713,40 +597,17 @@ variable "default_instance_type" {
 }
 
 resource "tencentcloud_kubernetes_cluster" "managed_cluster" {
-  vpc_id                                     = var.vpc
-  cluster_max_pod_num                        = 32
-  cluster_name                               = "test"
-  cluster_desc                               = "test cluster desc"
-  cluster_max_service_num                    = 256
-  cluster_internet                           = true
-  # managed_cluster_internet_security_policies = ["3.3.3.3", "1.1.1.1"]
-  cluster_deploy_type                        = "MANAGED_CLUSTER"
-  network_type								 = "VPC-CNI"
-  eni_subnet_ids							 = ["subnet-bk1etlyu"]
-  service_cidr								 = "10.1.0.0/24"
-
-  worker_config {
-    count                      = 1
-    availability_zone          = var.availability_zone
-    instance_type              = var.default_instance_type
-    system_disk_type           = "CLOUD_PREMIUM"
-    system_disk_size           = 60
-    internet_charge_type       = "TRAFFIC_POSTPAID_BY_HOUR"
-    internet_max_bandwidth_out = 100
-    public_ip_assigned         = true
-    subnet_id                  = "subnet-t5dv27rs"
-
-    data_disk {
-      disk_type = "CLOUD_PREMIUM"
-      disk_size = 50
-    }
-
-    enhanced_security_service = false
-    enhanced_monitor_service  = false
-    user_data                 = "dGVzdA=="
-    # password                  = "ZZXXccvv1212" // Optional, should be set if key_ids not set.
-    key_ids                   = "skey-11112222"
-  }
+  vpc_id                  = var.vpc
+  cluster_max_pod_num     = 32
+  cluster_name            = "test"
+  cluster_desc            = "test cluster desc"
+  cluster_max_service_num = 256
+  cluster_internet        = true
+  cluster_deploy_type     = "MANAGED_CLUSTER"
+  network_type            = "VPC-CNI"
+  eni_subnet_ids          = ["subnet-bk1etlyu"]
+  service_cidr            = "10.1.0.0/24"
+  data_plane_v2           = true
 
   labels = {
     "test1" = "test1",
@@ -756,6 +617,7 @@ resource "tencentcloud_kubernetes_cluster" "managed_cluster" {
 ```
 
 Using ops options
+
 ```
 resource "tencentcloud_kubernetes_cluster" "managed_cluster" {
   # ...your basic fields
@@ -780,30 +642,134 @@ resource "tencentcloud_kubernetes_cluster" "managed_cluster" {
 ```
 
 Create a CDC scenario cluster
+
 ```
 resource "tencentcloud_kubernetes_cluster" "cdc_cluster" {
-    cdc_id = "cluster-xxxxx"
-    vpc_id = "vpc-xxxxx"
-    cluster_cidr = "192.168.0.0/16"
-    cluster_max_pod_num = 64
-    cluster_name = "test-cdc"
-    cluster_desc = "test cluster desc"
-    cluster_max_service_num = 1024
-    cluster_version = "1.30.0"
-
-    cluster_os = "tlinux3.1x86_64"
-    cluster_level = "L20"
-    cluster_deploy_type = "INDEPENDENT_CLUSTER"
-  
-    container_runtime = "containerd"
-    runtime_version = "1.6.9"
-    pre_start_user_script = "aXB0YWJsZXMgLUEgSU5QVVQgLXAgdGNwIC1zIDE2OS4yNTQuMC4wLzE5IC0tdGNwLWZsYWdzIFNZTixSU1QgU1lOIC1qIFRDUE1TUyAtLXNldC1tc3MgMTE2MAppcHRhYmxlcyAtQSBPVVRQVVQgLXAgdGNwIC1kIDE2OS4yNTQuMC4wLzE5IC0tdGNwLWZsYWdzIFNZTixSU1QgU1lOIC1qIFRDUE1TUyAtLXNldC1tc3MgMTE2MAoKZWNobyAnCmlwdGFibGVzIC1BIElOUFVUIC1wIHRjcCAtcyAxNjkuMjU0LjAuMC8xOSAtLXRjcC1mbGFncyBTWU4sUlNUIFNZTiAtaiBUQ1BNU1MgLS1zZXQtbXNzIDExNjAKaXB0YWJsZXMgLUEgT1VUUFVUIC1wIHRjcCAtZCAxNjkuMjU0LjAuMC8xOSAtLXRjcC1mbGFncyBTWU4sUlNUIFNZTiAtaiBUQ1BNU1MgLS1zZXQtbXNzIDExNjAKJyA+PiAvZXRjL3JjLmQvcmMubG9jYWw="
-    exist_instance {
-        node_role = "MASTER_ETCD"
-        instances_para {
-        instance_ids = ["ins-eeijdk16", "ins-84ku5rba", "ins-8oa3im2s"]
+  cdc_id                  = "cluster-262n63e8"
+  vpc_id                  = "vpc-0m6078eb"
+  cluster_cidr            = "192.168.0.0/16"
+  cluster_max_pod_num     = 64
+  cluster_name            = "test-cdc"
+  cluster_desc            = "test cluster desc"
+  cluster_max_service_num = 1024
+  cluster_version         = "1.30.0"
+  cluster_os              = "tlinux3.1x86_64"
+  cluster_level           = "L20"
+  cluster_deploy_type     = "INDEPENDENT_CLUSTER"
+  container_runtime       = "containerd"
+  runtime_version         = "1.6.9"
+  pre_start_user_script   = "aXB0YWJsZXMgLUEgSU5QVVQgLXAgdGNwIC1zIDE2OS4yNTQuMC4wLzE5IC0tdGNwLWZsYWdzIFNZTixSU1QgU1lOIC1qIFRDUE1TUyAtLXNldC1tc3MgMTE2MAppcHRhYmxlcyAtQSBPVVRQVVQgLXAgdGNwIC1kIDE2OS4yNTQuMC4wLzE5IC0tdGNwLWZsYWdzIFNZTixSU1QgU1lOIC1qIFRDUE1TUyAtLXNldC1tc3MgMTE2MAoKZWNobyAnCmlwdGFibGVzIC1BIElOUFVUIC1wIHRjcCAtcyAxNjkuMjU0LjAuMC8xOSAtLXRjcC1mbGFncyBTWU4sUlNUIFNZTiAtaiBUQ1BNU1MgLS1zZXQtbXNzIDExNjAKaXB0YWJsZXMgLUEgT1VUUFVUIC1wIHRjcCAtZCAxNjkuMjU0LjAuMC8xOSAtLXRjcC1mbGFncyBTWU4sUlNUIFNZTiAtaiBUQ1BNU1MgLS1zZXQtbXNzIDExNjAKJyA+PiAvZXRjL3JjLmQvcmMubG9jYWw="
+  instance_delete_mode    = "retain"
+  exist_instance {
+    node_role = "MASTER_ETCD"
+    instances_para {
+      instance_ids              = ["ins-mam0c7lw", "ins-quvwayve", "ins-qbffk8iw"]
+      enhanced_security_service = true
+      enhanced_monitor_service  = true
+      password                  = "Password@123"
+      security_group_ids        = ["sg-hjs685q9"]
+      master_config {
+        mount_target      = "/var/data"
+        docker_graph_path = "/var/lib/containerd"
+        unschedulable     = 0
+        labels {
+          name  = "key"
+          value = "value"
         }
+        data_disk {
+          file_system           = "ext4"
+          auto_format_and_mount = true
+          mount_target          = "/var/data"
+          disk_partition        = "/dev/vdb"
+        }
+        extra_args {
+          kubelet = ["root-dir=/root"]
+        }
+        taints {
+          key    = "key"
+          value  = "value"
+          effect = "NoSchedule"
+        }
+      }
     }
+  }
+}
+```
+
+TKE cluster cloud subnet and CDC subnet are interconnected
+
+```hcl
+resource "tencentcloud_kubernetes_cluster" "example" {
+  cluster_name            = "tf-example"
+  cluster_desc            = "cluster desc"
+  cluster_os              = "tlinux3.1x86_64"
+  cluster_max_pod_num     = 64
+  cluster_max_service_num = 256
+  cluster_version         = "1.30.0"
+  cluster_deploy_type     = "MANAGED_CLUSTER"
+  container_runtime       = "containerd"
+  runtime_version         = "1.6.9"
+  is_dual_stack           = false
+  is_non_static_ip_mode   = true
+  network_type            = "VPC-CNI"
+  vpc_cni_type            = "tke-route-eni"
+  vpc_id                  = "vpc-i5yyodl9"
+  cluster_subnet_id       = "subnet-5rrirqyc"
+  eni_subnet_ids          = ["subnet-5rrirqyc"]
+  service_cidr            = "192.168.0.0/24"
+  cdc_id                  = "cluster-262n63e8"
+}
+```
+
+Use delete options to delete CBS when deleting the Cluster
+
+```hcl
+resource "tencentcloud_kubernetes_cluster" "example" {
+  vpc_id                     = local.first_vpc_id
+  cluster_cidr               = var.example_cluster_cidr
+  cluster_max_pod_num        = 32
+  cluster_name               = "example"
+  cluster_desc               = "example for tke cluster"
+  cluster_max_service_num    = 32
+  cluster_level              = "L50"
+  auto_upgrade_cluster_level = true
+  cluster_internet           = false # (can be ignored) open it after the nodes added
+  cluster_version            = "1.30.0"
+  cluster_os                 = "tlinux2.2(tkernel3)x86_64"
+  cluster_deploy_type        = "MANAGED_CLUSTER"
+  container_runtime          = "containerd"
+  docker_graph_path          = "/var/lib/containerd"
+
+  tags = {
+    "demo" = "test"
+  }
+
+  resource_delete_options {
+    resource_type = "CBS"
+    delete_mode   = "terminate"
+  }
+}
+```
+
+Using disable addons
+
+```hcl
+resource "tencentcloud_kubernetes_cluster" "example" {
+  vpc_id                           = "vpc-i5yyodl9"
+  cluster_max_pod_num              = 32
+  cluster_name                     = "tf-example"
+  cluster_desc                     = "cluster desc."
+  cluster_max_service_num          = 256
+  cluster_version                  = "1.30.0"
+  cluster_deploy_type              = "MANAGED_CLUSTER"
+  container_runtime                = "containerd"
+  runtime_version                  = "1.6.9"
+  instance_delete_mode             = "terminate"
+  upgrade_instances_follow_cluster = true
+  network_type                     = "VPC-CNI"
+  eni_subnet_ids                   = ["subnet-hhi88a58"]
+  service_cidr                     = "10.1.0.0/24"
+  disable_addons                   = ["ip-masq-agent"]
 }
 ```
 
@@ -812,5 +778,5 @@ Import
 tke cluster can be imported, e.g.
 
 ```
-$ terraform import tencentcloud_kubernetes_cluster.test cls-xxx
+$ terraform import tencentcloud_kubernetes_cluster.example cls-n2h4jbtk
 ```

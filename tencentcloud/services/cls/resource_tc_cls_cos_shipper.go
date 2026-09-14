@@ -109,7 +109,7 @@ func ResourceTencentCloudClsCosShipper() *schema.Resource {
 						"format": {
 							Type:        schema.TypeString,
 							Required:    true,
-							Description: "Content format. Valid values: json, csv.",
+							Description: "Content format. Valid values: json, csv, parquet.",
 						},
 						"csv": {
 							Type:     schema.TypeList,
@@ -168,8 +168,71 @@ func ResourceTencentCloudClsCosShipper() *schema.Resource {
 							},
 							Description: "JSON format content description.Note: this field may return null, indicating that no valid values can be obtained.",
 						},
+						"parquet": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"parquet_key_info": {
+										Type:        schema.TypeList,
+										Required:    true,
+										MinItems:    1,
+										Description: "Array of Parquet column definitions.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"key_name": {
+													Type:        schema.TypeString,
+													Required:    true,
+													Description: "Column name in the Parquet file.",
+												},
+												"key_type": {
+													Type:         schema.TypeString,
+													Required:     true,
+													ValidateFunc: tccommon.ValidateAllowedStringValue([]string{"string", "boolean", "int32", "int64", "float", "double"}),
+													Description:  "Data type of the column. Valid values: string, boolean, int32, int64, float, double.",
+												},
+												"key_non_existing_field": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Description: "Value to assign when the field does not exist or parsing fails.",
+												},
+											},
+										},
+									},
+								},
+							},
+							Description: "Parquet format content description.Note: this field may return null, indicating that no valid values can be obtained.",
+						},
 					},
 				},
+			},
+			"filename_mode": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "Naming a shipping file. Valid values: 0 (by random number); 1 (by shipping time). Default value: 0.",
+			},
+			"start_time": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Computed:    true,
+				Description: "Start time for data shipping, which cannot be earlier than the lifecycle start time of the log topic. If you do not specify this parameter, it will be set to the time when you create the data shipping task.",
+			},
+			"end_time": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "End time for data shipping, which cannot be set to a future time. If you do not specify this parameter, it indicates continuous data shipping.",
+			},
+			"storage_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "COS bucket storage type. support: STANDARD_IA, ARCHIVE, DEEP_ARCHIVE, STANDARD, MAZ_STANDARD, MAZ_STANDARD_IA, INTELLIGENT_TIERING.",
+			},
+			"time_zone": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "Timezone used to generate the time variable in the COS file path when shipping logs. Supports GMT and UTC timezone formats, e.g., `GMT+08:00`, `UTC+08:00`.",
 			},
 		},
 	}
@@ -201,11 +264,11 @@ func resourceTencentCloudClsCosShipperCreate(d *schema.ResourceData, meta interf
 		request.ShipperName = helper.String(v.(string))
 	}
 
-	if v, ok := d.GetOk("interval"); ok {
+	if v, ok := d.GetOkExists("interval"); ok {
 		request.Interval = helper.IntUint64(v.(int))
 	}
 
-	if v, ok := d.GetOk("max_size"); ok {
+	if v, ok := d.GetOkExists("max_size"); ok {
 		request.MaxSize = helper.IntUint64(v.(int))
 	}
 
@@ -287,9 +350,52 @@ func resourceTencentCloudClsCosShipperCreate(d *schema.ResourceData, meta interf
 					content.Json = &jsonInfo
 				}
 			}
+			if v, ok := dMap["parquet"]; ok {
+				if len(v.([]interface{})) == 1 {
+					parquet := v.([]interface{})[0].(map[string]interface{})
+					parquetInfo := cls.ParquetInfo{}
+
+					if keyInfos, ok := parquet["parquet_key_info"]; ok {
+						parquetKeyInfoList := keyInfos.([]interface{})
+						parquetInfo.ParquetKeyInfo = make([]*cls.ParquetKeyInfo, 0, len(parquetKeyInfoList))
+
+						for _, keyInfo := range parquetKeyInfoList {
+							keyInfoMap := keyInfo.(map[string]interface{})
+							parquetKeyInfo := &cls.ParquetKeyInfo{
+								KeyName: helper.String(keyInfoMap["key_name"].(string)),
+								KeyType: helper.String(keyInfoMap["key_type"].(string)),
+							}
+							if v, ok := keyInfoMap["key_non_existing_field"]; ok {
+								parquetKeyInfo.KeyNonExistingField = helper.String(v.(string))
+							}
+							parquetInfo.ParquetKeyInfo = append(parquetInfo.ParquetKeyInfo, parquetKeyInfo)
+						}
+					}
+					content.Parquet = &parquetInfo
+				}
+			}
 			contents = append(contents, &content)
 		}
 		request.Content = contents[0]
+	}
+
+	if v, ok := d.GetOkExists("filename_mode"); ok {
+		request.FilenameMode = helper.IntUint64(v.(int))
+	}
+
+	if v, ok := d.GetOkExists("start_time"); ok {
+		request.StartTime = helper.IntInt64(v.(int))
+	}
+	if v, ok := d.GetOkExists("end_time"); ok {
+		request.EndTime = helper.IntInt64(v.(int))
+	}
+
+	if v, ok := d.GetOk("storage_type"); ok {
+		request.StorageType = helper.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("time_zone"); ok {
+		request.TimeZone = helper.String(v.(string))
 	}
 
 	err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
@@ -300,6 +406,11 @@ func resourceTencentCloudClsCosShipperCreate(d *schema.ResourceData, meta interf
 			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
 				logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
 		}
+
+		if result == nil || result.Response == nil {
+			return resource.NonRetryableError(fmt.Errorf("Create cls cos shipper failed, Response is nil."))
+		}
+
 		response = result
 		return nil
 	})
@@ -307,6 +418,10 @@ func resourceTencentCloudClsCosShipperCreate(d *schema.ResourceData, meta interf
 	if err != nil {
 		log.Printf("[CRITAL]%s create cls cos shipper failed, reason:%+v", logId, err)
 		return err
+	}
+
+	if response.Response.ShipperId == nil {
+		return fmt.Errorf("ShipperId is nil.")
 	}
 
 	id := *response.Response.ShipperId
@@ -391,8 +506,48 @@ func resourceTencentCloudClsCosShipperRead(d *schema.ResourceData, meta interfac
 			}
 			content["json"] = []interface{}{json}
 		}
+		if shipper.Content.Parquet != nil {
+			parquetKeyInfoList := make([]interface{}, 0, len(shipper.Content.Parquet.ParquetKeyInfo))
+
+			for _, keyInfo := range shipper.Content.Parquet.ParquetKeyInfo {
+				parquetKeyInfoMap := map[string]interface{}{
+					"key_name": keyInfo.KeyName,
+					"key_type": keyInfo.KeyType,
+				}
+				if keyInfo.KeyNonExistingField != nil {
+					parquetKeyInfoMap["key_non_existing_field"] = keyInfo.KeyNonExistingField
+				}
+				parquetKeyInfoList = append(parquetKeyInfoList, parquetKeyInfoMap)
+			}
+
+			parquet := map[string]interface{}{
+				"parquet_key_info": parquetKeyInfoList,
+			}
+			content["parquet"] = []interface{}{parquet}
+		}
 		_ = d.Set("content", []interface{}{content})
 	}
+
+	if shipper.FilenameMode != nil {
+		_ = d.Set("filename_mode", shipper.FilenameMode)
+	}
+
+	if shipper.StartTime != nil {
+		_ = d.Set("start_time", shipper.StartTime)
+	}
+
+	if shipper.EndTime != nil {
+		_ = d.Set("end_time", shipper.EndTime)
+	}
+
+	if shipper.StorageType != nil {
+		_ = d.Set("storage_type", shipper.StorageType)
+	}
+
+	if shipper.TimeZone != nil {
+		_ = d.Set("time_zone", shipper.TimeZone)
+	}
+
 	return nil
 }
 
@@ -400,6 +555,13 @@ func resourceTencentCloudClsCosShipperUpdate(d *schema.ResourceData, meta interf
 	defer tccommon.LogElapsed("resource.tencentcloud_cls_cos_shipper.update")()
 	logId := tccommon.GetLogId(tccommon.ContextNil)
 	request := cls.NewModifyShipperRequest()
+
+	immutableArgs := []string{"start_time", "end_time"}
+	for _, v := range immutableArgs {
+		if d.HasChange(v) {
+			return fmt.Errorf("argument `%s` cannot be changed", v)
+		}
+	}
 
 	request.ShipperId = helper.String(d.Id())
 
@@ -422,13 +584,13 @@ func resourceTencentCloudClsCosShipperUpdate(d *schema.ResourceData, meta interf
 	}
 
 	if d.HasChange("interval") {
-		if v, ok := d.GetOk("interval"); ok {
+		if v, ok := d.GetOkExists("interval"); ok {
 			request.Interval = helper.IntUint64(v.(int))
 		}
 	}
 
 	if d.HasChange("max_size") {
-		if v, ok := d.GetOk("max_size"); ok {
+		if v, ok := d.GetOkExists("max_size"); ok {
 			request.MaxSize = helper.IntUint64(v.(int))
 		}
 	}
@@ -518,9 +680,51 @@ func resourceTencentCloudClsCosShipperUpdate(d *schema.ResourceData, meta interf
 						content.Json = &jsonInfo
 					}
 				}
+				if v, ok := dMap["parquet"]; ok {
+					if len(v.([]interface{})) == 1 {
+						parquet := v.([]interface{})[0].(map[string]interface{})
+						parquetInfo := cls.ParquetInfo{}
+
+						if keyInfos, ok := parquet["parquet_key_info"]; ok {
+							parquetKeyInfoList := keyInfos.([]interface{})
+							parquetInfo.ParquetKeyInfo = make([]*cls.ParquetKeyInfo, 0, len(parquetKeyInfoList))
+
+							for _, keyInfo := range parquetKeyInfoList {
+								keyInfoMap := keyInfo.(map[string]interface{})
+								parquetKeyInfo := &cls.ParquetKeyInfo{
+									KeyName: helper.String(keyInfoMap["key_name"].(string)),
+									KeyType: helper.String(keyInfoMap["key_type"].(string)),
+								}
+								if v, ok := keyInfoMap["key_non_existing_field"]; ok {
+									parquetKeyInfo.KeyNonExistingField = helper.String(v.(string))
+								}
+								parquetInfo.ParquetKeyInfo = append(parquetInfo.ParquetKeyInfo, parquetKeyInfo)
+							}
+						}
+						content.Parquet = &parquetInfo
+					}
+				}
 				contents = append(contents, &content)
 			}
 			request.Content = contents[0]
+		}
+	}
+
+	if d.HasChange("filename_mode") {
+		if v, ok := d.GetOkExists("filename_mode"); ok {
+			request.FilenameMode = helper.IntUint64(v.(int))
+		}
+	}
+
+	if d.HasChange("storage_type") {
+		if v, ok := d.GetOk("storage_type"); ok {
+			request.StorageType = helper.String(v.(string))
+		}
+	}
+
+	if d.HasChange("time_zone") {
+		if v, ok := d.GetOk("time_zone"); ok {
+			request.TimeZone = helper.String(v.(string))
 		}
 	}
 

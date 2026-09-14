@@ -7,12 +7,14 @@ import (
 	"log"
 	"reflect"
 	"strings"
+	"time"
 
 	tccommon "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/common"
 	svctag "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/services/tag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	sdkErrors "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
 	mongodb "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/mongodb/v20190725"
 
 	"github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/internal/helper"
@@ -21,6 +23,12 @@ import (
 
 func ResourceTencentCloudMongodbShardingInstance() *schema.Resource {
 	mongodbShardingInstanceInfo := map[string]*schema.Schema{
+		"cpu": {
+			Type:        schema.TypeInt,
+			Optional:    true,
+			Computed:    true,
+			Description: "The CPU core count of the MongoDB instance after the configuration change. Unit: C. When this parameter is empty, the current CPU size of the instance is used by default. The supported CPU specifications can be obtained through the DescribeSpecInfo API.",
+		},
 		"shard_quantity": {
 			Type:         schema.TypeInt,
 			Required:     true,
@@ -29,20 +37,19 @@ func ResourceTencentCloudMongodbShardingInstance() *schema.Resource {
 			Description:  "Number of sharding.",
 		},
 		"nodes_per_shard": {
-			Type:         schema.TypeInt,
-			Required:     true,
-			ForceNew:     true,
-			ValidateFunc: tccommon.ValidateIntegerInRange(3, 5),
-			Description:  "Number of nodes per shard, at least 3(one master and two slaves).",
+			Type:        schema.TypeInt,
+			Required:    true,
+			ForceNew:    true,
+			Description: "Number of nodes per shard, at least 3(one master and two slaves). Allow value[3, 5, 7].",
 		},
 		"availability_zone_list": {
-			Type:     schema.TypeList,
-			Optional: true,
-			Computed: true,
+			Type:             schema.TypeList,
+			Optional:         true,
+			Computed:         true,
+			DiffSuppressFunc: tccommon.StringListDiffSuppressIgnoreOrder("availability_zone_list"),
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
-			RequiredWith: []string{"hidden_zone"},
 			Description: `A list of nodes deployed in multiple availability zones. For more information, please use the API DescribeSpecInfo.
 			- Multi-availability zone deployment nodes can only be deployed in 3 different availability zones. It is not supported to deploy most nodes of the cluster in the same availability zone. For example, a 3-node cluster does not support the deployment of 2 nodes in the same zone.
 			- Version 4.2 and above are not supported.
@@ -50,11 +57,53 @@ func ResourceTencentCloudMongodbShardingInstance() *schema.Resource {
 			- Basic network cannot be selected.`,
 		},
 		"hidden_zone": {
-			Type:         schema.TypeString,
-			Optional:     true,
-			Computed:     true,
-			RequiredWith: []string{"availability_zone_list"},
-			Description:  "The availability zone to which the Hidden node belongs. This parameter must be configured to deploy instances across availability zones.",
+			Type:        schema.TypeString,
+			Optional:    true,
+			Computed:    true,
+			Description: "The availability zone to which the Hidden node belongs. This parameter is required in cross-AZ instance deployment.",
+		},
+		"add_node_list": {
+			Type:        schema.TypeList,
+			Optional:    true,
+			Description: "Add node list. Node type and availability zone information.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"role": {
+						Type:        schema.TypeString,
+						Required:    true,
+						Description: "Node role to add. Valid values: `SECONDARY` (Mongod node), `READONLY` (read-only node), `MONGOS` (Mongos node).",
+					},
+					"zone": {
+						Type:        schema.TypeString,
+						Required:    true,
+						Description: "The availability zone for the new node.",
+					},
+				},
+			},
+		},
+		"remove_node_list": {
+			Type:        schema.TypeList,
+			Optional:    true,
+			Description: "Remove node list. Node type, node name, and availability zone information. Note: Based on the consistency principle of each shard node in a sharding instance, when removing nodes, you only need to specify the node corresponding to shard 0, e.g., `cmgo-xxxx_0-node-readonly0` will remove the first readonly node of each shard.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"role": {
+						Type:        schema.TypeString,
+						Required:    true,
+						Description: "Node role to remove. Valid values: `SECONDARY` (Mongod secondary node), `READONLY` (read-only node), `MONGOS` (Mongos node).",
+					},
+					"node_name": {
+						Type:        schema.TypeString,
+						Required:    true,
+						Description: "Node ID to remove. For sharding cluster, specify the node name corresponding to one shard group. For example: `cmgo-xxxx_0-node-readonly0`.",
+					},
+					"zone": {
+						Type:        schema.TypeString,
+						Required:    true,
+						Description: "The availability zone of the node to remove.",
+					},
+				},
+			},
 		},
 	}
 	basic := TencentMongodbBasicInfo()
@@ -81,6 +130,7 @@ func mongodbAllShardingInstanceReqSet(requestInter interface{}, d *schema.Resour
 		nodeNum               = d.Get("nodes_per_shard").(int)
 		goodsNum              = 1
 		clusterType           = MONGODB_CLUSTER_TYPE_SHARD
+		cpu                   = d.Get("cpu").(int)
 		memoryInterface       = d.Get("memory").(int)
 		volumeInterface       = d.Get("volume").(int)
 		mongoVersionInterface = d.Get("engine_version").(string)
@@ -111,6 +161,7 @@ func mongodbAllShardingInstanceReqSet(requestInter interface{}, d *schema.Resour
 		"NodeNum":         helper.IntUint64(nodeNum),
 		"GoodsNum":        helper.IntUint64(goodsNum),
 		"ClusterType":     &clusterType,
+		"CpuCore":         helper.IntInt64(cpu),
 		"Memory":          helper.IntUint64(memoryInterface),
 		"Volume":          helper.IntUint64(volumeInterface),
 		"MongoVersion":    &mongoVersionInterface,
@@ -165,7 +216,75 @@ func mongodbAllShardingInstanceReqSet(requestInter interface{}, d *schema.Resour
 	if v, ok := d.GetOk("hidden_zone"); ok {
 		value.FieldByName("HiddenZone").Set(reflect.ValueOf(helper.String(v.(string))))
 	}
+	if v, ok := d.GetOk("data_encryption"); ok {
+		value.FieldByName("DataEncryption").Set(reflect.ValueOf(helper.String(v.(string))))
+	}
+	if v, ok := d.GetOk("encryption_key_source"); ok {
+		value.FieldByName("EncryptionKeySource").Set(reflect.ValueOf(helper.String(v.(string))))
+	}
+	if v, ok := d.GetOk("key_id"); ok {
+		value.FieldByName("KeyId").Set(reflect.ValueOf(helper.String(v.(string))))
+	}
+	if v, ok := d.GetOk("kms_region"); ok {
+		value.FieldByName("KmsRegion").Set(reflect.ValueOf(helper.String(v.(string))))
+	}
 	return nil
+}
+
+func mongodbShardingNodeListItemKey(node interface{}, fields ...string) string {
+	nodeMap, ok := node.(map[string]interface{})
+	if !ok {
+		return fmt.Sprintf("%v", node)
+	}
+
+	values := make([]string, 0, len(fields))
+	for _, field := range fields {
+		value, _ := nodeMap[field].(string)
+		values = append(values, value)
+	}
+	return strings.Join(values, "|")
+}
+
+func mongodbShardingAddNodeListItemKey(node interface{}) string {
+	return mongodbShardingNodeListItemKey(node, "role", "zone")
+}
+
+func mongodbShardingRemoveNodeListItemKey(node interface{}) string {
+	return mongodbShardingNodeListItemKey(node, "role", "node_name", "zone")
+}
+
+func mongodbShardingBuildNodeListCounter(nodeList []interface{}, itemKeyFunc func(interface{}) string) map[string]int {
+	counter := make(map[string]int, len(nodeList))
+	for _, item := range nodeList {
+		counter[itemKeyFunc(item)]++
+	}
+	return counter
+}
+
+func mongodbShardingIsNodeListSubset(subset, superset []interface{}, itemKeyFunc func(interface{}) string) bool {
+	supersetCounter := mongodbShardingBuildNodeListCounter(superset, itemKeyFunc)
+	for _, item := range subset {
+		itemKey := itemKeyFunc(item)
+		if supersetCounter[itemKey] <= 0 {
+			return false
+		}
+		supersetCounter[itemKey]--
+	}
+	return true
+}
+
+func mongodbShardingDiffNodeList(oldList, newList []interface{}, itemKeyFunc func(interface{}) string) []interface{} {
+	oldCounter := mongodbShardingBuildNodeListCounter(oldList, itemKeyFunc)
+	changedNodeList := make([]interface{}, 0)
+	for _, item := range newList {
+		itemKey := itemKeyFunc(item)
+		if oldCounter[itemKey] > 0 {
+			oldCounter[itemKey]--
+			continue
+		}
+		changedNodeList = append(changedNodeList, item)
+	}
+	return changedNodeList
 }
 
 func mongodbCreateShardingInstanceByUse(ctx context.Context, d *schema.ResourceData, meta interface{}) error {
@@ -367,6 +486,10 @@ func resourceMongodbShardingInstanceRead(d *schema.ResourceData, meta interface{
 	_ = d.Set("mongos_node_num", instance.MongosNodeNum)
 	_ = d.Set("auto_renew_flag", instance.AutoRenewFlag)
 
+	if instance.CpuNum != nil {
+		_ = d.Set("cpu", int(*instance.CpuNum/(*instance.ReplicationSetNum)))
+	}
+
 	groups, err := mongodbService.DescribeSecurityGroup(ctx, instanceId)
 	if err != nil {
 		return err
@@ -411,6 +534,35 @@ func resourceMongodbShardingInstanceRead(d *schema.ResourceData, meta interface{
 	}
 	_ = d.Set("tags", tags)
 
+	// encryption
+	encryptResp, err := mongodbService.DescribeTransparentDataEncryptionStatusById(ctx, instanceId)
+	if err != nil {
+		return err
+	}
+
+	if encryptResp != nil {
+		if encryptResp.TransparentDataEncryptionStatus != nil {
+			if *encryptResp.TransparentDataEncryptionStatus == "open" {
+				_ = d.Set("data_encryption", "TDE")
+			}
+
+			if *encryptResp.TransparentDataEncryptionStatus == "close" {
+				_ = d.Set("data_encryption", "No_Encryption")
+			}
+		}
+
+		if encryptResp.KeyInfoList != nil && len(encryptResp.KeyInfoList) > 0 {
+			keyInfo := encryptResp.KeyInfoList[0]
+			if keyInfo.KeyName != nil {
+				_ = d.Set("key_id", keyInfo.KeyName)
+			}
+
+			if keyInfo.KmsRegion != nil {
+				_ = d.Set("kms_region", keyInfo.KmsRegion)
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -427,42 +579,255 @@ func resourceMongodbShardingInstanceUpdate(d *schema.ResourceData, meta interfac
 	tagService := svctag.NewTagService(client)
 	region := client.Region
 
+	immutableArgs := []string{"data_encryption", "encryption_key_source", "key_id", "kms_region"}
+	for _, v := range immutableArgs {
+		if d.HasChange(v) {
+			return fmt.Errorf("argument `%s` cannot be changed", v)
+		}
+	}
+
 	d.Partial(true)
-	if d.HasChange("availability_zone_list") || d.HasChange("hidden_zone") {
-		return fmt.Errorf("setting of the field[availability_zone_list, hidden_zone] does not support update")
+	if d.HasChange("mongos_node_num") && !(d.HasChange("add_node_list") || d.HasChange("remove_node_list")) {
+		return fmt.Errorf("setting of the field[mongos_node_num] does not support update")
 	}
-	if d.HasChange("mongos_cpu") || d.HasChange("mongos_memory") || d.HasChange("mongos_node_num") {
-		return fmt.Errorf("setting of the field[mongos_cpu, mongos_memory, mongos_node_num] does not support update")
-	}
-	if d.HasChange("memory") || d.HasChange("volume") {
-		memory := d.Get("memory").(int)
-		volume := d.Get("volume").(int)
-		_, err := mongodbService.UpgradeInstance(ctx, instanceId, memory, volume, nil)
+	if d.HasChange("available_zone") || d.HasChange("availability_zone_list") || d.HasChange("hidden_zone") {
+		request := mongodb.NewModifyInstanceAzRequest()
+		response := mongodb.NewModifyInstanceAzResponse()
+		var (
+			primaryNodeZone      string
+			hiddenNodeZone       string
+			availabilityZoneList []string
+		)
+
+		if v, ok := d.GetOk("available_zone"); ok {
+			request.PrimaryNodeZone = helper.String(v.(string))
+			primaryNodeZone = v.(string)
+		}
+
+		if v, ok := d.GetOk("hidden_zone"); ok {
+			request.HiddenNodeZone = helper.String(v.(string))
+			hiddenNodeZone = v.(string)
+		}
+
+		if v, ok := d.GetOk("availability_zone_list"); ok {
+			for _, item := range v.([]interface{}) {
+				availabilityZoneList = append(availabilityZoneList, item.(string))
+			}
+
+			// Validate: primaryNodeZone and hiddenNodeZone must be in availabilityZoneList if not empty
+			zoneSet := make(map[string]bool, len(availabilityZoneList))
+			for _, z := range availabilityZoneList {
+				zoneSet[z] = true
+			}
+			if primaryNodeZone != "" && !zoneSet[primaryNodeZone] {
+				return fmt.Errorf("available_zone `%s` must be in availability_zone_list", primaryNodeZone)
+			}
+			if hiddenNodeZone != "" && !zoneSet[hiddenNodeZone] {
+				return fmt.Errorf("hidden_zone `%s` must be in availability_zone_list", hiddenNodeZone)
+			}
+
+			// Pick secondary node zone: last element in availabilityZoneList that differs from primaryNodeZone and hiddenNodeZone
+			var secondaryNodeZone string
+			for i := len(availabilityZoneList) - 1; i >= 0; i-- {
+				z := availabilityZoneList[i]
+				if z != primaryNodeZone && z != hiddenNodeZone {
+					secondaryNodeZone = z
+					break
+				}
+			}
+
+			request.SecondaryNodeZone = append(request.SecondaryNodeZone, &secondaryNodeZone)
+		}
+
+		request.InstanceId = &instanceId
+		request.InMaintenance = helper.IntUint64(0)
+		err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+			result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseMongodbClient().ModifyInstanceAz(request)
+			if e != nil {
+				return tccommon.RetryError(e)
+			} else {
+				log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+			}
+
+			if result == nil || result.Response == nil || result.Response.DealId == nil {
+				return resource.NonRetryableError(fmt.Errorf("Modify instance az failed, Response is nil"))
+			}
+
+			response = result
+			return nil
+		})
+
 		if err != nil {
+			log.Printf("[CRITAL]%s update mongodb az failed, reason:%+v", logId, err)
 			return err
 		}
 
-		// it will take time to wait for memory and volume change even describe request succeeded even the status returned in describe response is running
-		errUpdate := resource.Retry(20*tccommon.ReadRetryTimeout, func() *resource.RetryError {
-			infos, has, e := mongodbService.DescribeInstanceById(ctx, instanceId)
+		dealId := *response.Response.DealId
+
+		// wait for api sync
+		time.Sleep(10 * time.Second)
+		waitReq := mongodb.NewDescribeDBInstanceDealRequest()
+		waitReq.DealId = &dealId
+		err = resource.Retry(tccommon.ReadRetryTimeout*20, func() *resource.RetryError {
+			result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseMongodbClient().DescribeDBInstanceDeal(waitReq)
 			if e != nil {
-				return resource.NonRetryableError(e)
-			}
-			if !has {
-				return resource.NonRetryableError(fmt.Errorf("[CRITAL]%s updating mongodb sharding instance failed, instance doesn't exist", logId))
+				return tccommon.RetryError(e)
+			} else {
+				log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, waitReq.GetAction(), waitReq.ToJsonString(), result.ToJsonString())
 			}
 
-			memoryDes := *infos.Memory / 1024 / (*infos.ReplicationSetNum)
-			volumeDes := *infos.Volume / 1024 / (*infos.ReplicationSetNum)
-			if memory != int(memoryDes) || volume != int(volumeDes) {
-				return resource.RetryableError(fmt.Errorf("[CRITAL] updating mongodb sharding instance, current memory and volume values: %d, %d, waiting for them becoming new value: %d, %d", memoryDes, volumeDes, d.Get("memory").(int), d.Get("volume").(int)))
+			if result == nil || result.Response == nil {
+				return resource.NonRetryableError(fmt.Errorf("Describe db instance deal failed, Response is nil"))
 			}
-			return nil
+
+			if result.Response.Status == nil {
+				return resource.NonRetryableError(fmt.Errorf("Describe db instance deal failed, Status is nil"))
+			}
+
+			if *result.Response.Status == 4 {
+				return nil
+			}
+
+			return resource.RetryableError(fmt.Errorf("mongodb az is still in running, status: %d", *result.Response.Status))
 		})
-		if errUpdate != nil {
-			return errUpdate
+
+		if err != nil {
+			log.Printf("[CRITAL]%s update mongodb az failed, reason:%+v", logId, err)
+			return err
+		}
+	}
+
+	if d.HasChange("mongos_cpu") && d.HasChange("mongos_memory") {
+		if v, ok := d.GetOk("mongos_memory"); ok {
+			dealId, err := mongodbService.ModifyMongosMemory(ctx, instanceId, v.(int))
+			if err != nil {
+				return err
+			}
+			if dealId == "" {
+				return fmt.Errorf("deal id is empty")
+			}
+
+			errUpdate := resource.Retry(20*tccommon.ReadRetryTimeout, func() *resource.RetryError {
+				dealResponseParams, err := mongodbService.DescribeDBInstanceDeal(ctx, dealId)
+				if err != nil {
+					if sdkError, ok := err.(*sdkErrors.TencentCloudSDKError); ok {
+						if sdkError.Code == "InvalidParameter" && sdkError.Message == "deal resource not found." {
+							return resource.RetryableError(err)
+						}
+					}
+					return resource.NonRetryableError(err)
+				}
+
+				if *dealResponseParams.Status != MONGODB_STATUS_DELIVERY_SUCCESS {
+					return resource.RetryableError(fmt.Errorf("mongodb status is not delivery success"))
+				}
+				return nil
+			})
+			if errUpdate != nil {
+				return errUpdate
+			}
+		}
+	}
+	if d.HasChange("memory") || d.HasChange("volume") || d.HasChange("cpu") || d.HasChange("add_node_list") || d.HasChange("remove_node_list") {
+		memory := d.Get("memory").(int)
+		volume := d.Get("volume").(int)
+		params := make(map[string]interface{})
+
+		if v, ok := d.GetOkExists("cpu"); ok {
+			params["cpu"] = v.(int)
 		}
 
+		var inMaintenance int
+		if v, ok := d.GetOkExists("in_maintenance"); ok {
+			inMaintenance = v.(int)
+			params["in_maintenance"] = v.(int)
+		}
+
+		if d.HasChange("add_node_list") {
+			oldAddNodeListInterface, newAddNodeListInterface := d.GetChange("add_node_list")
+			oldAddNodeList, _ := oldAddNodeListInterface.([]interface{})
+			newAddNodeList, _ := newAddNodeListInterface.([]interface{})
+
+			switch {
+			case len(oldAddNodeList) == len(newAddNodeList):
+				if len(newAddNodeList) > 0 {
+					params["add_node_list"] = newAddNodeList
+				}
+			case len(oldAddNodeList) > len(newAddNodeList):
+				if mongodbShardingIsNodeListSubset(newAddNodeList, oldAddNodeList, mongodbShardingAddNodeListItemKey) {
+					_ = d.Set("add_node_list", newAddNodeList)
+				} else if len(newAddNodeList) > 0 {
+					params["add_node_list"] = newAddNodeList
+				}
+			default:
+				changedAddNodeList := mongodbShardingDiffNodeList(oldAddNodeList, newAddNodeList, mongodbShardingAddNodeListItemKey)
+				if len(changedAddNodeList) > 0 {
+					params["add_node_list"] = changedAddNodeList
+				}
+			}
+		}
+
+		if d.HasChange("remove_node_list") {
+			oldRemoveNodeListInterface, newRemoveNodeListInterface := d.GetChange("remove_node_list")
+			oldRemoveNodeList, _ := oldRemoveNodeListInterface.([]interface{})
+			newRemoveNodeList, _ := newRemoveNodeListInterface.([]interface{})
+
+			switch {
+			case len(oldRemoveNodeList) == len(newRemoveNodeList):
+				if len(newRemoveNodeList) > 0 {
+					params["remove_node_list"] = newRemoveNodeList
+				}
+			case len(oldRemoveNodeList) > len(newRemoveNodeList):
+				if mongodbShardingIsNodeListSubset(newRemoveNodeList, oldRemoveNodeList, mongodbShardingRemoveNodeListItemKey) {
+					_ = d.Set("remove_node_list", newRemoveNodeList)
+				} else if len(newRemoveNodeList) > 0 {
+					params["remove_node_list"] = newRemoveNodeList
+				}
+			default:
+				changedRemoveNodeList := mongodbShardingDiffNodeList(oldRemoveNodeList, newRemoveNodeList, mongodbShardingRemoveNodeListItemKey)
+				if len(changedRemoveNodeList) > 0 {
+					params["remove_node_list"] = changedRemoveNodeList
+				}
+			}
+		}
+
+		needUpgrade := d.HasChange("memory") || d.HasChange("volume")
+		if _, ok := params["add_node_list"]; ok {
+			needUpgrade = true
+		}
+		if _, ok := params["remove_node_list"]; ok {
+			needUpgrade = true
+		}
+
+		if needUpgrade {
+			_, err := mongodbService.UpgradeInstance(ctx, instanceId, memory, volume, params)
+			if err != nil {
+				return err
+			}
+
+			// it will take time to wait for memory and volume change even describe request succeeded even the status returned in describe response is running
+			if inMaintenance == 0 {
+				errUpdate := resource.Retry(20*tccommon.ReadRetryTimeout, func() *resource.RetryError {
+					infos, has, e := mongodbService.DescribeInstanceById(ctx, instanceId)
+					if e != nil {
+						return resource.NonRetryableError(e)
+					}
+					if !has {
+						return resource.NonRetryableError(fmt.Errorf("[CRITAL]%s updating mongodb sharding instance failed, instance doesn't exist", logId))
+					}
+
+					memoryDes := *infos.Memory / 1024 / (*infos.ReplicationSetNum)
+					volumeDes := *infos.Volume / 1024 / (*infos.ReplicationSetNum)
+					if memory != int(memoryDes) || volume != int(volumeDes) {
+						return resource.RetryableError(fmt.Errorf("[CRITAL] updating mongodb sharding instance, current memory and volume values: %d, %d, waiting for them becoming new value: %d, %d", memoryDes, volumeDes, d.Get("memory").(int), d.Get("volume").(int)))
+					}
+					return nil
+				})
+				if errUpdate != nil {
+					return errUpdate
+				}
+			}
+		}
 	}
 
 	if d.HasChange("instance_name") {
@@ -525,6 +890,41 @@ func resourceMongodbShardingInstanceUpdate(d *schema.ResourceData, meta interfac
 		}
 		err := mongodbService.ModifySecurityGroups(ctx, instanceId, securityGroupIds)
 		if err != nil {
+			return err
+		}
+	}
+
+	if d.HasChange("engine_version") {
+		request := mongodb.NewUpgradeDbInstanceVersionRequest()
+		response := mongodb.NewUpgradeDbInstanceVersionResponse()
+		request.InstanceId = &instanceId
+		if v, ok := d.GetOk("engine_version"); ok {
+			request.MongoVersion = helper.String(v.(string))
+		}
+
+		reqErr := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+			result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseMongodbClient().UpgradeDbInstanceVersionWithContext(ctx, request)
+			if e != nil {
+				return tccommon.RetryError(e)
+			} else {
+				log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+			}
+
+			if result == nil || result.Response == nil || result.Response.FlowId == nil {
+				return resource.NonRetryableError(fmt.Errorf("Upgrade engine version failed, Response is nil."))
+			}
+
+			response = result
+			return nil
+		})
+
+		if reqErr != nil {
+			log.Printf("[CRITAL]%s upgrade engine version failed, reason:%+v", logId, reqErr)
+			return reqErr
+		}
+
+		flowIdStr := helper.UInt64ToStr(*response.Response.FlowId)
+		if err := mongodbService.DescribeAsyncRequestInfo(ctx, flowIdStr, 20*tccommon.ReadRetryTimeout); err != nil {
 			return err
 		}
 	}

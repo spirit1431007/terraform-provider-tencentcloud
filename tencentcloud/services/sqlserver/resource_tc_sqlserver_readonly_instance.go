@@ -69,6 +69,21 @@ func ResourceTencentCloudSqlserverReadonlyInstance() *schema.Resource {
 			Optional:    true,
 			Description: "When `readonly_group_type`=2 and `readonly_groups_is_offline_delay`=1, it is required. After the newly created read-only group is delayed and removed, at least the number of read-only copies should be retained.",
 		},
+		"engine_version": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "Version of the SQL Server database engine.",
+		},
+		"ha_type": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "Instance type.",
+		},
+		"project_id": {
+			Type:        schema.TypeInt,
+			Computed:    true,
+			Description: "Project ID.",
+		},
 	}
 
 	basic := TencentSqlServerBasicInfo(true)
@@ -81,7 +96,9 @@ func ResourceTencentCloudSqlserverReadonlyInstance() *schema.Resource {
 		Read:   resourceTencentCloudSqlserverReadonlyInstanceRead,
 		Update: resourceTencentCloudSqlserverReadonlyInstanceUpdate,
 		Delete: resourceTencentCloudSqlserverReadonlyInstanceDelete,
-
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 		Schema: readonlyInstanceInfo,
 	}
 }
@@ -183,6 +200,10 @@ func resourceTencentCloudSqlserverReadonlyInstanceCreate(d *schema.ResourceData,
 		request.VoucherIds = helper.InterfacesStringsPoint(v)
 	}
 
+	if v, ok := d.GetOk("time_zone"); ok {
+		request.TimeZone = helper.String(v.(string))
+	}
+
 	var instanceId string
 	var outErr, inErr error
 
@@ -263,6 +284,29 @@ func resourceTencentCloudSqlserverReadonlyInstanceRead(d *schema.ResourceData, m
 	_ = d.Set("readonly_groups_max_delay_time", readOnlyInstance.ReadOnlyMaxDelayTime)
 	_ = d.Set("readonly_groups_min_in_group", readOnlyInstance.MinReadOnlyInGroup)
 
+	readOnlyGroup, err := sqlserverService.DescribeReadOnlyGroupListById(ctx, *readOnlyInstance.MasterInstanceId, *readOnlyInstance.ReadOnlyGroupId)
+	if readOnlyGroup == nil {
+		d.SetId("")
+		log.Printf("[WARN]%s resource `sqlserver_readonly_instance` [%s] not found, please check if it has been deleted.\n", logId, d.Id())
+		return nil
+	}
+
+	if readOnlyGroup.ReadOnlyGroupType != nil {
+		_ = d.Set("readonly_group_type", readOnlyGroup.ReadOnlyGroupType)
+	}
+
+	if readOnlyGroup.ReadOnlyGroupForcedUpgrade != nil {
+		if *readOnlyGroup.ReadOnlyGroupForcedUpgrade == 1 {
+			_ = d.Set("force_upgrade", true)
+		} else {
+			_ = d.Set("force_upgrade", false)
+		}
+	}
+
+	if instance.TimeZone != nil {
+		_ = d.Set("time_zone", instance.TimeZone)
+	}
+
 	tcClient := meta.(tccommon.ProviderMeta).GetAPIV3Conn()
 	tagService := svctag.NewTagService(tcClient)
 	tags, err := tagService.DescribeResourceTags(ctx, "sqlserver", "instance", tcClient.Region, d.Id())
@@ -279,6 +323,13 @@ func resourceTencentCloudSqlserverReadonlyInstanceUpdate(d *schema.ResourceData,
 
 	logId := tccommon.GetLogId(tccommon.ContextNil)
 	ctx := context.WithValue(context.TODO(), tccommon.LogIdKey, logId)
+
+	immutableArgs := []string{"time_zone"}
+	for _, v := range immutableArgs {
+		if d.HasChange(v) {
+			return fmt.Errorf("argument `%s` cannot be changed", v)
+		}
+	}
 
 	//basic info update
 	if err := sqlServerAllInstanceRoleUpdate(ctx, d, meta); err != nil {

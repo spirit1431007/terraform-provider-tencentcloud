@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -50,7 +51,7 @@ func (me *LogRoundTripper) RoundTrip(request *http.Request) (response *http.Resp
 		return
 	}
 
-	var headName = "X-TC-Action"
+	var headName = "X-Tc-Action"
 
 	if envReqClient := os.Getenv(REQUEST_CLIENT); envReqClient != "" {
 		ReqClient = envReqClient
@@ -71,16 +72,16 @@ func (me *LogRoundTripper) RoundTrip(request *http.Request) (response *http.Resp
 
 	request.Header.Set("X-TC-RequestClient", reqClientFormat)
 	inBytes = []byte(fmt.Sprintf("%s, request: ", request.Header[headName]))
-	requestBody, errRet := ioutil.ReadAll(bodyReader)
+	requestBody, errRet := io.ReadAll(bodyReader)
 	if errRet != nil {
 		return
 	}
 
 	inBytes = append(inBytes, requestBody...)
-	headName = "X-TC-Region"
+	headName = "X-Tc-Region"
 	appendMessage := []byte(fmt.Sprintf(
 		", (host %+v, region:%+v)",
-		request.Header["Host"],
+		request.Host,
 		request.Header[headName],
 	))
 
@@ -90,12 +91,12 @@ func (me *LogRoundTripper) RoundTrip(request *http.Request) (response *http.Resp
 		return
 	}
 
-	outBytes, errRet = ioutil.ReadAll(response.Body)
+	outBytes, errRet = io.ReadAll(response.Body)
 	if errRet != nil {
 		return
 	}
 
-	response.Body = ioutil.NopCloser(bytes.NewBuffer(outBytes))
+	response.Body = io.NopCloser(bytes.NewBuffer(outBytes))
 	return
 }
 
@@ -138,4 +139,18 @@ func (me *LogRoundTripper) log(in []byte, out []byte, err error, start time.Time
 	buf.WriteString(costFormat)
 
 	log.Println(buf.String())
+}
+
+// GetReqClientVersion returns the version of request client, if the version is empty or latest, return dev.
+func GetReqClientVersion() string {
+	version := ""
+	if idx := strings.Index(ReqClient, "-"); idx >= 0 {
+		version = ReqClient[idx+1:]
+	}
+
+	if version == "" || version == "latest" {
+		return "dev"
+	}
+
+	return version
 }

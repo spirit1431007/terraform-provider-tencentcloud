@@ -1,5 +1,5 @@
 ---
-subcategory: "Cloud Audit(Audit)"
+subcategory: "Cloud Audit(CloudAudit)"
 layout: "tencentcloud"
 page_title: "TencentCloud: tencentcloud_audit_track"
 sidebar_current: "docs-tencentcloud-resource-audit_track"
@@ -14,7 +14,7 @@ Provides a resource to create a audit track
 ## Example Usage
 
 ```hcl
-resource "tencentcloud_audit_track" "track" {
+resource "tencentcloud_audit_track" "example" {
   action_type = "Read"
   event_names = [
     "*",
@@ -33,6 +33,31 @@ resource "tencentcloud_audit_track" "track" {
 }
 ```
 
+### Specify storage user
+
+```hcl
+resource "tencentcloud_audit_track" "example" {
+  action_type = "Read"
+  event_names = [
+    "*",
+  ]
+  name                  = "terraform_track"
+  resource_type         = "*"
+  status                = 1
+  track_for_all_members = 0
+
+  storage {
+    storage_name       = "db90b92c-91d2-46b0-94ac-debbbb21dc4e"
+    storage_prefix     = "cloudaudit"
+    storage_region     = "ap-guangzhou"
+    storage_type       = "cos"
+    storage_account_id = "100037717137"
+    storage_app_id     = "1309116520"
+    compress           = 1
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -42,7 +67,7 @@ The following arguments are supported:
 * `name` - (Required, String) Track name.
 * `resource_type` - (Required, String) Track product, optional:- `*`: All product- Single product, such as `cos`.
 * `status` - (Required, Int) Track status, optional:- `0`: Close- `1`: Open.
-* `storage` - (Required, List) Track Storage, support `cos` and `cls`.
+* `storage` - (Required, List) Track Storage, support `cos`, `cls` and `ckafka`.
 * `track_for_all_members` - (Optional, Int) Whether to enable the delivery of group member operation logs to the group management account or trusted service management account, optional:- `0`: Close- `1`: Open.
 
 The `storage` object supports the following:
@@ -50,7 +75,10 @@ The `storage` object supports the following:
 * `storage_name` - (Required, String) Track Storage name:- when StorageType is `cls`, StorageName is cls topicId- when StorageType is `cos`, StorageName is cos bucket name that does not contain `-APPID`.
 * `storage_prefix` - (Required, String) Storage path prefix.
 * `storage_region` - (Required, String) Storage region.
-* `storage_type` - (Required, String) Track Storage type, optional:- `cos`- `cls`.
+* `storage_type` - (Required, String) Track Storage type, optional:- `cos`- `cls`- `ckafka`.
+* `compress` - (Optional, Int) Whether to compress. `1`: compress, `2`: do not compress.
+* `storage_account_id` - (Optional, String) Designated to store user ID.
+* `storage_app_id` - (Optional, String) Designated to store user appid.
 
 ## Attributes Reference
 
@@ -64,6 +92,6 @@ In addition to all arguments above, the following attributes are exported:
 
 audit track can be imported using the id, e.g.
 ```
-$ terraform import tencentcloud_audit_track.track track_id
+$ terraform import tencentcloud_audit_track.example 24283
 ```
 

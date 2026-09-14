@@ -6,6 +6,9 @@ import (
 	"log"
 	"strings"
 
+	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
+	tchttp "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/http"
+
 	as "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/as/v20180419"
 	sdkErrors "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
 
@@ -50,6 +53,11 @@ func resourceTencentCloudKubernetesNodePoolCreatePostFillRequest0(ctx context.Co
 	)
 	if len(configParas) != 1 {
 		return fmt.Errorf("need only one auto_scaling_config")
+	}
+
+	// check params
+	if err := checkParams(ctx); err != nil {
+		return err
 	}
 
 	groupParaStr, err := composeParameterToAsScalingGroupParaSerial(d)
@@ -115,7 +123,7 @@ func resourceTencentCloudKubernetesNodePoolCreatePostHandleResponse0(ctx context
 	nodePoolId := *resp.Response.NodePoolId
 
 	// todo wait for status ok
-	err := resource.Retry(5*tccommon.ReadRetryTimeout, func() *resource.RetryError {
+	err := resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 		nodePool, _, errRet := service.DescribeNodePool(ctx, clusterId, nodePoolId)
 		if errRet != nil {
 			return tccommon.RetryError(errRet, tccommon.InternalError)
@@ -148,6 +156,11 @@ func resourceTencentCloudKubernetesNodePoolCreatePostHandleResponse0(ctx context
 		return err
 	}
 	if err := resourceTencentCloudKubernetesNodePoolUpdateOnExit(ctx); err != nil {
+		return err
+	}
+
+	// wait node scaling
+	if err = waitNodePoolInitializing(ctx, clusterId, nodePoolId, schema.TimeoutCreate); err != nil {
 		return err
 	}
 
@@ -248,6 +261,9 @@ func resourceTencentCloudKubernetesNodePoolReadPostHandleResponse1(ctx context.C
 		if launchCfg.InternetAccessible.PublicIpAssigned != nil {
 			launchConfig["public_ip_assigned"] = launchCfg.InternetAccessible.PublicIpAssigned
 		}
+		if launchCfg.InternetAccessible.IPv4AddressType != nil {
+			launchConfig["ipv4_address_type"] = launchCfg.InternetAccessible.IPv4AddressType
+		}
 		if launchCfg.InstanceChargeType != nil {
 			launchConfig["instance_charge_type"] = launchCfg.InstanceChargeType
 			if *launchCfg.InstanceChargeType == svcas.INSTANCE_CHARGE_TYPE_SPOTPAID && launchCfg.InstanceMarketOptions != nil {
@@ -323,6 +339,10 @@ func resourceTencentCloudKubernetesNodePoolReadPostHandleResponse1(ctx context.C
 			launchConfig["host_name_style"] = launchCfg.HostNameSettings.HostNameStyle
 		}
 
+		if launchCfg.DedicatedClusterId != nil {
+			launchConfig["cdc_id"] = launchCfg.DedicatedClusterId
+		}
+
 		asgConfig := make([]interface{}, 0, 1)
 		asgConfig = append(asgConfig, launchConfig)
 		if err := d.Set("auto_scaling_config", asgConfig); err != nil {
@@ -380,6 +400,10 @@ func resourceTencentCloudKubernetesNodePoolReadPostHandleResponse1(ctx context.C
 
 		if helper.PString(nodePool.UserScript) != "" {
 			nodeConfig["user_data"] = helper.PString(nodePool.UserScript)
+		}
+
+		if helper.PString(nodePool.PreStartUserScript) != "" {
+			nodeConfig["pre_start_user_script"] = helper.PString(nodePool.PreStartUserScript)
 		}
 
 		if nodePool.GPUArgs != nil {
@@ -466,6 +490,11 @@ func resourceTencentCloudKubernetesNodePoolReadPostHandleResponse1(ctx context.C
 				_ = d.Set("scaling_mode", v.(string))
 			}
 		}
+
+		if asg.ServiceSettings != nil && asg.ServiceSettings.AutoUpdateInstanceTags != nil {
+			_ = d.Set("auto_update_instance_tags", asg.ServiceSettings.AutoUpdateInstanceTags)
+		}
+
 		// If not check, the diff between computed and default empty value leads to force replacement
 		if _, ok := d.GetOk("multi_zone_subnet_policy"); ok {
 			_ = d.Set("multi_zone_subnet_policy", asg.MultiZoneSubnetPolicy)
@@ -520,6 +549,9 @@ func resourceTencentCloudKubernetesNodePoolDeletePostHandleResponse0(ctx context
 			if errCode == "InternalError.UnexpectedInternal" {
 				return nil
 			}
+			if errCode == "FailedOperation.NodePoolQueryFailed" {
+				return nil
+			}
 			return tccommon.RetryError(errRet, tccommon.InternalError)
 		}
 		if has {
@@ -550,6 +582,11 @@ func resourceTencentCloudKubernetesNodePoolUpdateOnStart(ctx context.Context) er
 	}
 	clusterId := items[0]
 	nodePoolId := items[1]
+
+	// check params
+	if err := checkParams(ctx); err != nil {
+		return err
+	}
 
 	d.Partial(true)
 
@@ -609,52 +646,63 @@ func resourceTencentCloudKubernetesNodePoolUpdateOnStart(ctx context.Context) er
 			return err
 		}
 		capacityHasChanged = true
+
+		// wait node scaling
+		if err = waitNodePoolInitializing(ctx, clusterId, nodePoolId, schema.TimeoutUpdate); err != nil {
+			return err
+		}
 	}
 
 	// ModifyClusterNodePool
 	if d.HasChanges(
+		"node_os",
+		"node_os_type",
 		"labels",
 		"tags",
 	) {
-		request := tke.NewModifyClusterNodePoolRequest()
-		request.ClusterId = &clusterId
-		request.NodePoolId = &nodePoolId
-
-		labels := GetTkeLabels(d, "labels")
-		tags := helper.GetTags(d, "tags")
-		if len(labels) > 0 {
-			request.Labels = labels
-		}
-		if len(tags) > 0 {
-			for k, v := range tags {
-				key := k
-				val := v
-				request.Tags = append(request.Tags, &tke.Tag{
-					Key:   &key,
-					Value: &val,
-				})
-			}
-		}
-
+		var body map[string]interface{}
 		nodeOs := d.Get("node_os").(string)
 		nodeOsType := d.Get("node_os_type").(string)
 		//自定镜像不能指定节点操作系统类型
 		if strings.Contains(nodeOs, "img-") {
 			nodeOsType = ""
 		}
-		request.OsName = &nodeOs
-		request.OsCustomizeType = &nodeOsType
-		err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
-			result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseTkeClient().ModifyClusterNodePool(request)
-			if e != nil {
-				return tccommon.RetryError(e)
-			} else {
-				log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+
+		labels := GetTkeLabels(d, "labels")
+		body = map[string]interface{}{
+			"ClusterId":       clusterId,
+			"NodePoolId":      nodePoolId,
+			"OsName":          nodeOs,
+			"OsCustomizeType": nodeOsType,
+			"Labels":          labels,
+		}
+
+		tags := helper.GetTags(d, "tags")
+		if len(tags) > 0 {
+			var tmpTags []*tke.Tag
+			for k, v := range tags {
+				key := k
+				val := v
+				tmpTags = append(tmpTags, &tke.Tag{
+					Key:   &key,
+					Value: &val,
+				})
 			}
-			return nil
-		})
+
+			body["Tags"] = tmpTags
+		}
+
+		client := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseOmitNilClient("tke")
+		request := tchttp.NewCommonRequest("tke", "2018-05-25", "ModifyClusterNodePool")
+		err := request.SetActionParameters(body)
 		if err != nil {
-			log.Printf("[CRITAL]%s update kubernetes node pool failed, reason:%+v", logId, err)
+			return err
+		}
+
+		response := tchttp.NewCommonResponse()
+		err = client.Send(request, response)
+		if err != nil {
+			fmt.Printf("update kubernetes node pool taints failed: %v \n", err)
 			return err
 		}
 
@@ -686,6 +734,11 @@ func resourceTencentCloudKubernetesNodePoolUpdateOnStart(ctx context.Context) er
 		if err != nil {
 			return err
 		}
+
+		// wait node scaling
+		if err = waitNodePoolInitializing(ctx, clusterId, nodePoolId, schema.TimeoutUpdate); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -706,6 +759,11 @@ func resourceTencentCloudKubernetesNodePoolUpdateOnExit(ctx context.Context) err
 	}
 	clusterId := items[0]
 	nodePoolId := items[1]
+
+	err := resourceTencentCloudKubernetesNodePoolUpdateTaints(ctx, clusterId, nodePoolId)
+	if err != nil {
+		return err
+	}
 
 	// ModifyScalingGroup
 	if d.HasChange("scaling_group_name") ||
@@ -782,6 +840,24 @@ func resourceTencentCloudKubernetesNodePoolUpdateOnExit(ctx context.Context) err
 		}
 		_ = d.Set("auto_scaling_config.0.backup_instance_types", instanceTypes)
 	}
+
+	if d.HasChange("node_config.0.user_data") || d.HasChange("node_config.0.pre_start_user_script") {
+		userData := d.Get("node_config.0.user_data").(string)
+		preStartUserScript := d.Get("node_config.0.pre_start_user_script").(string)
+		err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+			errRet := service.ModifyClusterNodePoolPreStartUserScript(ctx, clusterId, nodePoolId, userData, preStartUserScript)
+			if errRet != nil {
+				return tccommon.RetryError(errRet)
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			return err
+		}
+	}
+
 	d.Partial(false)
 
 	return nil
@@ -849,8 +925,15 @@ func composeParameterToAsScalingGroupParaSerial(d *schema.ResourceData) (string,
 		request.SubnetIds = helper.InterfacesStringsPoint(subnetIds)
 	}
 
+	asServiceSettings := as.ServiceSettings{}
 	if v, ok := d.GetOk("scaling_mode"); ok {
-		request.ServiceSettings = &as.ServiceSettings{ScalingMode: helper.String(v.(string))}
+		asServiceSettings.ScalingMode = helper.String(v.(string))
+		request.ServiceSettings = &asServiceSettings
+	}
+
+	if v, ok := d.GetOkExists("auto_update_instance_tags"); ok {
+		asServiceSettings.AutoUpdateInstanceTags = helper.Bool(v.(bool))
+		request.ServiceSettings = &asServiceSettings
 	}
 
 	if v, ok := d.GetOk("multi_zone_subnet_policy"); ok {
@@ -931,6 +1014,10 @@ func composedKubernetesAsScalingConfigParaSerial(dMap map[string]interface{}, me
 	if v, ok := dMap["public_ip_assigned"]; ok {
 		publicIpAssigned := v.(bool)
 		request.InternetAccessible.PublicIpAssigned = &publicIpAssigned
+	}
+	if v, ok := dMap["ipv4_address_type"]; ok && v != "" {
+		ipv4AddressType := v.(string)
+		request.InternetAccessible.IPv4AddressType = &ipv4AddressType
 	}
 
 	request.LoginSettings = &as.LoginSettings{}
@@ -1053,6 +1140,11 @@ func composedKubernetesAsScalingConfigParaSerial(dMap map[string]interface{}, me
 			}
 		}
 	}
+
+	if v, ok := dMap["cdc_id"]; ok && v != "" {
+		request.DedicatedClusterId = helper.String(v.(string))
+	}
+
 	result = request.ToJsonString()
 	return result, errRet
 }
@@ -1136,6 +1228,10 @@ func composeAsLaunchConfigModifyRequest(d *schema.ResourceData, launchConfigId s
 	if v, ok := dMap["public_ip_assigned"]; ok {
 		publicIpAssigned := v.(bool)
 		request.InternetAccessible.PublicIpAssigned = &publicIpAssigned
+	}
+	if v, ok := dMap["ipv4_address_type"]; ok && v != "" {
+		ipv4AddressType := v.(string)
+		request.InternetAccessible.IPv4AddressType = &ipv4AddressType
 	}
 
 	if d.HasChange("auto_scaling_config.0.security_group_ids") {
@@ -1242,4 +1338,239 @@ func desiredCapacityOutRange(d *schema.ResourceData) bool {
 	minSize := d.Get("min_size").(int)
 	maxSize := d.Get("max_size").(int)
 	return capacity > maxSize || capacity < minSize
+}
+
+func resourceTencentCloudKubernetesNodePoolUpdateTaints(ctx context.Context, clusterId string, nodePoolId string) error {
+	d := tccommon.ResourceDataFromContext(ctx)
+	meta := tccommon.ProviderMetaFromContext(ctx)
+	logId := tccommon.GetLogId(tccommon.ContextNil)
+
+	if d.HasChange("taints") {
+		_, n := d.GetChange("taints")
+
+		// clean taints
+		if len(n.([]interface{})) == 0 {
+			body := map[string]interface{}{
+				"ClusterId":  clusterId,
+				"NodePoolId": nodePoolId,
+				"Taints":     []interface{}{},
+			}
+
+			client := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseOmitNilClient("tke")
+			request := tchttp.NewCommonRequest("tke", "2018-05-25", "ModifyClusterNodePool")
+			err := request.SetActionParameters(body)
+			if err != nil {
+				return err
+			}
+
+			response := tchttp.NewCommonResponse()
+			err = client.Send(request, response)
+			if err != nil {
+				fmt.Printf("update kubernetes node pool taints failed: %v \n", err)
+				return err
+			}
+		} else {
+			request := tke.NewModifyClusterNodePoolRequest()
+			request.ClusterId = helper.String(clusterId)
+			request.NodePoolId = helper.String(nodePoolId)
+
+			if v, ok := d.GetOk("taints"); ok {
+				for _, item := range v.([]interface{}) {
+					taintsMap := item.(map[string]interface{})
+					taint := tke.Taint{}
+					if v, ok := taintsMap["key"]; ok {
+						taint.Key = helper.String(v.(string))
+					}
+
+					if v, ok := taintsMap["value"]; ok {
+						taint.Value = helper.String(v.(string))
+					}
+
+					if v, ok := taintsMap["effect"]; ok {
+						taint.Effect = helper.String(v.(string))
+					}
+
+					request.Taints = append(request.Taints, &taint)
+				}
+			}
+
+			err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+				result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseTkeV20180525Client().ModifyClusterNodePoolWithContext(ctx, request)
+				if e != nil {
+					return tccommon.RetryError(e)
+				} else {
+					log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+				}
+
+				return nil
+			})
+
+			if err != nil {
+				log.Printf("[CRITAL]%s update kubernetes node pool taints failed, reason:%+v", logId, err)
+				return err
+			}
+		}
+
+		service := TkeService{client: meta.(tccommon.ProviderMeta).GetAPIV3Conn()}
+		err := resource.Retry(5*tccommon.ReadRetryTimeout, func() *resource.RetryError {
+			nodePool, _, errRet := service.DescribeNodePool(ctx, clusterId, nodePoolId)
+			if errRet != nil {
+				return tccommon.RetryError(errRet, tccommon.InternalError)
+			}
+			if nodePool != nil && *nodePool.LifeState == "normal" {
+				return nil
+			}
+			return resource.RetryableError(fmt.Errorf("node pool status is %s, retry...", *nodePool.LifeState))
+		})
+
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+	return nil
+}
+
+func checkParams(ctx context.Context) error {
+	d := tccommon.ResourceDataFromContext(ctx)
+	var (
+		enableAutoscale bool
+		waitNodeReady   bool
+	)
+
+	if v, ok := d.GetOkExists("enable_auto_scale"); ok {
+		enableAutoscale = v.(bool)
+	}
+
+	if v, ok := d.GetOkExists("wait_node_ready"); ok {
+		waitNodeReady = v.(bool)
+	}
+
+	if enableAutoscale && waitNodeReady {
+		return fmt.Errorf("`wait_node_ready` only can be set if `enable_auto_scale` is `false`.")
+	}
+
+	if _, ok := d.GetOkExists("scale_tolerance"); ok {
+		if !waitNodeReady {
+			return fmt.Errorf("`scale_tolerance` only can be set if `wait_node_ready` is `true`.")
+		}
+	}
+
+	return nil
+}
+
+func waitNodePoolInitializing(ctx context.Context, clusterId, nodePoolId, step string) (err error) {
+	d := tccommon.ResourceDataFromContext(ctx)
+	meta := tccommon.ProviderMetaFromContext(ctx)
+
+	var (
+		currentNormal      int64
+		desiredCapacity    int64
+		waitNodeReady      bool
+		scaleTolerance     int64 = 100
+		autoscalingGroupId string
+	)
+
+	if v, ok := d.GetOkExists("wait_node_ready"); ok {
+		waitNodeReady = v.(bool)
+	}
+
+	if waitNodeReady {
+		var dTimeout string
+		if step == schema.TimeoutCreate {
+			dTimeout = schema.TimeoutCreate
+		} else {
+			dTimeout = schema.TimeoutUpdate
+		}
+
+		if v, ok := d.GetOkExists("desired_capacity"); ok {
+			desiredCapacity = int64(v.(int))
+			if desiredCapacity == 0 {
+				desiredCapacity = 1
+			}
+		}
+
+		if v, ok := d.GetOkExists("scale_tolerance"); ok {
+			scaleTolerance = int64(v.(int))
+		}
+
+		logId := tccommon.GetLogId(tccommon.ContextNil)
+		nodePoolDetailrequest := tke.NewDescribeClusterNodePoolDetailRequest()
+		nodePoolDetailrequest.ClusterId = common.StringPtr(clusterId)
+		nodePoolDetailrequest.NodePoolId = common.StringPtr(nodePoolId)
+		err = resource.Retry(d.Timeout(dTimeout), func() *resource.RetryError {
+			result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseTkeV20180525Client().DescribeClusterNodePoolDetailWithContext(ctx, nodePoolDetailrequest)
+			if e != nil {
+				return tccommon.RetryError(e)
+			} else {
+				log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, nodePoolDetailrequest.GetAction(), nodePoolDetailrequest.ToJsonString(), result.ToJsonString())
+			}
+
+			if result == nil || result.Response == nil || result.Response.NodePool == nil || result.Response.NodePool.NodeCountSummary == nil || result.Response.NodePool.NodeCountSummary.AutoscalingAdded == nil {
+				e = fmt.Errorf("Cluster %s node pool %s not exists", clusterId, nodePoolId)
+				return resource.NonRetryableError(e)
+			}
+
+			desiredNodesNum := result.Response.NodePool.DesiredNodesNum
+			autoscalingAdded := result.Response.NodePool.NodeCountSummary.AutoscalingAdded
+			total := autoscalingAdded.Total
+			normal := autoscalingAdded.Normal
+			if *total != 0 {
+				if *normal > *desiredNodesNum {
+					return resource.RetryableError(fmt.Errorf("Node pool is still scaling"))
+				}
+
+				currentTolerance := int64((float64(*normal) / float64(*desiredNodesNum)) * 100)
+				if currentTolerance >= scaleTolerance || *desiredNodesNum == *normal {
+					return nil
+				}
+			}
+
+			currentNormal = *normal
+			autoscalingGroupId = *result.Response.NodePool.AutoscalingGroupId
+			return resource.RetryableError(fmt.Errorf("Node pool is still scaling"))
+		})
+
+		if err != nil {
+			if currentNormal < 1 {
+				var errFmt string
+				asRequest := as.NewDescribeAutoScalingActivitiesRequest()
+				asRequest.Filters = []*as.Filter{
+					{
+						Name:   common.StringPtr("auto-scaling-group-id"),
+						Values: common.StringPtrs([]string{autoscalingGroupId}),
+					},
+				}
+
+				err = resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
+					result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseAsClient().DescribeAutoScalingActivitiesWithContext(ctx, asRequest)
+					if e != nil {
+						return tccommon.RetryError(e)
+					} else {
+						log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, asRequest.GetAction(), asRequest.ToJsonString(), result.ToJsonString())
+					}
+
+					if result == nil || result.Response == nil || result.Response.ActivitySet == nil || len(result.Response.ActivitySet) < 1 {
+						e = fmt.Errorf("Describe auto scaling activities failed")
+						return resource.NonRetryableError(e)
+					}
+
+					res := result.Response.ActivitySet[0]
+					errFmt = fmt.Sprintf("%s\nDescription: %s\nStatusMessage: %s", *res.StatusMessageSimplified, *res.Description, *res.StatusMessage)
+					return nil
+				})
+
+				if err != nil {
+					return fmt.Errorf("Describe auto scaling activities failed: %s", err)
+				}
+
+				return fmt.Errorf("Node pool scaling failed, Reason: %s\nPlease check your resource inventory, Or adjust `desired_capacity`, `scale_tolerance` and `instance_type`, Then try again.", errFmt)
+			} else {
+				return fmt.Errorf("Node pool scaling failed, Desired value: %d, Actual value: %d, Scale tolerance: %d%%\nPlease check your resource inventory, Or adjust `desired_capacity`, `scale_tolerance` and `instance_type`, Then try again.", desiredCapacity, currentNormal, scaleTolerance)
+			}
+		}
+	}
+
+	return nil
 }

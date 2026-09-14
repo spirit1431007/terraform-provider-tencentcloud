@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+// Copyright (c) 2017-2025 Tencent. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -119,6 +119,9 @@ const (
 	// 用户组创建超过限制
 	FAILEDOPERATION_GROUPOVERUPPERLIMIT = "FailedOperation.GroupOverUpperLimit"
 
+	// 用户组类型和用户类型不匹配
+	FAILEDOPERATION_GROUPTYPEUSERTYPENOTMATCH = "FailedOperation.GroupTypeUserTypeNotMatch"
+
 	// CIC的用户组组员超出限制。
 	FAILEDOPERATION_GROUPUSERCOUNTOVERUPPERLIMIT = "FailedOperation.GroupUserCountOverUpperLimit"
 
@@ -148,6 +151,21 @@ const (
 
 	// 邀请已存在。
 	FAILEDOPERATION_INVITATIONEXIST = "FailedOperation.InvitationExist"
+
+	// 手动用户组不允许删除
+	FAILEDOPERATION_MANUALGROUPNOTDELETE = "FailedOperation.ManualGroupNotDelete"
+
+	// 手动用户组不允许更新
+	FAILEDOPERATION_MANUALGROUPNOTUPDATE = "FailedOperation.ManualGroupNotUpdate"
+
+	// 手动用户不允许删除
+	FAILEDOPERATION_MANUALUSERNOTDELETE = "FailedOperation.ManualUserNotDelete"
+
+	// 手动用户不允许更新
+	FAILEDOPERATION_MANUALUSERNOTUPDATE = "FailedOperation.ManualUserNotUpdate"
+
+	// 成员账号删除审核中。
+	FAILEDOPERATION_MEMBERACCOUNTDEREGISTERPENDING = "FailedOperation.MemberAccountDeregisterPending"
 
 	// 邮箱绑定失败。
 	FAILEDOPERATION_MEMBERBINDEMAILERROR = "FailedOperation.MemberBindEmailError"
@@ -193,6 +211,9 @@ const (
 
 	// 操作策略失败。
 	FAILEDOPERATION_OPERATEPOLICY = "FailedOperation.OperatePolicy"
+
+	// 存在组织成员访问策略。
+	FAILEDOPERATION_ORGMEMBERPOLICYEXIST = "FailedOperation.OrgMemberPolicyExist"
 
 	// 成员是主体管理账号，不允许退出组织。
 	FAILEDOPERATION_ORGANIZATIONAUTHMANAGENOTALLOWDELETE = "FailedOperation.OrganizationAuthManageNotAllowDelete"
@@ -266,6 +287,9 @@ const (
 	// 代付者不合法。
 	FAILEDOPERATION_PAYUINILLEGAL = "FailedOperation.PayUinIllegal"
 
+	// 操作权限被拒绝，OwnerUin不一致
+	FAILEDOPERATION_PERMISSIONDENIED = "FailedOperation.PermissionDenied"
+
 	// 存在成员账号已经开启标签策略，不支持开启集团标签策略
 	FAILEDOPERATION_POLICYENABLEINVALID = "FailedOperation.PolicyEnableInvalid"
 
@@ -314,11 +338,20 @@ const (
 	// 当 SSO 登录处于开启状态时不能清空 SAML 身份提供商信息。
 	FAILEDOPERATION_SSOSTATUSENABLENOTCLEARIDENTITYPROVIDER = "FailedOperation.SSoStatusEnableNotClearIdentityProvider"
 
+	// 生成SCIM密钥失败
+	FAILEDOPERATION_SCIMCREDENTIALGENERATEERROR = "FailedOperation.ScimCredentialGenerateError"
+
 	// 共享地域不存在。
 	FAILEDOPERATION_SHAREAREANOTEXIST = "FailedOperation.ShareAreaNotExist"
 
 	// 共享成员不存在。
 	FAILEDOPERATION_SHAREMEMBERNOTEXIST = "FailedOperation.ShareMemberNotExist"
+
+	// 部门在共享单元中。
+	FAILEDOPERATION_SHARENODEEXISTED = "FailedOperation.ShareNodeExisted"
+
+	// 共享部门不存在。
+	FAILEDOPERATION_SHARENODENOTEXIST = "FailedOperation.ShareNodeNotExist"
 
 	// 成员正在使用共享资源。
 	FAILEDOPERATION_SHARERESOURCEMEMBERINUSE = "FailedOperation.ShareResourceMemberInUse"
@@ -391,6 +424,12 @@ const (
 
 	// 该x509证书已经存在了。
 	FAILEDOPERATION_X509CERTIFICATEALREADYEXIST = "FailedOperation.X509CertificateAlreadyExist"
+
+	// x509证书数量超出限制
+	FAILEDOPERATION_X509CERTIFICATELIMITEXCEEDED = "FailedOperation.X509CertificateLimitExceeded"
+
+	// 需要最少一个x509证书
+	FAILEDOPERATION_X509CERTIFICATEMINIMUMREQUIRED = "FailedOperation.X509CertificateMinimumRequired"
 
 	// X509证书解析失败。
 	FAILEDOPERATION_X509CERTIFICATEPARSINGFAILED = "FailedOperation.X509CertificateParsingFailed"
@@ -578,6 +617,12 @@ const (
 	// 策略不存在
 	INVALIDPARAMETER_ROLEPOLICYNOTEXIST = "InvalidParameter.RolePolicyNotExist"
 
+	// SCIM密钥不存在
+	INVALIDPARAMETER_SCIMCREDENTIALNOTFOUND = "InvalidParameter.ScimCredentialNotFound"
+
+	// SCIM同步状态错误
+	INVALIDPARAMETER_SCIMSYNCSTATUSERROR = "InvalidParameter.ScimSyncStatusError"
+
 	// 策略文档的Statement字段不合法。
 	INVALIDPARAMETER_STATEMENTERROR = "InvalidParameter.StatementError"
 
@@ -589,6 +634,12 @@ const (
 
 	// 用户还存在用户组里。
 	INVALIDPARAMETER_USERALREADYEXISTSGROUP = "InvalidParameter.UserAlreadyExistsGroup"
+
+	// SCIM密钥状态错误
+	INVALIDPARAMETER_USERSCIMCREDENTIALSTATUSERROR = "InvalidParameter.UserScimCredentialStatusError"
+
+	// 用户类型错误。
+	INVALIDPARAMETER_USERTYPEERROR = "InvalidParameter.UserTypeError"
 
 	// 用户名已经存在
 	INVALIDPARAMETER_USERNAMEALREADYEXISTS = "InvalidParameter.UsernameAlreadyExists"
@@ -605,7 +656,7 @@ const (
 	// 策略内容不合法。
 	INVALIDPARAMETERVALUE_POLICYCONTENTINVALID = "InvalidParameterValue.PolicyContentInvalid"
 
-	// sso登陆启用状态值非法
+	// sso登录启用状态值非法
 	INVALIDPARAMETERVALUE_SSOSTATUSINVALID = "InvalidParameterValue.SSoStatusInvalid"
 
 	// X509证书格式错误。
@@ -656,6 +707,9 @@ const (
 	// 请求用户组移除用户超出限制。
 	LIMITEXCEEDED_REMOVEUSERFROMGROUPLIMITEXCEEDED = "LimitExceeded.RemoveUserFromGroupLimitExceeded"
 
+	// SCIM密钥数量超过限制
+	LIMITEXCEEDED_SCIMCREDENTIALLIMITEXCEEDED = "LimitExceeded.ScimCredentialLimitExceeded"
+
 	// 重新发送激活邮件次数超过限制。
 	LIMITEXCEEDED_SENDEMAILLIMIT = "LimitExceeded.SendEmailLimit"
 
@@ -664,6 +718,9 @@ const (
 
 	// 当次操作的共享成员超过上限。
 	LIMITEXCEEDED_SHAREUNITMEMBEROVERLIMIT = "LimitExceeded.ShareUnitMemberOverLimit"
+
+	// 共享单元部门超过上限。
+	LIMITEXCEEDED_SHAREUNITNODEOVERLIMIT = "LimitExceeded.ShareUnitNodeOverLimit"
 
 	// 当次操作的共享资源超过上限。
 	LIMITEXCEEDED_SHAREUNITRESOURCEOVERLIMIT = "LimitExceeded.ShareUnitResourceOverLimit"
@@ -871,6 +928,9 @@ const (
 
 	// 成员不支持操作。
 	UNSUPPORTEDOPERATION_MEMBERUNSUPPORTEDOPERATION = "UnsupportedOperation.MemberUnsupportedOperation"
+
+	// 操作被禁止。
+	UNSUPPORTEDOPERATION_OPERATIONFORBIDDEN = "UnsupportedOperation.OperationForbidden"
 
 	// 存在在途订单。
 	UNSUPPORTEDOPERATION_ORDERINPROGRESSEXISTED = "UnsupportedOperation.OrderInProgressExisted"

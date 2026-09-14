@@ -98,6 +98,61 @@ needMoreItems:
 
 }
 
+func (me *MysqlService) DescribeBackupsByMysqlIdRegion(ctx context.Context,
+	mysqlId string,
+	leftNumber int64, region string) (backupInfos []*cdb.BackupInfo, errRet error) {
+
+	logId := tccommon.GetLogId(ctx)
+
+	listInitSize := leftNumber
+	if listInitSize > 500 {
+		listInitSize = 500
+	}
+	backupInfos = make([]*cdb.BackupInfo, 0, listInitSize)
+
+	request := cdb.NewDescribeBackupsRequest()
+	request.InstanceId = &mysqlId
+
+	var offset, limit int64 = 0, 50
+needMoreItems:
+	if leftNumber <= 0 {
+		return
+	}
+	if leftNumber < limit {
+		limit = leftNumber
+	}
+	request.Limit = &limit
+	request.Offset = &offset
+	defer func() {
+		if errRet != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n",
+				logId, request.GetAction(), request.ToJsonString(), errRet.Error())
+		}
+	}()
+
+	ratelimit.Check(request.GetAction())
+
+	response, err := me.client.UseMysqlClientRegion(region).DescribeBackups(request)
+	if err != nil {
+		errRet = err
+		return
+	}
+
+	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
+		logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
+
+	totalCount := *response.Response.TotalCount
+	leftNumber = leftNumber - limit
+	offset += limit
+
+	backupInfos = append(backupInfos, response.Response.Items...)
+	if leftNumber > 0 && totalCount-offset > 0 {
+		goto needMoreItems
+	}
+	return backupInfos, nil
+
+}
+
 func (me *MysqlService) CreateBackup(ctx context.Context, mysqlId string) (backupId int64, errRet error) {
 
 	logId := tccommon.GetLogId(ctx)
@@ -802,6 +857,7 @@ func (me *MysqlService) _innerDescribeDBInstanceById(ctx context.Context, mysqlI
 	logId := tccommon.GetLogId(ctx)
 	request := cdb.NewDescribeDBInstancesRequest()
 	request.InstanceIds = []*string{&mysqlId}
+	request.QueryClusterInfo = helper.Bool(true)
 
 	defer func() {
 		if errRet != nil {
@@ -1038,60 +1094,6 @@ func (me *MysqlService) DescribeDBInstanceConfig(ctx context.Context, mysqlId st
 
 	backupConfig = response
 
-	return
-}
-
-// DEPRECATED: Specify these arguments while creating.
-func (me *MysqlService) InitDBInstances(ctx context.Context, mysqlId, password, charset, lowerCase string, port int) (asyncRequestId string, errRet error) {
-	logId := tccommon.GetLogId(ctx)
-	request := cdb.NewInitDBInstancesRequest()
-	request.InstanceIds = []*string{&mysqlId}
-	if password != "" {
-		request.NewPassword = &password
-	}
-
-	if port != 0 {
-		request.Vport = helper.IntInt64(port)
-	}
-
-	paramsMap := map[string]string{
-		"character_set_server": "LATIN1", // ["utf8","latin1","gbk","utf8mb4"]
-	}
-
-	if charset != "" {
-		paramsMap["character_set_server"] = charset // ["utf8","latin1","gbk","utf8mb4"]
-	}
-
-	if lowerCase != "" {
-		paramsMap["lower_case_table_names"] = lowerCase // ["0","1"]
-	}
-
-	for k, v := range paramsMap {
-		name := k
-		value := v
-		param := cdb.ParamInfo{Name: &name, Value: &value}
-		request.Parameters = append(request.Parameters, &param)
-	}
-
-	defer func() {
-		if errRet != nil {
-			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n",
-				logId, request.GetAction(), request.ToJsonString(), errRet.Error())
-		}
-	}()
-	ratelimit.Check(request.GetAction())
-	response, err := me.client.UseMysqlClient().InitDBInstances(request)
-
-	if err != nil {
-		errRet = err
-		return
-	}
-	if len(response.Response.AsyncRequestIds) != 1 {
-		errRet = fmt.Errorf("init one  mysql id got %d async ids", len(response.Response.AsyncRequestIds))
-		return
-	}
-
-	asyncRequestId = *response.Response.AsyncRequestIds[0]
 	return
 }
 
@@ -1372,6 +1374,31 @@ func (me *MysqlService) ModifyAutoRenewFlag(ctx context.Context, mysqlId string,
 	return
 }
 
+func (me *MysqlService) ModifyInstanceDestroyProtect(ctx context.Context, mysqlId string, destroyProtect string) (errRet error) {
+
+	logId := tccommon.GetLogId(ctx)
+	request := cdb.NewModifyInstanceDestroyProtectRequest()
+	request.InstanceIds = []*string{&mysqlId}
+	request.DestroyProtect = &destroyProtect
+
+	defer func() {
+		if errRet != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n",
+				logId, request.GetAction(), request.ToJsonString(), errRet.Error())
+		}
+	}()
+	ratelimit.Check(request.GetAction())
+	response, err := me.client.UseMysqlClient().ModifyInstanceDestroyProtect(request)
+
+	if err != nil {
+		errRet = err
+		return
+	}
+	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
+		logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
+	return
+}
+
 func (me *MysqlService) IsolateDBInstance(ctx context.Context, mysqlId string) (asyncRequestId string, errRet error) {
 
 	logId := tccommon.GetLogId(ctx)
@@ -1420,6 +1447,7 @@ func (me *MysqlService) DescribeMysqlTimeWindowById(ctx context.Context, instanc
 	logId := tccommon.GetLogId(ctx)
 
 	request := cdb.NewDescribeTimeWindowRequest()
+	response := cdb.NewDescribeTimeWindowResponse()
 	request.InstanceId = &instanceId
 
 	defer func() {
@@ -1428,24 +1456,40 @@ func (me *MysqlService) DescribeMysqlTimeWindowById(ctx context.Context, instanc
 		}
 	}()
 
-	ratelimit.Check(request.GetAction())
+	err := resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
+		ratelimit.Check(request.GetAction())
+		result, e := me.client.UseMysqlClient().DescribeTimeWindow(request)
+		if e != nil {
+			return tccommon.RetryError(e)
+		} else {
+			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+		}
 
-	response, err := me.client.UseMysqlClient().DescribeTimeWindow(request)
+		response = result
+		return nil
+	})
+
 	if err != nil {
 		errRet = err
 		return
 	}
-	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
 
 	timeWindow = response
 	return
 }
 
-func (me *MysqlService) DescribeMysqlSslById(ctx context.Context, instanceId string) (ssl *cdb.DescribeSSLStatusResponseParams, errRet error) {
+func (me *MysqlService) DescribeMysqlSslById(ctx context.Context, instanceId, roGroupId string) (ssl *cdb.DescribeSSLStatusResponseParams, errRet error) {
 	logId := tccommon.GetLogId(ctx)
 
 	request := cdb.NewDescribeSSLStatusRequest()
-	request.InstanceId = &instanceId
+	response := cdb.NewDescribeSSLStatusResponse()
+	if instanceId != "" {
+		request.InstanceId = &instanceId
+	}
+
+	if roGroupId != "" {
+		request.RoGroupId = &roGroupId
+	}
 
 	defer func() {
 		if errRet != nil {
@@ -1453,14 +1497,27 @@ func (me *MysqlService) DescribeMysqlSslById(ctx context.Context, instanceId str
 		}
 	}()
 
-	ratelimit.Check(request.GetAction())
+	err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+		ratelimit.Check(request.GetAction())
+		result, e := me.client.UseMysqlClient().DescribeSSLStatus(request)
+		if e != nil {
+			return tccommon.RetryError(e)
+		} else {
+			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+		}
 
-	response, err := me.client.UseMysqlClient().DescribeSSLStatus(request)
+		if result == nil || result.Response == nil {
+			return resource.NonRetryableError(fmt.Errorf("Describe ssl status failed, Response is nil."))
+		}
+
+		response = result
+		return nil
+	})
+
 	if err != nil {
 		errRet = err
 		return
 	}
-	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
 
 	ssl = response.Response
 	return
@@ -1478,14 +1535,22 @@ func (me *MysqlService) DeleteMysqlTimeWindowById(ctx context.Context, instanceI
 		}
 	}()
 
-	ratelimit.Check(request.GetAction())
+	err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+		ratelimit.Check(request.GetAction())
+		result, e := me.client.UseMysqlClient().DeleteTimeWindow(request)
+		if e != nil {
+			return tccommon.RetryError(e)
+		} else {
+			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+		}
 
-	response, err := me.client.UseMysqlClient().DeleteTimeWindow(request)
+		return nil
+	})
+
 	if err != nil {
 		errRet = err
 		return
 	}
-	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
 
 	return
 }
@@ -2916,16 +2981,23 @@ func (me *MysqlService) DescribeMysqlProxyById(ctx context.Context, instanceId, 
 		}
 	}()
 
-	ratelimit.Check(request.GetAction())
-
-	response, err := me.client.UseMysqlClient().DescribeCdbProxyInfo(request)
+	var response *cdb.DescribeCdbProxyInfoResponse
+	err := resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
+		ratelimit.Check(request.GetAction())
+		result, e := me.client.UseMysqlClient().DescribeCdbProxyInfo(request)
+		if e != nil {
+			return tccommon.RetryError(e)
+		}
+		response = result
+		return nil
+	})
 	if err != nil {
 		errRet = err
 		return
 	}
 	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
 
-	if len(response.Response.ProxyInfos) < 1 {
+	if response.Response == nil || len(response.Response.ProxyInfos) < 1 {
 		return
 	}
 
@@ -3154,7 +3226,7 @@ func (me *MysqlService) DescribeMysqlRoGroupById(ctx context.Context, instanceId
 	return
 }
 
-func (me *MysqlService) DescribeRoGroupByIdAndRoId(ctx context.Context, instanceId string, roInstanceId string) (roGroup *cdb.RoGroup, errRet error) {
+func (me *MysqlService) DescribeRoGroupByIdAndRoId(ctx context.Context, region string, instanceId string, roInstanceId string) (roGroup *cdb.RoGroup, errRet error) {
 	logId := tccommon.GetLogId(ctx)
 
 	request := cdb.NewDescribeRoGroupsRequest()
@@ -3168,7 +3240,7 @@ func (me *MysqlService) DescribeRoGroupByIdAndRoId(ctx context.Context, instance
 
 	ratelimit.Check(request.GetAction())
 
-	response, err := me.client.UseMysqlClient().DescribeRoGroups(request)
+	response, err := me.client.UseMysqlClientRegion(region).DescribeRoGroups(request)
 	if err != nil {
 		errRet = err
 		return
@@ -3434,5 +3506,205 @@ func (me *MysqlService) DeleteMysqlDatabaseById(ctx context.Context, instanceId 
 	}
 	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
 
+	return
+}
+
+func (me *MysqlService) DescribeMysqlAuditInstanceListById(ctx context.Context, instanceId string) (ret *cdb.InstanceDbAuditStatus, errRet error) {
+	logId := tccommon.GetLogId(ctx)
+
+	request := cdb.NewDescribeAuditInstanceListRequest()
+	response := cdb.NewDescribeAuditInstanceListResponse()
+	request.Filters = []*cdb.AuditInstanceFilters{
+		{
+			Name:       helper.String("InstanceId"),
+			ExactMatch: helper.Bool(true),
+			Values:     helper.Strings([]string{instanceId}),
+		},
+	}
+
+	defer func() {
+		if errRet != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n", logId, request.GetAction(), request.ToJsonString(), errRet.Error())
+		}
+	}()
+
+	errRet = resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
+		ratelimit.Check(request.GetAction())
+		result, e := me.client.UseMysqlClient().DescribeAuditInstanceList(request)
+		if e != nil {
+			return tccommon.RetryError(e)
+		} else {
+			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+		}
+
+		if result == nil || result.Response == nil || result.Response.Items == nil || len(result.Response.Items) == 0 {
+			return resource.RetryableError(fmt.Errorf("Describe audit instance list failed, Response is nil."))
+		}
+
+		response = result
+		return nil
+	})
+
+	if errRet != nil {
+		return
+	}
+
+	if len(response.Response.Items) != 1 {
+		return nil, fmt.Errorf("Describe audit instance list failed, Response items count is not 1.")
+	}
+
+	ret = response.Response.Items[0]
+	return
+}
+
+func (me *MysqlService) DescribeMysqlProxyAddressConfig(ctx context.Context, instanceId, proxyGroupId, proxyAddressId string) (address *cdb.ProxyAddress, errRet error) {
+	logId := tccommon.GetLogId(ctx)
+
+	proxy, err := me.DescribeMysqlProxyById(ctx, instanceId, proxyGroupId)
+	if err != nil {
+		errRet = err
+		return
+	}
+
+	if proxy == nil {
+		return
+	}
+
+	for _, addr := range proxy.ProxyAddress {
+		if addr.ProxyAddressId != nil && *addr.ProxyAddressId == proxyAddressId {
+			address = addr
+			return
+		}
+	}
+
+	log.Printf("[DEBUG]%s proxy address [%s] not found in proxy group [%s], instance [%s].\n", logId, proxyAddressId, proxyGroupId, instanceId)
+	return
+}
+
+func (me *MysqlService) DescribeCdbStartCpuExpandById(ctx context.Context, instanceId string) (ret *cdb.DescribeCPUExpandStrategyInfoResponseParams, errRet error) {
+	logId := tccommon.GetLogId(ctx)
+	request := cdb.NewDescribeCPUExpandStrategyInfoRequest()
+	request.InstanceId = &instanceId
+
+	defer func() {
+		if errRet != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n", logId, request.GetAction(), request.ToJsonString(), errRet.Error())
+		}
+	}()
+
+	err := resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
+		ratelimit.Check(request.GetAction())
+		result, e := me.client.UseMysqlClient().DescribeCPUExpandStrategyInfo(request)
+		if e != nil {
+			return tccommon.RetryError(e)
+		}
+		if result == nil || result.Response == nil {
+			return resource.NonRetryableError(fmt.Errorf("Describe cdb_start_cpu_expand failed, Response is nil."))
+		}
+		ret = result.Response
+		return nil
+	})
+
+	if err != nil {
+		errRet = err
+		return
+	}
+
+	return
+}
+
+func (me *MysqlService) DeleteCdbStartCpuExpandById(ctx context.Context, instanceId string) (asyncRequestId string, errRet error) {
+	logId := tccommon.GetLogId(ctx)
+	request := cdb.NewStopCpuExpandRequest()
+	request.InstanceId = &instanceId
+
+	defer func() {
+		if errRet != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n", logId, request.GetAction(), request.ToJsonString(), errRet.Error())
+		}
+	}()
+
+	err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+		ratelimit.Check(request.GetAction())
+		result, e := me.client.UseMysqlClient().StopCpuExpand(request)
+		if e != nil {
+			return tccommon.RetryError(e)
+		}
+		log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+		if result == nil || result.Response == nil {
+			return resource.NonRetryableError(fmt.Errorf("Stop cdb_start_cpu_expand failed, Response is nil."))
+		}
+		if result.Response.AsyncRequestId == nil || *result.Response.AsyncRequestId == "" {
+			return resource.NonRetryableError(fmt.Errorf("Stop cdb_start_cpu_expand failed, AsyncRequestId is nil or empty."))
+		}
+		asyncRequestId = *result.Response.AsyncRequestId
+		return nil
+	})
+
+	if err != nil {
+		errRet = err
+		return
+	}
+
+	return
+}
+
+func (me *MysqlService) CreateCloneInstance(ctx context.Context, request *cdb.CreateCloneInstanceRequest) (asyncRequestId string, errRet error) {
+	logId := tccommon.GetLogId(ctx)
+
+	defer func() {
+		if errRet != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n",
+				logId, request.GetAction(), request.ToJsonString(), errRet.Error())
+		}
+	}()
+	ratelimit.Check(request.GetAction())
+	response, err := me.client.UseMysqlClient().CreateCloneInstance(request)
+	if err != nil {
+		errRet = err
+		return
+	}
+	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
+		logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
+
+	if response == nil || response.Response == nil {
+		errRet = fmt.Errorf("CreateCloneInstance failed, Response is nil.")
+		return
+	}
+	if response.Response.AsyncRequestId == nil || *response.Response.AsyncRequestId == "" {
+		errRet = fmt.Errorf("CreateCloneInstance failed, AsyncRequestId is nil or empty.")
+		return
+	}
+	asyncRequestId = *response.Response.AsyncRequestId
+	return
+}
+
+func (me *MysqlService) UpgradeMysqlCloneInstance(ctx context.Context, request *cdb.UpgradeDBInstanceRequest) (asyncRequestId string, errRet error) {
+	logId := tccommon.GetLogId(ctx)
+
+	defer func() {
+		if errRet != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n",
+				logId, request.GetAction(), request.ToJsonString(), errRet.Error())
+		}
+	}()
+	ratelimit.Check(request.GetAction())
+	response, err := me.client.UseMysqlClient().UpgradeDBInstance(request)
+	if err != nil {
+		errRet = err
+		return
+	}
+	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
+		logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
+
+	if response == nil || response.Response == nil {
+		errRet = fmt.Errorf("UpgradeDBInstance failed, Response is nil.")
+		return
+	}
+	if response.Response.AsyncRequestId == nil || *response.Response.AsyncRequestId == "" {
+		errRet = fmt.Errorf("UpgradeDBInstance failed, AsyncRequestId is nil or empty.")
+		return
+	}
+	asyncRequestId = *response.Response.AsyncRequestId
 	return
 }

@@ -1,0 +1,164 @@
+---
+subcategory: "TDSQL-C MySQL(CynosDB)"
+layout: "tencentcloud"
+page_title: "TencentCloud: tencentcloud_cynosdb_backup_config"
+sidebar_current: "docs-tencentcloud-resource-cynosdb_backup_config"
+description: |-
+  Provides a resource to create a CynosDB backup config
+---
+
+# tencentcloud_cynosdb_backup_config
+
+Provides a resource to create a CynosDB backup config
+
+## Example Usage
+
+### Enable logical backup configuration and cross-region logical backup
+
+```hcl
+resource "tencentcloud_cynosdb_cluster" "example" {
+  available_zone               = "ap-guangzhou-6"
+  vpc_id                       = "vpc-i5yyodl9"
+  subnet_id                    = "subnet-hhi88a58"
+  db_mode                      = "NORMAL"
+  db_type                      = "MYSQL"
+  db_version                   = "5.7"
+  port                         = 3306
+  cluster_name                 = "tf-example"
+  password                     = "cynosDB@123"
+  instance_maintain_duration   = 7200
+  instance_maintain_start_time = 10800
+  instance_cpu_core            = 2
+  instance_memory_size         = 4
+  force_delete                 = true
+  instance_maintain_weekdays = [
+    "Fri",
+    "Mon",
+    "Sat",
+    "Sun",
+    "Thu",
+    "Wed",
+    "Tue",
+  ]
+
+  param_items {
+    name          = "character_set_server"
+    current_value = "utf8mb4"
+  }
+
+  param_items {
+    name          = "lower_case_table_names"
+    current_value = "1"
+  }
+
+  tags = {
+    createBy = "terraform"
+  }
+}
+
+resource "tencentcloud_cynosdb_backup_config" "example" {
+  cluster_id       = tencentcloud_cynosdb_cluster.example.id
+  backup_time_beg  = 7200
+  backup_time_end  = 21600
+  reserve_duration = 604800
+  logic_backup_config {
+    logic_backup_enable        = "ON"
+    logic_backup_time_beg      = 7200
+    logic_backup_time_end      = 21600
+    logic_cross_regions        = ["ap-shanghai"]
+    logic_cross_regions_enable = "ON"
+    logic_reserve_duration     = 604800
+  }
+}
+```
+
+### Disable logical backup configuration
+
+```hcl
+resource "tencentcloud_cynosdb_backup_config" "example" {
+  cluster_id       = tencentcloud_cynosdb_cluster.example.id
+  backup_time_beg  = 7200
+  backup_time_end  = 21600
+  reserve_duration = 604800
+  logic_backup_config {
+    logic_backup_enable = "OFF"
+  }
+}
+```
+
+### Enable secondary snapshot backup configuration
+
+```hcl
+resource "tencentcloud_cynosdb_backup_config" "example" {
+  cluster_id       = tencentcloud_cynosdb_cluster.example.id
+  backup_time_beg  = 7200
+  backup_time_end  = 21600
+  reserve_duration = 604800
+
+  snapshot_secondary_backup_config {
+    backup_time_beg         = 7200
+    backup_time_end         = 21600
+    reserve_duration        = 604800
+    backup_trigger_strategy = "periodically"
+  }
+}
+```
+
+## Argument Reference
+
+The following arguments are supported:
+
+* `backup_time_beg` - (Required, Int) Full backup start time. Value range: [0-24*3600]. For example, 0:00 AM, 1:00 AM, and 2:00 AM are represented by 0, 3600, and 7200, respectively.
+* `backup_time_end` - (Required, Int) Full backup end time. Value range: [0-24*3600]. For example, 0:00 AM, 1:00 AM, and 2:00 AM are represented by 0, 3600, and 7200, respectively.
+* `cluster_id` - (Required, String, ForceNew) Cluster ID.
+* `reserve_duration` - (Required, Int) Backup retention period in seconds. Backups will be cleared after this period elapses. 7 days is represented by 3600*24*7 = 604800. Maximum value: 158112000.
+* `logic_backup_config` - (Optional, List) Logical backup configuration. Do not set this field if it is not enabled. Example value: [{"LogicBackupEnable": "ON","LogicBackupTimeBeg": "2023-04-24 15:06:04","LogicBackupTimeEnd": "2024-04-24 15:06:04","LogicReserveDuration": "60","LogicCrossRegionsEnable": "ON","LogicCrossRegions": ["ap-guangzhou"]}].
+* `snapshot_secondary_backup_config` - (Optional, List) Secondary snapshot backup configuration.
+
+The `auto_copy_vaults` object of `snapshot_secondary_backup_config` supports the following:
+
+* `vault_id` - (Optional, String) Vault ID.
+* `vault_region` - (Optional, String) Vault region.
+
+The `logic_backup_config` object supports the following:
+
+* `logic_backup_enable` - (Optional, String) Whether to enable automatic logical backup. Value: `ON`, `OFF`.
+* `logic_backup_time_beg` - (Optional, Int) Automatic logical backup start time. When `logic_backup_enable` is `OFF`, it must be `0` or not entered. Example value: 2.
+* `logic_backup_time_end` - (Optional, Int) Automatic logical backup end time. When `logic_backup_enable` is `OFF`, it must be `0` or not entered. Example value: 6.
+* `logic_cross_regions_enable` - (Optional, String) Whether to enable cross-region logical backup. Cannot be input when `logic_backup_enable` is `OFF`. When `logic_backup_enable` is `ON`, `logic_cross_regions_enable` setting `ON` will take effect. Value: `ON`, `OFF`.
+* `logic_cross_regions` - (Optional, Set) Logical backup across regions. Example value: ["ap-guangzhou"]. When `logic_backup_enable` is `OFF`, it must be `[]` or not entered.
+* `logic_reserve_duration` - (Optional, Int) Automatic logical backup retention period. When `logic_backup_enable` is `OFF`, it must be `0` or not entered. Value range: [259200,158112000]. `logic_backup_enable` is `OFF`, `logic_reserve_duration` cannot be set when creating.
+
+The `snapshot_secondary_backup_config` object supports the following:
+
+* `auto_copy_vaults` - (Optional, List) Auto copy vault configuration list.
+* `backup_custom_auto_time` - (Optional, Bool) Whether to use system auto time.
+* `backup_interval_time` - (Optional, Int) Backup interval time.
+* `backup_time_beg` - (Optional, Int) Backup start time. Range: [0-24*3600]. E.g. 0:00, 1:00, 2:00 are 0, 3600, 7200.
+* `backup_time_end` - (Optional, Int) Backup end time. Range: [0-24*3600]. E.g. 0:00, 1:00, 2:00 are 0, 3600, 7200.
+* `backup_trigger_strategy` - (Optional, String) Backup trigger strategy. Values: `periodically` (periodic auto backup), `frequent` (high-frequency backup).
+* `backup_week_days` - (Optional, List) Backup week days array (length 7, Sunday to Saturday). Values: full, increment, none.
+* `reserve_duration` - (Optional, Int) Backup retention period in seconds. 7 days = 604800. Max: 158112000.
+
+## Attributes Reference
+
+In addition to all arguments above, the following attributes are exported:
+
+* `id` - ID of the resource.
+* `backup_freq` - Backup frequency. It is an array of 7 elements corresponding to Monday through Sunday. full: full backup; increment: incremental backup. This parameter cannot be modified currently and doesn't need to be entered.
+* `backup_type` - Backup mode. logic: logic backup; snapshot: snapshot backup. This parameter cannot be modified currently and doesn't need to be entered.
+
+The `snapshot_secondary_backup_config` object exports the following:
+
+* `cross_regions_enable` - Whether cross-region backup is enabled. Values: `yes`, `no`.
+* `cross_regions` - Cross-region backup target regions.
+
+
+## Import
+
+CynosDB backup config can be imported using the id, e.g.
+
+```
+terraform import tencentcloud_cynosdb_backup_config.example cynosdbmysql-bws8h88b
+```
+

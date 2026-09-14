@@ -55,8 +55,8 @@ func ResourceTencentCloudCkafkaInstance() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "profession",
-				ValidateFunc: tccommon.ValidateAllowedStringValue([]string{"standard", "profession"}),
-				Description:  "Specifications type of instance. Allowed values are `standard`, `profession`. Default is `profession`.",
+				ValidateFunc: tccommon.ValidateAllowedStringValue([]string{"standard", "profession", "premium"}),
+				Description:  "Specifications type of instance. Allowed values are `profession`, `premium`. Default is `profession`.",
 			},
 			"charge_type": {
 				Type:         schema.TypeString,
@@ -182,7 +182,7 @@ func ResourceTencentCloudCkafkaInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "Type of disk.",
+				Description: "Disk type for Professional Edition instances; this field is not required for Standard Edition instances. `CLOUD_SSD`: SSD Cloud Disk; `CLOUD_BASIC`: High-Performance Cloud Disk. If not specified, the default value is `CLOUD_BASIC`.",
 			},
 			"config": {
 				Type:     schema.TypeList,
@@ -252,6 +252,7 @@ func ResourceTencentCloudCkafkaInstance() *schema.Resource {
 			"rebalance_time": {
 				Type:        schema.TypeInt,
 				Optional:    true,
+				Deprecated:  "It has been deprecated from version 1.82.37.",
 				Description: "Modification of the rebalancing time after upgrade.",
 			},
 			"public_network": {
@@ -267,6 +268,22 @@ func ResourceTencentCloudCkafkaInstance() *schema.Resource {
 				Computed:     true,
 				ValidateFunc: tccommon.ValidateIntegerInRange(1024, 12*1024*1024),
 				Description:  "The size of a single message in bytes at the instance level. Value range: `1024 - 12*1024*1024 bytes (i.e., 1KB-12MB).",
+			},
+			"elastic_bandwidth_switch": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "Elastic bandwidth switch 0 not turned on 1 turned on (0 default). This takes effect only when the instance is created.",
+			},
+			"custom_ssl_cert_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Custom certificate ID, only effective when `specifications_type` is set to `profession`, supports custom certificate capabilities.",
+			},
+			"delete_protection_enable": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Computed:    true,
+				Description: "Instance delete protection switch of ckafka instance: `1` enable, `0` disable.",
 			},
 			"vip": {
 				Type:        schema.TypeString,
@@ -363,6 +380,14 @@ func ckafkaRequestSetParams(request interface{}, d *schema.ResourceData) {
 			zoneIds = append(zoneIds, helper.IntInt64(v.(int)))
 		}
 		values.FieldByName("ZoneIds").Set(reflect.ValueOf(zoneIds))
+	}
+
+	if v, ok := d.GetOk("elastic_bandwidth_switch"); ok {
+		values.FieldByName("ElasticBandwidthSwitch").Set(reflect.ValueOf(helper.Int64(int64(v.(int)))))
+	}
+
+	if v, ok := d.GetOk("custom_ssl_cert_id"); ok {
+		values.FieldByName("CustomSSLCertId").Set(reflect.ValueOf(helper.String(v.(string))))
 	}
 }
 
@@ -540,6 +565,11 @@ func resourceTencentCloudCkafkaInstanceCreate(d *schema.ResourceData, meta inter
 		modifyRequest.MaxMessageByte = helper.Uint64(uint64(v.(int)))
 	}
 
+	if v, ok := d.GetOkExists("delete_protection_enable"); ok {
+		needModify = true
+		modifyRequest.DeleteProtectionEnable = helper.Int64(int64(v.(int)))
+	}
+
 	if needModify {
 		err := service.ModifyCkafkaInstanceAttributes(ctx, modifyRequest)
 		if err != nil {
@@ -691,6 +721,10 @@ func resourceTencentCloudCkafkaInstanceRead(d *schema.ResourceData, meta interfa
 		_ = d.Set("dynamic_retention_config", dynamicConfig)
 		_ = d.Set("public_network", attr.PublicNetwork)
 
+		if attr.DeleteProtectionEnable != nil {
+			_ = d.Set("delete_protection_enable", attr.DeleteProtectionEnable)
+		}
+
 		//dynamicDiskConfig := make([]map[string]interface{}, 0)
 		//dynamicDiskConfig = append(dynamicDiskConfig, map[string]interface{}{
 		//	"enable":                  attr.DynamicDiskConfig.Enable,
@@ -722,6 +756,7 @@ func resourceTencentCloudCkafkaInstanceUpdate(d *schema.ResourceData, meta inter
 		"subnet_id", "renew_flag", "kafka_version",
 		"multi_zone_flag", "zone_ids", "disk_type",
 		"specifications_type", "instance_type",
+		"elastic_bandwidth_switch", "custom_ssl_cert_id",
 	}
 
 	for _, v := range immutableArgs {
@@ -806,6 +841,13 @@ func resourceTencentCloudCkafkaInstanceUpdate(d *schema.ResourceData, meta inter
 	if d.HasChange("max_message_byte") {
 		if v, ok := d.GetOkExists("max_message_byte"); ok {
 			request.MaxMessageByte = helper.Uint64(uint64(v.(int)))
+			modifyInstanceAttributesFlag = true
+		}
+	}
+
+	if d.HasChange("delete_protection_enable") {
+		if v, ok := d.GetOkExists("delete_protection_enable"); ok {
+			request.DeleteProtectionEnable = helper.Int64(int64(v.(int)))
 			modifyInstanceAttributesFlag = true
 		}
 	}

@@ -82,6 +82,11 @@ func ResourceTencentCloudCamRole() *schema.Resource {
 				Computed:    true,
 				Description: "The last update time of the CAM role.",
 			},
+			"role_arn": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "RoleArn Information for Roles.",
+			},
 			"tags": {
 				Type:        schema.TypeMap,
 				Optional:    true,
@@ -98,14 +103,12 @@ func resourceTencentCloudCamRoleCreate(d *schema.ResourceData, meta interface{})
 
 	name := d.Get("name").(string)
 	document := d.Get("document").(string)
-
-	camService := CamService{
-		client: meta.(tccommon.ProviderMeta).GetAPIV3Conn(),
+	camService := CamService{client: meta.(tccommon.ProviderMeta).GetAPIV3Conn()}
+	documentErr := camService.PolicyDocumentForceCheck(document)
+	if documentErr != nil {
+		return documentErr
 	}
-	//documentErr := camService.PolicyDocumentForceCheck(document)
-	//if documentErr != nil {
-	//	return documentErr
-	//}
+
 	request := cam.NewCreateRoleRequest()
 	request.RoleName = &name
 	request.PolicyDocument = &document
@@ -142,6 +145,11 @@ func resourceTencentCloudCamRoleCreate(d *schema.ResourceData, meta interface{})
 			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
 				logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
 		}
+
+		if result == nil || result.Response == nil || result.Response.RoleId == nil {
+			return resource.NonRetryableError(fmt.Errorf("Create CAM role failed, Response is nil."))
+		}
+
 		response = result
 		return nil
 	})
@@ -149,9 +157,7 @@ func resourceTencentCloudCamRoleCreate(d *schema.ResourceData, meta interface{})
 		log.Printf("[CRITAL]%s create CAM role failed, reason:%s\n", logId, err.Error())
 		return err
 	}
-	if response.Response.RoleId == nil {
-		return fmt.Errorf("CAM role id is nil")
-	}
+
 	d.SetId(*response.Response.RoleId)
 
 	//get really instance then read
@@ -222,6 +228,10 @@ func resourceTencentCloudCamRoleRead(d *schema.ResourceData, meta interface{}) e
 	_ = d.Set("update_time", instance.UpdateTime)
 	if instance.Description != nil {
 		_ = d.Set("description", instance.Description)
+	}
+
+	if instance.RoleArn != nil {
+		_ = d.Set("role_arn", instance.RoleArn)
 	}
 
 	if instance.ConsoleLogin != nil {
@@ -366,7 +376,30 @@ func resourceTencentCloudCamRoleUpdate(d *schema.ResourceData, meta interface{})
 	}
 
 	if d.HasChange("session_duration") {
-		return fmt.Errorf("`session_duration` do not support change now.")
+		request := cam.NewUpdateRoleSessionDurationRequest()
+		request.RoleId = helper.StrToUint64Point(roleId)
+		if v, ok := d.GetOkExists("session_duration"); ok {
+			request.SessionDuration = helper.IntUint64(v.(int))
+		}
+
+		err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+			response, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseCamClient().UpdateRoleSessionDuration(request)
+			if e != nil {
+				log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n",
+					logId, request.GetAction(), request.ToJsonString(), e.Error())
+				return tccommon.RetryError(e)
+			} else {
+				log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
+					logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			log.Printf("[CRITAL]%s update CAM role session duration failed, reason:%s\n", logId, err.Error())
+			return err
+		}
 	}
 	return resourceTencentCloudCamRoleRead(d, meta)
 }

@@ -7,6 +7,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	tchttp "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/http"
 
 	vpc "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/vpc/v20170312"
@@ -19,17 +20,18 @@ import (
 
 // Ccn basic information
 type CcnBasicInfo struct {
-	ccnId             string
-	name              string
-	description       string
-	state             string
-	qos               string
-	chargeType        string
-	bandWithLimitType string
-	instanceCount     int64
-	createTime        string
-	ecmpFlag          bool
-	overlapFlag       bool
+	ccnId                string
+	name                 string
+	description          string
+	state                string
+	qos                  string
+	chargeType           string
+	bandWithLimitType    string
+	instanceMeteringType string
+	instanceCount        int64
+	createTime           string
+	ecmpFlag             bool
+	overlapFlag          bool
 }
 
 type CcnInstanceBind struct {
@@ -76,6 +78,7 @@ func (info CcnBasicInfo) CreateTime() string {
 }
 
 type CcnAttachedInstanceInfo struct {
+	ccnUin         string
 	ccnId          string
 	instanceType   string
 	instanceRegion string
@@ -207,6 +210,9 @@ getMoreData:
 		basicInfo.state = *item.State
 		basicInfo.chargeType = *item.InstanceChargeType
 		basicInfo.bandWithLimitType = *item.BandwidthLimitType
+		if item.InstanceMeteringType != nil {
+			basicInfo.instanceMeteringType = *item.InstanceMeteringType
+		}
 		basicInfo.ecmpFlag = *item.RouteECMPFlag
 		basicInfo.overlapFlag = *item.RouteOverlapFlag
 
@@ -268,7 +274,7 @@ func (me *VpcService) DescribeCcnRegionBandwidthLimits(ctx context.Context, ccnI
 }
 
 func (me *VpcService) CreateCcn(ctx context.Context, name, description,
-	qos, chargeType, bandWithLimitType string) (basicInfo CcnBasicInfo, errRet error) {
+	qos, chargeType, bandWithLimitType, instanceMeteringType string) (basicInfo CcnBasicInfo, errRet error) {
 
 	logId := tccommon.GetLogId(ctx)
 	request := vpc.NewCreateCcnRequest()
@@ -278,6 +284,9 @@ func (me *VpcService) CreateCcn(ctx context.Context, name, description,
 	request.QosLevel = &qos
 	request.InstanceChargeType = &chargeType
 	request.BandwidthLimitType = &bandWithLimitType
+	if instanceMeteringType != "" {
+		request.InstanceMeteringType = &instanceMeteringType
+	}
 	ratelimit.Check(request.GetAction())
 	response, err := me.client.UseVpcClient().CreateCcn(request)
 
@@ -427,6 +436,79 @@ func (me *VpcService) DescribeCcnAttachedInstance(ctx context.Context, ccnId,
 	return
 }
 
+func (me *VpcService) DescribeCcnAttachedInstanceByFilter(ctx context.Context, ccnId, instanceType, instanceRegion, instanceId string) (info *vpc.CcnAttachedInstance, errRet error) {
+	var (
+		logId    = tccommon.GetLogId(ctx)
+		request  = vpc.NewDescribeCcnAttachedInstancesRequest()
+		response = vpc.NewDescribeCcnAttachedInstancesResponse()
+		result   []*vpc.CcnAttachedInstance
+		limit    uint64 = 20
+		offset   uint64 = 0
+	)
+
+	request.CcnId = &ccnId
+	request.Filters = []*vpc.Filter{
+		{
+			Name:   helper.String("instance-type"),
+			Values: helper.Strings([]string{instanceType}),
+		},
+
+		{
+			Name:   helper.String("instance-region"),
+			Values: helper.Strings([]string{instanceRegion}),
+		},
+
+		{
+			Name:   helper.String("instance-id"),
+			Values: helper.Strings([]string{instanceId}),
+		},
+	}
+
+	for {
+		request.Limit = &limit
+		request.Offset = &offset
+		err := resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
+			ratelimit.Check(request.GetAction())
+			result, e := me.client.UseVpcClient().DescribeCcnAttachedInstancesWithContext(ctx, request)
+			if e != nil {
+				return tccommon.RetryError(e)
+			} else {
+				log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+			}
+
+			if result == nil || result.Response == nil {
+				return resource.NonRetryableError(fmt.Errorf("Describe attach ccn instance failed, Response is nil."))
+			}
+
+			response = result
+			return nil
+		})
+
+		if err != nil {
+			errRet = err
+			return
+		}
+
+		if response == nil || len(response.Response.InstanceSet) < 1 {
+			break
+		}
+
+		result = append(result, response.Response.InstanceSet...)
+		if len(response.Response.InstanceSet) < int(limit) {
+			break
+		}
+
+		offset += limit
+	}
+
+	if len(result) != 1 {
+		return
+	}
+
+	info = result[0]
+	return
+}
+
 func (me *VpcService) DescribeCcnAttachedInstances(ctx context.Context, ccnId string) (infos []CcnAttachedInstanceInfo, errRet error) {
 
 	logId := tccommon.GetLogId(ctx)
@@ -506,6 +588,7 @@ func (me *VpcService) DescribeCcnAttachedInstances(ctx context.Context, ccnId st
 		info.state = *item.State
 		info.description = *item.Description
 		info.routeTableId = *item.RouteTableId
+		info.ccnUin = *item.CcnUin
 		infos = append(infos, info)
 	}
 	return
@@ -1260,7 +1343,12 @@ func (me *VpcService) DescribeVpcCcnRoutesById(ctx context.Context, ccnId string
 
 	request := vpc.NewDescribeCcnRoutesRequest()
 	request.CcnId = &ccnId
-
+	request.Filters = []*vpc.Filter{
+		{
+			Name:   helper.String("route-id"),
+			Values: []*string{helper.String(routeId)},
+		},
+	}
 	defer func() {
 		if errRet != nil {
 			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n", logId, request.GetAction(), request.ToJsonString(), errRet.Error())
@@ -1276,11 +1364,8 @@ func (me *VpcService) DescribeVpcCcnRoutesById(ctx context.Context, ccnId string
 	}
 	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
 
-	for _, route := range response.Response.RouteSet {
-		if *route.RouteId == routeId {
-			ccnRoutes = route
-			return
-		}
+	if response != nil && response.Response != nil && len(response.Response.RouteSet) > 0 {
+		ccnRoutes = response.Response.RouteSet[0]
 	}
 
 	return
@@ -1334,5 +1419,46 @@ func (me *VpcService) DescribeTenantCcnByFilter(ctx context.Context, param map[s
 		offset += limit
 	}
 
+	return
+}
+
+func (me *VpcService) DescribeCcnRouteTableInputPoliciesByFilter(ctx context.Context, param map[string]interface{}) (ret []*vpc.CcnRouteTableInputPolicys, errRet error) {
+	var (
+		logId   = tccommon.GetLogId(ctx)
+		request = vpc.NewDescribeCcnRouteTableInputPolicysRequest()
+	)
+
+	defer func() {
+		if errRet != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n", logId, request.GetAction(), request.ToJsonString(), errRet.Error())
+		}
+	}()
+
+	for k, v := range param {
+		if k == "CcnId" {
+			request.CcnId = v.(*string)
+		}
+		if k == "RouteTableId" {
+			request.RouteTableId = v.(*string)
+		}
+		if k == "PolicyVersion" {
+			request.PolicyVersion = v.(*uint64)
+		}
+	}
+
+	ratelimit.Check(request.GetAction())
+
+	response, err := me.client.UseCcnV20170312Client().DescribeCcnRouteTableInputPolicys(request)
+	if err != nil {
+		errRet = err
+		return
+	}
+	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
+
+	if len(response.Response.PolicySet) < 1 {
+		return
+	}
+
+	ret = response.Response.PolicySet
 	return
 }

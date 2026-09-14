@@ -17,8 +17,8 @@ import (
 
 func ResourceTencentCloudVpcBandwidthPackage() *schema.Resource {
 	return &schema.Resource{
-		Read:   resourceTencentCloudVpcBandwidthPackageRead,
 		Create: resourceTencentCloudVpcBandwidthPackageCreate,
+		Read:   resourceTencentCloudVpcBandwidthPackageRead,
 		Update: resourceTencentCloudVpcBandwidthPackageUpdate,
 		Delete: resourceTencentCloudVpcBandwidthPackageDelete,
 		Importer: &schema.ResourceImporter{
@@ -58,6 +58,14 @@ func ResourceTencentCloudVpcBandwidthPackage() *schema.Resource {
 				Type:        schema.TypeMap,
 				Optional:    true,
 				Description: "Tag description list.",
+				Deprecated:  "Use `tag` instead.",
+			},
+
+			"tag": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Computed:    true,
+				Description: "Tag description list.",
 			},
 
 			"time_span": {
@@ -78,12 +86,13 @@ func ResourceTencentCloudVpcBandwidthPackage() *schema.Resource {
 }
 
 func resourceTencentCloudVpcBandwidthPackageCreate(d *schema.ResourceData, meta interface{}) error {
-	defer tccommon.LogElapsed("resource.tencentcloud_bwp_bandwidth_package.create")()
+	defer tccommon.LogElapsed("resource.tencentcloud_vpc_bandwidth_package.create")()
 	defer tccommon.InconsistentCheck(d, meta)()
 
-	logId := tccommon.GetLogId(tccommon.ContextNil)
-
 	var (
+		logId    = tccommon.GetLogId(tccommon.ContextNil)
+		ctx      = context.WithValue(context.TODO(), tccommon.LogIdKey, logId)
+		service  = VpcService{client: meta.(tccommon.ProviderMeta).GetAPIV3Conn()}
 		request  = vpc.NewCreateBandwidthPackageRequest()
 		response *vpc.CreateBandwidthPackageResponse
 	)
@@ -100,16 +109,29 @@ func resourceTencentCloudVpcBandwidthPackageCreate(d *schema.ResourceData, meta 
 		request.BandwidthPackageName = helper.String(v.(string))
 	}
 
-	if v, ok := d.GetOk("internet_max_bandwidth"); ok {
+	if v, ok := d.GetOkExists("internet_max_bandwidth"); ok {
 		request.InternetMaxBandwidth = helper.IntInt64(v.(int))
 	}
 
+	// Deprecated: Use `tag` instead.
 	if v := helper.GetTags(d, "tags"); len(v) > 0 {
 		for tagKey, tagValue := range v {
 			tag := vpc.Tag{
 				Key:   helper.String(tagKey),
 				Value: helper.String(tagValue),
 			}
+
+			request.Tags = append(request.Tags, &tag)
+		}
+	}
+
+	if v := helper.GetTags(d, "tag"); len(v) > 0 {
+		for tagKey, tagValue := range v {
+			tag := vpc.Tag{
+				Key:   helper.String(tagKey),
+				Value: helper.String(tagValue),
+			}
+
 			request.Tags = append(request.Tags, &tag)
 		}
 	}
@@ -127,24 +149,30 @@ func resourceTencentCloudVpcBandwidthPackageCreate(d *schema.ResourceData, meta 
 		if e != nil {
 			return tccommon.RetryError(e)
 		} else {
-			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
-				logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
 		}
+
+		if result == nil || result.Response == nil {
+			return resource.NonRetryableError(fmt.Errorf("Create vpc bandwidthPackage failed, Response is nil."))
+		}
+
 		response = result
 		return nil
 	})
 
 	if err != nil {
-		log.Printf("[CRITAL]%s create bwp bandwidthPackage failed, reason:%+v", logId, err)
+		log.Printf("[CRITAL]%s create vpc bandwidthPackage failed, reason:%+v", logId, err)
 		return err
 	}
 
-	bandwidthPackageId := *response.Response.BandwidthPackageId
+	if response.Response.BandwidthPackageId == nil {
+		return fmt.Errorf("BandwidthPackageId is nil.")
+	}
 
+	bandwidthPackageId := *response.Response.BandwidthPackageId
 	d.SetId(bandwidthPackageId)
 
-	ctx := context.WithValue(context.TODO(), tccommon.LogIdKey, logId)
-
+	// Deprecated: Use `tag` instead.
 	if tags := helper.GetTags(d, "tags"); len(tags) > 0 {
 		tagService := svctag.NewTagService(meta.(tccommon.ProviderMeta).GetAPIV3Conn())
 		region := meta.(tccommon.ProviderMeta).GetAPIV3Conn().Region
@@ -154,20 +182,34 @@ func resourceTencentCloudVpcBandwidthPackageCreate(d *schema.ResourceData, meta 
 		}
 	}
 
-	service := VpcService{client: meta.(tccommon.ProviderMeta).GetAPIV3Conn()}
+	if tags := helper.GetTags(d, "tag"); len(tags) > 0 {
+		tagService := svctag.NewTagService(meta.(tccommon.ProviderMeta).GetAPIV3Conn())
+		region := meta.(tccommon.ProviderMeta).GetAPIV3Conn().Region
+		// qcs::vpc:ap-beijing:uin/10000057****:bwp/****, https://cloud.tencent.com/document/product/651/89122
+		resourceName := fmt.Sprintf("qcs::vpc:%s:uin/:bwp/%s", region, bandwidthPackageId)
+		if err := tagService.ModifyTags(ctx, resourceName, tags, nil); err != nil {
+			return err
+		}
+	}
+
+	// wait
 	err = resource.Retry(3*tccommon.ReadRetryTimeout, func() *resource.RetryError {
 		instance, errRet := service.DescribeVpcBandwidthPackage(ctx, bandwidthPackageId)
 		if errRet != nil {
 			return tccommon.RetryError(errRet, tccommon.InternalError)
 		}
+
 		if instance == nil {
 			return resource.RetryableError(fmt.Errorf("vpc bandwidthPackage instance is being created, retry..."))
 		}
+
 		if *instance.Status == "CREATED" {
 			return nil
 		}
+
 		return resource.RetryableError(fmt.Errorf("vpc bandwidthPackage instance status is %v, retry...", *instance.Status))
 	})
+
 	if err != nil {
 		return err
 	}
@@ -176,27 +218,25 @@ func resourceTencentCloudVpcBandwidthPackageCreate(d *schema.ResourceData, meta 
 }
 
 func resourceTencentCloudVpcBandwidthPackageRead(d *schema.ResourceData, meta interface{}) error {
-	defer tccommon.LogElapsed("resource.tencentcloud_bwp_bandwidth_package.read")()
+	defer tccommon.LogElapsed("resource.tencentcloud_vpc_bandwidth_package.read")()
+	defer tccommon.LogElapsed("resource.tencentcloud_vpc_bandwidth_package.read")()
 	defer tccommon.InconsistentCheck(d, meta)()
 
-	logId := tccommon.GetLogId(tccommon.ContextNil)
-	ctx := context.WithValue(context.TODO(), tccommon.LogIdKey, logId)
-
-	service := VpcService{client: meta.(tccommon.ProviderMeta).GetAPIV3Conn()}
-
-	bandwidthPackageId := d.Id()
+	var (
+		logId              = tccommon.GetLogId(tccommon.ContextNil)
+		ctx                = context.WithValue(context.TODO(), tccommon.LogIdKey, logId)
+		service            = VpcService{client: meta.(tccommon.ProviderMeta).GetAPIV3Conn()}
+		bandwidthPackageId = d.Id()
+	)
 
 	bandwidthPackage, err := service.DescribeVpcBandwidthPackage(ctx, bandwidthPackageId)
-
 	if err != nil {
 		return err
 	}
 
 	if bandwidthPackage == nil {
 		d.SetId("")
-		log.Printf("[WARN]%s resource `tencentcloud_vpc_bandwidth_package` [%s] not found, please check if it has been deleted.",
-			logId, bandwidthPackageId,
-		)
+		log.Printf("[WARN]%s resource `tencentcloud_vpc_bandwidth_package` [%s] not found, please check if it has been deleted.", logId, bandwidthPackageId)
 		return nil
 	}
 
@@ -222,11 +262,19 @@ func resourceTencentCloudVpcBandwidthPackageRead(d *schema.ResourceData, meta in
 
 	tcClient := meta.(tccommon.ProviderMeta).GetAPIV3Conn()
 	tagService := svctag.NewTagService(tcClient)
+
+	// Deprecated: Use `tag` instead.
 	tags, err := tagService.DescribeResourceTags(ctx, "vpc", "bandwidthPackage", tcClient.Region, d.Id())
 	if err != nil {
 		return err
 	}
 	_ = d.Set("tags", tags)
+
+	tags, err = tagService.DescribeResourceTags(ctx, "vpc", "bwp", tcClient.Region, d.Id())
+	if err != nil {
+		return err
+	}
+	_ = d.Set("tag", tags)
 
 	return nil
 }
@@ -235,14 +283,14 @@ func resourceTencentCloudVpcBandwidthPackageUpdate(d *schema.ResourceData, meta 
 	defer tccommon.LogElapsed("resource.tencentcloud_vpc_bandwidth_package.update")()
 	defer tccommon.InconsistentCheck(d, meta)()
 
-	logId := tccommon.GetLogId(tccommon.ContextNil)
-	ctx := context.WithValue(context.TODO(), tccommon.LogIdKey, logId)
-
-	bandwidthPackageId := d.Id()
+	var (
+		logId              = tccommon.GetLogId(tccommon.ContextNil)
+		ctx                = context.WithValue(context.TODO(), tccommon.LogIdKey, logId)
+		bandwidthPackageId = d.Id()
+	)
 
 	immutableArgs := []string{
 		"network_type",
-		"internet_max_bandwidth",
 		"egress",
 	}
 
@@ -252,35 +300,63 @@ func resourceTencentCloudVpcBandwidthPackageUpdate(d *schema.ResourceData, meta 
 		}
 	}
 
-	request := vpc.NewModifyBandwidthPackageAttributeRequest()
-	request.BandwidthPackageId = &bandwidthPackageId
+	if d.HasChange("bandwidth_package_name") || d.HasChange("charge_type") {
+		request := vpc.NewModifyBandwidthPackageAttributeRequest()
+		request.BandwidthPackageId = &bandwidthPackageId
+		if d.HasChange("bandwidth_package_name") {
+			if v, ok := d.GetOk("bandwidth_package_name"); ok {
+				request.BandwidthPackageName = helper.String(v.(string))
+			}
+		}
 
-	if v, ok := d.GetOk("bandwidth_package_name"); ok {
-		request.BandwidthPackageName = helper.String(v.(string))
-	}
+		if d.HasChange("charge_type") {
+			if v, ok := d.GetOk("charge_type"); ok {
+				request.ChargeType = helper.String(v.(string))
+			}
+		}
 
-	if d.HasChange("charge_type") {
-		if v, ok := d.GetOk("charge_type"); ok {
-			request.ChargeType = helper.String(v.(string))
+		err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+			result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseVpcClient().ModifyBandwidthPackageAttribute(request)
+			if e != nil {
+				return tccommon.RetryError(e)
+			} else {
+				log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			log.Printf("[CRITAL]%s Modify vpc bandwidthPackage attribute failed, reason:%+v", logId, err)
+			return err
 		}
 	}
 
-	err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
-		result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseVpcClient().ModifyBandwidthPackageAttribute(request)
-		if e != nil {
-			return tccommon.RetryError(e)
-		} else {
-			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
-				logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+	if d.HasChange("internet_max_bandwidth") {
+		request := vpc.NewModifyBandwidthPackageBandwidthRequest()
+		request.BandwidthPackageId = &bandwidthPackageId
+		if v, ok := d.GetOkExists("internet_max_bandwidth"); ok {
+			request.InternetMaxBandwidth = helper.IntInt64(v.(int))
 		}
-		return nil
-	})
 
-	if err != nil {
-		log.Printf("[CRITAL]%s create vpc bandwidthPackage failed, reason:%+v", logId, err)
-		return err
+		err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+			result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseVpcClient().ModifyBandwidthPackageBandwidth(request)
+			if e != nil {
+				return tccommon.RetryError(e)
+			} else {
+				log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			log.Printf("[CRITAL]%s Modify vpc bandwidthPackage bandWidth failed, reason:%+v", logId, err)
+			return err
+		}
 	}
 
+	// Deprecated: Use `tag` instead.
 	if d.HasChange("tags") {
 		tcClient := meta.(tccommon.ProviderMeta).GetAPIV3Conn()
 		tagService := svctag.NewTagService(tcClient)
@@ -292,19 +368,30 @@ func resourceTencentCloudVpcBandwidthPackageUpdate(d *schema.ResourceData, meta 
 		}
 	}
 
+	if d.HasChange("tag") {
+		tcClient := meta.(tccommon.ProviderMeta).GetAPIV3Conn()
+		tagService := svctag.NewTagService(tcClient)
+		oldTags, newTags := d.GetChange("tag")
+		replaceTags, deleteTags := svctag.DiffTags(oldTags.(map[string]interface{}), newTags.(map[string]interface{}))
+		resourceName := tccommon.BuildTagResourceName("vpc", "bwp", tcClient.Region, d.Id())
+		if err := tagService.ModifyTags(ctx, resourceName, replaceTags, deleteTags); err != nil {
+			return err
+		}
+	}
+
 	return resourceTencentCloudVpcBandwidthPackageRead(d, meta)
 }
 
 func resourceTencentCloudVpcBandwidthPackageDelete(d *schema.ResourceData, meta interface{}) error {
-	defer tccommon.LogElapsed("resource.tencentcloud_bwp_bandwidth_package.delete")()
+	defer tccommon.LogElapsed("resource.tencentcloud_vpc_bandwidth_package.delete")()
 	defer tccommon.InconsistentCheck(d, meta)()
 
-	logId := tccommon.GetLogId(tccommon.ContextNil)
-	ctx := context.WithValue(context.TODO(), tccommon.LogIdKey, logId)
-
-	service := VpcService{client: meta.(tccommon.ProviderMeta).GetAPIV3Conn()}
-
-	bandwidthPackageId := d.Id()
+	var (
+		logId              = tccommon.GetLogId(tccommon.ContextNil)
+		ctx                = context.WithValue(context.TODO(), tccommon.LogIdKey, logId)
+		service            = VpcService{client: meta.(tccommon.ProviderMeta).GetAPIV3Conn()}
+		bandwidthPackageId = d.Id()
+	)
 
 	if err := service.DeleteVpcBandwidthPackageById(ctx, bandwidthPackageId); err != nil {
 		return err

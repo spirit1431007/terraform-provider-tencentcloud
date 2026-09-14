@@ -13,14 +13,21 @@ type WebsiteRoutingRule struct {
 	RedirectProtocol         string `xml:"Redirect>Protocol,omitempty"`
 	RedirectReplaceKey       string `xml:"Redirect>ReplaceKeyWith,omitempty"`
 	RedirectReplaceKeyPrefix string `xml:"Redirect>ReplaceKeyPrefixWith,omitempty"`
+	URLRedirect              string `xml:"Redirect>URLRedirect,omitempty"`
 }
 
 type WebsiteRoutingRules struct {
 	Rules []WebsiteRoutingRule `xml:"RoutingRule,omitempty"`
 }
 
+type AutoAddressing struct {
+	Status string `xml:"Status,omitempty"`
+}
+
 type ErrorDocument struct {
-	Key string `xml:"Key,omitempty"`
+	Key                string `xml:"Key,omitempty"`
+	OriginalHttpStatus string `xml:"OriginalHttpStatus,omitempty"`
+	Charity404         string `xml:"Charity404,omitempty"`
 }
 
 type RedirectRequestsProtocol struct {
@@ -31,6 +38,7 @@ type BucketPutWebsiteOptions struct {
 	XMLName          xml.Name                  `xml:"WebsiteConfiguration"`
 	Index            string                    `xml:"IndexDocument>Suffix"`
 	RedirectProtocol *RedirectRequestsProtocol `xml:"RedirectAllRequestsTo,omitempty"`
+	AutoAddressing   *AutoAddressing           `xml:"AutoAddressing,omitempty"`
 	Error            *ErrorDocument            `xml:"ErrorDocument,omitempty"`
 	RoutingRules     *WebsiteRoutingRules      `xml:"RoutingRules,omitempty"`
 }

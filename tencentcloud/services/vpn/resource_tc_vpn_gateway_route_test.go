@@ -16,8 +16,8 @@ import (
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
 )
 
+// go test -i; go test -test.run TestAccTencentCloudVpnGatewayRoute_basic -v -timeout=0
 func TestAccTencentCloudVpnGatewayRoute_basic(t *testing.T) {
-	t.Parallel()
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { tcacctest.AccPreCheck(t) },
 		Providers:    tcacctest.AccProviders,
@@ -109,32 +109,124 @@ func testAccCheckVpnGatewayRouteExists(n string) resource.TestCheckFunc {
 }
 
 const testVpnGatewayRouteCreate = tcacctest.DefaultVpnDataSource + `
-# Create VPC
+resource "tencentcloud_vpn_customer_gateway" "cgw" {
+  name              = "terraform_test"
+  public_ip_address = "1.14.14.14"
+
+}
+
+# Create VPC and Subnet
 data "tencentcloud_vpc_instances" "foo" {
   name = "Default-VPC"
 }
 
+resource "tencentcloud_vpn_gateway" "vpn" {
+  name      = "terraform_update"
+  vpc_id    = data.tencentcloud_vpc_instances.foo.instance_list.0.vpc_id
+  bandwidth = 5
+  zone      = "ap-guangzhou-3"
+
+  tags = {
+    test = "test"
+  }
+}
+
+resource "tencentcloud_vpn_connection" "connection" {
+  name                       = "vpn_connection_test"
+  vpc_id                     = data.tencentcloud_vpc_instances.foo.instance_list.0.vpc_id
+  vpn_gateway_id             = tencentcloud_vpn_gateway.vpn.id
+  customer_gateway_id        = tencentcloud_vpn_customer_gateway.cgw.id
+  pre_share_key              = "test"
+  ike_proto_encry_algorithm  = "3DES-CBC"
+  ike_proto_authen_algorithm = "MD5"
+  ike_local_identity         = "ADDRESS"
+  ike_local_address          = tencentcloud_vpn_gateway.vpn.public_ip_address
+  ike_remote_identity        = "ADDRESS"
+  ike_remote_address         = tencentcloud_vpn_customer_gateway.cgw.public_ip_address
+  ike_dh_group_name          = "GROUP1"
+  ike_sa_lifetime_seconds    = 86400
+  ike_version                = "IKEV1"
+  route_type                 = "StaticRoute"
+  ipsec_encrypt_algorithm    = "3DES-CBC"
+  ipsec_integrity_algorithm  = "MD5"
+  ipsec_sa_lifetime_seconds  = 3600
+  ipsec_pfs_dh_group         = "DH-GROUP1"
+  ipsec_sa_lifetime_traffic  = 2560
+  dpd_enable                 = 1
+  dpd_timeout                = "30"
+  dpd_action                 = "clear"
+  tags = {
+    test = "test"
+  }
+}
+
 resource "tencentcloud_vpn_gateway_route" "route1" {
-  vpn_gateway_id = data.tencentcloud_vpn_gateways.foo.gateway_list.0.id
+  vpn_gateway_id         = tencentcloud_vpn_gateway.vpn.id
   destination_cidr_block = "10.0.0.0/16"
-  instance_type = "VPNCONN"
-  instance_id = data.tencentcloud_vpn_connections.conns.connection_list.0.id
-  priority = "100"
-  status = "ENABLE"
+  instance_type          = "VPNCONN"
+  instance_id            = tencentcloud_vpn_connection.connection.id
+  priority               = "100"
+  status                 = "ENABLE"
 }
 `
 const testVpnGatewayRouteUpdate = tcacctest.DefaultVpnDataSource + `
-# Create VPC
+resource "tencentcloud_vpn_customer_gateway" "cgw" {
+  name              = "terraform_test"
+  public_ip_address = "1.14.14.14"
+
+}
+
+# Create VPC and Subnet
 data "tencentcloud_vpc_instances" "foo" {
   name = "Default-VPC"
 }
 
+resource "tencentcloud_vpn_gateway" "vpn" {
+  name      = "terraform_update"
+  vpc_id    = data.tencentcloud_vpc_instances.foo.instance_list.0.vpc_id
+  bandwidth = 5
+  zone      = "ap-guangzhou-3"
+
+  tags = {
+    test = "test"
+  }
+}
+
+resource "tencentcloud_vpn_connection" "connection" {
+  name                       = "vpn_connection_test"
+  vpc_id                     = data.tencentcloud_vpc_instances.foo.instance_list.0.vpc_id
+  vpn_gateway_id             = tencentcloud_vpn_gateway.vpn.id
+  customer_gateway_id        = tencentcloud_vpn_customer_gateway.cgw.id
+  pre_share_key              = "test"
+  ike_proto_encry_algorithm  = "3DES-CBC"
+  ike_proto_authen_algorithm = "MD5"
+  ike_local_identity         = "ADDRESS"
+  ike_local_address          = tencentcloud_vpn_gateway.vpn.public_ip_address
+  ike_remote_identity        = "ADDRESS"
+  ike_remote_address         = tencentcloud_vpn_customer_gateway.cgw.public_ip_address
+  ike_dh_group_name          = "GROUP1"
+  ike_sa_lifetime_seconds    = 86400
+  ike_version                = "IKEV1"
+  route_type                 = "StaticRoute"
+  ipsec_encrypt_algorithm    = "3DES-CBC"
+  ipsec_integrity_algorithm  = "MD5"
+  ipsec_sa_lifetime_seconds  = 3600
+  ipsec_pfs_dh_group         = "DH-GROUP1"
+  ipsec_sa_lifetime_traffic  = 2560
+  dpd_enable                 = 1
+  dpd_timeout                = "30"
+  dpd_action                 = "clear"
+  tags = {
+    test = "test"
+  }
+}
+
 resource "tencentcloud_vpn_gateway_route" "route1" {
-  vpn_gateway_id = data.tencentcloud_vpn_gateways.foo.gateway_list.0.id
+  vpn_gateway_id         = tencentcloud_vpn_gateway.vpn.id
   destination_cidr_block = "10.0.0.0/16"
-  instance_type = "VPNCONN"
-  instance_id = data.tencentcloud_vpn_connections.conns.connection_list.0.id
-  priority = "100"
-  status = "DISABLE"
+  instance_type          = "VPNCONN"
+  instance_id            = tencentcloud_vpn_connection.connection.id
+  priority               = "100"
+  status                 = "DISABLE"
 }
 `

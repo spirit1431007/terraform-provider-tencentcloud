@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+// Copyright (c) 2017-2025 Tencent. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,6 +19,15 @@ const (
 
 	// 密钥不合法。
 	AUTHFAILURE_ACCESSKEYILLEGAL = "AuthFailure.AccessKeyIllegal"
+
+	// 校验MFA失败
+	FAILEDOPERATION_CHECKMFAERROR = "FailedOperation.CheckMFAError"
+
+	// MFA类型不支持
+	FAILEDOPERATION_MFATYPENOTSUPPORTED = "FailedOperation.MFATypeNotSupported"
+
+	// 该接口不支持临时密钥调用
+	FAILEDOPERATION_TEMPKEYNOTALLOWED = "FailedOperation.TempKeyNotAllowed"
 
 	// DB错误。
 	INTERNALERROR_DBERROR = "InternalError.DbError"
@@ -85,6 +94,9 @@ const (
 
 	// WebIdentityToken参数错误。
 	INVALIDPARAMETER_WEBIDENTITYTOKENERROR = "InvalidParameter.WebIdentityTokenError"
+
+	// 请求的次数超过了频率限制。
+	REQUESTLIMITEXCEEDED = "RequestLimitExceeded"
 
 	// 账号对应的角色不存在。
 	RESOURCENOTFOUND_ROLENOTFOUND = "ResourceNotFound.RoleNotFound"

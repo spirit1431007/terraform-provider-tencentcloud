@@ -32,49 +32,49 @@ func ResourceTencentCloudSecurityGroupRuleSet() *schema.Resource {
 		"cidr_block": {
 			Type:        schema.TypeString,
 			Optional:    true,
-			Description: "An IP address network or CIDR segment. NOTE: `cidr_block`, `ipv6_cidr_block`, `source_security_id` and `address_template_*` are exclusive and cannot be set in the same time.",
+			Description: "An IP address network or CIDR segment. NOTE: `cidr_block`, `ipv6_cidr_block`, `source_security_id` and `address_template_*` are exclusive and cannot be set in the same time; One of `cidr_block`, `ipv6_cidr_block`, `source_security_id` and `address_template_*` must be set.",
 		},
 		"ipv6_cidr_block": {
 			Type:        schema.TypeString,
 			Optional:    true,
-			Description: "An IPV6 address network or CIDR segment, and conflict with `source_security_id` and `address_template_*`.",
+			Description: "An IPV6 address network or CIDR segment, and conflict with `source_security_id` and `address_template_*`. NOTE: One of `cidr_block`, `ipv6_cidr_block`, `source_security_id` and `address_template_*` must be set.",
 		},
 		"source_security_id": {
 			Type:        schema.TypeString,
 			Optional:    true,
-			Description: "ID of the nested security group, and conflicts with `cidr_block` and `address_template_*`.",
+			Description: "ID of the nested security group, and conflicts with `cidr_block` and `address_template_*`. NOTE: One of `cidr_block`, `ipv6_cidr_block`, `source_security_id` and `address_template_*` must be set.",
 		},
 		"address_template_id": {
 			Type:        schema.TypeString,
 			Optional:    true,
-			Description: "Specify Address template ID like `ipm-xxxxxxxx`, conflict with `source_security_id` and `cidr_block`.",
+			Description: "Specify Address template ID like `ipm-xxxxxxxx`, conflict with `source_security_id` and `cidr_block`. NOTE: One of `cidr_block`, `ipv6_cidr_block`, `source_security_id` and `address_template_*` must be set.",
 		},
 		"address_template_group": {
 			Type:        schema.TypeString,
 			Optional:    true,
-			Description: "Specify Group ID of Address template like `ipmg-xxxxxxxx`, conflict with `source_security_id` and `cidr_block`.",
+			Description: "Specify Group ID of Address template like `ipmg-xxxxxxxx`, conflict with `source_security_id` and `cidr_block`. NOTE: One of `cidr_block`, `ipv6_cidr_block`, `source_security_id` and `address_template_*` must be set.",
 		},
 		"service_template_id": {
 			Type:        schema.TypeString,
 			Optional:    true,
-			Description: "Specify Protocol template ID like `ppm-xxxxxxxx`, conflict with `cidr_block` and `port`.",
+			Description: "Specify Protocol template ID like `ppm-xxxxxxxx`, conflict with `protocol` and `port`.",
 		},
 		"service_template_group": {
 			Type:        schema.TypeString,
 			Optional:    true,
-			Description: "Specify Group ID of Protocol template ID like `ppmg-xxxxxxxx`, conflict with `cidr_block` and `port`.",
+			Description: "Specify Group ID of Protocol template ID like `ppmg-xxxxxxxx`, conflict with `protocol` and `port`.",
 		},
 		"protocol": {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Computed:    true,
-			Description: "Type of IP protocol. Valid values: `TCP`, `UDP` and `ICMP`. Default to all types protocol, and conflicts with `service_template_*`.",
+			Description: "Type of IP protocol. Valid values: `TCP`, `UDP`, `ICMP`, `ICMPv6` and `ALL`. Default to all types protocol, and conflicts with `service_template_*`.",
 		},
 		"port": {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Computed:    true,
-			Description: "Range of the port. The available value can be one, multiple or one segment. E.g. `80`, `80,90` and `80-90`. Default to all ports, and conflicts with `service_template_*`.",
+			Description: "Range of the port. The available value can be `all`, a single port, or a port range. E.g. `80`, `80,90`, `80-90` or `all`. Note: If the `Protocol` value is set to `ALL`, the `Port` value also needs to be set to `all`. Default to all ports, and conflicts with `service_template_*`.",
 		},
 		"policy_index": {
 			Type:        schema.TypeInt,

@@ -31,9 +31,12 @@ func ResourceTencentCloudPostgresqlInstance() *schema.Resource {
 		Update: resourceTencentCloudPostgresqlInstanceUpdate,
 		Delete: resourceTencentCLoudPostgresqlInstanceDelete,
 		Importer: &schema.ResourceImporter{
-			State: helper.ImportWithDefaultValue(map[string]interface{}{
-				"delete_protection": false,
-			}),
+			State: schema.ImportStatePassthrough,
+		},
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(60 * time.Minute),
+			Update: schema.DefaultTimeout(60 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -57,6 +60,7 @@ func ResourceTencentCloudPostgresqlInstance() *schema.Resource {
 			"auto_renew_flag": {
 				Type:        schema.TypeInt,
 				Optional:    true,
+				Computed:    true,
 				Description: "Auto renew flag, `1` for enabled. NOTES: Only support prepaid instance.",
 			},
 			"auto_voucher": {
@@ -125,6 +129,13 @@ func ResourceTencentCloudPostgresqlInstance() *schema.Resource {
 				Required:    true,
 				Description: "Volume size(in GB). Allowed value must be a multiple of 10. The storage must be set with the limit of `storage_min` and `storage_max` which data source `tencentcloud_postgresql_specinfos` provides.",
 			},
+			"storage_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
+				Description: "Storage type of the instance. Valid values: `PHYSICAL_LOCAL_SSD` (default, local SSD), `CLOUD_PREMIUM` (premium cloud disk), `CLOUD_SSD` (cloud SSD), `CLOUD_HSSD` (enhanced cloud SSD). NOTE: This field will force new resource when modified.",
+			},
 			"memory": {
 				Type:        schema.TypeInt,
 				Required:    true,
@@ -166,7 +177,6 @@ func ResourceTencentCloudPostgresqlInstance() *schema.Resource {
 			},
 			"root_user": {
 				Type:        schema.TypeString,
-				ForceNew:    true,
 				Optional:    true,
 				Default:     "root",
 				Description: "Instance root account name. This parameter is optional, Default value is `root`.",
@@ -204,6 +214,12 @@ func ResourceTencentCloudPostgresqlInstance() *schema.Resource {
 				Computed:    true,
 				Description: "Region of the custom key.",
 			},
+			"kms_cluster_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "Specify the cluster served by KMS. If KMSClusterId is blank, use the KMS of the default cluster. If you choose to specify a KMS cluster, you need to pass in KMSClusterId.",
+			},
 			"public_access_switch": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -230,30 +246,52 @@ func ResourceTencentCloudPostgresqlInstance() *schema.Resource {
 			"backup_plan": {
 				Type:        schema.TypeList,
 				Optional:    true,
+				Computed:    true,
 				Description: "Specify DB backup plan.",
+				Deprecated:  "This field is deprecated from version 1.83.9. Use resource `tencentcloud_postgresql_backup_plan` to manage PG instance backup plan.",
 				MaxItems:    1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"min_backup_start_time": {
 							Type:        schema.TypeString,
 							Optional:    true,
+							Computed:    true,
 							Description: "Specify earliest backup start time, format `hh:mm:ss`.",
 						},
 						"max_backup_start_time": {
 							Type:        schema.TypeString,
 							Optional:    true,
+							Computed:    true,
 							Description: "Specify latest backup start time, format `hh:mm:ss`.",
 						},
 						"base_backup_retention_period": {
 							Type:        schema.TypeInt,
 							Optional:    true,
+							Computed:    true,
 							Description: "Specify days of the retention.",
 						},
 						"backup_period": {
 							Type:        schema.TypeList,
 							Optional:    true,
+							Computed:    true,
 							Description: "List of backup period per week, available values: `monday`, `tuesday`, `wednesday`, `thursday`, `friday`, `saturday`, `sunday`. NOTE: At least specify two days.",
 							Elem:        &schema.Schema{Type: schema.TypeString},
+						},
+						"monthly_backup_retention_period": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Specify days of the retention.",
+						},
+						"monthly_backup_period": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "If it is in monthly dimension, the format is numeric characters, such as [\"1\",\"2\"].",
+							Elem:        &schema.Schema{Type: schema.TypeString},
+						},
+						"monthly_plan_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Monthly plan id.",
 						},
 					},
 				},
@@ -286,8 +324,14 @@ func ResourceTencentCloudPostgresqlInstance() *schema.Resource {
 			"delete_protection": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
+				Computed:    true,
 				Description: "Whether to enable instance deletion protection. Default: false.",
+			},
+			"wait_switch": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: tccommon.ValidateAllowedIntValue([]int{POSTGRESQL_KERNEL_UPGRADE_IMMEDIATELY, POSTGRESQL_KERNEL_UPGRADE_MAINTAIN_WINDOW}),
+				Description:  "Switch time after instance configurations are modified. `0`: Switch immediately; `2`: Switch during maintenance time window. Default: `0`. Note: This only takes effect when updating the `memory`, `storage`, `cpu`, `db_node_set`, `db_kernel_version` fields.",
 			},
 			// Computed values
 			"public_access_host": {
@@ -359,23 +403,26 @@ func resourceTencentCloudPostgresqlInstanceCreate(d *schema.ResourceData, meta i
 	var allowMajorVersion, allowSpecVersion, allowSpec []string
 
 	var (
-		dbMajorVersion  = ""
-		dbKernelVersion = ""
-		needSupportTde  = 0
-		kmsKeyId        = ""
-		kmsRegion       = ""
-		period          = 1
-		autoRenewFlag   = 0
-		autoVoucher     = 0
-		voucherIds      []*string
-		cpu             int // cpu only used for query specCode which contains cpu info
+		dbMajorVersion   = ""
+		dbKernelVersion  = ""
+		needSupportTde   = 0
+		kmsKeyId         = ""
+		kmsRegion        = ""
+		kmsClusterId     = ""
+		period           = 1
+		autoRenewFlag    = 0
+		autoVoucher      = 0
+		voucherIds       []*string
+		cpu              int // cpu only used for query specCode which contains cpu info
+		storageType      string
+		deleteProtection bool
 	)
 
 	if v, ok := d.GetOkExists("cpu"); ok {
 		cpu = v.(int)
 	}
 
-	if v, ok := d.GetOk("period"); ok {
+	if v, ok := d.GetOkExists("period"); ok {
 		log.Printf("period set")
 		period = v.(int)
 	} else {
@@ -394,7 +441,7 @@ func resourceTencentCloudPostgresqlInstanceCreate(d *schema.ResourceData, meta i
 		dbKernelVersion = v.(string)
 	}
 
-	if v, ok := d.GetOk("need_support_tde"); ok {
+	if v, ok := d.GetOkExists("need_support_tde"); ok {
 		needSupportTde = v.(int)
 	}
 
@@ -406,16 +453,28 @@ func resourceTencentCloudPostgresqlInstanceCreate(d *schema.ResourceData, meta i
 		kmsRegion = v.(string)
 	}
 
-	if v, ok := d.Get("auto_renew_flag").(int); ok {
-		autoRenewFlag = v
+	if v, ok := d.GetOk("kms_cluster_id"); ok {
+		kmsClusterId = v.(string)
 	}
 
-	if v, ok := d.Get("auto_voucher").(int); ok {
-		autoVoucher = v
+	if v, ok := d.GetOkExists("auto_renew_flag"); ok {
+		autoRenewFlag = v.(int)
+	}
+
+	if v, ok := d.GetOkExists("auto_voucher"); ok {
+		autoVoucher = v.(int)
 	}
 
 	if v, ok := d.GetOk("voucher_ids"); ok {
 		voucherIds = helper.InterfacesStringsPoint(v.([]interface{}))
+	}
+
+	if v, ok := d.GetOk("storage_type"); ok {
+		storageType = v.(string)
+	}
+
+	if v, ok := d.GetOkExists("delete_protection"); ok {
+		deleteProtection = v.(bool)
 	}
 
 	requestSecurityGroup := make([]string, 0, len(securityGroups))
@@ -430,7 +489,7 @@ func resourceTencentCloudPostgresqlInstanceCreate(d *schema.ResourceData, meta i
 
 	// get specCode with engine_version and memory
 	outErr = resource.Retry(tccommon.ReadRetryTimeout*5, func() *resource.RetryError {
-		speccodes, inErr := postgresqlService.DescribeSpecinfos(ctx, zone)
+		speccodes, inErr := postgresqlService.DescribeSpecinfos(ctx, zone, storageType)
 		if inErr != nil {
 			return tccommon.RetryError(inErr)
 		}
@@ -536,8 +595,11 @@ func resourceTencentCloudPostgresqlInstanceCreate(d *schema.ResourceData, meta i
 			needSupportTde,
 			kmsKeyId,
 			kmsRegion,
+			kmsClusterId,
 			autoVoucher,
 			voucherIds,
+			storageType,
+			deleteProtection,
 		)
 
 		if inErr != nil {
@@ -559,7 +621,7 @@ func resourceTencentCloudPostgresqlInstanceCreate(d *schema.ResourceData, meta i
 	//internal version: replace setTag end, please do not modify this annotation and refrain from inserting any code between the beginning and end lines of the annotation.
 
 	// check creation done
-	err := resource.Retry(20*tccommon.ReadRetryTimeout, func() *resource.RetryError {
+	err := resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 		instance, has, err := postgresqlService.DescribePostgresqlInstanceById(ctx, instanceId)
 		if err != nil {
 			return tccommon.RetryError(err)
@@ -582,7 +644,8 @@ func resourceTencentCloudPostgresqlInstanceCreate(d *schema.ResourceData, meta i
 	}
 
 	// check init status
-	checkErr := postgresqlService.CheckDBInstanceStatus(ctx, instanceId)
+	timeoutMinutes := int(d.Timeout(schema.TimeoutCreate).Minutes())
+	checkErr := postgresqlService.CheckDBInstanceStatus(ctx, instanceId, timeoutMinutes)
 	if checkErr != nil {
 		return checkErr
 	}
@@ -609,7 +672,8 @@ func resourceTencentCloudPostgresqlInstanceCreate(d *schema.ResourceData, meta i
 	}
 
 	// check creation done
-	checkErr = postgresqlService.CheckDBInstanceStatus(ctx, instanceId)
+	timeoutMinutes = int(d.Timeout(schema.TimeoutCreate).Minutes())
+	checkErr = postgresqlService.CheckDBInstanceStatus(ctx, instanceId, timeoutMinutes)
 	if checkErr != nil {
 		return checkErr
 	}
@@ -629,7 +693,8 @@ func resourceTencentCloudPostgresqlInstanceCreate(d *schema.ResourceData, meta i
 	}
 
 	// check creation done
-	checkErr = postgresqlService.CheckDBInstanceStatus(ctx, instanceId)
+	timeoutMinutes = int(d.Timeout(schema.TimeoutCreate).Minutes())
+	checkErr = postgresqlService.CheckDBInstanceStatus(ctx, instanceId, timeoutMinutes)
 	if checkErr != nil {
 		return checkErr
 	}
@@ -675,6 +740,37 @@ func resourceTencentCloudPostgresqlInstanceCreate(d *schema.ResourceData, meta i
 
 	// set backup plan
 	if plan, ok := helper.InterfacesHeadMap(d, "backup_plan"); ok {
+		if v, ok := plan["monthly_backup_period"].([]interface{}); ok && len(v) > 0 {
+			request0 := postgresql.NewCreateBackupPlanRequest()
+			request0.DBInstanceId = &instanceId
+			request0.BackupPeriodType = helper.String("month")
+			request0.PlanName = helper.String("custom_month")
+			request0.BackupPeriod = helper.InterfacesStringsPoint(v)
+
+			if v, ok := plan["min_backup_start_time"].(string); ok && v != "" {
+				request0.MinBackupStartTime = &v
+			}
+
+			if v, ok := plan["max_backup_start_time"].(string); ok && v != "" {
+				request0.MaxBackupStartTime = &v
+			}
+
+			if v, ok := plan["monthly_backup_retention_period"].(int); ok && v != 0 {
+				request0.BaseBackupRetentionPeriod = helper.IntUint64(v)
+			}
+
+			err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+				_, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UsePostgresqlClient().CreateBackupPlan(request0)
+				if e != nil {
+					return tccommon.RetryError(err, postgresql.OPERATIONDENIED_INSTANCESTATUSLIMITOPERROR)
+				}
+				return nil
+			})
+
+			if err != nil {
+				return err
+			}
+		}
 		request := postgresql.NewModifyBackupPlanRequest()
 		request.DBInstanceId = &instanceId
 		if v, ok := plan["min_backup_start_time"].(string); ok && v != "" {
@@ -765,8 +861,6 @@ func resourceTencentCloudPostgresqlInstanceRead(d *schema.ResourceData, meta int
 
 	_ = d.Set("project_id", int(*instance.ProjectId))
 	_ = d.Set("availability_zone", instance.Zone)
-	_ = d.Set("vpc_id", instance.VpcId)
-	_ = d.Set("subnet_id", instance.SubnetId)
 	_ = d.Set("engine_version", instance.DBVersion)
 	_ = d.Set("db_kernel_version", instance.DBKernelVersion)
 	_ = d.Set("db_major_vesion", instance.DBMajorVersion)
@@ -774,19 +868,34 @@ func resourceTencentCloudPostgresqlInstanceRead(d *schema.ResourceData, meta int
 	_ = d.Set("name", instance.DBInstanceName)
 	_ = d.Set("charset", instance.DBCharset)
 
-	if rootUser != "" {
-		_ = d.Set("root_user", &rootUser)
-	}
+	// check net num
+	if len(instance.DBInstanceNetInfo) == 3 {
+		_ = d.Set("vpc_id", instance.DBInstanceNetInfo[0].VpcId)
+		_ = d.Set("subnet_id", instance.DBInstanceNetInfo[0].SubnetId)
+		_ = d.Set("private_access_ip", instance.DBInstanceNetInfo[0].Ip)
+		_ = d.Set("private_access_port", instance.DBInstanceNetInfo[0].Port)
 
-	if *instance.PayType == POSTGRESQL_PAYTYPE_PREPAID || *instance.PayType == COMMON_PAYTYPE_PREPAID {
-		_ = d.Set("charge_type", COMMON_PAYTYPE_PREPAID)
-	} else {
-		_ = d.Set("charge_type", COMMON_PAYTYPE_POSTPAID)
-	}
+		// net status
+		public_access_switch := false
+		for _, v := range instance.DBInstanceNetInfo {
+			if *v.NetType == "public" {
+				// both 1 and opened used in SDK
+				if *v.Status == "opened" || *v.Status == "1" {
+					public_access_switch = true
+				}
 
-	// net status
-	public_access_switch := false
-	if len(instance.DBInstanceNetInfo) > 0 {
+				_ = d.Set("public_access_host", v.Address)
+				_ = d.Set("public_access_port", v.Port)
+			}
+		}
+
+		_ = d.Set("public_access_switch", public_access_switch)
+	} else if len(instance.DBInstanceNetInfo) == 2 {
+		_ = d.Set("vpc_id", instance.VpcId)
+		_ = d.Set("subnet_id", instance.SubnetId)
+
+		// net status
+		public_access_switch := false
 		for _, v := range instance.DBInstanceNetInfo {
 			if *v.NetType == "public" {
 				// both 1 and opened used in SDK
@@ -804,9 +913,25 @@ func resourceTencentCloudPostgresqlInstanceRead(d *schema.ResourceData, meta int
 				_ = d.Set("private_access_port", v.Port)
 			}
 		}
+
+		_ = d.Set("public_access_switch", public_access_switch)
+	} else {
+		return fmt.Errorf("DBInstanceNetInfo returned incorrect information.")
 	}
 
-	_ = d.Set("public_access_switch", public_access_switch)
+	if rootUser != "" {
+		_ = d.Set("root_user", &rootUser)
+	}
+
+	if *instance.PayType == POSTGRESQL_PAYTYPE_PREPAID || *instance.PayType == COMMON_PAYTYPE_PREPAID {
+		_ = d.Set("charge_type", COMMON_PAYTYPE_PREPAID)
+	} else {
+		_ = d.Set("charge_type", COMMON_PAYTYPE_POSTPAID)
+	}
+
+	if instance.AutoRenew != nil {
+		_ = d.Set("auto_renew_flag", int(*instance.AutoRenew))
+	}
 
 	// security groups
 	sg, err := postgresqlService.DescribeDBInstanceSecurityGroupsById(ctx, d.Id())
@@ -823,6 +948,14 @@ func resourceTencentCloudPostgresqlInstanceRead(d *schema.ResourceData, meta int
 	ins, err := postgresqlService.DescribeDBInstanceAttribute(ctx, attrRequest)
 	if err != nil {
 		return err
+	}
+
+	if ins.DBInstanceStorageType != nil {
+		_ = d.Set("storage_type", ins.DBInstanceStorageType)
+	}
+
+	if ins.DeletionProtection != nil {
+		_ = d.Set("delete_protection", ins.DeletionProtection)
 	}
 
 	nodeSet := ins.DBNodeSet
@@ -868,6 +1001,7 @@ func resourceTencentCloudPostgresqlInstanceRead(d *schema.ResourceData, meta int
 	if has {
 		_ = d.Set("kms_key_id", kms.KeyId)
 		_ = d.Set("kms_region", kms.KeyRegion)
+		_ = d.Set("kms_cluster_id", kms.KMSClusterId)
 	}
 
 	// Uid, must use
@@ -906,46 +1040,84 @@ func resourceTencentCloudPostgresqlInstanceRead(d *schema.ResourceData, meta int
 	_ = d.Set("tags", tags)
 
 	// backup plans (only specified will rewrite)
-	if _, ok := d.GetOk("backup_plan"); ok {
-		request := postgresql.NewDescribeBackupPlansRequest()
-		request.DBInstanceId = helper.String(d.Id())
-		response, err := postgresqlService.DescribeBackupPlans(ctx, request)
-		if err != nil {
-			return err
+	bkpRequest := postgresql.NewDescribeBackupPlansRequest()
+	bkpRequest.DBInstanceId = helper.String(d.Id())
+	var bkpResponse []*postgresql.BackupPlan
+	err = resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
+		bkpResponse, inErr = postgresqlService.DescribeBackupPlans(ctx, bkpRequest)
+		if inErr != nil {
+			ee, ok := inErr.(*sdkErrors.TencentCloudSDKError)
+			if ok && ee.GetCode() == "FailedOperation.FailedOperationError" {
+				return nil
+			}
+
+			return tccommon.RetryError(inErr)
 		}
 
-		var backupPlan *postgresql.BackupPlan
-		if len(response) > 0 {
-			backupPlan = response[0]
-		}
+		return nil
+	})
 
-		if backupPlan != nil {
-			planMap := map[string]interface{}{}
-			if backupPlan.MinBackupStartTime != nil {
-				planMap["min_backup_start_time"] = backupPlan.MinBackupStartTime
-			}
+	if err != nil {
+		return err
+	}
 
-			if backupPlan.MaxBackupStartTime != nil {
-				planMap["max_backup_start_time"] = backupPlan.MaxBackupStartTime
-			}
-
-			if backupPlan.BaseBackupRetentionPeriod != nil {
-				planMap["base_backup_retention_period"] = backupPlan.BaseBackupRetentionPeriod
-			}
-
-			if backupPlan.BackupPeriod != nil {
-				strSlice := []string{}
-				// set period list from BackupPeriods string, eg:"BackupPeriod": "[\"tuesday\",\"wednesday\"]",
-				err := json.Unmarshal([]byte(*backupPlan.BackupPeriod), &strSlice)
-				if err != nil {
-					return fmt.Errorf("BackupPeriod:[%s] has invalid format,Unmarshal failed! error: %v", *backupPlan.BackupPeriod, err.Error())
+	var backupPlan, monthlyBackupPlan *postgresql.BackupPlan
+	if len(bkpResponse) > 0 {
+		backupPlan = bkpResponse[0]
+		for _, plan := range bkpResponse {
+			if plan != nil && plan.BackupPeriodType != nil {
+				if *plan.BackupPeriodType == "month" {
+					monthlyBackupPlan = plan
 				}
+				if *plan.BackupPeriodType == "week" {
+					backupPlan = plan
+				}
+			}
+		}
+	}
 
-				planMap["backup_period"] = strSlice
+	if backupPlan != nil {
+		planMap := map[string]interface{}{}
+		if backupPlan.MinBackupStartTime != nil {
+			planMap["min_backup_start_time"] = backupPlan.MinBackupStartTime
+		}
+
+		if backupPlan.MaxBackupStartTime != nil {
+			planMap["max_backup_start_time"] = backupPlan.MaxBackupStartTime
+		}
+
+		if backupPlan.BaseBackupRetentionPeriod != nil {
+			planMap["base_backup_retention_period"] = backupPlan.BaseBackupRetentionPeriod
+		}
+
+		if backupPlan.BackupPeriod != nil {
+			strSlice := []string{}
+			// set period list from BackupPeriods string, eg:"BackupPeriod": "[\"tuesday\",\"wednesday\"]",
+			err := json.Unmarshal([]byte(*backupPlan.BackupPeriod), &strSlice)
+			if err != nil {
+				return fmt.Errorf("BackupPeriod:[%s] has invalid format,Unmarshal failed! error: %v", *backupPlan.BackupPeriod, err.Error())
 			}
 
-			_ = d.Set("backup_plan", []interface{}{planMap})
+			planMap["backup_period"] = strSlice
 		}
+
+		if monthlyBackupPlan != nil && monthlyBackupPlan.PlanId != nil {
+			planMap["monthly_plan_id"] = monthlyBackupPlan.PlanId
+		}
+		if monthlyBackupPlan != nil && monthlyBackupPlan.BackupPeriod != nil {
+			strSlice := []string{}
+			err := json.Unmarshal([]byte(*monthlyBackupPlan.BackupPeriod), &strSlice)
+			if err != nil {
+				return fmt.Errorf("BackupPeriod:[%s] has invalid format,Unmarshal failed! error: %v", *backupPlan.BackupPeriod, err.Error())
+			}
+
+			planMap["monthly_backup_period"] = strSlice
+		}
+		if monthlyBackupPlan != nil && monthlyBackupPlan.BaseBackupRetentionPeriod != nil {
+			planMap["monthly_backup_retention_period"] = monthlyBackupPlan.BaseBackupRetentionPeriod
+		}
+
+		_ = d.Set("backup_plan", []interface{}{planMap})
 	}
 
 	// pg params
@@ -996,27 +1168,27 @@ func resourceTencentCloudPostgresqlInstanceUpdate(d *schema.ResourceData, meta i
 	d.Partial(true)
 
 	if err := helper.ImmutableArgsChek(d,
-		// "charge_type",
-		// "period",
-		// "auto_renew_flag",
-		// "auto_voucher",
+		"auto_voucher",
 		"voucher_ids",
+		"root_user",
 	); err != nil {
 		return err
 	}
 
-	if d.HasChange("period") && !d.HasChange("charge_type") {
-		return fmt.Errorf("The `period` field can be changed only when updating the charge type from `POSTPAID_BY_HOUR` to `PREPAID`.")
+	if d.HasChange("need_support_tde") || d.HasChange("kms_key_id") || d.HasChange("kms_region") || d.HasChange("kms_cluster_id") {
+		return fmt.Errorf("Not support change params contact with data transparent encryption.")
+	}
+
+	waitSwitch := POSTGRESQL_KERNEL_UPGRADE_IMMEDIATELY
+	if v, ok := d.GetOk("wait_switch"); ok {
+		waitSwitch = v.(int)
 	}
 
 	if d.HasChange("charge_type") {
 		var (
+			request       = postgresql.NewModifyDBInstanceChargeTypeRequest()
 			chargeTypeOld string
 			chargeTypeNew string
-			period        = 1
-			autoRenew     = 0
-			autoVoucher   = 0
-			request       = postgresql.NewModifyDBInstanceChargeTypeRequest()
 		)
 
 		old, new := d.GetChange("charge_type")
@@ -1032,32 +1204,9 @@ func resourceTencentCloudPostgresqlInstanceUpdate(d *schema.ResourceData, meta i
 			return fmt.Errorf("It only support to update the charge type from `POSTPAID_BY_HOUR` to `PREPAID`.")
 		}
 
-		if v, ok := d.GetOk("period"); ok {
-			log.Printf("period set")
-			period = v.(int)
-		} else {
-			log.Printf("period not set")
-		}
-
-		if v, ok := d.GetOk("auto_renew_flag"); ok {
-			log.Printf("auto_renew_flag set")
-			autoRenew = v.(int)
-		} else {
-			log.Printf("auto_renew_flag not set")
-		}
-
-		if v, ok := d.GetOk("auto_voucher"); ok {
-			log.Printf("auto_voucher set")
-			autoVoucher = v.(int)
-		} else {
-			log.Printf("auto_voucher not set")
-		}
-
 		request.DBInstanceId = &instanceId
 		request.InstanceChargeType = &chargeTypeNew
-		request.Period = helper.IntInt64(period)
-		request.AutoRenewFlag = helper.IntInt64(autoRenew)
-		request.AutoVoucher = helper.IntInt64(autoVoucher)
+		request.Period = helper.IntInt64(1)
 		err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
 			result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UsePostgresqlClient().ModifyDBInstanceChargeType(request)
 			if e != nil {
@@ -1082,45 +1231,15 @@ func resourceTencentCloudPostgresqlInstanceUpdate(d *schema.ResourceData, meta i
 		}
 	}
 
-	var outErr, inErr, checkErr error
-	// update vpc and subnet
-	if d.HasChange("vpc_id") || d.HasChange("subnet_id") {
-		var (
-			vpcOld    string
-			vpcNew    string
-			subnetOld string
-			subnetNew string
-			vipOld    string
-			vipNew    string
-		)
-
-		old, new := d.GetChange("vpc_id")
-		if old != nil {
-			vpcOld = old.(string)
+	if d.HasChange("auto_renew_flag") {
+		request := postgresql.NewSetAutoRenewFlagRequest()
+		request.DBInstanceIdSet = helper.Strings([]string{instanceId})
+		if v, ok := d.GetOkExists("auto_renew_flag"); ok {
+			request.AutoRenewFlag = helper.IntInt64(v.(int))
 		}
 
-		if new != nil {
-			vpcNew = new.(string)
-		}
-
-		old, new = d.GetChange("subnet_id")
-		if old != nil {
-			subnetOld = old.(string)
-		}
-
-		if new != nil {
-			subnetNew = new.(string)
-		}
-
-		// Create new network first, then delete the old one
-		request := postgresql.NewCreateDBInstanceNetworkAccessRequest()
-		request.DBInstanceId = helper.String(instanceId)
-		request.VpcId = helper.String(vpcNew)
-		request.SubnetId = helper.String(subnetNew)
-		// ip assigned by system
-		request.IsAssignVip = helper.Bool(false)
 		err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
-			result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UsePostgresqlClient().CreateDBInstanceNetworkAccess(request)
+			result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UsePostgresqlClient().SetAutoRenewFlag(request)
 			if e != nil {
 				return tccommon.RetryError(e)
 			} else {
@@ -1131,50 +1250,185 @@ func resourceTencentCloudPostgresqlInstanceUpdate(d *schema.ResourceData, meta i
 		})
 
 		if err != nil {
-			log.Printf("[CRITAL]%s create postgresql Instance NetworkAccess failed, reason:%+v", logId, err)
+			log.Printf("[CRITAL]%s operate postgresql SetAutoRenewFlag failed, reason:%+v", logId, err)
 			return err
 		}
 
+		// wait unit charge type changing operation of instance done
 		service := PostgresqlService{client: meta.(tccommon.ProviderMeta).GetAPIV3Conn()}
-		// wait for new network enabled
-		conf := tccommon.BuildStateChangeConf([]string{}, []string{"opened"}, 3*tccommon.ReadRetryTimeout, time.Second, service.PostgresqlDBInstanceNetworkAccessStateRefreshFunc(instanceId, vpcNew, subnetNew, vipOld, "", []string{}))
-		if object, e := conf.WaitForState(); e != nil {
-			return e
-		} else {
-			// find the vip assiged by system
-			ret := object.(*postgresql.DBInstanceNetInfo)
-			vipNew = *ret.Ip
-		}
-
-		// wait unit network changing operation of instance done
-		conf = tccommon.BuildStateChangeConf([]string{}, []string{"running"}, 3*tccommon.ReadRetryTimeout, time.Second, service.PostgresqlDBInstanceStateRefreshFunc(instanceId, []string{}))
+		conf := tccommon.BuildStateChangeConf([]string{}, []string{"running"}, 2*tccommon.ReadRetryTimeout, time.Second, service.PostgresqlDBInstanceStateRefreshFunc(instanceId, []string{}))
 		if _, e := conf.WaitForState(); e != nil {
 			return e
 		}
+	}
 
-		// delete the old one
-		if v, ok := d.GetOk("private_access_ip"); ok {
-			vipOld = v.(string)
+	if d.HasChange("period") {
+		request := postgresql.NewRenewInstanceRequest()
+		request.DBInstanceId = &instanceId
+		if v, ok := d.GetOkExists("period"); ok {
+			request.Period = helper.IntInt64(v.(int))
 		}
 
-		if err := service.DeletePostgresqlDBInstanceNetworkAccessById(ctx, instanceId, vpcOld, subnetOld, vipOld); err != nil {
+		if v, ok := d.GetOkExists("auto_voucher"); ok {
+			request.AutoVoucher = helper.IntInt64(v.(int))
+		}
+
+		if v, ok := d.GetOk("voucher_ids"); ok {
+			request.VoucherIds = helper.InterfacesStringsPoint(v.([]interface{}))
+		}
+
+		err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+			result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UsePostgresqlClient().RenewInstance(request)
+			if e != nil {
+				return tccommon.RetryError(e)
+			} else {
+				log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			log.Printf("[CRITAL]%s operate postgresql RenewInstance failed, reason:%+v", logId, err)
 			return err
 		}
 
-		// wait for old network removed
-		conf = tccommon.BuildStateChangeConf([]string{}, []string{"closed"}, 3*tccommon.ReadRetryTimeout, time.Second, service.PostgresqlDBInstanceNetworkAccessStateRefreshFunc(instanceId, vpcOld, subnetOld, vipNew, vipOld, []string{}))
+		// wait unit charge type changing operation of instance done
+		service := PostgresqlService{client: meta.(tccommon.ProviderMeta).GetAPIV3Conn()}
+		conf := tccommon.BuildStateChangeConf([]string{}, []string{"running"}, 2*tccommon.ReadRetryTimeout, time.Second, service.PostgresqlDBInstanceStateRefreshFunc(instanceId, []string{}))
 		if _, e := conf.WaitForState(); e != nil {
 			return e
 		}
+	}
 
-		// wait unit network changing operation of instance done
-		conf = tccommon.BuildStateChangeConf([]string{}, []string{"running"}, 3*tccommon.ReadRetryTimeout, time.Second, service.PostgresqlDBInstanceStateRefreshFunc(instanceId, []string{}))
-		if _, e := conf.WaitForState(); e != nil {
-			return e
+	var outErr, inErr, checkErr error
+	// update vpc and subnet
+	if d.HasChange("vpc_id") || d.HasChange("subnet_id") {
+		var (
+			postgresqlService = PostgresqlService{client: meta.(tccommon.ProviderMeta).GetAPIV3Conn()}
+			instance          *postgresql.DBInstance
+			has               bool
+			vpcOld            string
+			vpcNew            string
+			subnetOld         string
+			subnetNew         string
+			vipOld            string
+			vipNew            string
+		)
+
+		// check net first
+		outErr = resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
+			instance, has, inErr = postgresqlService.DescribePostgresqlInstanceById(ctx, d.Id())
+			if inErr != nil {
+				ee, ok := inErr.(*sdkErrors.TencentCloudSDKError)
+				if ok && (ee.GetCode() == "ResourceNotFound.InstanceNotFoundError" || ee.GetCode() == "InvalidParameter") {
+					return nil
+				}
+
+				return tccommon.RetryError(inErr)
+			}
+
+			if instance != nil && tccommon.IsContains(POSTGRESQL_RETRYABLE_STATUS, *instance.DBInstanceStatus) {
+				return resource.RetryableError(fmt.Errorf("instance %s is %s, retrying", *instance.DBInstanceId, *instance.DBInstanceStatus))
+			}
+
+			return nil
+		})
+
+		if outErr != nil {
+			return outErr
 		}
 
-		// refresh the private ip with new one
-		_ = d.Set("private_access_ip", vipNew)
+		if !has {
+			d.SetId("")
+			return nil
+		}
+
+		// check net num
+		if instance.DBInstanceNetInfo != nil && len(instance.DBInstanceNetInfo) > 2 {
+			return fmt.Errorf("There are already %d network information for the current PostgreSQL instance %s. Please remove one before modifying the instance network information.", len(instance.DBInstanceNetInfo)-1, d.Id())
+		} else {
+			old, new := d.GetChange("vpc_id")
+			if old != nil {
+				vpcOld = old.(string)
+			}
+
+			if new != nil {
+				vpcNew = new.(string)
+			}
+
+			old, new = d.GetChange("subnet_id")
+			if old != nil {
+				subnetOld = old.(string)
+			}
+
+			if new != nil {
+				subnetNew = new.(string)
+			}
+
+			// Create new network first, then delete the old one
+			request := postgresql.NewCreateDBInstanceNetworkAccessRequest()
+			request.DBInstanceId = helper.String(instanceId)
+			request.VpcId = helper.String(vpcNew)
+			request.SubnetId = helper.String(subnetNew)
+			// ip assigned by system
+			request.IsAssignVip = helper.Bool(false)
+			err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+				result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UsePostgresqlClient().CreateDBInstanceNetworkAccess(request)
+				if e != nil {
+					return tccommon.RetryError(e)
+				} else {
+					log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+				}
+
+				return nil
+			})
+
+			if err != nil {
+				log.Printf("[CRITAL]%s create postgresql Instance NetworkAccess failed, reason:%+v", logId, err)
+				return err
+			}
+
+			// wait for new network enabled
+			conf := tccommon.BuildStateChangeConf([]string{}, []string{"opened"}, 3*tccommon.ReadRetryTimeout, time.Second, postgresqlService.PostgresqlDBInstanceNetworkAccessStateRefreshFunc(instanceId, vpcNew, subnetNew, vipOld, "", []string{}))
+			if object, e := conf.WaitForState(); e != nil {
+				return e
+			} else {
+				// find the vip assiged by system
+				ret := object.(*postgresql.DBInstanceNetInfo)
+				vipNew = *ret.Ip
+			}
+
+			// wait unit network changing operation of instance done
+			conf = tccommon.BuildStateChangeConf([]string{}, []string{"running"}, 3*tccommon.ReadRetryTimeout, time.Second, postgresqlService.PostgresqlDBInstanceStateRefreshFunc(instanceId, []string{}))
+			if _, e := conf.WaitForState(); e != nil {
+				return e
+			}
+
+			// delete the old one
+			if v, ok := d.GetOk("private_access_ip"); ok {
+				vipOld = v.(string)
+			}
+
+			if err := postgresqlService.DeletePostgresqlDBInstanceNetworkAccessById(ctx, instanceId, vpcOld, subnetOld, vipOld); err != nil {
+				return err
+			}
+
+			// wait for old network removed
+			conf = tccommon.BuildStateChangeConf([]string{}, []string{"closed"}, 3*tccommon.ReadRetryTimeout, time.Second, postgresqlService.PostgresqlDBInstanceNetworkAccessStateRefreshFunc(instanceId, vpcOld, subnetOld, vipNew, vipOld, []string{}))
+			if _, e := conf.WaitForState(); e != nil {
+				return e
+			}
+
+			// wait unit network changing operation of instance done
+			conf = tccommon.BuildStateChangeConf([]string{}, []string{"running"}, 3*tccommon.ReadRetryTimeout, time.Second, postgresqlService.PostgresqlDBInstanceStateRefreshFunc(instanceId, []string{}))
+			if _, e := conf.WaitForState(); e != nil {
+				return e
+			}
+
+			// refresh the private ip with new one
+			_ = d.Set("private_access_ip", vipNew)
+		}
 	}
 
 	// update name
@@ -1210,7 +1464,7 @@ func resourceTencentCloudPostgresqlInstanceUpdate(d *schema.ResourceData, meta i
 		}
 
 		outErr = resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
-			inErr = postgresqlService.UpgradePostgresqlInstance(ctx, instanceId, memory, storage, cpu)
+			inErr = postgresqlService.UpgradePostgresqlInstance(ctx, instanceId, memory, storage, cpu, waitSwitch)
 			if inErr != nil {
 				return tccommon.RetryError(inErr)
 			}
@@ -1222,25 +1476,28 @@ func resourceTencentCloudPostgresqlInstanceUpdate(d *schema.ResourceData, meta i
 			return outErr
 		}
 
-		// Wait for status to processing
-		_ = resource.Retry(time.Second*10, func() *resource.RetryError {
-			instance, _, err := postgresqlService.DescribePostgresqlInstanceById(ctx, instanceId)
-			if err != nil {
-				return tccommon.RetryError(err)
+		if waitSwitch == POSTGRESQL_KERNEL_UPGRADE_IMMEDIATELY {
+			// Wait for status to processing
+			_ = resource.Retry(time.Second*10, func() *resource.RetryError {
+				instance, _, err := postgresqlService.DescribePostgresqlInstanceById(ctx, instanceId)
+				if err != nil {
+					return tccommon.RetryError(err)
+				}
+
+				if *instance.DBInstanceStatus == POSTGRESQL_STAUTS_RUNNING {
+					return resource.RetryableError(fmt.Errorf("waiting for upgrade status change"))
+				}
+
+				return nil
+			})
+
+			time.Sleep(time.Second * 5)
+			// check update storage and memory done
+			timeoutMinutes := int(d.Timeout(schema.TimeoutUpdate).Minutes())
+			checkErr = postgresqlService.CheckDBInstanceStatus(ctx, instanceId, timeoutMinutes)
+			if checkErr != nil {
+				return checkErr
 			}
-
-			if *instance.DBInstanceStatus == POSTGRESQL_STAUTS_RUNNING {
-				return resource.RetryableError(fmt.Errorf("waiting for upgrade status change"))
-			}
-
-			return nil
-		})
-
-		time.Sleep(time.Second * 5)
-		// check update storage and memory done
-		checkErr = postgresqlService.CheckDBInstanceStatus(ctx, instanceId, 60)
-		if checkErr != nil {
-			return checkErr
 		}
 	}
 
@@ -1354,6 +1611,86 @@ func resourceTencentCloudPostgresqlInstanceUpdate(d *schema.ResourceData, meta i
 			if err != nil {
 				return err
 			}
+
+			request1 := postgresql.NewModifyBackupPlanRequest()
+			request1.DBInstanceId = &instanceId
+			var hasMonthlybackupPeriod bool
+			if v, ok := plan["min_backup_start_time"].(string); ok && v != "" {
+				request1.MinBackupStartTime = &v
+			}
+
+			if v, ok := plan["max_backup_start_time"].(string); ok && v != "" {
+				request1.MaxBackupStartTime = &v
+			}
+
+			if v, ok := plan["monthly_backup_retention_period"].(int); ok && v != 0 {
+				request1.BaseBackupRetentionPeriod = helper.IntUint64(v)
+			}
+
+			if v, ok := plan["monthly_backup_period"].([]interface{}); ok && len(v) > 0 {
+				request1.BackupPeriod = helper.InterfacesStringsPoint(v)
+				hasMonthlybackupPeriod = true
+			}
+
+			var monthlyPlanId string
+			if v, ok := plan["monthly_plan_id"].(string); ok && v != "" {
+				request1.PlanId = helper.String(v)
+				monthlyPlanId = v
+			}
+			if !hasMonthlybackupPeriod && monthlyPlanId != "" {
+				request0 := postgresql.NewDeleteBackupPlanRequest()
+				request0.DBInstanceId = &instanceId
+				request0.PlanId = &monthlyPlanId
+				err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+					_, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UsePostgresqlClient().DeleteBackupPlan(request0)
+					if e != nil {
+						return tccommon.RetryError(e)
+					}
+					return nil
+				})
+
+				if err != nil {
+					return err
+				}
+			} else if hasMonthlybackupPeriod && monthlyPlanId == "" {
+				request00 := postgresql.NewCreateBackupPlanRequest()
+				request00.DBInstanceId = &instanceId
+				request00.BackupPeriodType = helper.String("month")
+				request00.PlanName = helper.String("custom_month")
+				if v, ok := plan["monthly_backup_period"].([]interface{}); ok && len(v) > 0 {
+					request00.BackupPeriod = helper.InterfacesStringsPoint(v)
+				}
+
+				if v, ok := plan["min_backup_start_time"].(string); ok && v != "" {
+					request00.MinBackupStartTime = &v
+				}
+
+				if v, ok := plan["max_backup_start_time"].(string); ok && v != "" {
+					request00.MaxBackupStartTime = &v
+				}
+
+				if v, ok := plan["monthly_backup_retention_period"].(int); ok && v != 0 {
+					request00.BaseBackupRetentionPeriod = helper.IntUint64(v)
+				}
+				err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+					_, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UsePostgresqlClient().CreateBackupPlan(request00)
+					if e != nil {
+						return tccommon.RetryError(e)
+					}
+					return nil
+				})
+
+				if err != nil {
+					return err
+				}
+			} else {
+				request1.PlanId = helper.String(monthlyPlanId)
+				err = postgresqlService.ModifyBackupPlan(ctx, request1)
+				if err != nil {
+					return err
+				}
+			}
+
 		}
 	}
 
@@ -1365,7 +1702,7 @@ func resourceTencentCloudPostgresqlInstanceUpdate(d *schema.ResourceData, meta i
 		nodeSet := d.Get("db_node_set").(*schema.Set).List()
 		request := postgresql.NewModifyDBInstanceDeploymentRequest()
 		request.DBInstanceId = helper.String(d.Id())
-		request.SwitchTag = helper.Int64(0)
+		request.SwitchTag = helper.IntInt64(waitSwitch)
 		for i := range nodeSet {
 			var (
 				node               = nodeSet[i].(map[string]interface{})
@@ -1399,21 +1736,23 @@ func resourceTencentCloudPostgresqlInstanceUpdate(d *schema.ResourceData, meta i
 			return err
 		}
 
-		err = resource.Retry(tccommon.ReadRetryTimeout*10, func() *resource.RetryError {
-			instance, _, err := postgresqlService.DescribePostgresqlInstanceById(ctx, d.Id())
+		if waitSwitch == POSTGRESQL_KERNEL_UPGRADE_IMMEDIATELY {
+			err = resource.Retry(tccommon.ReadRetryTimeout*10, func() *resource.RetryError {
+				instance, _, err := postgresqlService.DescribePostgresqlInstanceById(ctx, d.Id())
+				if err != nil {
+					return tccommon.RetryError(err)
+				}
+
+				if tccommon.IsContains(POSTGRESQL_RETRYABLE_STATUS, *instance.DBInstanceStatus) {
+					return resource.RetryableError(fmt.Errorf("instance status is %s, retrying", *instance.DBInstanceStatus))
+				}
+
+				return nil
+			})
+
 			if err != nil {
-				return tccommon.RetryError(err)
+				return err
 			}
-
-			if tccommon.IsContains(POSTGRESQL_RETRYABLE_STATUS, *instance.DBInstanceStatus) {
-				return resource.RetryableError(fmt.Errorf("instance status is %s, retrying", *instance.DBInstanceStatus))
-			}
-
-			return nil
-		})
-
-		if err != nil {
-			return err
 		}
 	}
 
@@ -1422,44 +1761,109 @@ func resourceTencentCloudPostgresqlInstanceUpdate(d *schema.ResourceData, meta i
 		return fmt.Errorf("The `availability_zone` cannot be modified, please use `db_node_set` instead of it.")
 	}
 
-	if d.HasChange("db_kernel_version") {
-		upgradeVersion := d.Get("db_kernel_version").(string)
-		upgradeRequest := postgresql.NewUpgradeDBInstanceKernelVersionRequest()
-		// upgradeResponse:= postgresql.NewUpgradeDBInstanceKernelVersionResponse()
-		upgradeRequest.DBInstanceId = &instanceId
-		upgradeRequest.TargetDBKernelVersion = &upgradeVersion
+	if d.HasChange("db_kernel_version") || d.HasChange("db_major_vesion") || d.HasChange("db_major_version") || d.HasChange("engine_version") {
+		oldKVInterface, newKVInterface := d.GetChange("db_kernel_version")
+		oldMVInterface, newMVInterface := d.GetChange("db_major_vesion")
+		oldMVInterface, newMVInterface = d.GetChange("db_major_version")
+		oldEVInterface, newEVInterface := d.GetChange("engine_version")
 
-		// only support for the immediate upgrade policy
-		switchTag := POSTGRESQL_KERNEL_UPGRADE_IMMEDIATELY
-		upgradeRequest.SwitchTag = helper.IntUint64(switchTag)
+		oldKVValue := oldKVInterface.(string)
+		newKVValue := newKVInterface.(string)
+		oldMVValue := oldMVInterface.(string)
+		newMVValue := newMVInterface.(string)
+		oldEVValue := oldEVInterface.(string)
+		newEVValue := newEVInterface.(string)
 
-		err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
-			result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UsePostgresqlClient().UpgradeDBInstanceKernelVersion(upgradeRequest)
-			if e != nil {
-				tcErr := e.(*sdkErrors.TencentCloudSDKError)
-				if tcErr.Code == "FailedOperation.FailedOperationError" {
-					// upgrade version invalid.
-					return resource.NonRetryableError(fmt.Errorf("Upgrade kernel version failed: %v", e.Error()))
-				}
-
-				return tccommon.RetryError(e)
-			} else {
-				log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, upgradeRequest.GetAction(), upgradeRequest.ToJsonString(), result.ToJsonString())
-			}
-
-			return nil
-		})
-
+		// check old version value
+		oldParamMap := make(map[string]interface{})
+		oldParamMap["DBVersion"] = oldEVValue
+		oldParamMap["DBMajorVersion"] = oldMVValue
+		oldParamMap["DBKernelVersion"] = oldKVValue
+		oldResult, err := postgresqlService.DescribePostgresqlDbVersionsByFilter(ctx, oldParamMap)
 		if err != nil {
-			log.Printf("[CRITAL]%s create dcdb dbInstance failed, reason:%+v", logId, err)
 			return err
 		}
 
-		// only wait for immediately upgrade mode
-		conf := tccommon.BuildStateChangeConf([]string{}, []string{"running", "isolated", "offline"}, 10*tccommon.ReadRetryTimeout, time.Second, postgresqlService.PostgresqlUpgradeKernelVersionRefreshFunc(d.Id(), []string{}))
+		if oldResult == nil || len(oldResult) == 0 {
+			return fmt.Errorf("Current postgresql instance engine_version: %s, db_major_version: %s and db_kernel_version: %s. has no available upgrade target verison.", oldEVValue, oldMVValue, oldKVValue)
+		}
 
-		if _, e := conf.WaitForState(); e != nil {
-			return e
+		// check new version value
+		newParamMap := make(map[string]interface{})
+		newParamMap["DBVersion"] = newEVValue
+		newParamMap["DBMajorVersion"] = newMVValue
+		newParamMap["DBKernelVersion"] = newKVValue
+		newResult, err := postgresqlService.DescribePostgresqlDbVersionsByFilter(ctx, newParamMap)
+		if err != nil {
+			return err
+		}
+
+		if newResult == nil || len(newResult) == 0 {
+			return fmt.Errorf("The expected modifications of engine_version: %s, db_major_version: %s and db_kernel_version: %s are illegal, available upgrade target verison cannot be found.", newEVValue, newMVValue, newKVValue)
+		}
+
+		if oldMVValue != newMVValue {
+			// use UpgradeDBInstanceMajorVersion
+			upgradeRequest := postgresql.NewUpgradeDBInstanceMajorVersionRequest()
+			upgradeRequest.DBInstanceId = &instanceId
+			upgradeRequest.TargetDBKernelVersion = &newKVValue
+			upgradeRequest.UpgradeTimeOption = helper.IntInt64(waitSwitch)
+			err = resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+				result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UsePostgresqlClient().UpgradeDBInstanceMajorVersion(upgradeRequest)
+				if e != nil {
+					tcErr := e.(*sdkErrors.TencentCloudSDKError)
+					if tcErr.Code == "FailedOperation.FailedOperationError" {
+						// upgrade version invalid.
+						return resource.NonRetryableError(fmt.Errorf("Upgrade major version failed: %v", e.Error()))
+					}
+
+					return tccommon.RetryError(e)
+				} else {
+					log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, upgradeRequest.GetAction(), upgradeRequest.ToJsonString(), result.ToJsonString())
+				}
+
+				return nil
+			})
+
+			if err != nil {
+				log.Printf("[CRITAL]%s upgrade major version failed, reason:%+v", logId, err)
+				return err
+			}
+		} else {
+			// use UpgradeDBInstanceKernelVersion
+			upgradeRequest := postgresql.NewUpgradeDBInstanceKernelVersionRequest()
+			upgradeRequest.DBInstanceId = &instanceId
+			upgradeRequest.TargetDBKernelVersion = &newKVValue
+			upgradeRequest.SwitchTag = helper.IntUint64(waitSwitch)
+			err = resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+				result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UsePostgresqlClient().UpgradeDBInstanceKernelVersion(upgradeRequest)
+				if e != nil {
+					tcErr := e.(*sdkErrors.TencentCloudSDKError)
+					if tcErr.Code == "FailedOperation.FailedOperationError" {
+						// upgrade version invalid.
+						return resource.NonRetryableError(fmt.Errorf("Upgrade kernel version failed: %v", e.Error()))
+					}
+
+					return tccommon.RetryError(e)
+				} else {
+					log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, upgradeRequest.GetAction(), upgradeRequest.ToJsonString(), result.ToJsonString())
+				}
+
+				return nil
+			})
+
+			if err != nil {
+				log.Printf("[CRITAL]%s upgrade kernel version failed, reason:%+v", logId, err)
+				return err
+			}
+		}
+
+		if waitSwitch == POSTGRESQL_KERNEL_UPGRADE_IMMEDIATELY {
+			// only wait for immediately upgrade mode
+			conf := tccommon.BuildStateChangeConf([]string{}, []string{"running", "isolated", "offline"}, 10*tccommon.ReadRetryTimeout, time.Second, postgresqlService.PostgresqlUpgradeKernelVersionRefreshFunc(d.Id(), []string{}))
+			if _, e := conf.WaitForState(); e != nil {
+				return e
+			}
 		}
 	}
 
@@ -1493,16 +1897,27 @@ func resourceTencentCloudPostgresqlInstanceUpdate(d *schema.ResourceData, meta i
 		}
 	}
 
-	if d.HasChange("db_major_vesion") || d.HasChange("db_major_version") {
-		return fmt.Errorf("Not support change db major version.")
-	}
+	if d.HasChange("delete_protection") {
+		request := postgresql.NewModifyDBInstanceDeletionProtectionRequest()
+		request.DBInstanceId = &instanceId
+		if v, ok := d.GetOkExists("delete_protection"); ok {
+			request.DeletionProtection = helper.Bool(v.(bool))
+		}
 
-	if d.HasChange("engine_version") {
-		return fmt.Errorf("Not support change engine_version.")
-	}
+		outErr = resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+			result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UsePostgresqlClient().ModifyDBInstanceDeletionProtection(request)
+			if e != nil {
+				return tccommon.RetryError(e)
+			} else {
+				log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+			}
 
-	if d.HasChange("need_support_tde") || d.HasChange("kms_key_id") || d.HasChange("kms_region") {
-		return fmt.Errorf("Not support change params contact with data transparent encryption.")
+			return nil
+		})
+
+		if outErr != nil {
+			return outErr
+		}
 	}
 
 	if len(paramEntrys) != 0 {
@@ -1537,7 +1952,6 @@ func resourceTencentCLoudPostgresqlInstanceDelete(d *schema.ResourceData, meta i
 		postgresqlService = PostgresqlService{client: meta.(tccommon.ProviderMeta).GetAPIV3Conn()}
 		outErr, inErr     error
 		has               bool
-		deleteProtection  bool
 	)
 
 	instanceId := d.Id()
@@ -1582,15 +1996,6 @@ func resourceTencentCLoudPostgresqlInstanceDelete(d *schema.ResourceData, meta i
 
 		return resource.RetryableError(fmt.Errorf("waiting for instance isolating"))
 	})
-
-	if v, ok := d.GetOkExists("delete_protection"); ok {
-		deleteProtection = v.(bool)
-	}
-
-	// delete protection
-	if deleteProtection {
-		return nil
-	}
 
 	outErr = postgresqlService.DeletePostgresqlInstance(ctx, instanceId)
 	if outErr != nil {

@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+// Copyright (c) 2017-2025 Tencent. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -96,6 +96,7 @@ func (c *Client) CheckRecordSnapshotRollbackWithContext(ctx context.Context, req
     if request == nil {
         request = NewCheckRecordSnapshotRollbackRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "CheckRecordSnapshotRollback")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CheckRecordSnapshotRollback require credential")
@@ -157,6 +158,7 @@ func (c *Client) CheckSnapshotRollbackWithContext(ctx context.Context, request *
     if request == nil {
         request = NewCheckSnapshotRollbackRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "CheckSnapshotRollback")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CheckSnapshotRollback require credential")
@@ -165,6 +167,246 @@ func (c *Client) CheckSnapshotRollbackWithContext(ctx context.Context, request *
     request.SetContext(ctx)
     
     response = NewCheckSnapshotRollbackResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateAndPayDealRequest() (request *CreateAndPayDealRequest) {
+    request = &CreateAndPayDealRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("dnspod", APIVersion, "CreateAndPayDeal")
+    
+    
+    return
+}
+
+func NewCreateAndPayDealResponse() (response *CreateAndPayDealResponse) {
+    response = &CreateAndPayDealResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateAndPayDeal
+// DNSPod商品下单并支付
+//
+// 可能返回的错误码:
+//  AUTHFAILURE = "AuthFailure"
+//  AUTHFAILURE_UNAUTHORIZEDOPERATION = "AuthFailure.UnauthorizedOperation"
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_ACCOUNTISLOCKED = "FailedOperation.AccountIsLocked"
+//  FAILEDOPERATION_CONTAINSPERSONALVIP = "FailedOperation.ContainsPersonalVip"
+//  FAILEDOPERATION_DOMAINISPERSONALTYPE = "FailedOperation.DomainIsPersonalType"
+//  FAILEDOPERATION_DOMAINISSPAM = "FailedOperation.DomainIsSpam"
+//  FAILEDOPERATION_DOMAINISVIP = "FailedOperation.DomainIsVip"
+//  FAILEDOPERATION_EIPCHECKFAILED = "FailedOperation.EipCheckFailed"
+//  FAILEDOPERATION_FUNCTIONNOTALLOWEDAPPLY = "FailedOperation.FunctionNotAllowedApply"
+//  FAILEDOPERATION_GETWHOISFAILED = "FailedOperation.GetWhoisFailed"
+//  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
+//  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_LOGINTIMEOUT = "FailedOperation.LoginTimeout"
+//  FAILEDOPERATION_MOBILENOTVERIFIED = "FailedOperation.MobileNotVerified"
+//  FAILEDOPERATION_NOTREALNAMEDUSER = "FailedOperation.NotRealNamedUser"
+//  FAILEDOPERATION_NOTRESOURCEOWNER = "FailedOperation.NotResourceOwner"
+//  FAILEDOPERATION_ORDERCANNOTPAY = "FailedOperation.OrderCanNotPay"
+//  FAILEDOPERATION_ORDERHASPAID = "FailedOperation.OrderHasPaid"
+//  FAILEDOPERATION_RESOURCENOTBIND = "FailedOperation.ResourceNotBind"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  FAILEDOPERATION_VERIFYINGBILLEXISTS = "FailedOperation.VerifyingBillExists"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_ACCOUNTISBANNED = "InvalidParameter.AccountIsBanned"
+//  INVALIDPARAMETER_ACTIONINVALID = "InvalidParameter.ActionInvalid"
+//  INVALIDPARAMETER_ACTIONSUCCESS = "InvalidParameter.ActionSuccess"
+//  INVALIDPARAMETER_ACTIVITY = "InvalidParameter.Activity"
+//  INVALIDPARAMETER_BILLNUMBERINVALID = "InvalidParameter.BillNumberInvalid"
+//  INVALIDPARAMETER_CLIENTTOKENTOOLONG = "InvalidParameter.ClientTokenTooLong"
+//  INVALIDPARAMETER_COMMON = "InvalidParameter.Common"
+//  INVALIDPARAMETER_DATAEXPIRED = "InvalidParameter.DataExpired"
+//  INVALIDPARAMETER_DATAINVALID = "InvalidParameter.DataInvalid"
+//  INVALIDPARAMETER_DEALTYPEINVALID = "InvalidParameter.DealTypeInvalid"
+//  INVALIDPARAMETER_DNSDEALDOMAINUPGRADED = "InvalidParameter.DnsDealDomainUpgraded"
+//  INVALIDPARAMETER_DNSDEALLOCKED = "InvalidParameter.DnsDealLocked"
+//  INVALIDPARAMETER_DNSINVALIDDEAL = "InvalidParameter.DnsInvalidDeal"
+//  INVALIDPARAMETER_DOMAINALIASEXISTS = "InvalidParameter.DomainAliasExists"
+//  INVALIDPARAMETER_DOMAINALIASIDINVALID = "InvalidParameter.DomainAliasIdInvalid"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_DOMAINISMODIFYINGDNS = "InvalidParameter.DomainIsModifyingDns"
+//  INVALIDPARAMETER_DOMAINNOTREGED = "InvalidParameter.DomainNotReged"
+//  INVALIDPARAMETER_DOMAINNOTVIP = "InvalidParameter.DomainNotVip"
+//  INVALIDPARAMETER_DOMAINTOOLONG = "InvalidParameter.DomainTooLong"
+//  INVALIDPARAMETER_DOMAINTYPEINVALID = "InvalidParameter.DomainTypeInvalid"
+//  INVALIDPARAMETER_DOMAINSEMPTY = "InvalidParameter.DomainsEmpty"
+//  INVALIDPARAMETER_GOODSCHILDTYPEINVALID = "InvalidParameter.GoodsChildTypeInvalid"
+//  INVALIDPARAMETER_GOODSNUMINVALID = "InvalidParameter.GoodsNumInvalid"
+//  INVALIDPARAMETER_GOODSTYPEINVALID = "InvalidParameter.GoodsTypeInvalid"
+//  INVALIDPARAMETER_GROUPNAMEINVALID = "InvalidParameter.GroupNameInvalid"
+//  INVALIDPARAMETER_ILLEGALNEWDEAL = "InvalidParameter.IllegalNewDeal"
+//  INVALIDPARAMETER_INVALIDDEALNAME = "InvalidParameter.InvalidDealName"
+//  INVALIDPARAMETER_INVALIDSECRETID = "InvalidParameter.InvalidSecretId"
+//  INVALIDPARAMETER_INVALIDSIGNATURE = "InvalidParameter.InvalidSignature"
+//  INVALIDPARAMETER_INVALIDTIME = "InvalidParameter.InvalidTime"
+//  INVALIDPARAMETER_OPERATEFAILED = "InvalidParameter.OperateFailed"
+//  INVALIDPARAMETER_PERMISSIONDENIED = "InvalidParameter.PermissionDenied"
+//  INVALIDPARAMETER_QCLOUDUININVALID = "InvalidParameter.QcloudUinInvalid"
+//  INVALIDPARAMETER_REQUESTIPLIMITED = "InvalidParameter.RequestIpLimited"
+//  INVALIDPARAMETER_SHAREDUSERSUNREALNAME = "InvalidParameter.SharedUsersUnrealName"
+//  INVALIDPARAMETER_TIMESPANINVALID = "InvalidParameter.TimeSpanInvalid"
+//  INVALIDPARAMETER_TIMESTAMPEXPIRED = "InvalidParameter.TimestampExpired"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  LIMITEXCEEDED_FAILEDLOGINLIMITEXCEEDED = "LimitExceeded.FailedLoginLimitExceeded"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_ACCESSDENIED = "OperationDenied.AccessDenied"
+//  OPERATIONDENIED_CANCELBILLNOTALLOWED = "OperationDenied.CancelBillNotAllowed"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_MONITORCALLBACKNOTENABLED = "OperationDenied.MonitorCallbackNotEnabled"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  OPERATIONDENIED_NOTADMIN = "OperationDenied.NotAdmin"
+//  OPERATIONDENIED_NOTGRANTEDBYOWNER = "OperationDenied.NotGrantedByOwner"
+//  OPERATIONDENIED_NOTMANAGEDUSER = "OperationDenied.NotManagedUser"
+//  OPERATIONDENIED_NOTORDEROWNER = "OperationDenied.NotOrderOwner"
+//  OPERATIONDENIED_POSTREQUESTACCEPTONLY = "OperationDenied.PostRequestAcceptOnly"
+//  OPERATIONDENIED_VIPDOMAINALLOWED = "OperationDenied.VipDomainAllowed"
+//  REQUESTLIMITEXCEEDED = "RequestLimitExceeded"
+//  REQUESTLIMITEXCEEDED_BATCHTASKLIMIT = "RequestLimitExceeded.BatchTaskLimit"
+//  REQUESTLIMITEXCEEDED_CREATEDOMAINLIMIT = "RequestLimitExceeded.CreateDomainLimit"
+//  REQUESTLIMITEXCEEDED_REQUESTLIMITEXCEEDED = "RequestLimitExceeded.RequestLimitExceeded"
+//  RESOURCEINUSE = "ResourceInUse"
+//  RESOURCEINSUFFICIENT = "ResourceInsufficient"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  RESOURCENOTFOUND_NODATAOFDOMAIN = "ResourceNotFound.NoDataOfDomain"
+//  RESOURCENOTFOUND_NODATAOFDOMAINALIAS = "ResourceNotFound.NoDataOfDomainAlias"
+//  RESOURCENOTFOUND_NODATAOFGIFT = "ResourceNotFound.NoDataOfGift"
+//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
+//  RESOURCESSOLDOUT = "ResourcesSoldOut"
+//  UNAUTHORIZEDOPERATION = "UnauthorizedOperation"
+//  UNKNOWNPARAMETER = "UnknownParameter"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
+func (c *Client) CreateAndPayDeal(request *CreateAndPayDealRequest) (response *CreateAndPayDealResponse, err error) {
+    return c.CreateAndPayDealWithContext(context.Background(), request)
+}
+
+// CreateAndPayDeal
+// DNSPod商品下单并支付
+//
+// 可能返回的错误码:
+//  AUTHFAILURE = "AuthFailure"
+//  AUTHFAILURE_UNAUTHORIZEDOPERATION = "AuthFailure.UnauthorizedOperation"
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_ACCOUNTISLOCKED = "FailedOperation.AccountIsLocked"
+//  FAILEDOPERATION_CONTAINSPERSONALVIP = "FailedOperation.ContainsPersonalVip"
+//  FAILEDOPERATION_DOMAINISPERSONALTYPE = "FailedOperation.DomainIsPersonalType"
+//  FAILEDOPERATION_DOMAINISSPAM = "FailedOperation.DomainIsSpam"
+//  FAILEDOPERATION_DOMAINISVIP = "FailedOperation.DomainIsVip"
+//  FAILEDOPERATION_EIPCHECKFAILED = "FailedOperation.EipCheckFailed"
+//  FAILEDOPERATION_FUNCTIONNOTALLOWEDAPPLY = "FailedOperation.FunctionNotAllowedApply"
+//  FAILEDOPERATION_GETWHOISFAILED = "FailedOperation.GetWhoisFailed"
+//  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
+//  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_LOGINTIMEOUT = "FailedOperation.LoginTimeout"
+//  FAILEDOPERATION_MOBILENOTVERIFIED = "FailedOperation.MobileNotVerified"
+//  FAILEDOPERATION_NOTREALNAMEDUSER = "FailedOperation.NotRealNamedUser"
+//  FAILEDOPERATION_NOTRESOURCEOWNER = "FailedOperation.NotResourceOwner"
+//  FAILEDOPERATION_ORDERCANNOTPAY = "FailedOperation.OrderCanNotPay"
+//  FAILEDOPERATION_ORDERHASPAID = "FailedOperation.OrderHasPaid"
+//  FAILEDOPERATION_RESOURCENOTBIND = "FailedOperation.ResourceNotBind"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  FAILEDOPERATION_VERIFYINGBILLEXISTS = "FailedOperation.VerifyingBillExists"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_ACCOUNTISBANNED = "InvalidParameter.AccountIsBanned"
+//  INVALIDPARAMETER_ACTIONINVALID = "InvalidParameter.ActionInvalid"
+//  INVALIDPARAMETER_ACTIONSUCCESS = "InvalidParameter.ActionSuccess"
+//  INVALIDPARAMETER_ACTIVITY = "InvalidParameter.Activity"
+//  INVALIDPARAMETER_BILLNUMBERINVALID = "InvalidParameter.BillNumberInvalid"
+//  INVALIDPARAMETER_CLIENTTOKENTOOLONG = "InvalidParameter.ClientTokenTooLong"
+//  INVALIDPARAMETER_COMMON = "InvalidParameter.Common"
+//  INVALIDPARAMETER_DATAEXPIRED = "InvalidParameter.DataExpired"
+//  INVALIDPARAMETER_DATAINVALID = "InvalidParameter.DataInvalid"
+//  INVALIDPARAMETER_DEALTYPEINVALID = "InvalidParameter.DealTypeInvalid"
+//  INVALIDPARAMETER_DNSDEALDOMAINUPGRADED = "InvalidParameter.DnsDealDomainUpgraded"
+//  INVALIDPARAMETER_DNSDEALLOCKED = "InvalidParameter.DnsDealLocked"
+//  INVALIDPARAMETER_DNSINVALIDDEAL = "InvalidParameter.DnsInvalidDeal"
+//  INVALIDPARAMETER_DOMAINALIASEXISTS = "InvalidParameter.DomainAliasExists"
+//  INVALIDPARAMETER_DOMAINALIASIDINVALID = "InvalidParameter.DomainAliasIdInvalid"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_DOMAINISMODIFYINGDNS = "InvalidParameter.DomainIsModifyingDns"
+//  INVALIDPARAMETER_DOMAINNOTREGED = "InvalidParameter.DomainNotReged"
+//  INVALIDPARAMETER_DOMAINNOTVIP = "InvalidParameter.DomainNotVip"
+//  INVALIDPARAMETER_DOMAINTOOLONG = "InvalidParameter.DomainTooLong"
+//  INVALIDPARAMETER_DOMAINTYPEINVALID = "InvalidParameter.DomainTypeInvalid"
+//  INVALIDPARAMETER_DOMAINSEMPTY = "InvalidParameter.DomainsEmpty"
+//  INVALIDPARAMETER_GOODSCHILDTYPEINVALID = "InvalidParameter.GoodsChildTypeInvalid"
+//  INVALIDPARAMETER_GOODSNUMINVALID = "InvalidParameter.GoodsNumInvalid"
+//  INVALIDPARAMETER_GOODSTYPEINVALID = "InvalidParameter.GoodsTypeInvalid"
+//  INVALIDPARAMETER_GROUPNAMEINVALID = "InvalidParameter.GroupNameInvalid"
+//  INVALIDPARAMETER_ILLEGALNEWDEAL = "InvalidParameter.IllegalNewDeal"
+//  INVALIDPARAMETER_INVALIDDEALNAME = "InvalidParameter.InvalidDealName"
+//  INVALIDPARAMETER_INVALIDSECRETID = "InvalidParameter.InvalidSecretId"
+//  INVALIDPARAMETER_INVALIDSIGNATURE = "InvalidParameter.InvalidSignature"
+//  INVALIDPARAMETER_INVALIDTIME = "InvalidParameter.InvalidTime"
+//  INVALIDPARAMETER_OPERATEFAILED = "InvalidParameter.OperateFailed"
+//  INVALIDPARAMETER_PERMISSIONDENIED = "InvalidParameter.PermissionDenied"
+//  INVALIDPARAMETER_QCLOUDUININVALID = "InvalidParameter.QcloudUinInvalid"
+//  INVALIDPARAMETER_REQUESTIPLIMITED = "InvalidParameter.RequestIpLimited"
+//  INVALIDPARAMETER_SHAREDUSERSUNREALNAME = "InvalidParameter.SharedUsersUnrealName"
+//  INVALIDPARAMETER_TIMESPANINVALID = "InvalidParameter.TimeSpanInvalid"
+//  INVALIDPARAMETER_TIMESTAMPEXPIRED = "InvalidParameter.TimestampExpired"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  LIMITEXCEEDED_FAILEDLOGINLIMITEXCEEDED = "LimitExceeded.FailedLoginLimitExceeded"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_ACCESSDENIED = "OperationDenied.AccessDenied"
+//  OPERATIONDENIED_CANCELBILLNOTALLOWED = "OperationDenied.CancelBillNotAllowed"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_MONITORCALLBACKNOTENABLED = "OperationDenied.MonitorCallbackNotEnabled"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  OPERATIONDENIED_NOTADMIN = "OperationDenied.NotAdmin"
+//  OPERATIONDENIED_NOTGRANTEDBYOWNER = "OperationDenied.NotGrantedByOwner"
+//  OPERATIONDENIED_NOTMANAGEDUSER = "OperationDenied.NotManagedUser"
+//  OPERATIONDENIED_NOTORDEROWNER = "OperationDenied.NotOrderOwner"
+//  OPERATIONDENIED_POSTREQUESTACCEPTONLY = "OperationDenied.PostRequestAcceptOnly"
+//  OPERATIONDENIED_VIPDOMAINALLOWED = "OperationDenied.VipDomainAllowed"
+//  REQUESTLIMITEXCEEDED = "RequestLimitExceeded"
+//  REQUESTLIMITEXCEEDED_BATCHTASKLIMIT = "RequestLimitExceeded.BatchTaskLimit"
+//  REQUESTLIMITEXCEEDED_CREATEDOMAINLIMIT = "RequestLimitExceeded.CreateDomainLimit"
+//  REQUESTLIMITEXCEEDED_REQUESTLIMITEXCEEDED = "RequestLimitExceeded.RequestLimitExceeded"
+//  RESOURCEINUSE = "ResourceInUse"
+//  RESOURCEINSUFFICIENT = "ResourceInsufficient"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  RESOURCENOTFOUND_NODATAOFDOMAIN = "ResourceNotFound.NoDataOfDomain"
+//  RESOURCENOTFOUND_NODATAOFDOMAINALIAS = "ResourceNotFound.NoDataOfDomainAlias"
+//  RESOURCENOTFOUND_NODATAOFGIFT = "ResourceNotFound.NoDataOfGift"
+//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
+//  RESOURCESSOLDOUT = "ResourcesSoldOut"
+//  UNAUTHORIZEDOPERATION = "UnauthorizedOperation"
+//  UNKNOWNPARAMETER = "UnknownParameter"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
+func (c *Client) CreateAndPayDealWithContext(ctx context.Context, request *CreateAndPayDealRequest) (response *CreateAndPayDealResponse, err error) {
+    if request == nil {
+        request = NewCreateAndPayDealRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "CreateAndPayDeal")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateAndPayDeal require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateAndPayDealResponse()
     err = c.Send(request, response)
     return
 }
@@ -394,6 +636,7 @@ func (c *Client) CreateDealWithContext(ctx context.Context, request *CreateDealR
     if request == nil {
         request = NewCreateDealRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "CreateDeal")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateDeal require credential")
@@ -433,6 +676,7 @@ func NewCreateDomainResponse() (response *CreateDomainResponse) {
 //  FAILEDOPERATION_DOMAINEXISTS = "FailedOperation.DomainExists"
 //  FAILEDOPERATION_DOMAININENTERPRISEMAILACCOUNT = "FailedOperation.DomainInEnterpriseMailAccount"
 //  FAILEDOPERATION_DOMAINOWNEDBYOTHERUSER = "FailedOperation.DomainOwnedByOtherUser"
+//  FAILEDOPERATION_TENCENTCLOUDFORBID = "FailedOperation.TencentCloudForbid"
 //  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
 //  INVALIDPARAMETER_ACCOUNTISBANNED = "InvalidParameter.AccountIsBanned"
 //  INVALIDPARAMETER_DOMAININBLACKLIST = "InvalidParameter.DomainInBlackList"
@@ -458,6 +702,7 @@ func (c *Client) CreateDomain(request *CreateDomainRequest) (response *CreateDom
 //  FAILEDOPERATION_DOMAINEXISTS = "FailedOperation.DomainExists"
 //  FAILEDOPERATION_DOMAININENTERPRISEMAILACCOUNT = "FailedOperation.DomainInEnterpriseMailAccount"
 //  FAILEDOPERATION_DOMAINOWNEDBYOTHERUSER = "FailedOperation.DomainOwnedByOtherUser"
+//  FAILEDOPERATION_TENCENTCLOUDFORBID = "FailedOperation.TencentCloudForbid"
 //  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
 //  INVALIDPARAMETER_ACCOUNTISBANNED = "InvalidParameter.AccountIsBanned"
 //  INVALIDPARAMETER_DOMAININBLACKLIST = "InvalidParameter.DomainInBlackList"
@@ -475,6 +720,7 @@ func (c *Client) CreateDomainWithContext(ctx context.Context, request *CreateDom
     if request == nil {
         request = NewCreateDomainRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "CreateDomain")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateDomain require credential")
@@ -519,6 +765,7 @@ func NewCreateDomainAliasResponse() (response *CreateDomainAliasResponse) {
 //  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
 //  INTERNALERROR = "InternalError"
 //  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_ALIASISMYDOMAIN = "InvalidParameter.AliasIsMyDomain"
 //  INVALIDPARAMETER_DOMAINALIASEXISTS = "InvalidParameter.DomainAliasExists"
 //  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
 //  INVALIDPARAMETER_DOMAININEFFECTORINVALIDATED = "InvalidParameter.DomainInEffectOrInvalidated"
@@ -549,6 +796,7 @@ func (c *Client) CreateDomainAlias(request *CreateDomainAliasRequest) (response 
 //  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
 //  INTERNALERROR = "InternalError"
 //  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_ALIASISMYDOMAIN = "InvalidParameter.AliasIsMyDomain"
 //  INVALIDPARAMETER_DOMAINALIASEXISTS = "InvalidParameter.DomainAliasExists"
 //  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
 //  INVALIDPARAMETER_DOMAININEFFECTORINVALIDATED = "InvalidParameter.DomainInEffectOrInvalidated"
@@ -566,6 +814,7 @@ func (c *Client) CreateDomainAliasWithContext(ctx context.Context, request *Crea
     if request == nil {
         request = NewCreateDomainAliasRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "CreateDomainAlias")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateDomainAlias require credential")
@@ -649,6 +898,7 @@ func (c *Client) CreateDomainBatchWithContext(ctx context.Context, request *Crea
     if request == nil {
         request = NewCreateDomainBatchRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "CreateDomainBatch")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateDomainBatch require credential")
@@ -766,6 +1016,7 @@ func (c *Client) CreateDomainCustomLineWithContext(ctx context.Context, request 
     if request == nil {
         request = NewCreateDomainCustomLineRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "CreateDomainCustomLine")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateDomainCustomLine require credential")
@@ -833,6 +1084,7 @@ func (c *Client) CreateDomainGroupWithContext(ctx context.Context, request *Crea
     if request == nil {
         request = NewCreateDomainGroupRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "CreateDomainGroup")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateDomainGroup require credential")
@@ -841,6 +1093,334 @@ func (c *Client) CreateDomainGroupWithContext(ctx context.Context, request *Crea
     request.SetContext(ctx)
     
     response = NewCreateDomainGroupResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateDomainsAnalyticsFileRequest() (request *CreateDomainsAnalyticsFileRequest) {
+    request = &CreateDomainsAnalyticsFileRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("dnspod", APIVersion, "CreateDomainsAnalyticsFile")
+    
+    
+    return
+}
+
+func NewCreateDomainsAnalyticsFileResponse() (response *CreateDomainsAnalyticsFileResponse) {
+    response = &CreateDomainsAnalyticsFileResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateDomainsAnalyticsFile
+// 批量导出域名解析量
+//
+// 可能返回的错误码:
+//  AUTHFAILURE = "AuthFailure"
+//  FAILEDOPERATION_DOMAINISSPAM = "FailedOperation.DomainIsSpam"
+//  FAILEDOPERATION_NOTREALNAMEDUSER = "FailedOperation.NotRealNamedUser"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_BATCHLIMITUNDO = "InvalidParameter.BatchLimitUndo"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINSEMPTY = "InvalidParameter.DomainsEmpty"
+//  INVALIDPARAMETER_JOBGREATERTHANLIMIT = "InvalidParameter.JobGreaterThanLimit"
+//  INVALIDPARAMETER_OPERATEFAILED = "InvalidParameter.OperateFailed"
+//  INVALIDPARAMETER_PARAMSILLEGAL = "InvalidParameter.ParamsIllegal"
+//  INVALIDPARAMETER_RECORDSEMPTY = "InvalidParameter.RecordsEmpty"
+//  INVALIDPARAMETER_STARTTIMEGREATERTHANENDTIME = "InvalidParameter.StarttimeGreaterThanEndtime"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  REQUESTLIMITEXCEEDED = "RequestLimitExceeded"
+//  REQUESTLIMITEXCEEDED_BATCHTASKLIMIT = "RequestLimitExceeded.BatchTaskLimit"
+//  UNKNOWNPARAMETER = "UnknownParameter"
+func (c *Client) CreateDomainsAnalyticsFile(request *CreateDomainsAnalyticsFileRequest) (response *CreateDomainsAnalyticsFileResponse, err error) {
+    return c.CreateDomainsAnalyticsFileWithContext(context.Background(), request)
+}
+
+// CreateDomainsAnalyticsFile
+// 批量导出域名解析量
+//
+// 可能返回的错误码:
+//  AUTHFAILURE = "AuthFailure"
+//  FAILEDOPERATION_DOMAINISSPAM = "FailedOperation.DomainIsSpam"
+//  FAILEDOPERATION_NOTREALNAMEDUSER = "FailedOperation.NotRealNamedUser"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_BATCHLIMITUNDO = "InvalidParameter.BatchLimitUndo"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINSEMPTY = "InvalidParameter.DomainsEmpty"
+//  INVALIDPARAMETER_JOBGREATERTHANLIMIT = "InvalidParameter.JobGreaterThanLimit"
+//  INVALIDPARAMETER_OPERATEFAILED = "InvalidParameter.OperateFailed"
+//  INVALIDPARAMETER_PARAMSILLEGAL = "InvalidParameter.ParamsIllegal"
+//  INVALIDPARAMETER_RECORDSEMPTY = "InvalidParameter.RecordsEmpty"
+//  INVALIDPARAMETER_STARTTIMEGREATERTHANENDTIME = "InvalidParameter.StarttimeGreaterThanEndtime"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  REQUESTLIMITEXCEEDED = "RequestLimitExceeded"
+//  REQUESTLIMITEXCEEDED_BATCHTASKLIMIT = "RequestLimitExceeded.BatchTaskLimit"
+//  UNKNOWNPARAMETER = "UnknownParameter"
+func (c *Client) CreateDomainsAnalyticsFileWithContext(ctx context.Context, request *CreateDomainsAnalyticsFileRequest) (response *CreateDomainsAnalyticsFileResponse, err error) {
+    if request == nil {
+        request = NewCreateDomainsAnalyticsFileRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "CreateDomainsAnalyticsFile")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateDomainsAnalyticsFile require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateDomainsAnalyticsFileResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateLineGroupRequest() (request *CreateLineGroupRequest) {
+    request = &CreateLineGroupRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("dnspod", APIVersion, "CreateLineGroup")
+    
+    
+    return
+}
+
+func NewCreateLineGroupResponse() (response *CreateLineGroupResponse) {
+    response = &CreateLineGroupResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateLineGroup
+// 创建域名的线路分组
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
+//  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER_DEFAULTLINENOTSELFDEFINED = "InvalidParameter.DefaultLineNotSelfdefined"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_GROUPNAMEEMPTY = "InvalidParameter.GroupNameEmpty"
+//  INVALIDPARAMETER_GROUPNAMEINVALID = "InvalidParameter.GroupNameInvalid"
+//  INVALIDPARAMETER_GROUPNAMEOCCUPIED = "InvalidParameter.GroupNameOccupied"
+//  INVALIDPARAMETER_LINEGROUPNOTSUPPORTED = "InvalidParameter.LineGroupNotSupported"
+//  INVALIDPARAMETER_LINEGROUPOVERCOUNTED = "InvalidParameter.LineGroupOverCounted"
+//  INVALIDPARAMETER_LINEINANOTHERGROUP = "InvalidParameter.LineInAnotherGroup"
+//  INVALIDPARAMETER_LINEOVERCOUNTED = "InvalidParameter.LineOverCounted"
+//  INVALIDPARAMETER_LOGINTOKENIDERROR = "InvalidParameter.LoginTokenIdError"
+//  INVALIDPARAMETER_LOGINTOKENNOTEXISTS = "InvalidParameter.LoginTokenNotExists"
+//  INVALIDPARAMETER_LOGINTOKENVALIDATEFAILED = "InvalidParameter.LoginTokenValidateFailed"
+//  INVALIDPARAMETER_REQUESTIPLIMITED = "InvalidParameter.RequestIpLimited"
+//  INVALIDPARAMETER_USERNOTEXISTS = "InvalidParameter.UserNotExists"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  INVALIDPARAMETERVALUE_USERIDINVALID = "InvalidParameterValue.UserIdInvalid"
+//  LIMITEXCEEDED_FAILEDLOGINLIMITEXCEEDED = "LimitExceeded.FailedLoginLimitExceeded"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  OPERATIONDENIED_NOTAGENT = "OperationDenied.NotAgent"
+//  OPERATIONDENIED_NOTMANAGEDUSER = "OperationDenied.NotManagedUser"
+//  REQUESTLIMITEXCEEDED_REQUESTLIMITEXCEEDED = "RequestLimitExceeded.RequestLimitExceeded"
+func (c *Client) CreateLineGroup(request *CreateLineGroupRequest) (response *CreateLineGroupResponse, err error) {
+    return c.CreateLineGroupWithContext(context.Background(), request)
+}
+
+// CreateLineGroup
+// 创建域名的线路分组
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
+//  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER_DEFAULTLINENOTSELFDEFINED = "InvalidParameter.DefaultLineNotSelfdefined"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_GROUPNAMEEMPTY = "InvalidParameter.GroupNameEmpty"
+//  INVALIDPARAMETER_GROUPNAMEINVALID = "InvalidParameter.GroupNameInvalid"
+//  INVALIDPARAMETER_GROUPNAMEOCCUPIED = "InvalidParameter.GroupNameOccupied"
+//  INVALIDPARAMETER_LINEGROUPNOTSUPPORTED = "InvalidParameter.LineGroupNotSupported"
+//  INVALIDPARAMETER_LINEGROUPOVERCOUNTED = "InvalidParameter.LineGroupOverCounted"
+//  INVALIDPARAMETER_LINEINANOTHERGROUP = "InvalidParameter.LineInAnotherGroup"
+//  INVALIDPARAMETER_LINEOVERCOUNTED = "InvalidParameter.LineOverCounted"
+//  INVALIDPARAMETER_LOGINTOKENIDERROR = "InvalidParameter.LoginTokenIdError"
+//  INVALIDPARAMETER_LOGINTOKENNOTEXISTS = "InvalidParameter.LoginTokenNotExists"
+//  INVALIDPARAMETER_LOGINTOKENVALIDATEFAILED = "InvalidParameter.LoginTokenValidateFailed"
+//  INVALIDPARAMETER_REQUESTIPLIMITED = "InvalidParameter.RequestIpLimited"
+//  INVALIDPARAMETER_USERNOTEXISTS = "InvalidParameter.UserNotExists"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  INVALIDPARAMETERVALUE_USERIDINVALID = "InvalidParameterValue.UserIdInvalid"
+//  LIMITEXCEEDED_FAILEDLOGINLIMITEXCEEDED = "LimitExceeded.FailedLoginLimitExceeded"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  OPERATIONDENIED_NOTAGENT = "OperationDenied.NotAgent"
+//  OPERATIONDENIED_NOTMANAGEDUSER = "OperationDenied.NotManagedUser"
+//  REQUESTLIMITEXCEEDED_REQUESTLIMITEXCEEDED = "RequestLimitExceeded.RequestLimitExceeded"
+func (c *Client) CreateLineGroupWithContext(ctx context.Context, request *CreateLineGroupRequest) (response *CreateLineGroupResponse, err error) {
+    if request == nil {
+        request = NewCreateLineGroupRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "CreateLineGroup")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateLineGroup require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateLineGroupResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateLineGroupCopyRequest() (request *CreateLineGroupCopyRequest) {
+    request = &CreateLineGroupCopyRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("dnspod", APIVersion, "CreateLineGroupCopy")
+    
+    
+    return
+}
+
+func NewCreateLineGroupCopyResponse() (response *CreateLineGroupCopyResponse) {
+    response = &CreateLineGroupCopyResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateLineGroupCopy
+// 复制域名的线路分组
+//
+// 可能返回的错误码:
+//  AUTHFAILURE = "AuthFailure"
+//  AUTHFAILURE_UNAUTHORIZEDOPERATION = "AuthFailure.UnauthorizedOperation"
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
+//  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER_COPIEDLINEGROUPDUPLICATED = "InvalidParameter.CopiedLineGroupDuplicated"
+//  INVALIDPARAMETER_DEFAULTLINENOTSELFDEFINED = "InvalidParameter.DefaultLineNotSelfdefined"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININEFFECTORINVALIDATED = "InvalidParameter.DomainInEffectOrInvalidated"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_DOMAINSELFNOCOPY = "InvalidParameter.DomainSelfNoCopy"
+//  INVALIDPARAMETER_GRADENOTCOPY = "InvalidParameter.GradeNotCopy"
+//  INVALIDPARAMETER_GROUPNAMEEMPTY = "InvalidParameter.GroupNameEmpty"
+//  INVALIDPARAMETER_GROUPNAMEINVALID = "InvalidParameter.GroupNameInvalid"
+//  INVALIDPARAMETER_GROUPNAMEOCCUPIED = "InvalidParameter.GroupNameOccupied"
+//  INVALIDPARAMETER_INVALIDSRCDOMAINID = "InvalidParameter.InvalidSrcDomainId"
+//  INVALIDPARAMETER_LINEFORMATINVALID = "InvalidParameter.LineFormatInvalid"
+//  INVALIDPARAMETER_LINEGROUPNOTSUPPORTED = "InvalidParameter.LineGroupNotSupported"
+//  INVALIDPARAMETER_LINEGROUPOVERCOUNTED = "InvalidParameter.LineGroupOverCounted"
+//  INVALIDPARAMETER_LINEGROUPUPDATEFAILED = "InvalidParameter.LineGroupUpdateFailed"
+//  INVALIDPARAMETER_LINEINANOTHERGROUP = "InvalidParameter.LineInAnotherGroup"
+//  INVALIDPARAMETER_LINEINUSE = "InvalidParameter.LineInUse"
+//  INVALIDPARAMETER_LINENOTEXIST = "InvalidParameter.LineNotExist"
+//  INVALIDPARAMETER_LINENOTSELECTED = "InvalidParameter.LineNotSelected"
+//  INVALIDPARAMETER_LINEOVERCOUNTED = "InvalidParameter.LineOverCounted"
+//  INVALIDPARAMETER_LOGINTOKENIDERROR = "InvalidParameter.LoginTokenIdError"
+//  INVALIDPARAMETER_LOGINTOKENNOTEXISTS = "InvalidParameter.LoginTokenNotExists"
+//  INVALIDPARAMETER_LOGINTOKENVALIDATEFAILED = "InvalidParameter.LoginTokenValidateFailed"
+//  INVALIDPARAMETER_NOAUTHORITYTOSRCDOMAIN = "InvalidParameter.NoAuthorityToSrcDomain"
+//  INVALIDPARAMETER_NOAUTHORITYTOTHEGROUP = "InvalidParameter.NoAuthorityToTheGroup"
+//  INVALIDPARAMETER_OPTYPENOTSUPPORTED = "InvalidParameter.OptypeNotSupported"
+//  INVALIDPARAMETER_REQUESTIPLIMITED = "InvalidParameter.RequestIpLimited"
+//  INVALIDPARAMETER_USERNOTEXISTS = "InvalidParameter.UserNotExists"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  INVALIDPARAMETERVALUE_USERIDINVALID = "InvalidParameterValue.UserIdInvalid"
+//  LIMITEXCEEDED_FAILEDLOGINLIMITEXCEEDED = "LimitExceeded.FailedLoginLimitExceeded"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  OPERATIONDENIED_NOTAGENT = "OperationDenied.NotAgent"
+//  OPERATIONDENIED_NOTMANAGEDUSER = "OperationDenied.NotManagedUser"
+//  REQUESTLIMITEXCEEDED_REQUESTLIMITEXCEEDED = "RequestLimitExceeded.RequestLimitExceeded"
+//  UNAUTHORIZEDOPERATION = "UnauthorizedOperation"
+func (c *Client) CreateLineGroupCopy(request *CreateLineGroupCopyRequest) (response *CreateLineGroupCopyResponse, err error) {
+    return c.CreateLineGroupCopyWithContext(context.Background(), request)
+}
+
+// CreateLineGroupCopy
+// 复制域名的线路分组
+//
+// 可能返回的错误码:
+//  AUTHFAILURE = "AuthFailure"
+//  AUTHFAILURE_UNAUTHORIZEDOPERATION = "AuthFailure.UnauthorizedOperation"
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
+//  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER_COPIEDLINEGROUPDUPLICATED = "InvalidParameter.CopiedLineGroupDuplicated"
+//  INVALIDPARAMETER_DEFAULTLINENOTSELFDEFINED = "InvalidParameter.DefaultLineNotSelfdefined"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININEFFECTORINVALIDATED = "InvalidParameter.DomainInEffectOrInvalidated"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_DOMAINSELFNOCOPY = "InvalidParameter.DomainSelfNoCopy"
+//  INVALIDPARAMETER_GRADENOTCOPY = "InvalidParameter.GradeNotCopy"
+//  INVALIDPARAMETER_GROUPNAMEEMPTY = "InvalidParameter.GroupNameEmpty"
+//  INVALIDPARAMETER_GROUPNAMEINVALID = "InvalidParameter.GroupNameInvalid"
+//  INVALIDPARAMETER_GROUPNAMEOCCUPIED = "InvalidParameter.GroupNameOccupied"
+//  INVALIDPARAMETER_INVALIDSRCDOMAINID = "InvalidParameter.InvalidSrcDomainId"
+//  INVALIDPARAMETER_LINEFORMATINVALID = "InvalidParameter.LineFormatInvalid"
+//  INVALIDPARAMETER_LINEGROUPNOTSUPPORTED = "InvalidParameter.LineGroupNotSupported"
+//  INVALIDPARAMETER_LINEGROUPOVERCOUNTED = "InvalidParameter.LineGroupOverCounted"
+//  INVALIDPARAMETER_LINEGROUPUPDATEFAILED = "InvalidParameter.LineGroupUpdateFailed"
+//  INVALIDPARAMETER_LINEINANOTHERGROUP = "InvalidParameter.LineInAnotherGroup"
+//  INVALIDPARAMETER_LINEINUSE = "InvalidParameter.LineInUse"
+//  INVALIDPARAMETER_LINENOTEXIST = "InvalidParameter.LineNotExist"
+//  INVALIDPARAMETER_LINENOTSELECTED = "InvalidParameter.LineNotSelected"
+//  INVALIDPARAMETER_LINEOVERCOUNTED = "InvalidParameter.LineOverCounted"
+//  INVALIDPARAMETER_LOGINTOKENIDERROR = "InvalidParameter.LoginTokenIdError"
+//  INVALIDPARAMETER_LOGINTOKENNOTEXISTS = "InvalidParameter.LoginTokenNotExists"
+//  INVALIDPARAMETER_LOGINTOKENVALIDATEFAILED = "InvalidParameter.LoginTokenValidateFailed"
+//  INVALIDPARAMETER_NOAUTHORITYTOSRCDOMAIN = "InvalidParameter.NoAuthorityToSrcDomain"
+//  INVALIDPARAMETER_NOAUTHORITYTOTHEGROUP = "InvalidParameter.NoAuthorityToTheGroup"
+//  INVALIDPARAMETER_OPTYPENOTSUPPORTED = "InvalidParameter.OptypeNotSupported"
+//  INVALIDPARAMETER_REQUESTIPLIMITED = "InvalidParameter.RequestIpLimited"
+//  INVALIDPARAMETER_USERNOTEXISTS = "InvalidParameter.UserNotExists"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  INVALIDPARAMETERVALUE_USERIDINVALID = "InvalidParameterValue.UserIdInvalid"
+//  LIMITEXCEEDED_FAILEDLOGINLIMITEXCEEDED = "LimitExceeded.FailedLoginLimitExceeded"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  OPERATIONDENIED_NOTAGENT = "OperationDenied.NotAgent"
+//  OPERATIONDENIED_NOTMANAGEDUSER = "OperationDenied.NotManagedUser"
+//  REQUESTLIMITEXCEEDED_REQUESTLIMITEXCEEDED = "RequestLimitExceeded.RequestLimitExceeded"
+//  UNAUTHORIZEDOPERATION = "UnauthorizedOperation"
+func (c *Client) CreateLineGroupCopyWithContext(ctx context.Context, request *CreateLineGroupCopyRequest) (response *CreateLineGroupCopyResponse, err error) {
+    if request == nil {
+        request = NewCreateLineGroupCopyRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "CreateLineGroupCopy")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateLineGroupCopy require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateLineGroupCopyResponse()
     err = c.Send(request, response)
     return
 }
@@ -871,10 +1451,13 @@ func NewCreateRecordResponse() (response *CreateRecordResponse) {
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_DNSSECINCOMPLETECLOSED = "FailedOperation.DNSSECIncompleteClosed"
 //  FAILEDOPERATION_DOMAINISLOCKED = "FailedOperation.DomainIsLocked"
 //  FAILEDOPERATION_DOMAINISSPAM = "FailedOperation.DomainIsSpam"
 //  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
 //  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_MUSTADDDEFAULTLINEFIRST = "FailedOperation.MustAddDefaultLineFirst"
+//  FAILEDOPERATION_TENCENTCLOUDFORBID = "FailedOperation.TencentCloudForbid"
 //  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
 //  INVALIDPARAMETER_ACCOUNTISBANNED = "InvalidParameter.AccountIsBanned"
 //  INVALIDPARAMETER_CUSTOMMESSAGE = "InvalidParameter.CustomMessage"
@@ -932,10 +1515,13 @@ func (c *Client) CreateRecord(request *CreateRecordRequest) (response *CreateRec
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_DNSSECINCOMPLETECLOSED = "FailedOperation.DNSSECIncompleteClosed"
 //  FAILEDOPERATION_DOMAINISLOCKED = "FailedOperation.DomainIsLocked"
 //  FAILEDOPERATION_DOMAINISSPAM = "FailedOperation.DomainIsSpam"
 //  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
 //  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_MUSTADDDEFAULTLINEFIRST = "FailedOperation.MustAddDefaultLineFirst"
+//  FAILEDOPERATION_TENCENTCLOUDFORBID = "FailedOperation.TencentCloudForbid"
 //  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
 //  INVALIDPARAMETER_ACCOUNTISBANNED = "InvalidParameter.AccountIsBanned"
 //  INVALIDPARAMETER_CUSTOMMESSAGE = "InvalidParameter.CustomMessage"
@@ -986,6 +1572,7 @@ func (c *Client) CreateRecordWithContext(ctx context.Context, request *CreateRec
     if request == nil {
         request = NewCreateRecordRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "CreateRecord")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateRecord require credential")
@@ -1069,6 +1656,7 @@ func (c *Client) CreateRecordBatchWithContext(ctx context.Context, request *Crea
     if request == nil {
         request = NewCreateRecordBatchRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "CreateRecordBatch")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateRecordBatch require credential")
@@ -1134,6 +1722,7 @@ func (c *Client) CreateRecordGroupWithContext(ctx context.Context, request *Crea
     if request == nil {
         request = NewCreateRecordGroupRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "CreateRecordGroup")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateRecordGroup require credential")
@@ -1199,6 +1788,7 @@ func (c *Client) CreateSnapshotWithContext(ctx context.Context, request *CreateS
     if request == nil {
         request = NewCreateSnapshotRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "CreateSnapshot")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateSnapshot require credential")
@@ -1207,6 +1797,304 @@ func (c *Client) CreateSnapshotWithContext(ctx context.Context, request *CreateS
     request.SetContext(ctx)
     
     response = NewCreateSnapshotResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateSubDomainsAnalyticsFileRequest() (request *CreateSubDomainsAnalyticsFileRequest) {
+    request = &CreateSubDomainsAnalyticsFileRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("dnspod", APIVersion, "CreateSubDomainsAnalyticsFile")
+    
+    
+    return
+}
+
+func NewCreateSubDomainsAnalyticsFileResponse() (response *CreateSubDomainsAnalyticsFileResponse) {
+    response = &CreateSubDomainsAnalyticsFileResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateSubDomainsAnalyticsFile
+// 批量导出子域名解析量
+//
+// 可能返回的错误码:
+//  AUTHFAILURE = "AuthFailure"
+//  FAILEDOPERATION_DOMAINISSPAM = "FailedOperation.DomainIsSpam"
+//  FAILEDOPERATION_NOTREALNAMEDUSER = "FailedOperation.NotRealNamedUser"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_BATCHLIMITUNDO = "InvalidParameter.BatchLimitUndo"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINSEMPTY = "InvalidParameter.DomainsEmpty"
+//  INVALIDPARAMETER_JOBGREATERTHANLIMIT = "InvalidParameter.JobGreaterThanLimit"
+//  INVALIDPARAMETER_OPERATEFAILED = "InvalidParameter.OperateFailed"
+//  INVALIDPARAMETER_PARAMSILLEGAL = "InvalidParameter.ParamsIllegal"
+//  INVALIDPARAMETER_RECORDSEMPTY = "InvalidParameter.RecordsEmpty"
+//  INVALIDPARAMETER_STARTTIMEGREATERTHANENDTIME = "InvalidParameter.StarttimeGreaterThanEndtime"
+//  INVALIDPARAMETERVALUE_DOMAINGRADEINVALID = "InvalidParameterValue.DomainGradeInvalid"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  REQUESTLIMITEXCEEDED = "RequestLimitExceeded"
+//  REQUESTLIMITEXCEEDED_BATCHTASKLIMIT = "RequestLimitExceeded.BatchTaskLimit"
+//  UNKNOWNPARAMETER = "UnknownParameter"
+func (c *Client) CreateSubDomainsAnalyticsFile(request *CreateSubDomainsAnalyticsFileRequest) (response *CreateSubDomainsAnalyticsFileResponse, err error) {
+    return c.CreateSubDomainsAnalyticsFileWithContext(context.Background(), request)
+}
+
+// CreateSubDomainsAnalyticsFile
+// 批量导出子域名解析量
+//
+// 可能返回的错误码:
+//  AUTHFAILURE = "AuthFailure"
+//  FAILEDOPERATION_DOMAINISSPAM = "FailedOperation.DomainIsSpam"
+//  FAILEDOPERATION_NOTREALNAMEDUSER = "FailedOperation.NotRealNamedUser"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_BATCHLIMITUNDO = "InvalidParameter.BatchLimitUndo"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINSEMPTY = "InvalidParameter.DomainsEmpty"
+//  INVALIDPARAMETER_JOBGREATERTHANLIMIT = "InvalidParameter.JobGreaterThanLimit"
+//  INVALIDPARAMETER_OPERATEFAILED = "InvalidParameter.OperateFailed"
+//  INVALIDPARAMETER_PARAMSILLEGAL = "InvalidParameter.ParamsIllegal"
+//  INVALIDPARAMETER_RECORDSEMPTY = "InvalidParameter.RecordsEmpty"
+//  INVALIDPARAMETER_STARTTIMEGREATERTHANENDTIME = "InvalidParameter.StarttimeGreaterThanEndtime"
+//  INVALIDPARAMETERVALUE_DOMAINGRADEINVALID = "InvalidParameterValue.DomainGradeInvalid"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  REQUESTLIMITEXCEEDED = "RequestLimitExceeded"
+//  REQUESTLIMITEXCEEDED_BATCHTASKLIMIT = "RequestLimitExceeded.BatchTaskLimit"
+//  UNKNOWNPARAMETER = "UnknownParameter"
+func (c *Client) CreateSubDomainsAnalyticsFileWithContext(ctx context.Context, request *CreateSubDomainsAnalyticsFileRequest) (response *CreateSubDomainsAnalyticsFileResponse, err error) {
+    if request == nil {
+        request = NewCreateSubDomainsAnalyticsFileRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "CreateSubDomainsAnalyticsFile")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateSubDomainsAnalyticsFile require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateSubDomainsAnalyticsFileResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateSubdomainValidateTXTValueRequest() (request *CreateSubdomainValidateTXTValueRequest) {
+    request = &CreateSubdomainValidateTXTValueRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("dnspod", APIVersion, "CreateSubdomainValidateTXTValue")
+    
+    
+    return
+}
+
+func NewCreateSubdomainValidateTXTValueResponse() (response *CreateSubdomainValidateTXTValueResponse) {
+    response = &CreateSubdomainValidateTXTValueResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateSubdomainValidateTXTValue
+// 创建添加子域名 Zone 域解析时所需要的 TXT 记录值
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_DOMAINEXISTS = "FailedOperation.DomainExists"
+//  INVALIDPARAMETER_SUBDOMAININVALID = "InvalidParameter.SubdomainInvalid"
+//  INVALIDPARAMETER_UNREALNAMEUSER = "InvalidParameter.UnrealNameUser"
+func (c *Client) CreateSubdomainValidateTXTValue(request *CreateSubdomainValidateTXTValueRequest) (response *CreateSubdomainValidateTXTValueResponse, err error) {
+    return c.CreateSubdomainValidateTXTValueWithContext(context.Background(), request)
+}
+
+// CreateSubdomainValidateTXTValue
+// 创建添加子域名 Zone 域解析时所需要的 TXT 记录值
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_DOMAINEXISTS = "FailedOperation.DomainExists"
+//  INVALIDPARAMETER_SUBDOMAININVALID = "InvalidParameter.SubdomainInvalid"
+//  INVALIDPARAMETER_UNREALNAMEUSER = "InvalidParameter.UnrealNameUser"
+func (c *Client) CreateSubdomainValidateTXTValueWithContext(ctx context.Context, request *CreateSubdomainValidateTXTValueRequest) (response *CreateSubdomainValidateTXTValueResponse, err error) {
+    if request == nil {
+        request = NewCreateSubdomainValidateTXTValueRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "CreateSubdomainValidateTXTValue")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateSubdomainValidateTXTValue require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateSubdomainValidateTXTValueResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateTXTRecordRequest() (request *CreateTXTRecordRequest) {
+    request = &CreateTXTRecordRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("dnspod", APIVersion, "CreateTXTRecord")
+    
+    
+    return
+}
+
+func NewCreateTXTRecordResponse() (response *CreateTXTRecordResponse) {
+    response = &CreateTXTRecordResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateTXTRecord
+// 添加TXT记录
+//
+// 备注：新添加的解析记录存在短暂的索引延迟，如果查询不到新增记录，请在 30 秒后重试
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_DNSSECINCOMPLETECLOSED = "FailedOperation.DNSSECIncompleteClosed"
+//  FAILEDOPERATION_DOMAINISLOCKED = "FailedOperation.DomainIsLocked"
+//  FAILEDOPERATION_DOMAINISSPAM = "FailedOperation.DomainIsSpam"
+//  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
+//  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_MUSTADDDEFAULTLINEFIRST = "FailedOperation.MustAddDefaultLineFirst"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INVALIDPARAMETER_ACCOUNTISBANNED = "InvalidParameter.AccountIsBanned"
+//  INVALIDPARAMETER_CUSTOMMESSAGE = "InvalidParameter.CustomMessage"
+//  INVALIDPARAMETER_DNSSECADDCNAMEERROR = "InvalidParameter.DnssecAddCnameError"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_DOMAINNOTALLOWEDMODIFYRECORDS = "InvalidParameter.DomainNotAllowedModifyRecords"
+//  INVALIDPARAMETER_DOMAINNOTBEIAN = "InvalidParameter.DomainNotBeian"
+//  INVALIDPARAMETER_DOMAINRECORDEXIST = "InvalidParameter.DomainRecordExist"
+//  INVALIDPARAMETER_EMAILNOTVERIFIED = "InvalidParameter.EmailNotVerified"
+//  INVALIDPARAMETER_INVALIDWEIGHT = "InvalidParameter.InvalidWeight"
+//  INVALIDPARAMETER_LOGINTOKENIDERROR = "InvalidParameter.LoginTokenIdError"
+//  INVALIDPARAMETER_LOGINTOKENNOTEXISTS = "InvalidParameter.LoginTokenNotExists"
+//  INVALIDPARAMETER_LOGINTOKENVALIDATEFAILED = "InvalidParameter.LoginTokenValidateFailed"
+//  INVALIDPARAMETER_MOBILENOTVERIFIED = "InvalidParameter.MobileNotVerified"
+//  INVALIDPARAMETER_MXINVALID = "InvalidParameter.MxInvalid"
+//  INVALIDPARAMETER_RECORDLINEINVALID = "InvalidParameter.RecordLineInvalid"
+//  INVALIDPARAMETER_RECORDTYPEINVALID = "InvalidParameter.RecordTypeInvalid"
+//  INVALIDPARAMETER_RECORDVALUEINVALID = "InvalidParameter.RecordValueInvalid"
+//  INVALIDPARAMETER_RECORDVALUELENGTHINVALID = "InvalidParameter.RecordValueLengthInvalid"
+//  INVALIDPARAMETER_REQUESTIPLIMITED = "InvalidParameter.RequestIpLimited"
+//  INVALIDPARAMETER_SUBDOMAININVALID = "InvalidParameter.SubdomainInvalid"
+//  INVALIDPARAMETER_UNREALNAMEUSER = "InvalidParameter.UnrealNameUser"
+//  INVALIDPARAMETER_URLVALUEILLEGAL = "InvalidParameter.UrlValueIllegal"
+//  INVALIDPARAMETER_USERNOTEXISTS = "InvalidParameter.UserNotExists"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  INVALIDPARAMETERVALUE_USERIDINVALID = "InvalidParameterValue.UserIdInvalid"
+//  LIMITEXCEEDED_AAAACOUNTLIMIT = "LimitExceeded.AAAACountLimit"
+//  LIMITEXCEEDED_ATNSRECORDLIMIT = "LimitExceeded.AtNsRecordLimit"
+//  LIMITEXCEEDED_FAILEDLOGINLIMITEXCEEDED = "LimitExceeded.FailedLoginLimitExceeded"
+//  LIMITEXCEEDED_HIDDENURLEXCEEDED = "LimitExceeded.HiddenUrlExceeded"
+//  LIMITEXCEEDED_NSCOUNTLIMIT = "LimitExceeded.NsCountLimit"
+//  LIMITEXCEEDED_RECORDTTLLIMIT = "LimitExceeded.RecordTtlLimit"
+//  LIMITEXCEEDED_SRVCOUNTLIMIT = "LimitExceeded.SrvCountLimit"
+//  LIMITEXCEEDED_SUBDOMAINLEVELLIMIT = "LimitExceeded.SubdomainLevelLimit"
+//  LIMITEXCEEDED_SUBDOMAINROLLLIMIT = "LimitExceeded.SubdomainRollLimit"
+//  LIMITEXCEEDED_SUBDOMAINWCARDLIMIT = "LimitExceeded.SubdomainWcardLimit"
+//  LIMITEXCEEDED_URLCOUNTLIMIT = "LimitExceeded.UrlCountLimit"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_IPINBLACKLISTNOTALLOWED = "OperationDenied.IPInBlacklistNotAllowed"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  OPERATIONDENIED_NOTADMIN = "OperationDenied.NotAdmin"
+//  OPERATIONDENIED_NOTAGENT = "OperationDenied.NotAgent"
+//  OPERATIONDENIED_NOTMANAGEDUSER = "OperationDenied.NotManagedUser"
+//  REQUESTLIMITEXCEEDED_REQUESTLIMITEXCEEDED = "RequestLimitExceeded.RequestLimitExceeded"
+func (c *Client) CreateTXTRecord(request *CreateTXTRecordRequest) (response *CreateTXTRecordResponse, err error) {
+    return c.CreateTXTRecordWithContext(context.Background(), request)
+}
+
+// CreateTXTRecord
+// 添加TXT记录
+//
+// 备注：新添加的解析记录存在短暂的索引延迟，如果查询不到新增记录，请在 30 秒后重试
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_DNSSECINCOMPLETECLOSED = "FailedOperation.DNSSECIncompleteClosed"
+//  FAILEDOPERATION_DOMAINISLOCKED = "FailedOperation.DomainIsLocked"
+//  FAILEDOPERATION_DOMAINISSPAM = "FailedOperation.DomainIsSpam"
+//  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
+//  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_MUSTADDDEFAULTLINEFIRST = "FailedOperation.MustAddDefaultLineFirst"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INVALIDPARAMETER_ACCOUNTISBANNED = "InvalidParameter.AccountIsBanned"
+//  INVALIDPARAMETER_CUSTOMMESSAGE = "InvalidParameter.CustomMessage"
+//  INVALIDPARAMETER_DNSSECADDCNAMEERROR = "InvalidParameter.DnssecAddCnameError"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_DOMAINNOTALLOWEDMODIFYRECORDS = "InvalidParameter.DomainNotAllowedModifyRecords"
+//  INVALIDPARAMETER_DOMAINNOTBEIAN = "InvalidParameter.DomainNotBeian"
+//  INVALIDPARAMETER_DOMAINRECORDEXIST = "InvalidParameter.DomainRecordExist"
+//  INVALIDPARAMETER_EMAILNOTVERIFIED = "InvalidParameter.EmailNotVerified"
+//  INVALIDPARAMETER_INVALIDWEIGHT = "InvalidParameter.InvalidWeight"
+//  INVALIDPARAMETER_LOGINTOKENIDERROR = "InvalidParameter.LoginTokenIdError"
+//  INVALIDPARAMETER_LOGINTOKENNOTEXISTS = "InvalidParameter.LoginTokenNotExists"
+//  INVALIDPARAMETER_LOGINTOKENVALIDATEFAILED = "InvalidParameter.LoginTokenValidateFailed"
+//  INVALIDPARAMETER_MOBILENOTVERIFIED = "InvalidParameter.MobileNotVerified"
+//  INVALIDPARAMETER_MXINVALID = "InvalidParameter.MxInvalid"
+//  INVALIDPARAMETER_RECORDLINEINVALID = "InvalidParameter.RecordLineInvalid"
+//  INVALIDPARAMETER_RECORDTYPEINVALID = "InvalidParameter.RecordTypeInvalid"
+//  INVALIDPARAMETER_RECORDVALUEINVALID = "InvalidParameter.RecordValueInvalid"
+//  INVALIDPARAMETER_RECORDVALUELENGTHINVALID = "InvalidParameter.RecordValueLengthInvalid"
+//  INVALIDPARAMETER_REQUESTIPLIMITED = "InvalidParameter.RequestIpLimited"
+//  INVALIDPARAMETER_SUBDOMAININVALID = "InvalidParameter.SubdomainInvalid"
+//  INVALIDPARAMETER_UNREALNAMEUSER = "InvalidParameter.UnrealNameUser"
+//  INVALIDPARAMETER_URLVALUEILLEGAL = "InvalidParameter.UrlValueIllegal"
+//  INVALIDPARAMETER_USERNOTEXISTS = "InvalidParameter.UserNotExists"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  INVALIDPARAMETERVALUE_USERIDINVALID = "InvalidParameterValue.UserIdInvalid"
+//  LIMITEXCEEDED_AAAACOUNTLIMIT = "LimitExceeded.AAAACountLimit"
+//  LIMITEXCEEDED_ATNSRECORDLIMIT = "LimitExceeded.AtNsRecordLimit"
+//  LIMITEXCEEDED_FAILEDLOGINLIMITEXCEEDED = "LimitExceeded.FailedLoginLimitExceeded"
+//  LIMITEXCEEDED_HIDDENURLEXCEEDED = "LimitExceeded.HiddenUrlExceeded"
+//  LIMITEXCEEDED_NSCOUNTLIMIT = "LimitExceeded.NsCountLimit"
+//  LIMITEXCEEDED_RECORDTTLLIMIT = "LimitExceeded.RecordTtlLimit"
+//  LIMITEXCEEDED_SRVCOUNTLIMIT = "LimitExceeded.SrvCountLimit"
+//  LIMITEXCEEDED_SUBDOMAINLEVELLIMIT = "LimitExceeded.SubdomainLevelLimit"
+//  LIMITEXCEEDED_SUBDOMAINROLLLIMIT = "LimitExceeded.SubdomainRollLimit"
+//  LIMITEXCEEDED_SUBDOMAINWCARDLIMIT = "LimitExceeded.SubdomainWcardLimit"
+//  LIMITEXCEEDED_URLCOUNTLIMIT = "LimitExceeded.UrlCountLimit"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_IPINBLACKLISTNOTALLOWED = "OperationDenied.IPInBlacklistNotAllowed"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  OPERATIONDENIED_NOTADMIN = "OperationDenied.NotAdmin"
+//  OPERATIONDENIED_NOTAGENT = "OperationDenied.NotAgent"
+//  OPERATIONDENIED_NOTMANAGEDUSER = "OperationDenied.NotManagedUser"
+//  REQUESTLIMITEXCEEDED_REQUESTLIMITEXCEEDED = "RequestLimitExceeded.RequestLimitExceeded"
+func (c *Client) CreateTXTRecordWithContext(ctx context.Context, request *CreateTXTRecordRequest) (response *CreateTXTRecordResponse, err error) {
+    if request == nil {
+        request = NewCreateTXTRecordRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "CreateTXTRecord")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateTXTRecord require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateTXTRecordResponse()
     err = c.Send(request, response)
     return
 }
@@ -1270,6 +2158,7 @@ func (c *Client) DeleteDomainWithContext(ctx context.Context, request *DeleteDom
     if request == nil {
         request = NewDeleteDomainRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DeleteDomain")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteDomain require credential")
@@ -1351,6 +2240,7 @@ func (c *Client) DeleteDomainAliasWithContext(ctx context.Context, request *Dele
     if request == nil {
         request = NewDeleteDomainAliasRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DeleteDomainAlias")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteDomainAlias require credential")
@@ -1420,6 +2310,7 @@ func (c *Client) DeleteDomainBatchWithContext(ctx context.Context, request *Dele
     if request == nil {
         request = NewDeleteDomainBatchRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DeleteDomainBatch")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteDomainBatch require credential")
@@ -1543,6 +2434,7 @@ func (c *Client) DeleteDomainCustomLineWithContext(ctx context.Context, request 
     if request == nil {
         request = NewDeleteDomainCustomLineRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DeleteDomainCustomLine")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteDomainCustomLine require credential")
@@ -1551,6 +2443,134 @@ func (c *Client) DeleteDomainCustomLineWithContext(ctx context.Context, request 
     request.SetContext(ctx)
     
     response = NewDeleteDomainCustomLineResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDeleteLineGroupRequest() (request *DeleteLineGroupRequest) {
+    request = &DeleteLineGroupRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("dnspod", APIVersion, "DeleteLineGroup")
+    
+    
+    return
+}
+
+func NewDeleteLineGroupResponse() (response *DeleteLineGroupResponse) {
+    response = &DeleteLineGroupResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DeleteLineGroup
+// 删除域名的线路分组
+//
+// 可能返回的错误码:
+//  AUTHFAILURE = "AuthFailure"
+//  AUTHFAILURE_UNAUTHORIZEDOPERATION = "AuthFailure.UnauthorizedOperation"
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
+//  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER_DEFAULTLINENOTSELFDEFINED = "InvalidParameter.DefaultLineNotSelfdefined"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININEFFECTORINVALIDATED = "InvalidParameter.DomainInEffectOrInvalidated"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_GROUPNAMEEMPTY = "InvalidParameter.GroupNameEmpty"
+//  INVALIDPARAMETER_GROUPNAMEINVALID = "InvalidParameter.GroupNameInvalid"
+//  INVALIDPARAMETER_GROUPNAMEOCCUPIED = "InvalidParameter.GroupNameOccupied"
+//  INVALIDPARAMETER_LINEFORMATINVALID = "InvalidParameter.LineFormatInvalid"
+//  INVALIDPARAMETER_LINEGROUPNOTSUPPORTED = "InvalidParameter.LineGroupNotSupported"
+//  INVALIDPARAMETER_LINEGROUPOVERCOUNTED = "InvalidParameter.LineGroupOverCounted"
+//  INVALIDPARAMETER_LINEGROUPUPDATEFAILED = "InvalidParameter.LineGroupUpdateFailed"
+//  INVALIDPARAMETER_LINEINANOTHERGROUP = "InvalidParameter.LineInAnotherGroup"
+//  INVALIDPARAMETER_LINEINUSE = "InvalidParameter.LineInUse"
+//  INVALIDPARAMETER_LINEINUSENOTDELETE = "InvalidParameter.LineInUseNotDelete"
+//  INVALIDPARAMETER_LINENOTEXIST = "InvalidParameter.LineNotExist"
+//  INVALIDPARAMETER_LINENOTSELECTED = "InvalidParameter.LineNotSelected"
+//  INVALIDPARAMETER_LINEOVERCOUNTED = "InvalidParameter.LineOverCounted"
+//  INVALIDPARAMETER_LOGINTOKENIDERROR = "InvalidParameter.LoginTokenIdError"
+//  INVALIDPARAMETER_LOGINTOKENNOTEXISTS = "InvalidParameter.LoginTokenNotExists"
+//  INVALIDPARAMETER_LOGINTOKENVALIDATEFAILED = "InvalidParameter.LoginTokenValidateFailed"
+//  INVALIDPARAMETER_NOAUTHORITYTOTHEGROUP = "InvalidParameter.NoAuthorityToTheGroup"
+//  INVALIDPARAMETER_REQUESTIPLIMITED = "InvalidParameter.RequestIpLimited"
+//  INVALIDPARAMETER_USERNOTEXISTS = "InvalidParameter.UserNotExists"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  INVALIDPARAMETERVALUE_USERIDINVALID = "InvalidParameterValue.UserIdInvalid"
+//  LIMITEXCEEDED_FAILEDLOGINLIMITEXCEEDED = "LimitExceeded.FailedLoginLimitExceeded"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  OPERATIONDENIED_NOTAGENT = "OperationDenied.NotAgent"
+//  OPERATIONDENIED_NOTMANAGEDUSER = "OperationDenied.NotManagedUser"
+//  REQUESTLIMITEXCEEDED_REQUESTLIMITEXCEEDED = "RequestLimitExceeded.RequestLimitExceeded"
+//  UNAUTHORIZEDOPERATION = "UnauthorizedOperation"
+func (c *Client) DeleteLineGroup(request *DeleteLineGroupRequest) (response *DeleteLineGroupResponse, err error) {
+    return c.DeleteLineGroupWithContext(context.Background(), request)
+}
+
+// DeleteLineGroup
+// 删除域名的线路分组
+//
+// 可能返回的错误码:
+//  AUTHFAILURE = "AuthFailure"
+//  AUTHFAILURE_UNAUTHORIZEDOPERATION = "AuthFailure.UnauthorizedOperation"
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
+//  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER_DEFAULTLINENOTSELFDEFINED = "InvalidParameter.DefaultLineNotSelfdefined"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININEFFECTORINVALIDATED = "InvalidParameter.DomainInEffectOrInvalidated"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_GROUPNAMEEMPTY = "InvalidParameter.GroupNameEmpty"
+//  INVALIDPARAMETER_GROUPNAMEINVALID = "InvalidParameter.GroupNameInvalid"
+//  INVALIDPARAMETER_GROUPNAMEOCCUPIED = "InvalidParameter.GroupNameOccupied"
+//  INVALIDPARAMETER_LINEFORMATINVALID = "InvalidParameter.LineFormatInvalid"
+//  INVALIDPARAMETER_LINEGROUPNOTSUPPORTED = "InvalidParameter.LineGroupNotSupported"
+//  INVALIDPARAMETER_LINEGROUPOVERCOUNTED = "InvalidParameter.LineGroupOverCounted"
+//  INVALIDPARAMETER_LINEGROUPUPDATEFAILED = "InvalidParameter.LineGroupUpdateFailed"
+//  INVALIDPARAMETER_LINEINANOTHERGROUP = "InvalidParameter.LineInAnotherGroup"
+//  INVALIDPARAMETER_LINEINUSE = "InvalidParameter.LineInUse"
+//  INVALIDPARAMETER_LINEINUSENOTDELETE = "InvalidParameter.LineInUseNotDelete"
+//  INVALIDPARAMETER_LINENOTEXIST = "InvalidParameter.LineNotExist"
+//  INVALIDPARAMETER_LINENOTSELECTED = "InvalidParameter.LineNotSelected"
+//  INVALIDPARAMETER_LINEOVERCOUNTED = "InvalidParameter.LineOverCounted"
+//  INVALIDPARAMETER_LOGINTOKENIDERROR = "InvalidParameter.LoginTokenIdError"
+//  INVALIDPARAMETER_LOGINTOKENNOTEXISTS = "InvalidParameter.LoginTokenNotExists"
+//  INVALIDPARAMETER_LOGINTOKENVALIDATEFAILED = "InvalidParameter.LoginTokenValidateFailed"
+//  INVALIDPARAMETER_NOAUTHORITYTOTHEGROUP = "InvalidParameter.NoAuthorityToTheGroup"
+//  INVALIDPARAMETER_REQUESTIPLIMITED = "InvalidParameter.RequestIpLimited"
+//  INVALIDPARAMETER_USERNOTEXISTS = "InvalidParameter.UserNotExists"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  INVALIDPARAMETERVALUE_USERIDINVALID = "InvalidParameterValue.UserIdInvalid"
+//  LIMITEXCEEDED_FAILEDLOGINLIMITEXCEEDED = "LimitExceeded.FailedLoginLimitExceeded"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  OPERATIONDENIED_NOTAGENT = "OperationDenied.NotAgent"
+//  OPERATIONDENIED_NOTMANAGEDUSER = "OperationDenied.NotManagedUser"
+//  REQUESTLIMITEXCEEDED_REQUESTLIMITEXCEEDED = "RequestLimitExceeded.RequestLimitExceeded"
+//  UNAUTHORIZEDOPERATION = "UnauthorizedOperation"
+func (c *Client) DeleteLineGroupWithContext(ctx context.Context, request *DeleteLineGroupRequest) (response *DeleteLineGroupResponse, err error) {
+    if request == nil {
+        request = NewDeleteLineGroupRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DeleteLineGroup")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DeleteLineGroup require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDeleteLineGroupResponse()
     err = c.Send(request, response)
     return
 }
@@ -1646,6 +2666,7 @@ func (c *Client) DeleteRecordWithContext(ctx context.Context, request *DeleteRec
     if request == nil {
         request = NewDeleteRecordRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DeleteRecord")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteRecord require credential")
@@ -1680,6 +2701,8 @@ func NewDeleteRecordBatchResponse() (response *DeleteRecordBatchResponse) {
 // DeleteRecordBatch
 // 批量删除解析记录
 //
+// 备注：因存储限制， 建议一次批量删除最多2000条
+//
 // 可能返回的错误码:
 //  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
 //  INVALIDPARAMETER_BATCHRECORDREMOVEACTIONERROR = "InvalidParameter.BatchRecordRemoveActionError"
@@ -1700,6 +2723,8 @@ func (c *Client) DeleteRecordBatch(request *DeleteRecordBatchRequest) (response 
 // DeleteRecordBatch
 // 批量删除解析记录
 //
+// 备注：因存储限制， 建议一次批量删除最多2000条
+//
 // 可能返回的错误码:
 //  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
 //  INVALIDPARAMETER_BATCHRECORDREMOVEACTIONERROR = "InvalidParameter.BatchRecordRemoveActionError"
@@ -1717,6 +2742,7 @@ func (c *Client) DeleteRecordBatchWithContext(ctx context.Context, request *Dele
     if request == nil {
         request = NewDeleteRecordBatchRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DeleteRecordBatch")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteRecordBatch require credential")
@@ -1780,6 +2806,7 @@ func (c *Client) DeleteRecordGroupWithContext(ctx context.Context, request *Dele
     if request == nil {
         request = NewDeleteRecordGroupRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DeleteRecordGroup")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteRecordGroup require credential")
@@ -1847,6 +2874,7 @@ func (c *Client) DeleteShareDomainWithContext(ctx context.Context, request *Dele
     if request == nil {
         request = NewDeleteShareDomainRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DeleteShareDomain")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteShareDomain require credential")
@@ -1912,6 +2940,7 @@ func (c *Client) DeleteSnapshotWithContext(ctx context.Context, request *DeleteS
     if request == nil {
         request = NewDeleteSnapshotRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DeleteSnapshot")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteSnapshot require credential")
@@ -1944,7 +2973,7 @@ func NewDescribeBatchTaskResponse() (response *DescribeBatchTaskResponse) {
 }
 
 // DescribeBatchTask
-// 获取任务详情
+// 获取批量操作任务执行详情
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -1957,7 +2986,7 @@ func (c *Client) DescribeBatchTask(request *DescribeBatchTaskRequest) (response 
 }
 
 // DescribeBatchTask
-// 获取任务详情
+// 获取批量操作任务执行详情
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -1969,6 +2998,7 @@ func (c *Client) DescribeBatchTaskWithContext(ctx context.Context, request *Desc
     if request == nil {
         request = NewDescribeBatchTaskRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeBatchTask")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeBatchTask require credential")
@@ -2032,6 +3062,7 @@ func (c *Client) DescribeDomainWithContext(ctx context.Context, request *Describ
     if request == nil {
         request = NewDescribeDomainRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeDomain")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDomain require credential")
@@ -2107,6 +3138,7 @@ func (c *Client) DescribeDomainAliasListWithContext(ctx context.Context, request
     if request == nil {
         request = NewDescribeDomainAliasListRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeDomainAliasList")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDomainAliasList require credential")
@@ -2172,6 +3204,7 @@ func (c *Client) DescribeDomainAnalyticsWithContext(ctx context.Context, request
     if request == nil {
         request = NewDescribeDomainAnalyticsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeDomainAnalytics")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDomainAnalytics require credential")
@@ -2180,6 +3213,76 @@ func (c *Client) DescribeDomainAnalyticsWithContext(ctx context.Context, request
     request.SetContext(ctx)
     
     response = NewDescribeDomainAnalyticsResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeDomainAndRecordListRequest() (request *DescribeDomainAndRecordListRequest) {
+    request = &DescribeDomainAndRecordListRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("dnspod", APIVersion, "DescribeDomainAndRecordList")
+    
+    
+    return
+}
+
+func NewDescribeDomainAndRecordListResponse() (response *DescribeDomainAndRecordListResponse) {
+    response = &DescribeDomainAndRecordListResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeDomainAndRecordList
+// 批量操作中搜索域名
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INVALIDPARAMETER_BATCHDOMAINNOTAUTH = "InvalidParameter.BatchDomainNotAuth"
+//  INVALIDPARAMETER_BATCHRECORDREMOVEACTIONERROR = "InvalidParameter.BatchRecordRemoveActionError"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_DOMAINSEMPTY = "InvalidParameter.DomainsEmpty"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  RESOURCENOTFOUND_NODATAOFDOMAIN = "ResourceNotFound.NoDataOfDomain"
+func (c *Client) DescribeDomainAndRecordList(request *DescribeDomainAndRecordListRequest) (response *DescribeDomainAndRecordListResponse, err error) {
+    return c.DescribeDomainAndRecordListWithContext(context.Background(), request)
+}
+
+// DescribeDomainAndRecordList
+// 批量操作中搜索域名
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INVALIDPARAMETER_BATCHDOMAINNOTAUTH = "InvalidParameter.BatchDomainNotAuth"
+//  INVALIDPARAMETER_BATCHRECORDREMOVEACTIONERROR = "InvalidParameter.BatchRecordRemoveActionError"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_DOMAINSEMPTY = "InvalidParameter.DomainsEmpty"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  RESOURCENOTFOUND_NODATAOFDOMAIN = "ResourceNotFound.NoDataOfDomain"
+func (c *Client) DescribeDomainAndRecordListWithContext(ctx context.Context, request *DescribeDomainAndRecordListRequest) (response *DescribeDomainAndRecordListResponse, err error) {
+    if request == nil {
+        request = NewDescribeDomainAndRecordListRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeDomainAndRecordList")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeDomainAndRecordList require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeDomainAndRecordListResponse()
     err = c.Send(request, response)
     return
 }
@@ -2267,6 +3370,7 @@ func (c *Client) DescribeDomainCustomLineListWithContext(ctx context.Context, re
     if request == nil {
         request = NewDescribeDomainCustomLineListRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeDomainCustomLineList")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDomainCustomLineList require credential")
@@ -2314,6 +3418,7 @@ func NewDescribeDomainFilterListResponse() (response *DescribeDomainFilterListRe
 //  INVALIDPARAMETER_OFFSETINVALID = "InvalidParameter.OffsetInvalid"
 //  INVALIDPARAMETER_OPERATEFAILED = "InvalidParameter.OperateFailed"
 //  INVALIDPARAMETER_RESULTMORETHAN500 = "InvalidParameter.ResultMoreThan500"
+//  INVALIDPARAMETER_UNSUPPORTEDFILTERTYPE = "InvalidParameter.UnsupportedFilterType"
 //  INVALIDPARAMETERVALUE_LIMITINVALID = "InvalidParameterValue.LimitInvalid"
 //  OPERATIONDENIED_ACCESSDENIED = "OperationDenied.AccessDenied"
 //  REQUESTLIMITEXCEEDED = "RequestLimitExceeded"
@@ -2339,6 +3444,7 @@ func (c *Client) DescribeDomainFilterList(request *DescribeDomainFilterListReque
 //  INVALIDPARAMETER_OFFSETINVALID = "InvalidParameter.OffsetInvalid"
 //  INVALIDPARAMETER_OPERATEFAILED = "InvalidParameter.OperateFailed"
 //  INVALIDPARAMETER_RESULTMORETHAN500 = "InvalidParameter.ResultMoreThan500"
+//  INVALIDPARAMETER_UNSUPPORTEDFILTERTYPE = "InvalidParameter.UnsupportedFilterType"
 //  INVALIDPARAMETERVALUE_LIMITINVALID = "InvalidParameterValue.LimitInvalid"
 //  OPERATIONDENIED_ACCESSDENIED = "OperationDenied.AccessDenied"
 //  REQUESTLIMITEXCEEDED = "RequestLimitExceeded"
@@ -2348,6 +3454,7 @@ func (c *Client) DescribeDomainFilterListWithContext(ctx context.Context, reques
     if request == nil {
         request = NewDescribeDomainFilterListRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeDomainFilterList")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDomainFilterList require credential")
@@ -2409,6 +3516,7 @@ func (c *Client) DescribeDomainGroupListWithContext(ctx context.Context, request
     if request == nil {
         request = NewDescribeDomainGroupListRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeDomainGroupList")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDomainGroupList require credential")
@@ -2486,6 +3594,7 @@ func (c *Client) DescribeDomainListWithContext(ctx context.Context, request *Des
     if request == nil {
         request = NewDescribeDomainListRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeDomainList")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDomainList require credential")
@@ -2494,6 +3603,70 @@ func (c *Client) DescribeDomainListWithContext(ctx context.Context, request *Des
     request.SetContext(ctx)
     
     response = NewDescribeDomainListResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeDomainLogFilterFileRequest() (request *DescribeDomainLogFilterFileRequest) {
+    request = &DescribeDomainLogFilterFileRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("dnspod", APIVersion, "DescribeDomainLogFilterFile")
+    
+    
+    return
+}
+
+func NewDescribeDomainLogFilterFileResponse() (response *DescribeDomainLogFilterFileResponse) {
+    response = &DescribeDomainLogFilterFileResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeDomainLogFilterFile
+// 获取域名操作日志导出文件下载地址
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  OPERATIONDENIED_ACCESSDENIED = "OperationDenied.AccessDenied"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+func (c *Client) DescribeDomainLogFilterFile(request *DescribeDomainLogFilterFileRequest) (response *DescribeDomainLogFilterFileResponse, err error) {
+    return c.DescribeDomainLogFilterFileWithContext(context.Background(), request)
+}
+
+// DescribeDomainLogFilterFile
+// 获取域名操作日志导出文件下载地址
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  OPERATIONDENIED_ACCESSDENIED = "OperationDenied.AccessDenied"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+func (c *Client) DescribeDomainLogFilterFileWithContext(ctx context.Context, request *DescribeDomainLogFilterFileRequest) (response *DescribeDomainLogFilterFileResponse, err error) {
+    if request == nil {
+        request = NewDescribeDomainLogFilterFileRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeDomainLogFilterFile")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeDomainLogFilterFile require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeDomainLogFilterFileResponse()
     err = c.Send(request, response)
     return
 }
@@ -2549,6 +3722,7 @@ func (c *Client) DescribeDomainLogListWithContext(ctx context.Context, request *
     if request == nil {
         request = NewDescribeDomainLogListRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeDomainLogList")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDomainLogList require credential")
@@ -2612,6 +3786,7 @@ func (c *Client) DescribeDomainPreviewWithContext(ctx context.Context, request *
     if request == nil {
         request = NewDescribeDomainPreviewRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeDomainPreview")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDomainPreview require credential")
@@ -2699,6 +3874,7 @@ func (c *Client) DescribeDomainPurviewWithContext(ctx context.Context, request *
     if request == nil {
         request = NewDescribeDomainPurviewRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeDomainPurview")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDomainPurview require credential")
@@ -2758,6 +3934,7 @@ func (c *Client) DescribeDomainShareInfoWithContext(ctx context.Context, request
     if request == nil {
         request = NewDescribeDomainShareInfoRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeDomainShareInfo")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDomainShareInfo require credential")
@@ -2766,6 +3943,230 @@ func (c *Client) DescribeDomainShareInfoWithContext(ctx context.Context, request
     request.SetContext(ctx)
     
     response = NewDescribeDomainShareInfoResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeDomainShareUserListRequest() (request *DescribeDomainShareUserListRequest) {
+    request = &DescribeDomainShareUserListRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("dnspod", APIVersion, "DescribeDomainShareUserList")
+    
+    
+    return
+}
+
+func NewDescribeDomainShareUserListResponse() (response *DescribeDomainShareUserListResponse) {
+    response = &DescribeDomainShareUserListResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeDomainShareUserList
+// 获取指定域名的已共享列表
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+func (c *Client) DescribeDomainShareUserList(request *DescribeDomainShareUserListRequest) (response *DescribeDomainShareUserListResponse, err error) {
+    return c.DescribeDomainShareUserListWithContext(context.Background(), request)
+}
+
+// DescribeDomainShareUserList
+// 获取指定域名的已共享列表
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+func (c *Client) DescribeDomainShareUserListWithContext(ctx context.Context, request *DescribeDomainShareUserListRequest) (response *DescribeDomainShareUserListResponse, err error) {
+    if request == nil {
+        request = NewDescribeDomainShareUserListRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeDomainShareUserList")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeDomainShareUserList require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeDomainShareUserListResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeDomainVipListRequest() (request *DescribeDomainVipListRequest) {
+    request = &DescribeDomainVipListRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("dnspod", APIVersion, "DescribeDomainVipList")
+    
+    
+    return
+}
+
+func NewDescribeDomainVipListResponse() (response *DescribeDomainVipListResponse) {
+    response = &DescribeDomainVipListResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeDomainVipList
+// 获取套餐列表
+//
+// 可能返回的错误码:
+//  AUTHFAILURE = "AuthFailure"
+//  AUTHFAILURE_UNAUTHORIZEDOPERATION = "AuthFailure.UnauthorizedOperation"
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_ACCOUNTISLOCKED = "FailedOperation.AccountIsLocked"
+//  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
+//  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_LOGINTIMEOUT = "FailedOperation.LoginTimeout"
+//  FAILEDOPERATION_NOTBATCHTASKOWNER = "FailedOperation.NotBatchTaskOwner"
+//  FAILEDOPERATION_NOTREALNAMEDUSER = "FailedOperation.NotRealNamedUser"
+//  FAILEDOPERATION_NOTRESOURCEOWNER = "FailedOperation.NotResourceOwner"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_ACCOUNTISBANNED = "InvalidParameter.AccountIsBanned"
+//  INVALIDPARAMETER_ACQUIREHASHEXISTS = "InvalidParameter.AcquireHashExists"
+//  INVALIDPARAMETER_ACTIONINVALID = "InvalidParameter.ActionInvalid"
+//  INVALIDPARAMETER_INVALIDIP = "InvalidParameter.InvalidIp"
+//  INVALIDPARAMETER_INVALIDSECRETID = "InvalidParameter.InvalidSecretId"
+//  INVALIDPARAMETER_INVALIDSIGNATURE = "InvalidParameter.InvalidSignature"
+//  INVALIDPARAMETER_INVALIDSRCDOMAINID = "InvalidParameter.InvalidSrcDomainId"
+//  INVALIDPARAMETER_INVALIDTIME = "InvalidParameter.InvalidTime"
+//  INVALIDPARAMETER_OPERATEFAILED = "InvalidParameter.OperateFailed"
+//  INVALIDPARAMETER_OPERATIONISTOOFREQUENT = "InvalidParameter.OperationIsTooFrequent"
+//  INVALIDPARAMETER_OPTYPENOTSUPPORTED = "InvalidParameter.OptypeNotSupported"
+//  INVALIDPARAMETER_PARAMINVALID = "InvalidParameter.ParamInvalid"
+//  INVALIDPARAMETER_PARAMSILLEGAL = "InvalidParameter.ParamsIllegal"
+//  INVALIDPARAMETER_PARAMSMISSING = "InvalidParameter.ParamsMissing"
+//  INVALIDPARAMETER_PERMISSIONDENIED = "InvalidParameter.PermissionDenied"
+//  INVALIDPARAMETER_PTRINVALIDPUBLICIP = "InvalidParameter.PtrInvalidPublicIp"
+//  INVALIDPARAMETER_PTRIPNOTOWNER = "InvalidParameter.PtrIpNotOwner"
+//  INVALIDPARAMETER_QCLOUDUININVALID = "InvalidParameter.QcloudUinInvalid"
+//  INVALIDPARAMETER_REQUESTIPLIMITED = "InvalidParameter.RequestIpLimited"
+//  INVALIDPARAMETER_SHAREUSEREXISTS = "InvalidParameter.ShareUserExists"
+//  INVALIDPARAMETER_TIMESTAMPEXPIRED = "InvalidParameter.TimestampExpired"
+//  INVALIDPARAMETER_TOOLSDOMAININVALID = "InvalidParameter.ToolsDomainInvalid"
+//  INVALIDPARAMETER_TOOLSDOMAINNOTREGED = "InvalidParameter.ToolsDomainNotReged"
+//  INVALIDPARAMETER_USERALREADYLOCKED = "InvalidParameter.UserAlreadyLocked"
+//  INVALIDPARAMETER_USERNOTEXISTS = "InvalidParameter.UserNotExists"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  LIMITEXCEEDED_FAILEDLOGINLIMITEXCEEDED = "LimitExceeded.FailedLoginLimitExceeded"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_ACCESSDENIED = "OperationDenied.AccessDenied"
+//  OPERATIONDENIED_AGENTSUBORDINATEDENIED = "OperationDenied.AgentSubordinateDenied"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  OPERATIONDENIED_NOTGRANTEDBYOWNER = "OperationDenied.NotGrantedByOwner"
+//  OPERATIONDENIED_POSTREQUESTACCEPTONLY = "OperationDenied.PostRequestAcceptOnly"
+//  REQUESTLIMITEXCEEDED = "RequestLimitExceeded"
+//  REQUESTLIMITEXCEEDED_CREATEDOMAINLIMIT = "RequestLimitExceeded.CreateDomainLimit"
+//  REQUESTLIMITEXCEEDED_REQUESTLIMITEXCEEDED = "RequestLimitExceeded.RequestLimitExceeded"
+//  RESOURCENOTFOUND_NODATAOFDOMAIN = "ResourceNotFound.NoDataOfDomain"
+//  UNAUTHORIZEDOPERATION = "UnauthorizedOperation"
+//  UNKNOWNPARAMETER = "UnknownParameter"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
+func (c *Client) DescribeDomainVipList(request *DescribeDomainVipListRequest) (response *DescribeDomainVipListResponse, err error) {
+    return c.DescribeDomainVipListWithContext(context.Background(), request)
+}
+
+// DescribeDomainVipList
+// 获取套餐列表
+//
+// 可能返回的错误码:
+//  AUTHFAILURE = "AuthFailure"
+//  AUTHFAILURE_UNAUTHORIZEDOPERATION = "AuthFailure.UnauthorizedOperation"
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_ACCOUNTISLOCKED = "FailedOperation.AccountIsLocked"
+//  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
+//  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_LOGINTIMEOUT = "FailedOperation.LoginTimeout"
+//  FAILEDOPERATION_NOTBATCHTASKOWNER = "FailedOperation.NotBatchTaskOwner"
+//  FAILEDOPERATION_NOTREALNAMEDUSER = "FailedOperation.NotRealNamedUser"
+//  FAILEDOPERATION_NOTRESOURCEOWNER = "FailedOperation.NotResourceOwner"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_ACCOUNTISBANNED = "InvalidParameter.AccountIsBanned"
+//  INVALIDPARAMETER_ACQUIREHASHEXISTS = "InvalidParameter.AcquireHashExists"
+//  INVALIDPARAMETER_ACTIONINVALID = "InvalidParameter.ActionInvalid"
+//  INVALIDPARAMETER_INVALIDIP = "InvalidParameter.InvalidIp"
+//  INVALIDPARAMETER_INVALIDSECRETID = "InvalidParameter.InvalidSecretId"
+//  INVALIDPARAMETER_INVALIDSIGNATURE = "InvalidParameter.InvalidSignature"
+//  INVALIDPARAMETER_INVALIDSRCDOMAINID = "InvalidParameter.InvalidSrcDomainId"
+//  INVALIDPARAMETER_INVALIDTIME = "InvalidParameter.InvalidTime"
+//  INVALIDPARAMETER_OPERATEFAILED = "InvalidParameter.OperateFailed"
+//  INVALIDPARAMETER_OPERATIONISTOOFREQUENT = "InvalidParameter.OperationIsTooFrequent"
+//  INVALIDPARAMETER_OPTYPENOTSUPPORTED = "InvalidParameter.OptypeNotSupported"
+//  INVALIDPARAMETER_PARAMINVALID = "InvalidParameter.ParamInvalid"
+//  INVALIDPARAMETER_PARAMSILLEGAL = "InvalidParameter.ParamsIllegal"
+//  INVALIDPARAMETER_PARAMSMISSING = "InvalidParameter.ParamsMissing"
+//  INVALIDPARAMETER_PERMISSIONDENIED = "InvalidParameter.PermissionDenied"
+//  INVALIDPARAMETER_PTRINVALIDPUBLICIP = "InvalidParameter.PtrInvalidPublicIp"
+//  INVALIDPARAMETER_PTRIPNOTOWNER = "InvalidParameter.PtrIpNotOwner"
+//  INVALIDPARAMETER_QCLOUDUININVALID = "InvalidParameter.QcloudUinInvalid"
+//  INVALIDPARAMETER_REQUESTIPLIMITED = "InvalidParameter.RequestIpLimited"
+//  INVALIDPARAMETER_SHAREUSEREXISTS = "InvalidParameter.ShareUserExists"
+//  INVALIDPARAMETER_TIMESTAMPEXPIRED = "InvalidParameter.TimestampExpired"
+//  INVALIDPARAMETER_TOOLSDOMAININVALID = "InvalidParameter.ToolsDomainInvalid"
+//  INVALIDPARAMETER_TOOLSDOMAINNOTREGED = "InvalidParameter.ToolsDomainNotReged"
+//  INVALIDPARAMETER_USERALREADYLOCKED = "InvalidParameter.UserAlreadyLocked"
+//  INVALIDPARAMETER_USERNOTEXISTS = "InvalidParameter.UserNotExists"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  LIMITEXCEEDED_FAILEDLOGINLIMITEXCEEDED = "LimitExceeded.FailedLoginLimitExceeded"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_ACCESSDENIED = "OperationDenied.AccessDenied"
+//  OPERATIONDENIED_AGENTSUBORDINATEDENIED = "OperationDenied.AgentSubordinateDenied"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  OPERATIONDENIED_NOTGRANTEDBYOWNER = "OperationDenied.NotGrantedByOwner"
+//  OPERATIONDENIED_POSTREQUESTACCEPTONLY = "OperationDenied.PostRequestAcceptOnly"
+//  REQUESTLIMITEXCEEDED = "RequestLimitExceeded"
+//  REQUESTLIMITEXCEEDED_CREATEDOMAINLIMIT = "RequestLimitExceeded.CreateDomainLimit"
+//  REQUESTLIMITEXCEEDED_REQUESTLIMITEXCEEDED = "RequestLimitExceeded.RequestLimitExceeded"
+//  RESOURCENOTFOUND_NODATAOFDOMAIN = "ResourceNotFound.NoDataOfDomain"
+//  UNAUTHORIZEDOPERATION = "UnauthorizedOperation"
+//  UNKNOWNPARAMETER = "UnknownParameter"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
+func (c *Client) DescribeDomainVipListWithContext(ctx context.Context, request *DescribeDomainVipListRequest) (response *DescribeDomainVipListResponse, err error) {
+    if request == nil {
+        request = NewDescribeDomainVipListRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeDomainVipList")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeDomainVipList require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeDomainVipListResponse()
     err = c.Send(request, response)
     return
 }
@@ -2821,6 +4222,7 @@ func (c *Client) DescribeDomainWhoisWithContext(ctx context.Context, request *De
     if request == nil {
         request = NewDescribeDomainWhoisRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeDomainWhois")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDomainWhois require credential")
@@ -2829,6 +4231,154 @@ func (c *Client) DescribeDomainWhoisWithContext(ctx context.Context, request *De
     request.SetContext(ctx)
     
     response = NewDescribeDomainWhoisResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeFileInfoByJobIdRequest() (request *DescribeFileInfoByJobIdRequest) {
+    request = &DescribeFileInfoByJobIdRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("dnspod", APIVersion, "DescribeFileInfoByJobId")
+    
+    
+    return
+}
+
+func NewDescribeFileInfoByJobIdResponse() (response *DescribeFileInfoByJobIdResponse) {
+    response = &DescribeFileInfoByJobIdResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeFileInfoByJobId
+// 根据批量任务ID获取生成文件信息
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_FILENOTEXIST = "FailedOperation.FileNotExist"
+//  FAILEDOPERATION_NOTBATCHTASKOWNER = "FailedOperation.NotBatchTaskOwner"
+//  INVALIDPARAMETER_BATCHTASKNOTEXIST = "InvalidParameter.BatchTaskNotExist"
+func (c *Client) DescribeFileInfoByJobId(request *DescribeFileInfoByJobIdRequest) (response *DescribeFileInfoByJobIdResponse, err error) {
+    return c.DescribeFileInfoByJobIdWithContext(context.Background(), request)
+}
+
+// DescribeFileInfoByJobId
+// 根据批量任务ID获取生成文件信息
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_FILENOTEXIST = "FailedOperation.FileNotExist"
+//  FAILEDOPERATION_NOTBATCHTASKOWNER = "FailedOperation.NotBatchTaskOwner"
+//  INVALIDPARAMETER_BATCHTASKNOTEXIST = "InvalidParameter.BatchTaskNotExist"
+func (c *Client) DescribeFileInfoByJobIdWithContext(ctx context.Context, request *DescribeFileInfoByJobIdRequest) (response *DescribeFileInfoByJobIdResponse, err error) {
+    if request == nil {
+        request = NewDescribeFileInfoByJobIdRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeFileInfoByJobId")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeFileInfoByJobId require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeFileInfoByJobIdResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeLineGroupListRequest() (request *DescribeLineGroupListRequest) {
+    request = &DescribeLineGroupListRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("dnspod", APIVersion, "DescribeLineGroupList")
+    
+    
+    return
+}
+
+func NewDescribeLineGroupListResponse() (response *DescribeLineGroupListResponse) {
+    response = &DescribeLineGroupListResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeLineGroupList
+// 获取域名的线路分组列表
+//
+// 可能返回的错误码:
+//  AUTHFAILURE_UNAUTHORIZEDOPERATION = "AuthFailure.UnauthorizedOperation"
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
+//  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_LOGINTOKENIDERROR = "InvalidParameter.LoginTokenIdError"
+//  INVALIDPARAMETER_LOGINTOKENNOTEXISTS = "InvalidParameter.LoginTokenNotExists"
+//  INVALIDPARAMETER_LOGINTOKENVALIDATEFAILED = "InvalidParameter.LoginTokenValidateFailed"
+//  INVALIDPARAMETER_REQUESTIPLIMITED = "InvalidParameter.RequestIpLimited"
+//  INVALIDPARAMETER_USERNOTEXISTS = "InvalidParameter.UserNotExists"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  INVALIDPARAMETERVALUE_USERIDINVALID = "InvalidParameterValue.UserIdInvalid"
+//  LIMITEXCEEDED_FAILEDLOGINLIMITEXCEEDED = "LimitExceeded.FailedLoginLimitExceeded"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  OPERATIONDENIED_NOTAGENT = "OperationDenied.NotAgent"
+//  OPERATIONDENIED_NOTMANAGEDUSER = "OperationDenied.NotManagedUser"
+//  REQUESTLIMITEXCEEDED_REQUESTLIMITEXCEEDED = "RequestLimitExceeded.RequestLimitExceeded"
+//  UNAUTHORIZEDOPERATION = "UnauthorizedOperation"
+func (c *Client) DescribeLineGroupList(request *DescribeLineGroupListRequest) (response *DescribeLineGroupListResponse, err error) {
+    return c.DescribeLineGroupListWithContext(context.Background(), request)
+}
+
+// DescribeLineGroupList
+// 获取域名的线路分组列表
+//
+// 可能返回的错误码:
+//  AUTHFAILURE_UNAUTHORIZEDOPERATION = "AuthFailure.UnauthorizedOperation"
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
+//  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_LOGINTOKENIDERROR = "InvalidParameter.LoginTokenIdError"
+//  INVALIDPARAMETER_LOGINTOKENNOTEXISTS = "InvalidParameter.LoginTokenNotExists"
+//  INVALIDPARAMETER_LOGINTOKENVALIDATEFAILED = "InvalidParameter.LoginTokenValidateFailed"
+//  INVALIDPARAMETER_REQUESTIPLIMITED = "InvalidParameter.RequestIpLimited"
+//  INVALIDPARAMETER_USERNOTEXISTS = "InvalidParameter.UserNotExists"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  INVALIDPARAMETERVALUE_USERIDINVALID = "InvalidParameterValue.UserIdInvalid"
+//  LIMITEXCEEDED_FAILEDLOGINLIMITEXCEEDED = "LimitExceeded.FailedLoginLimitExceeded"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  OPERATIONDENIED_NOTAGENT = "OperationDenied.NotAgent"
+//  OPERATIONDENIED_NOTMANAGEDUSER = "OperationDenied.NotManagedUser"
+//  REQUESTLIMITEXCEEDED_REQUESTLIMITEXCEEDED = "RequestLimitExceeded.RequestLimitExceeded"
+//  UNAUTHORIZEDOPERATION = "UnauthorizedOperation"
+func (c *Client) DescribeLineGroupListWithContext(ctx context.Context, request *DescribeLineGroupListRequest) (response *DescribeLineGroupListResponse, err error) {
+    if request == nil {
+        request = NewDescribeLineGroupListRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeLineGroupList")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeLineGroupList require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeLineGroupListResponse()
     err = c.Send(request, response)
     return
 }
@@ -2918,6 +4468,7 @@ func (c *Client) DescribePackageDetailWithContext(ctx context.Context, request *
     if request == nil {
         request = NewDescribePackageDetailRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribePackageDetail")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribePackageDetail require credential")
@@ -3011,6 +4562,7 @@ func (c *Client) DescribeRecordWithContext(ctx context.Context, request *Describ
     if request == nil {
         request = NewDescribeRecordRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeRecord")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeRecord require credential")
@@ -3110,6 +4662,7 @@ func (c *Client) DescribeRecordExistExceptDefaultNSWithContext(ctx context.Conte
     if request == nil {
         request = NewDescribeRecordExistExceptDefaultNSRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeRecordExistExceptDefaultNS")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeRecordExistExceptDefaultNS require credential")
@@ -3144,6 +4697,12 @@ func NewDescribeRecordFilterListResponse() (response *DescribeRecordFilterListRe
 // DescribeRecordFilterList
 // 获取某个域名下的解析记录列表
 //
+// 备注：
+//
+// 1. 新添加的解析记录存在短暂的索引延迟，如果查询不到新增记录，请在 30 秒后重试
+//
+// 2.  API获取的记录总条数会比控制台多2条，原因是： 为了防止用户误操作导致解析服务不可用，对2021-10-29 14:24:26之后添加的域名，在控制台都不显示这2条NS记录。
+//
 // 可能返回的错误码:
 //  AUTHFAILURE = "AuthFailure"
 //  FAILEDOPERATION = "FailedOperation"
@@ -3176,6 +4735,12 @@ func (c *Client) DescribeRecordFilterList(request *DescribeRecordFilterListReque
 // DescribeRecordFilterList
 // 获取某个域名下的解析记录列表
 //
+// 备注：
+//
+// 1. 新添加的解析记录存在短暂的索引延迟，如果查询不到新增记录，请在 30 秒后重试
+//
+// 2.  API获取的记录总条数会比控制台多2条，原因是： 为了防止用户误操作导致解析服务不可用，对2021-10-29 14:24:26之后添加的域名，在控制台都不显示这2条NS记录。
+//
 // 可能返回的错误码:
 //  AUTHFAILURE = "AuthFailure"
 //  FAILEDOPERATION = "FailedOperation"
@@ -3205,6 +4770,7 @@ func (c *Client) DescribeRecordFilterListWithContext(ctx context.Context, reques
     if request == nil {
         request = NewDescribeRecordFilterListRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeRecordFilterList")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeRecordFilterList require credential")
@@ -3268,6 +4834,7 @@ func (c *Client) DescribeRecordGroupListWithContext(ctx context.Context, request
     if request == nil {
         request = NewDescribeRecordGroupListRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeRecordGroupList")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeRecordGroupList require credential")
@@ -3276,6 +4843,68 @@ func (c *Client) DescribeRecordGroupListWithContext(ctx context.Context, request
     request.SetContext(ctx)
     
     response = NewDescribeRecordGroupListResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeRecordLineCategoryListRequest() (request *DescribeRecordLineCategoryListRequest) {
+    request = &DescribeRecordLineCategoryListRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("dnspod", APIVersion, "DescribeRecordLineCategoryList")
+    
+    
+    return
+}
+
+func NewDescribeRecordLineCategoryListResponse() (response *DescribeRecordLineCategoryListResponse) {
+    response = &DescribeRecordLineCategoryListResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeRecordLineCategoryList
+// 按分类返回线路列表
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+func (c *Client) DescribeRecordLineCategoryList(request *DescribeRecordLineCategoryListRequest) (response *DescribeRecordLineCategoryListResponse, err error) {
+    return c.DescribeRecordLineCategoryListWithContext(context.Background(), request)
+}
+
+// DescribeRecordLineCategoryList
+// 按分类返回线路列表
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+func (c *Client) DescribeRecordLineCategoryListWithContext(ctx context.Context, request *DescribeRecordLineCategoryListRequest) (response *DescribeRecordLineCategoryListResponse, err error) {
+    if request == nil {
+        request = NewDescribeRecordLineCategoryListRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeRecordLineCategoryList")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeRecordLineCategoryList require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeRecordLineCategoryListResponse()
     err = c.Send(request, response)
     return
 }
@@ -3357,6 +4986,7 @@ func (c *Client) DescribeRecordLineListWithContext(ctx context.Context, request 
     if request == nil {
         request = NewDescribeRecordLineListRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeRecordLineList")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeRecordLineList require credential")
@@ -3391,7 +5021,11 @@ func NewDescribeRecordListResponse() (response *DescribeRecordListResponse) {
 // DescribeRecordList
 // 获取某个域名下的解析记录列表
 //
-// 备注：新添加的解析记录存在短暂的索引延迟，如果查询不到新增记录，请在 30 秒后重试
+// 备注：
+//
+// 1. 新添加的解析记录存在短暂的索引延迟，如果查询不到新增记录，请在 30 秒后重试
+//
+// 2.  API获取的记录总条数会比控制台多2条，原因是： 为了防止用户误操作导致解析服务不可用，对2021-10-29 14:24:26之后添加的域名，在控制台都不显示这2条NS记录。
 //
 // 可能返回的错误码:
 //  AUTHFAILURE = "AuthFailure"
@@ -3423,7 +5057,11 @@ func (c *Client) DescribeRecordList(request *DescribeRecordListRequest) (respons
 // DescribeRecordList
 // 获取某个域名下的解析记录列表
 //
-// 备注：新添加的解析记录存在短暂的索引延迟，如果查询不到新增记录，请在 30 秒后重试
+// 备注：
+//
+// 1. 新添加的解析记录存在短暂的索引延迟，如果查询不到新增记录，请在 30 秒后重试
+//
+// 2.  API获取的记录总条数会比控制台多2条，原因是： 为了防止用户误操作导致解析服务不可用，对2021-10-29 14:24:26之后添加的域名，在控制台都不显示这2条NS记录。
 //
 // 可能返回的错误码:
 //  AUTHFAILURE = "AuthFailure"
@@ -3452,6 +5090,7 @@ func (c *Client) DescribeRecordListWithContext(ctx context.Context, request *Des
     if request == nil {
         request = NewDescribeRecordListRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeRecordList")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeRecordList require credential")
@@ -3515,6 +5154,7 @@ func (c *Client) DescribeRecordSnapshotRollbackResultWithContext(ctx context.Con
     if request == nil {
         request = NewDescribeRecordSnapshotRollbackResultRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeRecordSnapshotRollbackResult")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeRecordSnapshotRollbackResult require credential")
@@ -3600,6 +5240,7 @@ func (c *Client) DescribeRecordTypeWithContext(ctx context.Context, request *Des
     if request == nil {
         request = NewDescribeRecordTypeRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeRecordType")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeRecordType require credential")
@@ -3608,6 +5249,92 @@ func (c *Client) DescribeRecordTypeWithContext(ctx context.Context, request *Des
     request.SetContext(ctx)
     
     response = NewDescribeRecordTypeResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeResolveCountRequest() (request *DescribeResolveCountRequest) {
+    request = &DescribeResolveCountRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("dnspod", APIVersion, "DescribeResolveCount")
+    
+    
+    return
+}
+
+func NewDescribeResolveCountResponse() (response *DescribeResolveCountResponse) {
+    response = &DescribeResolveCountResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeResolveCount
+// 查看域名的解析量
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_AUTHLOGUNSUPPORT = "FailedOperation.AuthLogUnsupport"
+//  FAILEDOPERATION_DOMAINISSPAM = "FailedOperation.DomainIsSpam"
+//  FAILEDOPERATION_DOMAINNOTINSERVICE = "FailedOperation.DomainNotInService"
+//  FAILEDOPERATION_TEMPORARYERROR = "FailedOperation.TemporaryError"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INVALIDPARAMETER_AUTHLOGINVALIDRETCODE = "InvalidParameter.AuthLogInvalidRetCode"
+//  INVALIDPARAMETER_AUTHLOGINVALIDSCOPE = "InvalidParameter.AuthLogInvalidScope"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_ENDDATEBEYONDRANGE = "InvalidParameter.EndDateBeyondRange"
+//  INVALIDPARAMETER_INVALIDENDDATE = "InvalidParameter.InvalidEndDate"
+//  INVALIDPARAMETER_INVALIDSTARTDATE = "InvalidParameter.InvalidStartDate"
+//  INVALIDPARAMETER_PARAMSMISSING = "InvalidParameter.ParamsMissing"
+//  INVALIDPARAMETER_STARTDATEBEYONDRANGE = "InvalidParameter.StartDateBeyondRange"
+//  INVALIDPARAMETER_SUBSBEYONDRANGE = "InvalidParameter.SubsBeyondRange"
+//  INVALIDPARAMETERVALUE_DOMAINGRADEINVALID = "InvalidParameterValue.DomainGradeInvalid"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+func (c *Client) DescribeResolveCount(request *DescribeResolveCountRequest) (response *DescribeResolveCountResponse, err error) {
+    return c.DescribeResolveCountWithContext(context.Background(), request)
+}
+
+// DescribeResolveCount
+// 查看域名的解析量
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_AUTHLOGUNSUPPORT = "FailedOperation.AuthLogUnsupport"
+//  FAILEDOPERATION_DOMAINISSPAM = "FailedOperation.DomainIsSpam"
+//  FAILEDOPERATION_DOMAINNOTINSERVICE = "FailedOperation.DomainNotInService"
+//  FAILEDOPERATION_TEMPORARYERROR = "FailedOperation.TemporaryError"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INVALIDPARAMETER_AUTHLOGINVALIDRETCODE = "InvalidParameter.AuthLogInvalidRetCode"
+//  INVALIDPARAMETER_AUTHLOGINVALIDSCOPE = "InvalidParameter.AuthLogInvalidScope"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_ENDDATEBEYONDRANGE = "InvalidParameter.EndDateBeyondRange"
+//  INVALIDPARAMETER_INVALIDENDDATE = "InvalidParameter.InvalidEndDate"
+//  INVALIDPARAMETER_INVALIDSTARTDATE = "InvalidParameter.InvalidStartDate"
+//  INVALIDPARAMETER_PARAMSMISSING = "InvalidParameter.ParamsMissing"
+//  INVALIDPARAMETER_STARTDATEBEYONDRANGE = "InvalidParameter.StartDateBeyondRange"
+//  INVALIDPARAMETER_SUBSBEYONDRANGE = "InvalidParameter.SubsBeyondRange"
+//  INVALIDPARAMETERVALUE_DOMAINGRADEINVALID = "InvalidParameterValue.DomainGradeInvalid"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+func (c *Client) DescribeResolveCountWithContext(ctx context.Context, request *DescribeResolveCountRequest) (response *DescribeResolveCountResponse, err error) {
+    if request == nil {
+        request = NewDescribeResolveCountRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeResolveCount")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeResolveCount require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeResolveCountResponse()
     err = c.Send(request, response)
     return
 }
@@ -3663,6 +5390,7 @@ func (c *Client) DescribeSnapshotConfigWithContext(ctx context.Context, request 
     if request == nil {
         request = NewDescribeSnapshotConfigRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeSnapshotConfig")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeSnapshotConfig require credential")
@@ -3726,6 +5454,7 @@ func (c *Client) DescribeSnapshotListWithContext(ctx context.Context, request *D
     if request == nil {
         request = NewDescribeSnapshotListRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeSnapshotList")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeSnapshotList require credential")
@@ -3787,6 +5516,7 @@ func (c *Client) DescribeSnapshotRollbackResultWithContext(ctx context.Context, 
     if request == nil {
         request = NewDescribeSnapshotRollbackResultRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeSnapshotRollbackResult")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeSnapshotRollbackResult require credential")
@@ -3850,6 +5580,7 @@ func (c *Client) DescribeSnapshotRollbackTaskWithContext(ctx context.Context, re
     if request == nil {
         request = NewDescribeSnapshotRollbackTaskRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeSnapshotRollbackTask")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeSnapshotRollbackTask require credential")
@@ -3917,6 +5648,7 @@ func (c *Client) DescribeSubdomainAnalyticsWithContext(ctx context.Context, requ
     if request == nil {
         request = NewDescribeSubdomainAnalyticsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeSubdomainAnalytics")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeSubdomainAnalytics require credential")
@@ -3925,6 +5657,64 @@ func (c *Client) DescribeSubdomainAnalyticsWithContext(ctx context.Context, requ
     request.SetContext(ctx)
     
     response = NewDescribeSubdomainAnalyticsResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeSubdomainValidateStatusRequest() (request *DescribeSubdomainValidateStatusRequest) {
+    request = &DescribeSubdomainValidateStatusRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("dnspod", APIVersion, "DescribeSubdomainValidateStatus")
+    
+    
+    return
+}
+
+func NewDescribeSubdomainValidateStatusResponse() (response *DescribeSubdomainValidateStatusResponse) {
+    response = &DescribeSubdomainValidateStatusResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeSubdomainValidateStatus
+// 查看添加子域名 Zone 域解析 TXT 记录值验证状态
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_DOMAINEXISTS = "FailedOperation.DomainExists"
+//  INVALIDPARAMETER_QUHUITXTNOTMATCH = "InvalidParameter.QuhuiTxtNotMatch"
+//  INVALIDPARAMETER_QUHUITXTRECORDWAIT = "InvalidParameter.QuhuiTxtRecordWait"
+//  INVALIDPARAMETER_SUBDOMAININVALID = "InvalidParameter.SubdomainInvalid"
+//  INVALIDPARAMETER_UNREALNAMEUSER = "InvalidParameter.UnrealNameUser"
+func (c *Client) DescribeSubdomainValidateStatus(request *DescribeSubdomainValidateStatusRequest) (response *DescribeSubdomainValidateStatusResponse, err error) {
+    return c.DescribeSubdomainValidateStatusWithContext(context.Background(), request)
+}
+
+// DescribeSubdomainValidateStatus
+// 查看添加子域名 Zone 域解析 TXT 记录值验证状态
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_DOMAINEXISTS = "FailedOperation.DomainExists"
+//  INVALIDPARAMETER_QUHUITXTNOTMATCH = "InvalidParameter.QuhuiTxtNotMatch"
+//  INVALIDPARAMETER_QUHUITXTRECORDWAIT = "InvalidParameter.QuhuiTxtRecordWait"
+//  INVALIDPARAMETER_SUBDOMAININVALID = "InvalidParameter.SubdomainInvalid"
+//  INVALIDPARAMETER_UNREALNAMEUSER = "InvalidParameter.UnrealNameUser"
+func (c *Client) DescribeSubdomainValidateStatusWithContext(ctx context.Context, request *DescribeSubdomainValidateStatusRequest) (response *DescribeSubdomainValidateStatusResponse, err error) {
+    if request == nil {
+        request = NewDescribeSubdomainValidateStatusRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeSubdomainValidateStatus")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeSubdomainValidateStatus require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeSubdomainValidateStatusResponse()
     err = c.Send(request, response)
     return
 }
@@ -3949,7 +5739,7 @@ func NewDescribeUserDetailResponse() (response *DescribeUserDetailResponse) {
 }
 
 // DescribeUserDetail
-// 获取帐户信息
+// 获取账户信息
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -3964,7 +5754,7 @@ func (c *Client) DescribeUserDetail(request *DescribeUserDetailRequest) (respons
 }
 
 // DescribeUserDetail
-// 获取帐户信息
+// 获取账户信息
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -3978,6 +5768,7 @@ func (c *Client) DescribeUserDetailWithContext(ctx context.Context, request *Des
     if request == nil {
         request = NewDescribeUserDetailRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeUserDetail")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeUserDetail require credential")
@@ -4075,6 +5866,7 @@ func (c *Client) DescribeVASStatisticWithContext(ctx context.Context, request *D
     if request == nil {
         request = NewDescribeVASStatisticRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeVASStatistic")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeVASStatistic require credential")
@@ -4083,6 +5875,166 @@ func (c *Client) DescribeVASStatisticWithContext(ctx context.Context, request *D
     request.SetContext(ctx)
     
     response = NewDescribeVASStatisticResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeVasListRequest() (request *DescribeVasListRequest) {
+    request = &DescribeVasListRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("dnspod", APIVersion, "DescribeVasList")
+    
+    
+    return
+}
+
+func NewDescribeVasListResponse() (response *DescribeVasListResponse) {
+    response = &DescribeVasListResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeVasList
+// 获取增值服务列表
+//
+// 可能返回的错误码:
+//  AUTHFAILURE = "AuthFailure"
+//  AUTHFAILURE_UNAUTHORIZEDOPERATION = "AuthFailure.UnauthorizedOperation"
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_ACCOUNTISLOCKED = "FailedOperation.AccountIsLocked"
+//  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
+//  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_LOGINTIMEOUT = "FailedOperation.LoginTimeout"
+//  FAILEDOPERATION_NOTBATCHTASKOWNER = "FailedOperation.NotBatchTaskOwner"
+//  FAILEDOPERATION_NOTREALNAMEDUSER = "FailedOperation.NotRealNamedUser"
+//  FAILEDOPERATION_NOTRESOURCEOWNER = "FailedOperation.NotResourceOwner"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_ACCOUNTISBANNED = "InvalidParameter.AccountIsBanned"
+//  INVALIDPARAMETER_ACQUIREHASHEXISTS = "InvalidParameter.AcquireHashExists"
+//  INVALIDPARAMETER_ACTIONINVALID = "InvalidParameter.ActionInvalid"
+//  INVALIDPARAMETER_INVALIDIP = "InvalidParameter.InvalidIp"
+//  INVALIDPARAMETER_INVALIDSECRETID = "InvalidParameter.InvalidSecretId"
+//  INVALIDPARAMETER_INVALIDSIGNATURE = "InvalidParameter.InvalidSignature"
+//  INVALIDPARAMETER_INVALIDSRCDOMAINID = "InvalidParameter.InvalidSrcDomainId"
+//  INVALIDPARAMETER_INVALIDTIME = "InvalidParameter.InvalidTime"
+//  INVALIDPARAMETER_OPERATEFAILED = "InvalidParameter.OperateFailed"
+//  INVALIDPARAMETER_OPERATIONISTOOFREQUENT = "InvalidParameter.OperationIsTooFrequent"
+//  INVALIDPARAMETER_OPTYPENOTSUPPORTED = "InvalidParameter.OptypeNotSupported"
+//  INVALIDPARAMETER_PARAMINVALID = "InvalidParameter.ParamInvalid"
+//  INVALIDPARAMETER_PARAMSILLEGAL = "InvalidParameter.ParamsIllegal"
+//  INVALIDPARAMETER_PARAMSMISSING = "InvalidParameter.ParamsMissing"
+//  INVALIDPARAMETER_PERMISSIONDENIED = "InvalidParameter.PermissionDenied"
+//  INVALIDPARAMETER_PTRINVALIDPUBLICIP = "InvalidParameter.PtrInvalidPublicIp"
+//  INVALIDPARAMETER_PTRIPNOTOWNER = "InvalidParameter.PtrIpNotOwner"
+//  INVALIDPARAMETER_QCLOUDUININVALID = "InvalidParameter.QcloudUinInvalid"
+//  INVALIDPARAMETER_REQUESTIPLIMITED = "InvalidParameter.RequestIpLimited"
+//  INVALIDPARAMETER_SHAREUSEREXISTS = "InvalidParameter.ShareUserExists"
+//  INVALIDPARAMETER_TIMESTAMPEXPIRED = "InvalidParameter.TimestampExpired"
+//  INVALIDPARAMETER_TOOLSDOMAININVALID = "InvalidParameter.ToolsDomainInvalid"
+//  INVALIDPARAMETER_TOOLSDOMAINNOTREGED = "InvalidParameter.ToolsDomainNotReged"
+//  INVALIDPARAMETER_USERALREADYLOCKED = "InvalidParameter.UserAlreadyLocked"
+//  INVALIDPARAMETER_USERNOTEXISTS = "InvalidParameter.UserNotExists"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  LIMITEXCEEDED_FAILEDLOGINLIMITEXCEEDED = "LimitExceeded.FailedLoginLimitExceeded"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_ACCESSDENIED = "OperationDenied.AccessDenied"
+//  OPERATIONDENIED_AGENTSUBORDINATEDENIED = "OperationDenied.AgentSubordinateDenied"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  OPERATIONDENIED_NOTGRANTEDBYOWNER = "OperationDenied.NotGrantedByOwner"
+//  OPERATIONDENIED_POSTREQUESTACCEPTONLY = "OperationDenied.PostRequestAcceptOnly"
+//  REQUESTLIMITEXCEEDED = "RequestLimitExceeded"
+//  REQUESTLIMITEXCEEDED_CREATEDOMAINLIMIT = "RequestLimitExceeded.CreateDomainLimit"
+//  REQUESTLIMITEXCEEDED_REQUESTLIMITEXCEEDED = "RequestLimitExceeded.RequestLimitExceeded"
+//  RESOURCENOTFOUND_NODATAOFDOMAIN = "ResourceNotFound.NoDataOfDomain"
+//  UNAUTHORIZEDOPERATION = "UnauthorizedOperation"
+//  UNKNOWNPARAMETER = "UnknownParameter"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
+func (c *Client) DescribeVasList(request *DescribeVasListRequest) (response *DescribeVasListResponse, err error) {
+    return c.DescribeVasListWithContext(context.Background(), request)
+}
+
+// DescribeVasList
+// 获取增值服务列表
+//
+// 可能返回的错误码:
+//  AUTHFAILURE = "AuthFailure"
+//  AUTHFAILURE_UNAUTHORIZEDOPERATION = "AuthFailure.UnauthorizedOperation"
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_ACCOUNTISLOCKED = "FailedOperation.AccountIsLocked"
+//  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
+//  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_LOGINTIMEOUT = "FailedOperation.LoginTimeout"
+//  FAILEDOPERATION_NOTBATCHTASKOWNER = "FailedOperation.NotBatchTaskOwner"
+//  FAILEDOPERATION_NOTREALNAMEDUSER = "FailedOperation.NotRealNamedUser"
+//  FAILEDOPERATION_NOTRESOURCEOWNER = "FailedOperation.NotResourceOwner"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_ACCOUNTISBANNED = "InvalidParameter.AccountIsBanned"
+//  INVALIDPARAMETER_ACQUIREHASHEXISTS = "InvalidParameter.AcquireHashExists"
+//  INVALIDPARAMETER_ACTIONINVALID = "InvalidParameter.ActionInvalid"
+//  INVALIDPARAMETER_INVALIDIP = "InvalidParameter.InvalidIp"
+//  INVALIDPARAMETER_INVALIDSECRETID = "InvalidParameter.InvalidSecretId"
+//  INVALIDPARAMETER_INVALIDSIGNATURE = "InvalidParameter.InvalidSignature"
+//  INVALIDPARAMETER_INVALIDSRCDOMAINID = "InvalidParameter.InvalidSrcDomainId"
+//  INVALIDPARAMETER_INVALIDTIME = "InvalidParameter.InvalidTime"
+//  INVALIDPARAMETER_OPERATEFAILED = "InvalidParameter.OperateFailed"
+//  INVALIDPARAMETER_OPERATIONISTOOFREQUENT = "InvalidParameter.OperationIsTooFrequent"
+//  INVALIDPARAMETER_OPTYPENOTSUPPORTED = "InvalidParameter.OptypeNotSupported"
+//  INVALIDPARAMETER_PARAMINVALID = "InvalidParameter.ParamInvalid"
+//  INVALIDPARAMETER_PARAMSILLEGAL = "InvalidParameter.ParamsIllegal"
+//  INVALIDPARAMETER_PARAMSMISSING = "InvalidParameter.ParamsMissing"
+//  INVALIDPARAMETER_PERMISSIONDENIED = "InvalidParameter.PermissionDenied"
+//  INVALIDPARAMETER_PTRINVALIDPUBLICIP = "InvalidParameter.PtrInvalidPublicIp"
+//  INVALIDPARAMETER_PTRIPNOTOWNER = "InvalidParameter.PtrIpNotOwner"
+//  INVALIDPARAMETER_QCLOUDUININVALID = "InvalidParameter.QcloudUinInvalid"
+//  INVALIDPARAMETER_REQUESTIPLIMITED = "InvalidParameter.RequestIpLimited"
+//  INVALIDPARAMETER_SHAREUSEREXISTS = "InvalidParameter.ShareUserExists"
+//  INVALIDPARAMETER_TIMESTAMPEXPIRED = "InvalidParameter.TimestampExpired"
+//  INVALIDPARAMETER_TOOLSDOMAININVALID = "InvalidParameter.ToolsDomainInvalid"
+//  INVALIDPARAMETER_TOOLSDOMAINNOTREGED = "InvalidParameter.ToolsDomainNotReged"
+//  INVALIDPARAMETER_USERALREADYLOCKED = "InvalidParameter.UserAlreadyLocked"
+//  INVALIDPARAMETER_USERNOTEXISTS = "InvalidParameter.UserNotExists"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  LIMITEXCEEDED_FAILEDLOGINLIMITEXCEEDED = "LimitExceeded.FailedLoginLimitExceeded"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_ACCESSDENIED = "OperationDenied.AccessDenied"
+//  OPERATIONDENIED_AGENTSUBORDINATEDENIED = "OperationDenied.AgentSubordinateDenied"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  OPERATIONDENIED_NOTGRANTEDBYOWNER = "OperationDenied.NotGrantedByOwner"
+//  OPERATIONDENIED_POSTREQUESTACCEPTONLY = "OperationDenied.PostRequestAcceptOnly"
+//  REQUESTLIMITEXCEEDED = "RequestLimitExceeded"
+//  REQUESTLIMITEXCEEDED_CREATEDOMAINLIMIT = "RequestLimitExceeded.CreateDomainLimit"
+//  REQUESTLIMITEXCEEDED_REQUESTLIMITEXCEEDED = "RequestLimitExceeded.RequestLimitExceeded"
+//  RESOURCENOTFOUND_NODATAOFDOMAIN = "ResourceNotFound.NoDataOfDomain"
+//  UNAUTHORIZEDOPERATION = "UnauthorizedOperation"
+//  UNKNOWNPARAMETER = "UnknownParameter"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
+func (c *Client) DescribeVasListWithContext(ctx context.Context, request *DescribeVasListRequest) (response *DescribeVasListResponse, err error) {
+    if request == nil {
+        request = NewDescribeVasListRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DescribeVasList")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeVasList require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeVasListResponse()
     err = c.Send(request, response)
     return
 }
@@ -4140,6 +6092,7 @@ func (c *Client) DownloadSnapshotWithContext(ctx context.Context, request *Downl
     if request == nil {
         request = NewDownloadSnapshotRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "DownloadSnapshot")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DownloadSnapshot require credential")
@@ -4148,6 +6101,76 @@ func (c *Client) DownloadSnapshotWithContext(ctx context.Context, request *Downl
     request.SetContext(ctx)
     
     response = NewDownloadSnapshotResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyDomainCNAMESpeedupStatusBatchRequest() (request *ModifyDomainCNAMESpeedupStatusBatchRequest) {
+    request = &ModifyDomainCNAMESpeedupStatusBatchRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("dnspod", APIVersion, "ModifyDomainCNAMESpeedupStatusBatch")
+    
+    
+    return
+}
+
+func NewModifyDomainCNAMESpeedupStatusBatchResponse() (response *ModifyDomainCNAMESpeedupStatusBatchResponse) {
+    response = &ModifyDomainCNAMESpeedupStatusBatchResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyDomainCNAMESpeedupStatusBatch
+// 批量修改域名CNAME加速状态
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INVALIDPARAMETER_BATCHRECORDREMOVEACTIONERROR = "InvalidParameter.BatchRecordRemoveActionError"
+//  INVALIDPARAMETER_BATCHTASKCOUNTLIMIT = "InvalidParameter.BatchTaskCountLimit"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_DOMAINSEMPTY = "InvalidParameter.DomainsEmpty"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  REQUESTLIMITEXCEEDED_BATCHTASKLIMIT = "RequestLimitExceeded.BatchTaskLimit"
+func (c *Client) ModifyDomainCNAMESpeedupStatusBatch(request *ModifyDomainCNAMESpeedupStatusBatchRequest) (response *ModifyDomainCNAMESpeedupStatusBatchResponse, err error) {
+    return c.ModifyDomainCNAMESpeedupStatusBatchWithContext(context.Background(), request)
+}
+
+// ModifyDomainCNAMESpeedupStatusBatch
+// 批量修改域名CNAME加速状态
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INVALIDPARAMETER_BATCHRECORDREMOVEACTIONERROR = "InvalidParameter.BatchRecordRemoveActionError"
+//  INVALIDPARAMETER_BATCHTASKCOUNTLIMIT = "InvalidParameter.BatchTaskCountLimit"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_DOMAINSEMPTY = "InvalidParameter.DomainsEmpty"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  REQUESTLIMITEXCEEDED_BATCHTASKLIMIT = "RequestLimitExceeded.BatchTaskLimit"
+func (c *Client) ModifyDomainCNAMESpeedupStatusBatchWithContext(ctx context.Context, request *ModifyDomainCNAMESpeedupStatusBatchRequest) (response *ModifyDomainCNAMESpeedupStatusBatchResponse, err error) {
+    if request == nil {
+        request = NewModifyDomainCNAMESpeedupStatusBatchRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "ModifyDomainCNAMESpeedupStatusBatch")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyDomainCNAMESpeedupStatusBatch require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyDomainCNAMESpeedupStatusBatchResponse()
     err = c.Send(request, response)
     return
 }
@@ -4259,6 +6282,7 @@ func (c *Client) ModifyDomainCustomLineWithContext(ctx context.Context, request 
     if request == nil {
         request = NewModifyDomainCustomLineRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "ModifyDomainCustomLine")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyDomainCustomLine require credential")
@@ -4356,6 +6380,7 @@ func (c *Client) ModifyDomainLockWithContext(ctx context.Context, request *Modif
     if request == nil {
         request = NewModifyDomainLockRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "ModifyDomainLock")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyDomainLock require credential")
@@ -4397,6 +6422,7 @@ func NewModifyDomainOwnerResponse() (response *ModifyDomainOwnerResponse) {
 //  FAILEDOPERATION_DOMAINISVIP = "FailedOperation.DomainIsVip"
 //  FAILEDOPERATION_TRANSFERTOENTERPRISEDENIED = "FailedOperation.TransferToEnterpriseDenied"
 //  FAILEDOPERATION_TRANSFERTOPERSONDENIED = "FailedOperation.TransferToPersonDenied"
+//  FAILEDOPERATION_USERNOTALLOWTRANSFER = "FailedOperation.UserNotAllowTransfer"
 //  INVALIDPARAMETER_CUSTOMMESSAGE = "InvalidParameter.CustomMessage"
 //  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
 //  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
@@ -4407,6 +6433,7 @@ func NewModifyDomainOwnerResponse() (response *ModifyDomainOwnerResponse) {
 //  INVALIDPARAMETER_OPERATEFAILED = "InvalidParameter.OperateFailed"
 //  INVALIDPARAMETER_OTHERACCOUNTUNREALNAME = "InvalidParameter.OtherAccountUnrealName"
 //  INVALIDPARAMETER_QCLOUDUININVALID = "InvalidParameter.QcloudUinInvalid"
+//  INVALIDPARAMETER_TRANSFERACCOUNTISBANNED = "InvalidParameter.TransferAccountIsBanned"
 //  INVALIDPARAMETER_USERAREAINVALID = "InvalidParameter.UserAreaInvalid"
 //  INVALIDPARAMETER_USERNOTEXISTS = "InvalidParameter.UserNotExists"
 //  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
@@ -4425,6 +6452,7 @@ func (c *Client) ModifyDomainOwner(request *ModifyDomainOwnerRequest) (response 
 //  FAILEDOPERATION_DOMAINISVIP = "FailedOperation.DomainIsVip"
 //  FAILEDOPERATION_TRANSFERTOENTERPRISEDENIED = "FailedOperation.TransferToEnterpriseDenied"
 //  FAILEDOPERATION_TRANSFERTOPERSONDENIED = "FailedOperation.TransferToPersonDenied"
+//  FAILEDOPERATION_USERNOTALLOWTRANSFER = "FailedOperation.UserNotAllowTransfer"
 //  INVALIDPARAMETER_CUSTOMMESSAGE = "InvalidParameter.CustomMessage"
 //  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
 //  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
@@ -4435,6 +6463,7 @@ func (c *Client) ModifyDomainOwner(request *ModifyDomainOwnerRequest) (response 
 //  INVALIDPARAMETER_OPERATEFAILED = "InvalidParameter.OperateFailed"
 //  INVALIDPARAMETER_OTHERACCOUNTUNREALNAME = "InvalidParameter.OtherAccountUnrealName"
 //  INVALIDPARAMETER_QCLOUDUININVALID = "InvalidParameter.QcloudUinInvalid"
+//  INVALIDPARAMETER_TRANSFERACCOUNTISBANNED = "InvalidParameter.TransferAccountIsBanned"
 //  INVALIDPARAMETER_USERAREAINVALID = "InvalidParameter.UserAreaInvalid"
 //  INVALIDPARAMETER_USERNOTEXISTS = "InvalidParameter.UserNotExists"
 //  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
@@ -4443,6 +6472,7 @@ func (c *Client) ModifyDomainOwnerWithContext(ctx context.Context, request *Modi
     if request == nil {
         request = NewModifyDomainOwnerRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "ModifyDomainOwner")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyDomainOwner require credential")
@@ -4451,6 +6481,76 @@ func (c *Client) ModifyDomainOwnerWithContext(ctx context.Context, request *Modi
     request.SetContext(ctx)
     
     response = NewModifyDomainOwnerResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyDomainRecursiveStatusBatchRequest() (request *ModifyDomainRecursiveStatusBatchRequest) {
+    request = &ModifyDomainRecursiveStatusBatchRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("dnspod", APIVersion, "ModifyDomainRecursiveStatusBatch")
+    
+    
+    return
+}
+
+func NewModifyDomainRecursiveStatusBatchResponse() (response *ModifyDomainRecursiveStatusBatchResponse) {
+    response = &ModifyDomainRecursiveStatusBatchResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyDomainRecursiveStatusBatch
+// 批量修改域名递归解析加速状态
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INVALIDPARAMETER_BATCHRECORDREMOVEACTIONERROR = "InvalidParameter.BatchRecordRemoveActionError"
+//  INVALIDPARAMETER_BATCHTASKCOUNTLIMIT = "InvalidParameter.BatchTaskCountLimit"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_DOMAINSEMPTY = "InvalidParameter.DomainsEmpty"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  REQUESTLIMITEXCEEDED_BATCHTASKLIMIT = "RequestLimitExceeded.BatchTaskLimit"
+func (c *Client) ModifyDomainRecursiveStatusBatch(request *ModifyDomainRecursiveStatusBatchRequest) (response *ModifyDomainRecursiveStatusBatchResponse, err error) {
+    return c.ModifyDomainRecursiveStatusBatchWithContext(context.Background(), request)
+}
+
+// ModifyDomainRecursiveStatusBatch
+// 批量修改域名递归解析加速状态
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INVALIDPARAMETER_BATCHRECORDREMOVEACTIONERROR = "InvalidParameter.BatchRecordRemoveActionError"
+//  INVALIDPARAMETER_BATCHTASKCOUNTLIMIT = "InvalidParameter.BatchTaskCountLimit"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_DOMAINSEMPTY = "InvalidParameter.DomainsEmpty"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  REQUESTLIMITEXCEEDED_BATCHTASKLIMIT = "RequestLimitExceeded.BatchTaskLimit"
+func (c *Client) ModifyDomainRecursiveStatusBatchWithContext(ctx context.Context, request *ModifyDomainRecursiveStatusBatchRequest) (response *ModifyDomainRecursiveStatusBatchResponse, err error) {
+    if request == nil {
+        request = NewModifyDomainRecursiveStatusBatchRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "ModifyDomainRecursiveStatusBatch")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyDomainRecursiveStatusBatch require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyDomainRecursiveStatusBatchResponse()
     err = c.Send(request, response)
     return
 }
@@ -4536,6 +6636,7 @@ func (c *Client) ModifyDomainRemarkWithContext(ctx context.Context, request *Mod
     if request == nil {
         request = NewModifyDomainRemarkRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "ModifyDomainRemark")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyDomainRemark require credential")
@@ -4607,6 +6708,7 @@ func (c *Client) ModifyDomainStatusWithContext(ctx context.Context, request *Mod
     if request == nil {
         request = NewModifyDomainStatusRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "ModifyDomainStatus")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyDomainStatus require credential")
@@ -4615,6 +6717,80 @@ func (c *Client) ModifyDomainStatusWithContext(ctx context.Context, request *Mod
     request.SetContext(ctx)
     
     response = NewModifyDomainStatusResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyDomainToGroupRequest() (request *ModifyDomainToGroupRequest) {
+    request = &ModifyDomainToGroupRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("dnspod", APIVersion, "ModifyDomainToGroup")
+    
+    
+    return
+}
+
+func NewModifyDomainToGroupResponse() (response *ModifyDomainToGroupResponse) {
+    response = &ModifyDomainToGroupResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyDomainToGroup
+// 修改域名所属分组
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_NOTREALNAMEDUSER = "FailedOperation.NotRealNamedUser"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_GROUPIDINVALID = "InvalidParameter.GroupIdInvalid"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+func (c *Client) ModifyDomainToGroup(request *ModifyDomainToGroupRequest) (response *ModifyDomainToGroupResponse, err error) {
+    return c.ModifyDomainToGroupWithContext(context.Background(), request)
+}
+
+// ModifyDomainToGroup
+// 修改域名所属分组
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_NOTREALNAMEDUSER = "FailedOperation.NotRealNamedUser"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_GROUPIDINVALID = "InvalidParameter.GroupIdInvalid"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+func (c *Client) ModifyDomainToGroupWithContext(ctx context.Context, request *ModifyDomainToGroupRequest) (response *ModifyDomainToGroupResponse, err error) {
+    if request == nil {
+        request = NewModifyDomainToGroupRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "ModifyDomainToGroup")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyDomainToGroup require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyDomainToGroupResponse()
     err = c.Send(request, response)
     return
 }
@@ -4702,6 +6878,7 @@ func (c *Client) ModifyDomainUnlockWithContext(ctx context.Context, request *Mod
     if request == nil {
         request = NewModifyDomainUnlockRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "ModifyDomainUnlock")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyDomainUnlock require credential")
@@ -4839,6 +7016,7 @@ func (c *Client) ModifyDynamicDNSWithContext(ctx context.Context, request *Modif
     if request == nil {
         request = NewModifyDynamicDNSRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "ModifyDynamicDNS")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyDynamicDNS require credential")
@@ -4847,6 +7025,136 @@ func (c *Client) ModifyDynamicDNSWithContext(ctx context.Context, request *Modif
     request.SetContext(ctx)
     
     response = NewModifyDynamicDNSResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyLineGroupRequest() (request *ModifyLineGroupRequest) {
+    request = &ModifyLineGroupRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("dnspod", APIVersion, "ModifyLineGroup")
+    
+    
+    return
+}
+
+func NewModifyLineGroupResponse() (response *ModifyLineGroupResponse) {
+    response = &ModifyLineGroupResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyLineGroup
+// 修改域名的线路分组
+//
+// 可能返回的错误码:
+//  AUTHFAILURE = "AuthFailure"
+//  AUTHFAILURE_UNAUTHORIZEDOPERATION = "AuthFailure.UnauthorizedOperation"
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
+//  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER_DEFAULTLINENOTSELFDEFINED = "InvalidParameter.DefaultLineNotSelfdefined"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININEFFECTORINVALIDATED = "InvalidParameter.DomainInEffectOrInvalidated"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_GROUPNAMEEMPTY = "InvalidParameter.GroupNameEmpty"
+//  INVALIDPARAMETER_GROUPNAMEINVALID = "InvalidParameter.GroupNameInvalid"
+//  INVALIDPARAMETER_GROUPNAMEOCCUPIED = "InvalidParameter.GroupNameOccupied"
+//  INVALIDPARAMETER_LINEFORMATINVALID = "InvalidParameter.LineFormatInvalid"
+//  INVALIDPARAMETER_LINEGROUPNOTSUPPORTED = "InvalidParameter.LineGroupNotSupported"
+//  INVALIDPARAMETER_LINEGROUPOVERCOUNTED = "InvalidParameter.LineGroupOverCounted"
+//  INVALIDPARAMETER_LINEGROUPUPDATEFAILED = "InvalidParameter.LineGroupUpdateFailed"
+//  INVALIDPARAMETER_LINEINANOTHERGROUP = "InvalidParameter.LineInAnotherGroup"
+//  INVALIDPARAMETER_LINEINUSE = "InvalidParameter.LineInUse"
+//  INVALIDPARAMETER_LINENOTEXIST = "InvalidParameter.LineNotExist"
+//  INVALIDPARAMETER_LINENOTSELECTED = "InvalidParameter.LineNotSelected"
+//  INVALIDPARAMETER_LINEOVERCOUNTED = "InvalidParameter.LineOverCounted"
+//  INVALIDPARAMETER_LOGINTOKENIDERROR = "InvalidParameter.LoginTokenIdError"
+//  INVALIDPARAMETER_LOGINTOKENNOTEXISTS = "InvalidParameter.LoginTokenNotExists"
+//  INVALIDPARAMETER_LOGINTOKENVALIDATEFAILED = "InvalidParameter.LoginTokenValidateFailed"
+//  INVALIDPARAMETER_NOAUTHORITYTOTHEGROUP = "InvalidParameter.NoAuthorityToTheGroup"
+//  INVALIDPARAMETER_REQUESTIPLIMITED = "InvalidParameter.RequestIpLimited"
+//  INVALIDPARAMETER_USERNOTEXISTS = "InvalidParameter.UserNotExists"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  INVALIDPARAMETERVALUE_USERIDINVALID = "InvalidParameterValue.UserIdInvalid"
+//  LIMITEXCEEDED_FAILEDLOGINLIMITEXCEEDED = "LimitExceeded.FailedLoginLimitExceeded"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  OPERATIONDENIED_NOTAGENT = "OperationDenied.NotAgent"
+//  OPERATIONDENIED_NOTMANAGEDUSER = "OperationDenied.NotManagedUser"
+//  REQUESTLIMITEXCEEDED_REQUESTLIMITEXCEEDED = "RequestLimitExceeded.RequestLimitExceeded"
+//  UNAUTHORIZEDOPERATION = "UnauthorizedOperation"
+//  UNKNOWNPARAMETER = "UnknownParameter"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
+func (c *Client) ModifyLineGroup(request *ModifyLineGroupRequest) (response *ModifyLineGroupResponse, err error) {
+    return c.ModifyLineGroupWithContext(context.Background(), request)
+}
+
+// ModifyLineGroup
+// 修改域名的线路分组
+//
+// 可能返回的错误码:
+//  AUTHFAILURE = "AuthFailure"
+//  AUTHFAILURE_UNAUTHORIZEDOPERATION = "AuthFailure.UnauthorizedOperation"
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
+//  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER_DEFAULTLINENOTSELFDEFINED = "InvalidParameter.DefaultLineNotSelfdefined"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININEFFECTORINVALIDATED = "InvalidParameter.DomainInEffectOrInvalidated"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_GROUPNAMEEMPTY = "InvalidParameter.GroupNameEmpty"
+//  INVALIDPARAMETER_GROUPNAMEINVALID = "InvalidParameter.GroupNameInvalid"
+//  INVALIDPARAMETER_GROUPNAMEOCCUPIED = "InvalidParameter.GroupNameOccupied"
+//  INVALIDPARAMETER_LINEFORMATINVALID = "InvalidParameter.LineFormatInvalid"
+//  INVALIDPARAMETER_LINEGROUPNOTSUPPORTED = "InvalidParameter.LineGroupNotSupported"
+//  INVALIDPARAMETER_LINEGROUPOVERCOUNTED = "InvalidParameter.LineGroupOverCounted"
+//  INVALIDPARAMETER_LINEGROUPUPDATEFAILED = "InvalidParameter.LineGroupUpdateFailed"
+//  INVALIDPARAMETER_LINEINANOTHERGROUP = "InvalidParameter.LineInAnotherGroup"
+//  INVALIDPARAMETER_LINEINUSE = "InvalidParameter.LineInUse"
+//  INVALIDPARAMETER_LINENOTEXIST = "InvalidParameter.LineNotExist"
+//  INVALIDPARAMETER_LINENOTSELECTED = "InvalidParameter.LineNotSelected"
+//  INVALIDPARAMETER_LINEOVERCOUNTED = "InvalidParameter.LineOverCounted"
+//  INVALIDPARAMETER_LOGINTOKENIDERROR = "InvalidParameter.LoginTokenIdError"
+//  INVALIDPARAMETER_LOGINTOKENNOTEXISTS = "InvalidParameter.LoginTokenNotExists"
+//  INVALIDPARAMETER_LOGINTOKENVALIDATEFAILED = "InvalidParameter.LoginTokenValidateFailed"
+//  INVALIDPARAMETER_NOAUTHORITYTOTHEGROUP = "InvalidParameter.NoAuthorityToTheGroup"
+//  INVALIDPARAMETER_REQUESTIPLIMITED = "InvalidParameter.RequestIpLimited"
+//  INVALIDPARAMETER_USERNOTEXISTS = "InvalidParameter.UserNotExists"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  INVALIDPARAMETERVALUE_USERIDINVALID = "InvalidParameterValue.UserIdInvalid"
+//  LIMITEXCEEDED_FAILEDLOGINLIMITEXCEEDED = "LimitExceeded.FailedLoginLimitExceeded"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  OPERATIONDENIED_NOTAGENT = "OperationDenied.NotAgent"
+//  OPERATIONDENIED_NOTMANAGEDUSER = "OperationDenied.NotManagedUser"
+//  REQUESTLIMITEXCEEDED_REQUESTLIMITEXCEEDED = "RequestLimitExceeded.RequestLimitExceeded"
+//  UNAUTHORIZEDOPERATION = "UnauthorizedOperation"
+//  UNKNOWNPARAMETER = "UnknownParameter"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
+func (c *Client) ModifyLineGroupWithContext(ctx context.Context, request *ModifyLineGroupRequest) (response *ModifyLineGroupResponse, err error) {
+    if request == nil {
+        request = NewModifyLineGroupRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "ModifyLineGroup")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyLineGroup require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyLineGroupResponse()
     err = c.Send(request, response)
     return
 }
@@ -5080,6 +7388,7 @@ func (c *Client) ModifyPackageAutoRenewWithContext(ctx context.Context, request 
     if request == nil {
         request = NewModifyPackageAutoRenewRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "ModifyPackageAutoRenew")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyPackageAutoRenew require credential")
@@ -5088,6 +7397,254 @@ func (c *Client) ModifyPackageAutoRenewWithContext(ctx context.Context, request 
     request.SetContext(ctx)
     
     response = NewModifyPackageAutoRenewResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyPackageDomainRequest() (request *ModifyPackageDomainRequest) {
+    request = &ModifyPackageDomainRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("dnspod", APIVersion, "ModifyPackageDomain")
+    
+    
+    return
+}
+
+func NewModifyPackageDomainResponse() (response *ModifyPackageDomainResponse) {
+    response = &ModifyPackageDomainResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyPackageDomain
+// 套餐绑定、解绑、更换域名
+//
+// 可能返回的错误码:
+//  AUTHFAILURE = "AuthFailure"
+//  AUTHFAILURE_UNAUTHORIZEDOPERATION = "AuthFailure.UnauthorizedOperation"
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_ACCOUNTISLOCKED = "FailedOperation.AccountIsLocked"
+//  FAILEDOPERATION_DOMAINISENTERPRISETYPE = "FailedOperation.DomainIsEnterpriseType"
+//  FAILEDOPERATION_DOMAINISLOCKED = "FailedOperation.DomainIsLocked"
+//  FAILEDOPERATION_DOMAINISPERSONALTYPE = "FailedOperation.DomainIsPersonalType"
+//  FAILEDOPERATION_DOMAINISSPAM = "FailedOperation.DomainIsSpam"
+//  FAILEDOPERATION_DOMAINISVIP = "FailedOperation.DomainIsVip"
+//  FAILEDOPERATION_EIPCHECKFAILED = "FailedOperation.EipCheckFailed"
+//  FAILEDOPERATION_FREEFORUMUIDNOTALLOWED = "FailedOperation.FreeForumUidNotAllowed"
+//  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
+//  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_LOGINTIMEOUT = "FailedOperation.LoginTimeout"
+//  FAILEDOPERATION_NOTBATCHTASKOWNER = "FailedOperation.NotBatchTaskOwner"
+//  FAILEDOPERATION_NOTDOMAINOWNER = "FailedOperation.NotDomainOwner"
+//  FAILEDOPERATION_NOTREALNAMEDUSER = "FailedOperation.NotRealNamedUser"
+//  FAILEDOPERATION_NOTRESOURCEOWNER = "FailedOperation.NotResourceOwner"
+//  FAILEDOPERATION_ORDERCANNOTPAY = "FailedOperation.OrderCanNotPay"
+//  FAILEDOPERATION_ORDERHASPAID = "FailedOperation.OrderHasPaid"
+//  FAILEDOPERATION_RESOURCENOTBIND = "FailedOperation.ResourceNotBind"
+//  FAILEDOPERATION_TRANSFERTOPERSONDENIED = "FailedOperation.TransferToPersonDenied"
+//  FAILEDOPERATION_TWOSTEPNOTON = "FailedOperation.TwoStepNotOn"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  FAILEDOPERATION_VERIFYINGBILLEXISTS = "FailedOperation.VerifyingBillExists"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_ACCOUNTISBANNED = "InvalidParameter.AccountIsBanned"
+//  INVALIDPARAMETER_ACTIONINVALID = "InvalidParameter.ActionInvalid"
+//  INVALIDPARAMETER_BILLNUMBERINVALID = "InvalidParameter.BillNumberInvalid"
+//  INVALIDPARAMETER_COMMON = "InvalidParameter.Common"
+//  INVALIDPARAMETER_DTOKENNOTSUPPORT = "InvalidParameter.DTokenNotSupport"
+//  INVALIDPARAMETER_DATAEXPIRED = "InvalidParameter.DataExpired"
+//  INVALIDPARAMETER_DATAINVALID = "InvalidParameter.DataInvalid"
+//  INVALIDPARAMETER_DEALTYPEINVALID = "InvalidParameter.DealTypeInvalid"
+//  INVALIDPARAMETER_DEFAULTLINENOTSELFDEFINED = "InvalidParameter.DefaultLineNotSelfdefined"
+//  INVALIDPARAMETER_DNSDEALDOMAINUPGRADED = "InvalidParameter.DnsDealDomainUpgraded"
+//  INVALIDPARAMETER_DNSDEALLOCKED = "InvalidParameter.DnsDealLocked"
+//  INVALIDPARAMETER_DNSINVALIDDEAL = "InvalidParameter.DnsInvalidDeal"
+//  INVALIDPARAMETER_DOMAINALIASEXISTS = "InvalidParameter.DomainAliasExists"
+//  INVALIDPARAMETER_DOMAINALREADYVIP = "InvalidParameter.DomainAlreadyVip"
+//  INVALIDPARAMETER_DOMAINDUPLICATED = "InvalidParameter.DomainDuplicated"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININEFFECTORINVALIDATED = "InvalidParameter.DomainInEffectOrInvalidated"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_DOMAINNOTEFFECTIVE = "InvalidParameter.DomainNotEffective"
+//  INVALIDPARAMETER_DOMAINNOTREGED = "InvalidParameter.DomainNotReged"
+//  INVALIDPARAMETER_DOMAINNOTVIP = "InvalidParameter.DomainNotVip"
+//  INVALIDPARAMETER_DOMAINTASKNOTFINISHED = "InvalidParameter.DomainTaskNotFinished"
+//  INVALIDPARAMETER_DOMAINTOOLONG = "InvalidParameter.DomainTooLong"
+//  INVALIDPARAMETER_DOMAINTYPEINVALID = "InvalidParameter.DomainTypeInvalid"
+//  INVALIDPARAMETER_EMAILSAME = "InvalidParameter.EmailSame"
+//  INVALIDPARAMETER_GETNSFAIL = "InvalidParameter.GetNsFail"
+//  INVALIDPARAMETER_GOODSCHILDTYPEINVALID = "InvalidParameter.GoodsChildTypeInvalid"
+//  INVALIDPARAMETER_ILLEGALNEWDEAL = "InvalidParameter.IllegalNewDeal"
+//  INVALIDPARAMETER_INVALIDDEALNAME = "InvalidParameter.InvalidDealName"
+//  INVALIDPARAMETER_INVALIDSECRETID = "InvalidParameter.InvalidSecretId"
+//  INVALIDPARAMETER_INVALIDSIGNATURE = "InvalidParameter.InvalidSignature"
+//  INVALIDPARAMETER_INVALIDTIME = "InvalidParameter.InvalidTime"
+//  INVALIDPARAMETER_OPENIDINVALID = "InvalidParameter.OpenidInvalid"
+//  INVALIDPARAMETER_OPERATEFAILED = "InvalidParameter.OperateFailed"
+//  INVALIDPARAMETER_OPERATIONISTOOFREQUENT = "InvalidParameter.OperationIsTooFrequent"
+//  INVALIDPARAMETER_OPTYPENOTSUPPORTED = "InvalidParameter.OptypeNotSupported"
+//  INVALIDPARAMETER_PARAMINVALID = "InvalidParameter.ParamInvalid"
+//  INVALIDPARAMETER_PARAMSILLEGAL = "InvalidParameter.ParamsIllegal"
+//  INVALIDPARAMETER_PARAMSMISSING = "InvalidParameter.ParamsMissing"
+//  INVALIDPARAMETER_REQUESTIPLIMITED = "InvalidParameter.RequestIpLimited"
+//  INVALIDPARAMETER_TIMESTAMPEXPIRED = "InvalidParameter.TimestampExpired"
+//  INVALIDPARAMETER_UPDATENEWGRADEFAILED = "InvalidParameter.UpdateNewGradeFailed"
+//  INVALIDPARAMETER_UPDATEOLDGRADEFAILED = "InvalidParameter.UpdateOldGradeFailed"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  LIMITEXCEEDED_FAILEDLOGINLIMITEXCEEDED = "LimitExceeded.FailedLoginLimitExceeded"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_ACCESSDENIED = "OperationDenied.AccessDenied"
+//  OPERATIONDENIED_AGENTDENIED = "OperationDenied.AgentDenied"
+//  OPERATIONDENIED_AGENTSUBORDINATEDENIED = "OperationDenied.AgentSubordinateDenied"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  OPERATIONDENIED_NOTADMIN = "OperationDenied.NotAdmin"
+//  OPERATIONDENIED_NOTAGENT = "OperationDenied.NotAgent"
+//  OPERATIONDENIED_NOTGRANTEDBYOWNER = "OperationDenied.NotGrantedByOwner"
+//  OPERATIONDENIED_NOTMANAGEDUSER = "OperationDenied.NotManagedUser"
+//  OPERATIONDENIED_NOTORDEROWNER = "OperationDenied.NotOrderOwner"
+//  OPERATIONDENIED_NOTRESOURCEOWNER = "OperationDenied.NotResourceOwner"
+//  OPERATIONDENIED_POSTREQUESTACCEPTONLY = "OperationDenied.PostRequestAcceptOnly"
+//  OPERATIONDENIED_RESOURCEALREADYBIND = "OperationDenied.ResourceAlreadyBind"
+//  REQUESTLIMITEXCEEDED = "RequestLimitExceeded"
+//  REQUESTLIMITEXCEEDED_BATCHTASKLIMIT = "RequestLimitExceeded.BatchTaskLimit"
+//  REQUESTLIMITEXCEEDED_CREATEDOMAINLIMIT = "RequestLimitExceeded.CreateDomainLimit"
+//  REQUESTLIMITEXCEEDED_REQUESTLIMITEXCEEDED = "RequestLimitExceeded.RequestLimitExceeded"
+//  RESOURCEINUSE = "ResourceInUse"
+//  RESOURCEINSUFFICIENT = "ResourceInsufficient"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
+//  RESOURCESSOLDOUT = "ResourcesSoldOut"
+//  UNAUTHORIZEDOPERATION = "UnauthorizedOperation"
+//  UNKNOWNPARAMETER = "UnknownParameter"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
+func (c *Client) ModifyPackageDomain(request *ModifyPackageDomainRequest) (response *ModifyPackageDomainResponse, err error) {
+    return c.ModifyPackageDomainWithContext(context.Background(), request)
+}
+
+// ModifyPackageDomain
+// 套餐绑定、解绑、更换域名
+//
+// 可能返回的错误码:
+//  AUTHFAILURE = "AuthFailure"
+//  AUTHFAILURE_UNAUTHORIZEDOPERATION = "AuthFailure.UnauthorizedOperation"
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_ACCOUNTISLOCKED = "FailedOperation.AccountIsLocked"
+//  FAILEDOPERATION_DOMAINISENTERPRISETYPE = "FailedOperation.DomainIsEnterpriseType"
+//  FAILEDOPERATION_DOMAINISLOCKED = "FailedOperation.DomainIsLocked"
+//  FAILEDOPERATION_DOMAINISPERSONALTYPE = "FailedOperation.DomainIsPersonalType"
+//  FAILEDOPERATION_DOMAINISSPAM = "FailedOperation.DomainIsSpam"
+//  FAILEDOPERATION_DOMAINISVIP = "FailedOperation.DomainIsVip"
+//  FAILEDOPERATION_EIPCHECKFAILED = "FailedOperation.EipCheckFailed"
+//  FAILEDOPERATION_FREEFORUMUIDNOTALLOWED = "FailedOperation.FreeForumUidNotAllowed"
+//  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
+//  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_LOGINTIMEOUT = "FailedOperation.LoginTimeout"
+//  FAILEDOPERATION_NOTBATCHTASKOWNER = "FailedOperation.NotBatchTaskOwner"
+//  FAILEDOPERATION_NOTDOMAINOWNER = "FailedOperation.NotDomainOwner"
+//  FAILEDOPERATION_NOTREALNAMEDUSER = "FailedOperation.NotRealNamedUser"
+//  FAILEDOPERATION_NOTRESOURCEOWNER = "FailedOperation.NotResourceOwner"
+//  FAILEDOPERATION_ORDERCANNOTPAY = "FailedOperation.OrderCanNotPay"
+//  FAILEDOPERATION_ORDERHASPAID = "FailedOperation.OrderHasPaid"
+//  FAILEDOPERATION_RESOURCENOTBIND = "FailedOperation.ResourceNotBind"
+//  FAILEDOPERATION_TRANSFERTOPERSONDENIED = "FailedOperation.TransferToPersonDenied"
+//  FAILEDOPERATION_TWOSTEPNOTON = "FailedOperation.TwoStepNotOn"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  FAILEDOPERATION_VERIFYINGBILLEXISTS = "FailedOperation.VerifyingBillExists"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_ACCOUNTISBANNED = "InvalidParameter.AccountIsBanned"
+//  INVALIDPARAMETER_ACTIONINVALID = "InvalidParameter.ActionInvalid"
+//  INVALIDPARAMETER_BILLNUMBERINVALID = "InvalidParameter.BillNumberInvalid"
+//  INVALIDPARAMETER_COMMON = "InvalidParameter.Common"
+//  INVALIDPARAMETER_DTOKENNOTSUPPORT = "InvalidParameter.DTokenNotSupport"
+//  INVALIDPARAMETER_DATAEXPIRED = "InvalidParameter.DataExpired"
+//  INVALIDPARAMETER_DATAINVALID = "InvalidParameter.DataInvalid"
+//  INVALIDPARAMETER_DEALTYPEINVALID = "InvalidParameter.DealTypeInvalid"
+//  INVALIDPARAMETER_DEFAULTLINENOTSELFDEFINED = "InvalidParameter.DefaultLineNotSelfdefined"
+//  INVALIDPARAMETER_DNSDEALDOMAINUPGRADED = "InvalidParameter.DnsDealDomainUpgraded"
+//  INVALIDPARAMETER_DNSDEALLOCKED = "InvalidParameter.DnsDealLocked"
+//  INVALIDPARAMETER_DNSINVALIDDEAL = "InvalidParameter.DnsInvalidDeal"
+//  INVALIDPARAMETER_DOMAINALIASEXISTS = "InvalidParameter.DomainAliasExists"
+//  INVALIDPARAMETER_DOMAINALREADYVIP = "InvalidParameter.DomainAlreadyVip"
+//  INVALIDPARAMETER_DOMAINDUPLICATED = "InvalidParameter.DomainDuplicated"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININEFFECTORINVALIDATED = "InvalidParameter.DomainInEffectOrInvalidated"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_DOMAINNOTEFFECTIVE = "InvalidParameter.DomainNotEffective"
+//  INVALIDPARAMETER_DOMAINNOTREGED = "InvalidParameter.DomainNotReged"
+//  INVALIDPARAMETER_DOMAINNOTVIP = "InvalidParameter.DomainNotVip"
+//  INVALIDPARAMETER_DOMAINTASKNOTFINISHED = "InvalidParameter.DomainTaskNotFinished"
+//  INVALIDPARAMETER_DOMAINTOOLONG = "InvalidParameter.DomainTooLong"
+//  INVALIDPARAMETER_DOMAINTYPEINVALID = "InvalidParameter.DomainTypeInvalid"
+//  INVALIDPARAMETER_EMAILSAME = "InvalidParameter.EmailSame"
+//  INVALIDPARAMETER_GETNSFAIL = "InvalidParameter.GetNsFail"
+//  INVALIDPARAMETER_GOODSCHILDTYPEINVALID = "InvalidParameter.GoodsChildTypeInvalid"
+//  INVALIDPARAMETER_ILLEGALNEWDEAL = "InvalidParameter.IllegalNewDeal"
+//  INVALIDPARAMETER_INVALIDDEALNAME = "InvalidParameter.InvalidDealName"
+//  INVALIDPARAMETER_INVALIDSECRETID = "InvalidParameter.InvalidSecretId"
+//  INVALIDPARAMETER_INVALIDSIGNATURE = "InvalidParameter.InvalidSignature"
+//  INVALIDPARAMETER_INVALIDTIME = "InvalidParameter.InvalidTime"
+//  INVALIDPARAMETER_OPENIDINVALID = "InvalidParameter.OpenidInvalid"
+//  INVALIDPARAMETER_OPERATEFAILED = "InvalidParameter.OperateFailed"
+//  INVALIDPARAMETER_OPERATIONISTOOFREQUENT = "InvalidParameter.OperationIsTooFrequent"
+//  INVALIDPARAMETER_OPTYPENOTSUPPORTED = "InvalidParameter.OptypeNotSupported"
+//  INVALIDPARAMETER_PARAMINVALID = "InvalidParameter.ParamInvalid"
+//  INVALIDPARAMETER_PARAMSILLEGAL = "InvalidParameter.ParamsIllegal"
+//  INVALIDPARAMETER_PARAMSMISSING = "InvalidParameter.ParamsMissing"
+//  INVALIDPARAMETER_REQUESTIPLIMITED = "InvalidParameter.RequestIpLimited"
+//  INVALIDPARAMETER_TIMESTAMPEXPIRED = "InvalidParameter.TimestampExpired"
+//  INVALIDPARAMETER_UPDATENEWGRADEFAILED = "InvalidParameter.UpdateNewGradeFailed"
+//  INVALIDPARAMETER_UPDATEOLDGRADEFAILED = "InvalidParameter.UpdateOldGradeFailed"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  LIMITEXCEEDED_FAILEDLOGINLIMITEXCEEDED = "LimitExceeded.FailedLoginLimitExceeded"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_ACCESSDENIED = "OperationDenied.AccessDenied"
+//  OPERATIONDENIED_AGENTDENIED = "OperationDenied.AgentDenied"
+//  OPERATIONDENIED_AGENTSUBORDINATEDENIED = "OperationDenied.AgentSubordinateDenied"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  OPERATIONDENIED_NOTADMIN = "OperationDenied.NotAdmin"
+//  OPERATIONDENIED_NOTAGENT = "OperationDenied.NotAgent"
+//  OPERATIONDENIED_NOTGRANTEDBYOWNER = "OperationDenied.NotGrantedByOwner"
+//  OPERATIONDENIED_NOTMANAGEDUSER = "OperationDenied.NotManagedUser"
+//  OPERATIONDENIED_NOTORDEROWNER = "OperationDenied.NotOrderOwner"
+//  OPERATIONDENIED_NOTRESOURCEOWNER = "OperationDenied.NotResourceOwner"
+//  OPERATIONDENIED_POSTREQUESTACCEPTONLY = "OperationDenied.PostRequestAcceptOnly"
+//  OPERATIONDENIED_RESOURCEALREADYBIND = "OperationDenied.ResourceAlreadyBind"
+//  REQUESTLIMITEXCEEDED = "RequestLimitExceeded"
+//  REQUESTLIMITEXCEEDED_BATCHTASKLIMIT = "RequestLimitExceeded.BatchTaskLimit"
+//  REQUESTLIMITEXCEEDED_CREATEDOMAINLIMIT = "RequestLimitExceeded.CreateDomainLimit"
+//  REQUESTLIMITEXCEEDED_REQUESTLIMITEXCEEDED = "RequestLimitExceeded.RequestLimitExceeded"
+//  RESOURCEINUSE = "ResourceInUse"
+//  RESOURCEINSUFFICIENT = "ResourceInsufficient"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
+//  RESOURCESSOLDOUT = "ResourcesSoldOut"
+//  UNAUTHORIZEDOPERATION = "UnauthorizedOperation"
+//  UNKNOWNPARAMETER = "UnknownParameter"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
+func (c *Client) ModifyPackageDomainWithContext(ctx context.Context, request *ModifyPackageDomainRequest) (response *ModifyPackageDomainResponse, err error) {
+    if request == nil {
+        request = NewModifyPackageDomainRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "ModifyPackageDomain")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyPackageDomain require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyPackageDomainResponse()
     err = c.Send(request, response)
     return
 }
@@ -5116,11 +7673,14 @@ func NewModifyRecordResponse() (response *ModifyRecordResponse) {
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_DNSSECINCOMPLETECLOSED = "FailedOperation.DNSSECIncompleteClosed"
 //  FAILEDOPERATION_DOMAINISLOCKED = "FailedOperation.DomainIsLocked"
 //  FAILEDOPERATION_DOMAINISSPAM = "FailedOperation.DomainIsSpam"
 //  FAILEDOPERATION_FREQUENCYLIMIT = "FailedOperation.FrequencyLimit"
 //  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
 //  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_MUSTADDDEFAULTLINEFIRST = "FailedOperation.MustAddDefaultLineFirst"
+//  FAILEDOPERATION_TENCENTCLOUDFORBID = "FailedOperation.TencentCloudForbid"
 //  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
 //  INVALIDPARAMETER_ACCOUNTISBANNED = "InvalidParameter.AccountIsBanned"
 //  INVALIDPARAMETER_CUSTOMMESSAGE = "InvalidParameter.CustomMessage"
@@ -5178,11 +7738,14 @@ func (c *Client) ModifyRecord(request *ModifyRecordRequest) (response *ModifyRec
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_DNSSECINCOMPLETECLOSED = "FailedOperation.DNSSECIncompleteClosed"
 //  FAILEDOPERATION_DOMAINISLOCKED = "FailedOperation.DomainIsLocked"
 //  FAILEDOPERATION_DOMAINISSPAM = "FailedOperation.DomainIsSpam"
 //  FAILEDOPERATION_FREQUENCYLIMIT = "FailedOperation.FrequencyLimit"
 //  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
 //  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_MUSTADDDEFAULTLINEFIRST = "FailedOperation.MustAddDefaultLineFirst"
+//  FAILEDOPERATION_TENCENTCLOUDFORBID = "FailedOperation.TencentCloudForbid"
 //  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
 //  INVALIDPARAMETER_ACCOUNTISBANNED = "InvalidParameter.AccountIsBanned"
 //  INVALIDPARAMETER_CUSTOMMESSAGE = "InvalidParameter.CustomMessage"
@@ -5235,6 +7798,7 @@ func (c *Client) ModifyRecordWithContext(ctx context.Context, request *ModifyRec
     if request == nil {
         request = NewModifyRecordRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "ModifyRecord")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyRecord require credential")
@@ -5332,6 +7896,7 @@ func (c *Client) ModifyRecordBatchWithContext(ctx context.Context, request *Modi
     if request == nil {
         request = NewModifyRecordBatchRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "ModifyRecordBatch")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyRecordBatch require credential")
@@ -5340,6 +7905,62 @@ func (c *Client) ModifyRecordBatchWithContext(ctx context.Context, request *Modi
     request.SetContext(ctx)
     
     response = NewModifyRecordBatchResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyRecordBatchV3Request() (request *ModifyRecordBatchV3Request) {
+    request = &ModifyRecordBatchV3Request{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("dnspod", APIVersion, "ModifyRecordBatchV3")
+    
+    
+    return
+}
+
+func NewModifyRecordBatchV3Response() (response *ModifyRecordBatchV3Response) {
+    response = &ModifyRecordBatchV3Response{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyRecordBatchV3
+// 批量修改记录
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER_BATCHTASKCOUNTLIMIT = "InvalidParameter.BatchTaskCountLimit"
+//  INVALIDPARAMETER_JOBGREATERTHANLIMIT = "InvalidParameter.JobGreaterThanLimit"
+//  INVALIDPARAMETER_PARAMSILLEGAL = "InvalidParameter.ParamsIllegal"
+//  REQUESTLIMITEXCEEDED_BATCHTASKLIMIT = "RequestLimitExceeded.BatchTaskLimit"
+func (c *Client) ModifyRecordBatchV3(request *ModifyRecordBatchV3Request) (response *ModifyRecordBatchV3Response, err error) {
+    return c.ModifyRecordBatchV3WithContext(context.Background(), request)
+}
+
+// ModifyRecordBatchV3
+// 批量修改记录
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER_BATCHTASKCOUNTLIMIT = "InvalidParameter.BatchTaskCountLimit"
+//  INVALIDPARAMETER_JOBGREATERTHANLIMIT = "InvalidParameter.JobGreaterThanLimit"
+//  INVALIDPARAMETER_PARAMSILLEGAL = "InvalidParameter.ParamsIllegal"
+//  REQUESTLIMITEXCEEDED_BATCHTASKLIMIT = "RequestLimitExceeded.BatchTaskLimit"
+func (c *Client) ModifyRecordBatchV3WithContext(ctx context.Context, request *ModifyRecordBatchV3Request) (response *ModifyRecordBatchV3Response, err error) {
+    if request == nil {
+        request = NewModifyRecordBatchV3Request()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "ModifyRecordBatchV3")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyRecordBatchV3 require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyRecordBatchV3Response()
     err = c.Send(request, response)
     return
 }
@@ -5485,6 +8106,7 @@ func (c *Client) ModifyRecordFieldsWithContext(ctx context.Context, request *Mod
     if request == nil {
         request = NewModifyRecordFieldsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "ModifyRecordFields")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyRecordFields require credential")
@@ -5550,6 +8172,7 @@ func (c *Client) ModifyRecordGroupWithContext(ctx context.Context, request *Modi
     if request == nil {
         request = NewModifyRecordGroupRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "ModifyRecordGroup")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyRecordGroup require credential")
@@ -5649,6 +8272,7 @@ func (c *Client) ModifyRecordRemarkWithContext(ctx context.Context, request *Mod
     if request == nil {
         request = NewModifyRecordRemarkRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "ModifyRecordRemark")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyRecordRemark require credential")
@@ -5690,6 +8314,7 @@ func NewModifyRecordStatusResponse() (response *ModifyRecordStatusResponse) {
 //  FAILEDOPERATION_FREQUENCYLIMIT = "FailedOperation.FrequencyLimit"
 //  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
 //  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_MUSTADDDEFAULTLINEFIRST = "FailedOperation.MustAddDefaultLineFirst"
 //  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
 //  INVALIDPARAMETER_CUSTOMMESSAGE = "InvalidParameter.CustomMessage"
 //  INVALIDPARAMETER_DNSSECADDCNAMEERROR = "InvalidParameter.DnssecAddCnameError"
@@ -5744,6 +8369,7 @@ func (c *Client) ModifyRecordStatus(request *ModifyRecordStatusRequest) (respons
 //  FAILEDOPERATION_FREQUENCYLIMIT = "FailedOperation.FrequencyLimit"
 //  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
 //  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_MUSTADDDEFAULTLINEFIRST = "FailedOperation.MustAddDefaultLineFirst"
 //  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
 //  INVALIDPARAMETER_CUSTOMMESSAGE = "InvalidParameter.CustomMessage"
 //  INVALIDPARAMETER_DNSSECADDCNAMEERROR = "InvalidParameter.DnssecAddCnameError"
@@ -5788,6 +8414,7 @@ func (c *Client) ModifyRecordStatusWithContext(ctx context.Context, request *Mod
     if request == nil {
         request = NewModifyRecordStatusRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "ModifyRecordStatus")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyRecordStatus require credential")
@@ -5853,6 +8480,7 @@ func (c *Client) ModifyRecordToGroupWithContext(ctx context.Context, request *Mo
     if request == nil {
         request = NewModifyRecordToGroupRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "ModifyRecordToGroup")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyRecordToGroup require credential")
@@ -5920,6 +8548,7 @@ func (c *Client) ModifySnapshotConfigWithContext(ctx context.Context, request *M
     if request == nil {
         request = NewModifySnapshotConfigRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "ModifySnapshotConfig")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifySnapshotConfig require credential")
@@ -6057,6 +8686,7 @@ func (c *Client) ModifySubdomainStatusWithContext(ctx context.Context, request *
     if request == nil {
         request = NewModifySubdomainStatusRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "ModifySubdomainStatus")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifySubdomainStatus require credential")
@@ -6065,6 +8695,166 @@ func (c *Client) ModifySubdomainStatusWithContext(ctx context.Context, request *
     request.SetContext(ctx)
     
     response = NewModifySubdomainStatusResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyTXTRecordRequest() (request *ModifyTXTRecordRequest) {
+    request = &ModifyTXTRecordRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("dnspod", APIVersion, "ModifyTXTRecord")
+    
+    
+    return
+}
+
+func NewModifyTXTRecordResponse() (response *ModifyTXTRecordResponse) {
+    response = &ModifyTXTRecordResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyTXTRecord
+// 修改TXT记录
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_DNSSECINCOMPLETECLOSED = "FailedOperation.DNSSECIncompleteClosed"
+//  FAILEDOPERATION_DOMAINISLOCKED = "FailedOperation.DomainIsLocked"
+//  FAILEDOPERATION_DOMAINISSPAM = "FailedOperation.DomainIsSpam"
+//  FAILEDOPERATION_FREQUENCYLIMIT = "FailedOperation.FrequencyLimit"
+//  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
+//  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_MUSTADDDEFAULTLINEFIRST = "FailedOperation.MustAddDefaultLineFirst"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INVALIDPARAMETER_ACCOUNTISBANNED = "InvalidParameter.AccountIsBanned"
+//  INVALIDPARAMETER_CUSTOMMESSAGE = "InvalidParameter.CustomMessage"
+//  INVALIDPARAMETER_DNSSECADDCNAMEERROR = "InvalidParameter.DnssecAddCnameError"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_DOMAINNOTALLOWEDMODIFYRECORDS = "InvalidParameter.DomainNotAllowedModifyRecords"
+//  INVALIDPARAMETER_DOMAINNOTBEIAN = "InvalidParameter.DomainNotBeian"
+//  INVALIDPARAMETER_DOMAINRECORDEXIST = "InvalidParameter.DomainRecordExist"
+//  INVALIDPARAMETER_EMAILNOTVERIFIED = "InvalidParameter.EmailNotVerified"
+//  INVALIDPARAMETER_INVALIDWEIGHT = "InvalidParameter.InvalidWeight"
+//  INVALIDPARAMETER_LOGINTOKENIDERROR = "InvalidParameter.LoginTokenIdError"
+//  INVALIDPARAMETER_LOGINTOKENNOTEXISTS = "InvalidParameter.LoginTokenNotExists"
+//  INVALIDPARAMETER_LOGINTOKENVALIDATEFAILED = "InvalidParameter.LoginTokenValidateFailed"
+//  INVALIDPARAMETER_MOBILENOTVERIFIED = "InvalidParameter.MobileNotVerified"
+//  INVALIDPARAMETER_MXINVALID = "InvalidParameter.MxInvalid"
+//  INVALIDPARAMETER_OPERATEFAILED = "InvalidParameter.OperateFailed"
+//  INVALIDPARAMETER_RECORDIDINVALID = "InvalidParameter.RecordIdInvalid"
+//  INVALIDPARAMETER_RECORDLINEINVALID = "InvalidParameter.RecordLineInvalid"
+//  INVALIDPARAMETER_RECORDTYPEINVALID = "InvalidParameter.RecordTypeInvalid"
+//  INVALIDPARAMETER_RECORDVALUEINVALID = "InvalidParameter.RecordValueInvalid"
+//  INVALIDPARAMETER_RECORDVALUELENGTHINVALID = "InvalidParameter.RecordValueLengthInvalid"
+//  INVALIDPARAMETER_REQUESTIPLIMITED = "InvalidParameter.RequestIpLimited"
+//  INVALIDPARAMETER_SUBDOMAININVALID = "InvalidParameter.SubdomainInvalid"
+//  INVALIDPARAMETER_UNREALNAMEUSER = "InvalidParameter.UnrealNameUser"
+//  INVALIDPARAMETER_URLVALUEILLEGAL = "InvalidParameter.UrlValueIllegal"
+//  INVALIDPARAMETER_USERNOTEXISTS = "InvalidParameter.UserNotExists"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  INVALIDPARAMETERVALUE_USERIDINVALID = "InvalidParameterValue.UserIdInvalid"
+//  LIMITEXCEEDED_AAAACOUNTLIMIT = "LimitExceeded.AAAACountLimit"
+//  LIMITEXCEEDED_ATNSRECORDLIMIT = "LimitExceeded.AtNsRecordLimit"
+//  LIMITEXCEEDED_FAILEDLOGINLIMITEXCEEDED = "LimitExceeded.FailedLoginLimitExceeded"
+//  LIMITEXCEEDED_HIDDENURLEXCEEDED = "LimitExceeded.HiddenUrlExceeded"
+//  LIMITEXCEEDED_NSCOUNTLIMIT = "LimitExceeded.NsCountLimit"
+//  LIMITEXCEEDED_RECORDTTLLIMIT = "LimitExceeded.RecordTtlLimit"
+//  LIMITEXCEEDED_SRVCOUNTLIMIT = "LimitExceeded.SrvCountLimit"
+//  LIMITEXCEEDED_SUBDOMAINLEVELLIMIT = "LimitExceeded.SubdomainLevelLimit"
+//  LIMITEXCEEDED_SUBDOMAINROLLLIMIT = "LimitExceeded.SubdomainRollLimit"
+//  LIMITEXCEEDED_SUBDOMAINWCARDLIMIT = "LimitExceeded.SubdomainWcardLimit"
+//  LIMITEXCEEDED_URLCOUNTLIMIT = "LimitExceeded.UrlCountLimit"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_IPINBLACKLISTNOTALLOWED = "OperationDenied.IPInBlacklistNotAllowed"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  OPERATIONDENIED_NOTADMIN = "OperationDenied.NotAdmin"
+//  OPERATIONDENIED_NOTAGENT = "OperationDenied.NotAgent"
+//  OPERATIONDENIED_NOTMANAGEDUSER = "OperationDenied.NotManagedUser"
+//  REQUESTLIMITEXCEEDED_REQUESTLIMITEXCEEDED = "RequestLimitExceeded.RequestLimitExceeded"
+func (c *Client) ModifyTXTRecord(request *ModifyTXTRecordRequest) (response *ModifyTXTRecordResponse, err error) {
+    return c.ModifyTXTRecordWithContext(context.Background(), request)
+}
+
+// ModifyTXTRecord
+// 修改TXT记录
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_DNSSECINCOMPLETECLOSED = "FailedOperation.DNSSECIncompleteClosed"
+//  FAILEDOPERATION_DOMAINISLOCKED = "FailedOperation.DomainIsLocked"
+//  FAILEDOPERATION_DOMAINISSPAM = "FailedOperation.DomainIsSpam"
+//  FAILEDOPERATION_FREQUENCYLIMIT = "FailedOperation.FrequencyLimit"
+//  FAILEDOPERATION_LOGINAREANOTALLOWED = "FailedOperation.LoginAreaNotAllowed"
+//  FAILEDOPERATION_LOGINFAILED = "FailedOperation.LoginFailed"
+//  FAILEDOPERATION_MUSTADDDEFAULTLINEFIRST = "FailedOperation.MustAddDefaultLineFirst"
+//  FAILEDOPERATION_UNKNOWERROR = "FailedOperation.UnknowError"
+//  INVALIDPARAMETER_ACCOUNTISBANNED = "InvalidParameter.AccountIsBanned"
+//  INVALIDPARAMETER_CUSTOMMESSAGE = "InvalidParameter.CustomMessage"
+//  INVALIDPARAMETER_DNSSECADDCNAMEERROR = "InvalidParameter.DnssecAddCnameError"
+//  INVALIDPARAMETER_DOMAINIDINVALID = "InvalidParameter.DomainIdInvalid"
+//  INVALIDPARAMETER_DOMAININVALID = "InvalidParameter.DomainInvalid"
+//  INVALIDPARAMETER_DOMAINISALIASER = "InvalidParameter.DomainIsAliaser"
+//  INVALIDPARAMETER_DOMAINNOTALLOWEDMODIFYRECORDS = "InvalidParameter.DomainNotAllowedModifyRecords"
+//  INVALIDPARAMETER_DOMAINNOTBEIAN = "InvalidParameter.DomainNotBeian"
+//  INVALIDPARAMETER_DOMAINRECORDEXIST = "InvalidParameter.DomainRecordExist"
+//  INVALIDPARAMETER_EMAILNOTVERIFIED = "InvalidParameter.EmailNotVerified"
+//  INVALIDPARAMETER_INVALIDWEIGHT = "InvalidParameter.InvalidWeight"
+//  INVALIDPARAMETER_LOGINTOKENIDERROR = "InvalidParameter.LoginTokenIdError"
+//  INVALIDPARAMETER_LOGINTOKENNOTEXISTS = "InvalidParameter.LoginTokenNotExists"
+//  INVALIDPARAMETER_LOGINTOKENVALIDATEFAILED = "InvalidParameter.LoginTokenValidateFailed"
+//  INVALIDPARAMETER_MOBILENOTVERIFIED = "InvalidParameter.MobileNotVerified"
+//  INVALIDPARAMETER_MXINVALID = "InvalidParameter.MxInvalid"
+//  INVALIDPARAMETER_OPERATEFAILED = "InvalidParameter.OperateFailed"
+//  INVALIDPARAMETER_RECORDIDINVALID = "InvalidParameter.RecordIdInvalid"
+//  INVALIDPARAMETER_RECORDLINEINVALID = "InvalidParameter.RecordLineInvalid"
+//  INVALIDPARAMETER_RECORDTYPEINVALID = "InvalidParameter.RecordTypeInvalid"
+//  INVALIDPARAMETER_RECORDVALUEINVALID = "InvalidParameter.RecordValueInvalid"
+//  INVALIDPARAMETER_RECORDVALUELENGTHINVALID = "InvalidParameter.RecordValueLengthInvalid"
+//  INVALIDPARAMETER_REQUESTIPLIMITED = "InvalidParameter.RequestIpLimited"
+//  INVALIDPARAMETER_SUBDOMAININVALID = "InvalidParameter.SubdomainInvalid"
+//  INVALIDPARAMETER_UNREALNAMEUSER = "InvalidParameter.UnrealNameUser"
+//  INVALIDPARAMETER_URLVALUEILLEGAL = "InvalidParameter.UrlValueIllegal"
+//  INVALIDPARAMETER_USERNOTEXISTS = "InvalidParameter.UserNotExists"
+//  INVALIDPARAMETERVALUE_DOMAINNOTEXISTS = "InvalidParameterValue.DomainNotExists"
+//  INVALIDPARAMETERVALUE_USERIDINVALID = "InvalidParameterValue.UserIdInvalid"
+//  LIMITEXCEEDED_AAAACOUNTLIMIT = "LimitExceeded.AAAACountLimit"
+//  LIMITEXCEEDED_ATNSRECORDLIMIT = "LimitExceeded.AtNsRecordLimit"
+//  LIMITEXCEEDED_FAILEDLOGINLIMITEXCEEDED = "LimitExceeded.FailedLoginLimitExceeded"
+//  LIMITEXCEEDED_HIDDENURLEXCEEDED = "LimitExceeded.HiddenUrlExceeded"
+//  LIMITEXCEEDED_NSCOUNTLIMIT = "LimitExceeded.NsCountLimit"
+//  LIMITEXCEEDED_RECORDTTLLIMIT = "LimitExceeded.RecordTtlLimit"
+//  LIMITEXCEEDED_SRVCOUNTLIMIT = "LimitExceeded.SrvCountLimit"
+//  LIMITEXCEEDED_SUBDOMAINLEVELLIMIT = "LimitExceeded.SubdomainLevelLimit"
+//  LIMITEXCEEDED_SUBDOMAINROLLLIMIT = "LimitExceeded.SubdomainRollLimit"
+//  LIMITEXCEEDED_SUBDOMAINWCARDLIMIT = "LimitExceeded.SubdomainWcardLimit"
+//  LIMITEXCEEDED_URLCOUNTLIMIT = "LimitExceeded.UrlCountLimit"
+//  OPERATIONDENIED_DOMAINOWNERALLOWEDONLY = "OperationDenied.DomainOwnerAllowedOnly"
+//  OPERATIONDENIED_IPINBLACKLISTNOTALLOWED = "OperationDenied.IPInBlacklistNotAllowed"
+//  OPERATIONDENIED_NOPERMISSIONTOOPERATEDOMAIN = "OperationDenied.NoPermissionToOperateDomain"
+//  OPERATIONDENIED_NOTADMIN = "OperationDenied.NotAdmin"
+//  OPERATIONDENIED_NOTAGENT = "OperationDenied.NotAgent"
+//  OPERATIONDENIED_NOTMANAGEDUSER = "OperationDenied.NotManagedUser"
+//  REQUESTLIMITEXCEEDED_REQUESTLIMITEXCEEDED = "RequestLimitExceeded.RequestLimitExceeded"
+func (c *Client) ModifyTXTRecordWithContext(ctx context.Context, request *ModifyTXTRecordRequest) (response *ModifyTXTRecordResponse, err error) {
+    if request == nil {
+        request = NewModifyTXTRecordRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "ModifyTXTRecord")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyTXTRecord require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyTXTRecordResponse()
     err = c.Send(request, response)
     return
 }
@@ -6300,6 +9090,7 @@ func (c *Client) ModifyVasAutoRenewStatusWithContext(ctx context.Context, reques
     if request == nil {
         request = NewModifyVasAutoRenewStatusRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "ModifyVasAutoRenewStatus")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyVasAutoRenewStatus require credential")
@@ -6537,6 +9328,7 @@ func (c *Client) PayOrderWithBalanceWithContext(ctx context.Context, request *Pa
     if request == nil {
         request = NewPayOrderWithBalanceRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "PayOrderWithBalance")
     
     if c.GetCredential() == nil {
         return nil, errors.New("PayOrderWithBalance require credential")
@@ -6598,6 +9390,7 @@ func (c *Client) RollbackRecordSnapshotWithContext(ctx context.Context, request 
     if request == nil {
         request = NewRollbackRecordSnapshotRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "RollbackRecordSnapshot")
     
     if c.GetCredential() == nil {
         return nil, errors.New("RollbackRecordSnapshot require credential")
@@ -6661,6 +9454,7 @@ func (c *Client) RollbackSnapshotWithContext(ctx context.Context, request *Rollb
     if request == nil {
         request = NewRollbackSnapshotRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "dnspod", APIVersion, "RollbackSnapshot")
     
     if c.GetCredential() == nil {
         return nil, errors.New("RollbackSnapshot require credential")

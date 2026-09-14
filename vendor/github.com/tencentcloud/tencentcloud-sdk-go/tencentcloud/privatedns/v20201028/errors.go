@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+// Copyright (c) 2017-2025 Tencent. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,12 @@ const (
 	// 记录创建失败。
 	FAILEDOPERATION_CREATERECORDFAILED = "FailedOperation.CreateRecordFailed"
 
+	// 创建终端节点异常。
+	FAILEDOPERATION_CREATEVPCENDPOINTERROR = "FailedOperation.CreateVpcEndPointError"
+
+	// 创建终端节点失败。
+	FAILEDOPERATION_CREATEVPCENDPOINTFAILED = "FailedOperation.CreateVpcEndPointFailed"
+
 	// 私有域创建失败。
 	FAILEDOPERATION_CREATEZONEFAILED = "FailedOperation.CreateZoneFailed"
 
@@ -52,6 +58,12 @@ const (
 
 	// 解析域删除失败。
 	FAILEDOPERATION_DELETEZONEFAILED = "FailedOperation.DeleteZoneFailed"
+
+	// 获取临时凭证失败
+	FAILEDOPERATION_GETTMPCREDFAILED = "FailedOperation.GetTmpCredFailed"
+
+	// 您的账号在同一区域内创建终端节点数量已达上限。
+	FAILEDOPERATION_INBOUNDOVERLIMIT = "FailedOperation.InboundOverLimit"
 
 	// 记录修改失败。
 	FAILEDOPERATION_MODIFYRECORDFAILED = "FailedOperation.ModifyRecordFailed"
@@ -79,6 +91,15 @@ const (
 
 	// 终端节点不存在。
 	INVALIDPARAMETER_ENDPOINTNOTEXISTS = "InvalidParameter.EndPointNotExists"
+
+	// 终端节点服务不存在。
+	INVALIDPARAMETER_ENDPOINTSERVICENOTEXIST = "InvalidParameter.EndPointServiceNotExist"
+
+	// 转发规则不存在。
+	INVALIDPARAMETER_FORWARDRULENOTEXIST = "InvalidParameter.ForwardRuleNotExist"
+
+	// 私有域已经绑定过转发规则。
+	INVALIDPARAMETER_FORWARDRULEZONEREPEATBIND = "InvalidParameter.ForwardRuleZoneRepeatBind"
 
 	// 非法CIDR。
 	INVALIDPARAMETER_ILLEGALCIDR = "InvalidParameter.IllegalCidr"
@@ -134,8 +155,8 @@ const (
 	// 记录不存在。
 	INVALIDPARAMETER_RECORDNOTEXIST = "InvalidParameter.RecordNotExist"
 
-	// 记录负载均衡数量超过限制。
-	INVALIDPARAMETER_RECORDROLLLIMITCOUNTEXCEED = "InvalidParameter.RecordRolllimitCountExceed"
+	// 记录负载均衡数量超过限制
+	INVALIDPARAMETER_RECORDROLLLIMITCOUNTEXCEED = "InvalidParameter.RecordRollLimitCountExceed"
 
 	// TXT记录负载均衡数量超过10。
 	INVALIDPARAMETER_RECORDTXTCOUNTEXCEED = "InvalidParameter.RecordTXTCountExceed"
@@ -166,6 +187,9 @@ const (
 
 	// 内部保留域名，不支持创建。
 	INVALIDPARAMETERVALUE_RESERVEDDOMAIN = "InvalidParameterValue.ReservedDomain"
+
+	// uin没有录入白名单，无权限访问
+	INVALIDPARAMETERVALUE_UINNOTINWHITELIST = "InvalidParameterValue.UinNotInWhiteList"
 
 	// 超过配额限制。
 	LIMITEXCEEDED = "LimitExceeded"
@@ -205,6 +229,9 @@ const (
 
 	// 资源不可用。
 	RESOURCEUNAVAILABLE = "ResourceUnavailable"
+
+	// 未添加平台账号到当前终端节点服务的白名单内。
+	RESOURCEUNAVAILABLE_SERVICEWHITELISTNOTADDED = "ResourceUnavailable.ServiceWhiteListNotAdded"
 
 	// TLD增值包已过期。
 	RESOURCEUNAVAILABLE_TLDPACKAGEEXPIRED = "ResourceUnavailable.TldPackageExpired"

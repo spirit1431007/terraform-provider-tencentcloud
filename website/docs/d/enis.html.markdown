@@ -39,6 +39,7 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `enis` - An information list of ENIs. Each element contains the following attributes:
+  * `cdc_id` - CDC instance ID.
   * `create_time` - Creation time of the ENI.
   * `description` - Description of the ENI.
   * `id` - ID of the ENI.
@@ -47,6 +48,12 @@ In addition to all arguments above, the following attributes are exported:
     * `description` - Description of the IP.
     * `ip` - Intranet IP.
     * `primary` - Indicates whether the IP is primary.
+  * `ipv6s` - A set of intranet IPv6s.
+    * `address_id` - The `ID` of the `EIP` instance, such as `eip-hxlqja90`.
+    * `address` - `IPv6` address, such as `3402:4e00:20:100:0:8cd9:2a67:71f3`.
+    * `description` - Message description.
+    * `is_wan_ip_blocked` - Whether the public IP is blocked.
+    * `primary` - Whether it is a primary `IP`.
   * `mac` - MAC address.
   * `name` - Name of the ENI.
   * `primary` - Indicates whether the IP is primary.

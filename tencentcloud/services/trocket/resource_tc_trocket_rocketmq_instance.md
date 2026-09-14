@@ -1,6 +1,4 @@
-Provides a resource to create a rocketmq 5.x instance
-
-~> **NOTE:** It only supports create postpaid rocketmq 5.x instance.
+Provides a resource to create a Trocket rocketmq instance
 
 Example Usage
 
@@ -65,6 +63,56 @@ resource "tencentcloud_trocket_rocketmq_instance" "example" {
   subnet_id     = tencentcloud_subnet.subnet.id
   enable_public = true
   bandwidth     = 10
+  ip_rules {
+    ip     = "1.1.1.1"
+    allow  = true
+    remark = "remark message."
+  }
+
+  ip_rules {
+    ip     = "2.2.2.2"
+    allow  = false
+    remark = "remark message."
+  }
+
+  tags = {
+    tag_key   = "rocketmq"
+    tag_value = "5.x"
+  }
+}
+```
+
+Create Instance with Billing and Deployment Params
+
+```hcl
+# create vpc
+resource "tencentcloud_vpc" "vpc" {
+  name       = "vpc"
+  cidr_block = "10.0.0.0/16"
+}
+
+# create vpc subnet
+resource "tencentcloud_subnet" "subnet" {
+  name              = "subnet"
+  vpc_id            = tencentcloud_vpc.vpc.id
+  availability_zone = "ap-guangzhou-6"
+  cidr_block        = "10.0.20.0/28"
+  is_multicast      = false
+}
+
+# create rocketmq instance with billing and deployment params
+resource "tencentcloud_trocket_rocketmq_instance" "example" {
+  name          = "tf-example"
+  instance_type = "PRO"
+  sku_code      = "pro_4k"
+  remark        = "remark"
+  vpc_id        = tencentcloud_vpc.vpc.id
+  subnet_id     = tencentcloud_subnet.subnet.id
+  pay_mode      = 1
+  renew_flag    = 1
+  time_span     = 12
+  max_topic_num = 1000
+  zone_ids      = [100006, 100007]
   tags = {
     tag_key   = "rocketmq"
     tag_value = "5.x"
@@ -74,8 +122,8 @@ resource "tencentcloud_trocket_rocketmq_instance" "example" {
 
 Import
 
-trocket rocketmq_instance can be imported using the id, e.g.
+Trocket rocketmq instance can be imported using the id, e.g.
 
 ```
-terraform import tencentcloud_trocket_rocketmq_instance.rocketmq_instance rmq-n5qado7m
+terraform import tencentcloud_trocket_rocketmq_instance.example rmq-n5qado7m
 ```

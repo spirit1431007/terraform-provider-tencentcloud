@@ -47,7 +47,7 @@ func ResourceTencentCloudMonitorTmpInstance() *schema.Resource {
 			"data_retention_time": {
 				Type:        schema.TypeInt,
 				Required:    true,
-				Description: "Data retention time(in days). Value range: 15, 30, 45, 90, 180, 360, 720.",
+				Description: "Data retention time(in days). Value range: 15, 30, 45, 90, 180, 365, 730.",
 			},
 
 			"zone": {
@@ -85,6 +85,13 @@ func ResourceTencentCloudMonitorTmpInstance() *schema.Resource {
 				Computed:    true,
 				Description: "Proxy address.",
 			},
+
+			"long_term_storage_retention_time": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Computed:    true,
+				Description: "Long-term storage retention time(in days). Value range: 60-730.",
+			},
 		},
 	}
 }
@@ -119,6 +126,15 @@ func resourceTencentCloudMonitorTmpInstanceCreate(d *schema.ResourceData, meta i
 		request.Zone = helper.String(v.(string))
 	}
 
+	if v, ok := d.GetOkExists("long_term_storage_retention_time"); ok {
+		request.InstanceAttributes = []*monitor.PrometheusRuleKV{
+			{
+				Key:   helper.String("LongTermStorageRetentionTime"),
+				Value: helper.String(fmt.Sprintf("%d", v.(int))),
+			},
+		}
+	}
+
 	err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
 		result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseMonitorClient().CreatePrometheusMultiTenantInstancePostPayMode(request)
 		if e != nil {
@@ -128,6 +144,10 @@ func resourceTencentCloudMonitorTmpInstanceCreate(d *schema.ResourceData, meta i
 				logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
 		}
 
+		if result == nil || result.Response == nil {
+			return resource.NonRetryableError(fmt.Errorf("Create monitor tmpInstance failed, Response is nil."))
+		}
+
 		response = result
 		return nil
 	})
@@ -135,6 +155,10 @@ func resourceTencentCloudMonitorTmpInstanceCreate(d *schema.ResourceData, meta i
 	if err != nil {
 		log.Printf("[CRITAL]%s create monitor tmpInstance failed, reason:%+v", logId, err)
 		return err
+	}
+
+	if response.Response.InstanceId == nil {
+		return fmt.Errorf("InstanceId is nil.")
 	}
 
 	tmpInstanceId := *response.Response.InstanceId
@@ -233,6 +257,17 @@ func resourceTencentCloudMonitorTmpInstanceRead(d *schema.ResourceData, meta int
 		_ = d.Set("proxy_address", tmpInstance.ProxyAddress)
 	}
 
+	if tmpInstance.InstanceAttributes != nil {
+		for _, attr := range tmpInstance.InstanceAttributes {
+			if attr.Key != nil && *attr.Key == "LongTermStorageRetentionTime" && attr.Value != nil {
+				var longTermStorageRetentionTime int
+				fmt.Sscanf(*attr.Value, "%d", &longTermStorageRetentionTime)
+				_ = d.Set("long_term_storage_retention_time", longTermStorageRetentionTime)
+				break
+			}
+		}
+	}
+
 	tcClient := meta.(tccommon.ProviderMeta).GetAPIV3Conn()
 	tagService := svctag.NewTagService(tcClient)
 	tags, err := tagService.DescribeResourceTags(ctx, "monitor", "prom-instance", tcClient.Region, d.Id())
@@ -274,6 +309,17 @@ func resourceTencentCloudMonitorTmpInstanceUpdate(d *schema.ResourceData, meta i
 	if d.HasChange("data_retention_time") {
 		if v, ok := d.GetOk("data_retention_time"); ok {
 			request.DataRetentionTime = helper.IntInt64(v.(int))
+		}
+	}
+
+	if d.HasChange("long_term_storage_retention_time") {
+		if v, ok := d.GetOkExists("long_term_storage_retention_time"); ok {
+			request.InstanceAttributes = []*monitor.PrometheusRuleKV{
+				{
+					Key:   helper.String("LongTermStorageRetentionTime"),
+					Value: helper.String(fmt.Sprintf("%d", v.(int))),
+				},
+			}
 		}
 	}
 

@@ -144,7 +144,6 @@ func ResourceTencentCloudMysqlDrInstance() *schema.Resource {
 				ValidateFunc: tccommon.ValidateStringLengthInRange(1, 100),
 				Description:  "Private network ID. If `vpc_id` is set, this value is required.",
 			},
-
 			"security_groups": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -207,6 +206,13 @@ func ResourceTencentCloudMysqlDrInstance() *schema.Resource {
 				Type:        schema.TypeMap,
 				Optional:    true,
 				Description: "Instance tags.",
+			},
+			"disk_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
+				Description: "Disk Type: This parameter can be specified for Single-Node (Cloud Disk) or Cloud Disk Edition instances. `CLOUD_SSD` designates an SSD cloud disk; `CLOUD_HSSD` designates an Enhanced SSD cloud disk; and `CLOUD_PREMIUM` designates a High-Performance cloud disk. Note: The regions that support the disk types for Single-Node (Cloud Disk) and Cloud Disk Edition instances vary slightly; please refer to `Regions and Availability Zones` for specific support details.",
 			},
 
 			// Computed values
@@ -388,6 +394,9 @@ func resourceTencentCloudMysqlDrInstanceRead(d *schema.ResourceData, meta interf
 	_ = d.Set("slave_deploy_mode", mysqlInfo.DeployMode)
 	_ = d.Set("slave_sync_mode", mysqlInfo.ProtectMode)
 	_ = d.Set("project_id", mysqlInfo.ProjectId)
+	if mysqlInfo.DiskType != nil {
+		_ = d.Set("disk_type", mysqlInfo.DiskType)
+	}
 
 	if mysqlInfo.SlaveInfo != nil && mysqlInfo.SlaveInfo.First != nil {
 		_ = d.Set("first_slave_zone", mysqlInfo.SlaveInfo.First.Zone)
@@ -435,7 +444,54 @@ func resourceTencentCloudMysqlDrInstanceUpdate(d *schema.ResourceData, meta inte
 	logId := tccommon.GetLogId(tccommon.ContextNil)
 	ctx := context.WithValue(context.TODO(), tccommon.LogIdKey, logId)
 
+	mysqlID := d.Id()
 	payType := getPayType(d).(int)
+
+	if d.HasChange("prepaid_period") {
+		if v, ok := d.GetOk("charge_type"); ok {
+			if v.(string) != MYSQL_CHARGE_TYPE_PREPAID {
+				return fmt.Errorf("`prepaid_period` only support prepaid instance.")
+			}
+		}
+	}
+
+	if d.HasChange("charge_type") {
+		oldChargeTypeInterface, newChargeTypeInterface := d.GetChange("charge_type")
+		oldChargeType := oldChargeTypeInterface.(string)
+		newChargeType := newChargeTypeInterface.(string)
+
+		if oldChargeType == MYSQL_CHARGE_TYPE_PREPAID && newChargeType == MYSQL_CHARGE_TYPE_POSTPAID {
+			return fmt.Errorf("`charge_type` only supports modification from `POSTPAID` to `PREPAID`.")
+		}
+
+		var period int = 1
+		if v, ok := d.GetOkExists("prepaid_period"); ok {
+			period = v.(int)
+		}
+
+		request := cdb.NewRenewDBInstanceRequest()
+		request.InstanceId = &mysqlID
+		request.ModifyPayType = helper.String(newChargeType)
+		request.TimeSpan = helper.IntInt64(period)
+		err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+			result, err := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseMysqlClient().RenewDBInstance(request)
+			if err != nil {
+				return tccommon.RetryError(err, tccommon.InternalError)
+			} else {
+				log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+			}
+
+			if result == nil || result.Response == nil {
+				return resource.NonRetryableError(fmt.Errorf("Renew DB instance failed, Response is nil."))
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			return err
+		}
+	}
 
 	d.Partial(true)
 
@@ -563,13 +619,15 @@ func mysqlDrInstanceSet(ctx context.Context, requestInter interface{}, d *schema
 		}
 	}
 
-	if payType, ok := d.GetOk("pay_type"); ok && okByMonth {
+	payType, ok := d.GetOkExists("pay_type")
+	if (!ok || payType == -1) && okByMonth {
 		var period int
 		if !ok || payType == -1 {
 			period = d.Get("prepaid_period").(int)
 		} else {
 			period = d.Get("period").(int)
 		}
+
 		requestByMonth.Period = helper.IntInt64(period)
 	}
 
@@ -745,6 +803,15 @@ func mysqlDrInstanceSet(ctx context.Context, requestInter interface{}, d *schema
 			requestByMonth.ProtectMode = slaveSyncMode
 		} else {
 			requestByUse.ProtectMode = slaveSyncMode
+		}
+	}
+
+	if v, ok := d.GetOk("disk_type"); ok {
+		diskType := helper.String(v.(string))
+		if okByMonth {
+			requestByMonth.DiskType = diskType
+		} else {
+			requestByUse.DiskType = diskType
 		}
 	}
 

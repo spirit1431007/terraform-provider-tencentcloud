@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	tccommon "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/common"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	as "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/as/v20180419"
+	sdkErrors "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
 
 	"github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/internal/helper"
 )
@@ -77,6 +79,12 @@ func ResourceTencentCloudAsLifecycleHook() *schema.Resource {
 				Optional:    true,
 				Description: "For CMQ_TOPIC type, a name of topic must be set.",
 			},
+			"lifecycle_transition_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The scenario where the lifecycle hook is applied. `EXTENSION`: the lifecycle hook will be triggered when AttachInstances, DetachInstances or RemoveInstaces is called. `NORMAL`: the lifecycle hook is not triggered by the above APIs.",
+			},
 			"lifecycle_command": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
@@ -122,6 +130,9 @@ func resourceTencentCloudAsLifecycleHookCreate(d *schema.ResourceData, meta inte
 	if v, ok := d.GetOk("notification_metadata"); ok {
 		request.NotificationMetadata = helper.String(v.(string))
 	}
+	if v, ok := d.GetOk("lifecycle_transition_type"); ok {
+		request.LifecycleTransitionType = helper.String(v.(string))
+	}
 	if v, ok := d.GetOk("notification_target_type"); ok {
 		request.NotificationTarget = &as.NotificationTarget{}
 		request.NotificationTarget.TargetType = helper.String(v.(string))
@@ -151,19 +162,35 @@ func resourceTencentCloudAsLifecycleHookCreate(d *schema.ResourceData, meta inte
 		request.LifecycleCommand = &lifecycleCommand
 	}
 
-	response, err := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseAsClient().CreateLifecycleHook(request)
+	var lifecycleHookId string
+	err := resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
+		response, err := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseAsClient().CreateLifecycleHook(request)
+		if err != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n", logId, request.GetAction(), request.ToJsonString(), err.Error())
+			if e, ok := err.(*sdkErrors.TencentCloudSDKError); ok {
+				if strings.Contains(e.GetCode(), "LimitExceeded.QuotaNotEnough") {
+					return resource.RetryableError(err)
+				}
+			}
+
+			return tccommon.RetryError(err)
+		}
+
+		log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
+		if response == nil || response.Response == nil || response.Response.LifecycleHookId == nil {
+			return resource.NonRetryableError(fmt.Errorf("AS LifecycleHook not exists"))
+		}
+
+		lifecycleHookId = *response.Response.LifecycleHookId
+		return nil
+	})
+
 	if err != nil {
-		log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n",
-			logId, request.GetAction(), request.ToJsonString(), err.Error())
+		log.Printf("[CRITAL]%s create AS LifecycleHook failed, reason:%s\n", logId, err.Error())
 		return err
 	}
-	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
-		logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
 
-	if response.Response.LifecycleHookId == nil {
-		return fmt.Errorf("lifecycle hook id is nil")
-	}
-	d.SetId(*response.Response.LifecycleHookId)
+	d.SetId(lifecycleHookId)
 
 	return resourceTencentCloudAsLifecycleHookRead(d, meta)
 }
@@ -199,6 +226,9 @@ func resourceTencentCloudAsLifecycleHookRead(d *schema.ResourceData, meta interf
 		}
 		if lifecycleHook.NotificationMetadata != nil {
 			_ = d.Set("notification_metadata", *lifecycleHook.NotificationMetadata)
+		}
+		if lifecycleHook.LifecycleTransitionType != nil {
+			_ = d.Set("lifecycle_transition_type", *lifecycleHook.LifecycleTransitionType)
 		}
 		if lifecycleHook.NotificationTarget != nil {
 			_ = d.Set("notification_target_type", *lifecycleHook.NotificationTarget.TargetType)
@@ -247,6 +277,9 @@ func resourceTencentCloudAsLifecycleHookUpdate(d *schema.ResourceData, meta inte
 	if v, ok := d.GetOk("notification_metadata"); ok {
 		request.NotificationMetadata = helper.String(v.(string))
 	}
+	if v, ok := d.GetOk("lifecycle_transition_type"); ok {
+		request.LifecycleTransitionType = helper.String(v.(string))
+	}
 	if v, ok := d.GetOk("notification_target_type"); ok {
 		request.NotificationTarget = &as.NotificationTarget{}
 		request.NotificationTarget.TargetType = helper.String(v.(string))
@@ -265,15 +298,17 @@ func resourceTencentCloudAsLifecycleHookUpdate(d *schema.ResourceData, meta inte
 		}
 	}
 
-	if dMap, ok := helper.InterfacesHeadMap(d, "lifecycle_command"); ok {
-		lifecycleCommand := as.LifecycleCommand{}
-		if v, ok := dMap["command_id"]; ok {
-			lifecycleCommand.CommandId = helper.String(v.(string))
+	if d.HasChange("lifecycle_command") {
+		if dMap, ok := helper.InterfacesHeadMap(d, "lifecycle_command"); ok {
+			lifecycleCommand := as.LifecycleCommand{}
+			if v, ok := dMap["command_id"]; ok && v != "" {
+				lifecycleCommand.CommandId = helper.String(v.(string))
+			}
+			if v, ok := dMap["parameters"]; ok && v != "" {
+				lifecycleCommand.Parameters = helper.String(v.(string))
+			}
+			request.LifecycleCommand = &lifecycleCommand
 		}
-		if v, ok := dMap["parameters"]; ok {
-			lifecycleCommand.Parameters = helper.String(v.(string))
-		}
-		request.LifecycleCommand = &lifecycleCommand
 	}
 
 	response, err := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseAsClient().UpgradeLifecycleHook(request)

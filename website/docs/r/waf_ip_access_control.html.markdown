@@ -11,6 +11,8 @@ description: |-
 
 Provides a resource to create a waf ip_access_control
 
+~> **NOTE:** This resource is no longer under maintenance, please use `tencentcloud_waf_ip_access_control_v2` instead
+
 ## Example Usage
 
 ```hcl
@@ -63,6 +65,11 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - ID of the resource.
 
+The `items` object exports the following:
+
+* `id` - Id.
+* `source` - Source.
+* `valid_status` - Valid status.
 
 
 ## Import

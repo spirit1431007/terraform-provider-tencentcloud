@@ -78,7 +78,6 @@ func init() {
 }
 
 func TestAccTencentCloudCbsStorageResource_basic(t *testing.T) {
-	t.Parallel()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { tcacctest.AccPreCheck(t) },
@@ -105,8 +104,38 @@ func TestAccTencentCloudCbsStorageResource_basic(t *testing.T) {
 	})
 }
 
+func TestAccTencentCloudCbsStorageResource_burstPerformance(t *testing.T) {
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { tcacctest.AccPreCheck(t) },
+		Providers:    tcacctest.AccProviders,
+		CheckDestroy: testAccCheckCbsStorageDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCbsStorage_burstPerformance,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageExists("tencentcloud_cbs_storage.burst_performance"),
+					resource.TestCheckResourceAttr("tencentcloud_cbs_storage.burst_performance", "burst_performance", "true"),
+				),
+			},
+			{
+				Config: testAccCbsStorage_burstPerformanceUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageExists("tencentcloud_cbs_storage.burst_performance"),
+					resource.TestCheckResourceAttr("tencentcloud_cbs_storage.burst_performance", "burst_performance", "false"),
+				),
+			},
+			{
+				ResourceName:            "tencentcloud_cbs_storage.burst_performance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_delete"},
+			},
+		},
+	})
+}
+
 func TestAccTencentCloudCbsStorageResource_full(t *testing.T) {
-	t.Parallel()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { tcacctest.AccPreCheck(t) },
@@ -258,6 +287,24 @@ resource "tencentcloud_cbs_storage" "storage_basic" {
 }
 `
 
+const testAccCbsStorage_burstPerformance = `
+resource "tencentcloud_cbs_storage" "burst_performance" {
+	storage_type      = "CLOUD_HSSD"
+	storage_name      = "burst-performance"
+	storage_size      = 500
+	availability_zone = "ap-guangzhou-3"
+	burst_performance = true
+}
+`
+const testAccCbsStorage_burstPerformanceUpdate = `
+resource "tencentcloud_cbs_storage" "burst_performance" {
+	storage_type      = "CLOUD_HSSD"
+	storage_name      = "burst-performance"
+	storage_size      = 500
+	availability_zone = "ap-guangzhou-3"
+	burst_performance = false
+}
+`
 const testAccCbsStorage_full = `
 resource "tencentcloud_cbs_storage" "storage_full" {
 	storage_type      = "CLOUD_PREMIUM"
@@ -341,5 +388,52 @@ resource "tencentcloud_cbs_storage" "storage_upgrade" {
 	prepaid_renew_flag = "NOTIFY_AND_MANUAL_RENEW"
 	prepaid_period = 1
 	force_delete = true
+}
+`
+
+func TestAccTencentCloudCbsStorageResource_instanceId(t *testing.T) {
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { tcacctest.AccPreCheck(t) },
+		Providers:    tcacctest.AccProviders,
+		CheckDestroy: testAccCheckCbsStorageDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCbsStorage_instanceId,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageExists("tencentcloud_cbs_storage.storage_instance_id"),
+					resource.TestCheckResourceAttrSet("tencentcloud_cbs_storage.storage_instance_id", "instance_id"),
+				),
+			},
+			{
+				ResourceName:            "tencentcloud_cbs_storage.storage_instance_id",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_delete"},
+			},
+		},
+	})
+}
+
+const testAccCbsStorage_instanceId = tcacctest.DefaultInstanceVariable + tcacctest.DefaultAzVariable + `
+resource "tencentcloud_instance" "test_cbs_instance_id" {
+  instance_name     = "test-cbs-instance-id-cvm"
+  availability_zone = var.default_az
+  image_id          = data.tencentcloud_images.default.images.0.image_id
+  system_disk_type  = "CLOUD_PREMIUM"
+  instance_type     = data.tencentcloud_instance_types.default.instance_types.0.instance_type
+}
+
+resource "tencentcloud_cbs_storage" "storage_instance_id" {
+  storage_name      = "tf-storage-instance-id"
+  storage_type      = "CLOUD_PREMIUM"
+  storage_size      = 50
+  availability_zone = var.default_az
+  charge_type       = "POSTPAID_BY_HOUR"
+  instance_id       = tencentcloud_instance.test_cbs_instance_id.id
+
+  tags = {
+    createBy = "Terraform"
+  }
 }
 `

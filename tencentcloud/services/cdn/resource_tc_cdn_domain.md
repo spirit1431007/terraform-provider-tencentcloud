@@ -5,8 +5,8 @@ Provides a resource to create a CDN domain.
 Example Usage
 
 ```hcl
-resource "tencentcloud_cdn_domain" "foo" {
-  domain         = "xxxx.com"
+resource "tencentcloud_cdn_domain" "example" {
+  domain         = "example.com"
   service_type   = "web"
   area           = "mainland"
   full_url_cache = false
@@ -40,32 +40,31 @@ resource "tencentcloud_cdn_domain" "foo" {
 Example Usage of cdn uses cache and request headers
 
 ```hcl
-resource "tencentcloud_cdn_domain" "foo" {
-  domain         = "xxxx.com"
-  service_type   = "web"
-  area           = "mainland"
-  # full_url_cache = true # Deprecated, use cache_key below.
+resource "tencentcloud_cdn_domain" "example" {
+  domain       = "example.com"
+  service_type = "web"
+  area         = "mainland"
   cache_key {
     full_url_cache = "on"
   }
   range_origin_switch = "off"
 
-  rule_cache{
-  	cache_time = 10000
-  	no_cache_switch="on"
-  	re_validate="on"
+  rule_cache {
+    cache_time      = 10000
+    no_cache_switch = "on"
+    re_validate     = "on"
   }
 
-  request_header{
-  	switch = "on"
+  request_header {
+    switch = "on"
 
-  	header_rules {
-  		header_mode = "add"
-  		header_name = "tf-header-name"
-  		header_value = "tf-header-value"
-  		rule_type = "all"
-  		rule_paths = ["*"]
-  	}
+    header_rules {
+      header_mode  = "add"
+      header_name  = "tf-header-name"
+      header_value = "tf-header-value"
+      rule_type    = "all"
+      rule_paths   = ["*"]
+    }
   }
 
   origin {
@@ -104,8 +103,8 @@ resource "tencentcloud_cos_bucket" "bucket" {
 }
 
 # Create cdn domain
-resource "tencentcloud_cdn_domain" "cdn" {
-  domain         = "abc.com"
+resource "tencentcloud_cdn_domain" "example" {
+  domain         = "example.com"
   service_type   = "web"
   area           = "mainland"
   # full_url_cache = false # Deprecated
@@ -131,10 +130,75 @@ resource "tencentcloud_cdn_domain" "cdn" {
 }
 ```
 
+Example Usage of CDN domain with advanced fields
+
+```hcl
+resource "tencentcloud_cdn_domain" "example" {
+  domain       = "example.com"
+  service_type = "web"
+  area         = "mainland"
+
+  origin {
+    origin_type          = "ip"
+    origin_list          = ["127.0.0.1"]
+    origin_pull_protocol = "follow"
+  }
+
+  https_config {
+    https_switch         = "off"
+    http2_switch         = "off"
+    ocsp_stapling_switch = "off"
+    spdy_switch          = "off"
+    verify_client        = "off"
+
+    hsts {
+      switch               = "on"
+      max_age              = 31536000
+      include_sub_domains  = "on"
+    }
+  }
+
+  user_agent_filter {
+    switch = "on"
+
+    filter_rules {
+      rule_type   = "all"
+      rule_paths  = ["*"]
+      user_agents = ["Mozilla/5.0"]
+      filter_type = "blacklist"
+    }
+  }
+
+  url_redirect {
+    switch = "on"
+
+    path_rules {
+      redirect_status_code = 302
+      pattern              = "/old/*"
+      redirect_url         = "/new/$1"
+    }
+  }
+
+  origin_combine {
+    switch = "on"
+  }
+
+  range_origin_pull {
+    switch = "on"
+
+    range_rules {
+      switch    = "on"
+      rule_type = "file"
+      rule_paths = ["jpg", "png"]
+    }
+  }
+}
+```
+
 Import
 
 CDN domain can be imported using the id, e.g.
 
 ```
-$ terraform import tencentcloud_cdn_domain.foo xxxx.com
+terraform import tencentcloud_cdn_domain.example example.com
 ```

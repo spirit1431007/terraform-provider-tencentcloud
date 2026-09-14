@@ -14,9 +14,19 @@ Provides a COS resource to create a COS bucket policy and set its attributes.
 ## Example Usage
 
 ```hcl
-resource "tencentcloud_cos_bucket_policy" "cos_policy" {
-  bucket = "mycos-1258798060"
+data "tencentcloud_user_info" "info" {}
 
+locals {
+  app_id = data.tencentcloud_user_info.info.app_id
+}
+
+resource "tencentcloud_cos_bucket" "example" {
+  bucket = "private-bucket-${local.app_id}"
+  acl    = "private"
+}
+
+resource "tencentcloud_cos_bucket_policy" "example" {
+  bucket = tencentcloud_cos_bucket.example.id
   policy = <<EOF
 {
   "version": "2.0",
@@ -33,7 +43,7 @@ resource "tencentcloud_cos_bucket_policy" "cos_policy" {
       ],
       "Effect": "allow",
       "Resource": [
-        "qcs::cos:<bucket region>:uid/<your-account-id>:<bucket name>/*"
+        "qcs::cos:<bucket region>:uid/<your-appid-id>:<your-bucket-name>/*"
       ]
     }
   ]
@@ -47,7 +57,7 @@ EOF
 The following arguments are supported:
 
 * `bucket` - (Required, String, ForceNew) The name of a bucket to be created. Bucket format should be [custom name]-[appid], for example `mycos-1258798060`.
-* `policy` - (Required, String) The text of the policy. For more info please refer to [Tencent official doc](https://intl.cloud.tencent.com/document/product/436/18023).
+* `policy` - (Required, String) The text of the policy. For more info please refer to [Tencent official doc](https://intl.cloud.tencent.com/document/product/436/18023), The six-segment resource scenario example in the document is as follows: Example of specifying a bucket: `qcs::cos:ap-guangzhou:uid/1250000000:examplebucket-1250000000/*`, In the cdc scenario: `qcs::cos:ap-guangzhou:uid/1250000000:cdc_cluster-123456_examplebucket-1250000000/*`; Example of specifying a folder: `qcs::cos:ap-guangzhou:uid/1250000000:examplebucket-1250000000/folder/*`, In the cdc scenario: `qcs::cos:ap-guangzhou:uid/1250000000:cdc_cluster-123456_examplebucket-1250000000/folder/*`; Specified object example: `qcs::cos:ap-guangzhou:uid/1250000000:examplebucket-1250000000/folder/exampleobject`, In the cdc scenario: `qcs::cos:ap-guangzhou:uid/1250000000:cdc_cluster-123456_examplebucket-1250000000/folder/exampleobject`.
 
 ## Attributes Reference
 
@@ -62,6 +72,6 @@ In addition to all arguments above, the following attributes are exported:
 COS bucket policy can be imported, e.g.
 
 ```
-$ terraform import tencentcloud_cos_bucket_policy.bucket bucket-name
+$ terraform import tencentcloud_cos_bucket_policy.example private-bucket-1309118521
 ```
 

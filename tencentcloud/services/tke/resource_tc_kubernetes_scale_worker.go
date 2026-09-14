@@ -9,8 +9,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	tke "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/tke/v20180525"
-
+	tkev20180525 "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/tke/v20180525"
 	tccommon "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/common"
 	"github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/internal/helper"
 )
@@ -19,6 +18,7 @@ func ResourceTencentCloudKubernetesScaleWorker() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceTencentCloudKubernetesScaleWorkerCreate,
 		Read:   resourceTencentCloudKubernetesScaleWorkerRead,
+		Update: resourceTencentCloudKubernetesScaleWorkerUpdate,
 		Delete: resourceTencentCloudKubernetesScaleWorkerDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: customScaleWorkerResourceImporter,
@@ -120,26 +120,31 @@ func ResourceTencentCloudKubernetesScaleWorker() *schema.Resource {
 						"cuda": {
 							Type:        schema.TypeMap,
 							Optional:    true,
+							ForceNew:    true,
 							Description: "CUDA  version. Format like: `{ version: String, name: String }`. `version`: Version of GPU driver or CUDA; `name`: Name of GPU driver or CUDA.",
 						},
 						"cudnn": {
 							Type:        schema.TypeMap,
 							Optional:    true,
+							ForceNew:    true,
 							Description: "cuDNN version. Format like: `{ version: String, name: String, doc_name: String, dev_name: String }`. `version`: cuDNN version; `name`: cuDNN name; `doc_name`: Doc name of cuDNN; `dev_name`: Dev name of cuDNN.",
 						},
 						"custom_driver": {
 							Type:        schema.TypeMap,
 							Optional:    true,
+							ForceNew:    true,
 							Description: "Custom GPU driver. Format like: `{address: String}`. `address`: URL of custom GPU driver address.",
 						},
 						"driver": {
 							Type:        schema.TypeMap,
 							Optional:    true,
+							ForceNew:    true,
 							Description: "GPU driver version. Format like: `{ version: String, name: String }`. `version`: Version of GPU driver or CUDA; `name`: Name of GPU driver or CUDA.",
 						},
 						"mig_enable": {
 							Type:        schema.TypeBool,
 							Optional:    true,
+							ForceNew:    true,
 							Default:     false,
 							Description: "Whether to enable MIG.",
 						},
@@ -172,7 +177,6 @@ func ResourceTencentCloudKubernetesScaleWorker() *schema.Resource {
 			"worker_config": {
 				Type:        schema.TypeList,
 				Required:    true,
-				ForceNew:    true,
 				MaxItems:    1,
 				MinItems:    1,
 				Description: "Deploy the machine configuration information of the 'WORK' service, and create <=20 units for common users.",
@@ -187,6 +191,7 @@ func ResourceTencentCloudKubernetesScaleWorker() *schema.Resource {
 						"bandwidth_package_id": {
 							Type:        schema.TypeString,
 							Optional:    true,
+							ForceNew:    true,
 							Description: "bandwidth package id. if user is standard user, then the bandwidth_package_id is needed, or default has bandwidth_package_id.",
 						},
 						"cam_role_name": {
@@ -242,6 +247,7 @@ func ResourceTencentCloudKubernetesScaleWorker() *schema.Resource {
 									"encrypt": {
 										Type:        schema.TypeBool,
 										Optional:    true,
+										ForceNew:    true,
 										Description: "Indicates whether to encrypt data disk, default `false`.",
 									},
 									"file_system": {
@@ -254,6 +260,7 @@ func ResourceTencentCloudKubernetesScaleWorker() *schema.Resource {
 									"kms_key_id": {
 										Type:        schema.TypeString,
 										Optional:    true,
+										ForceNew:    true,
 										Description: "ID of the custom CMK in the format of UUID or `kms-abcd1234`. This parameter is used to encrypt cloud disks.",
 									},
 									"mount_target": {
@@ -283,7 +290,6 @@ func ResourceTencentCloudKubernetesScaleWorker() *schema.Resource {
 							Type:        schema.TypeList,
 							Optional:    true,
 							ForceNew:    true,
-							MaxItems:    1,
 							Description: "Disaster recover groups to which a CVM instance belongs. Only support maximum 1.",
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
@@ -312,24 +318,24 @@ func ResourceTencentCloudKubernetesScaleWorker() *schema.Resource {
 						"hpc_cluster_id": {
 							Type:        schema.TypeString,
 							Optional:    true,
+							ForceNew:    true,
 							Description: "Id of cvm hpc cluster.",
 						},
 						"img_id": {
 							Type:        schema.TypeString,
 							Optional:    true,
+							ForceNew:    true,
 							Description: "The valid image id, format of img-xxx.",
 						},
 						"instance_charge_type": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							ForceNew:    true,
 							Default:     "POSTPAID_BY_HOUR",
-							Description: "The charge type of instance. Valid values are `PREPAID` and `POSTPAID_BY_HOUR`. The default is `POSTPAID_BY_HOUR`. Note: TencentCloud International only supports `POSTPAID_BY_HOUR`, `PREPAID` instance will not terminated after cluster deleted, and may not allow to delete before expired.",
+							Description: "The charge type of instance. Valid values are `PREPAID`, `POSTPAID_BY_HOUR`, `SPOTPAID`, `CDCPAID`. The default is `POSTPAID_BY_HOUR`. Note: TencentCloud International only supports `POSTPAID_BY_HOUR`, `PREPAID` instance will not terminated after cluster deleted, and may not allow to delete before expired.",
 						},
 						"instance_charge_type_prepaid_period": {
 							Type:        schema.TypeInt,
 							Optional:    true,
-							ForceNew:    true,
 							Default:     1,
 							Description: "The tenancy (time unit is month) of the prepaid instance. NOTE: it only works when instance_charge_type is set to `PREPAID`. Valid values are `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`, `10`, `11`, `12`, `24`, `36`.",
 						},
@@ -337,7 +343,6 @@ func ResourceTencentCloudKubernetesScaleWorker() *schema.Resource {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Computed:    true,
-							ForceNew:    true,
 							Description: "Auto renewal flag. Valid values: `NOTIFY_AND_AUTO_RENEW`: notify upon expiration and renew automatically, `NOTIFY_AND_MANUAL_RENEW`: notify upon expiration but do not renew automatically, `DISABLE_NOTIFY_AND_MANUAL_RENEW`: neither notify upon expiration nor renew automatically. Default value: `NOTIFY_AND_MANUAL_RENEW`. If this parameter is specified as `NOTIFY_AND_AUTO_RENEW`, the instance will be automatically renewed on a monthly basis if the account balance is sufficient. NOTE: it only works when instance_charge_type is set to `PREPAID`.",
 						},
 						"instance_name": {
@@ -363,6 +368,7 @@ func ResourceTencentCloudKubernetesScaleWorker() *schema.Resource {
 						"internet_max_bandwidth_out": {
 							Type:        schema.TypeInt,
 							Optional:    true,
+							ForceNew:    true,
 							Default:     0,
 							Description: "Max bandwidth of Internet access in Mbps. Default is 0.",
 						},
@@ -424,6 +430,35 @@ func ResourceTencentCloudKubernetesScaleWorker() *schema.Resource {
 							ForceNew:    true,
 							Description: "User data provided to instances, needs to be encoded in base64, and the maximum supported data size is 16KB.",
 						},
+						"tags": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							ForceNew:    true,
+							Computed:    true,
+							Description: "Tag pairs.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Required:    true,
+										ForceNew:    true,
+										Description: "Tag key.",
+									},
+									"value": {
+										Type:        schema.TypeString,
+										Required:    true,
+										ForceNew:    true,
+										Description: "Tag value.",
+									},
+								},
+							},
+						},
+						"cdc_id": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							ForceNew:    true,
+							Description: "CDC ID.",
+						},
 					},
 				},
 			},
@@ -433,6 +468,35 @@ func ResourceTencentCloudKubernetesScaleWorker() *schema.Resource {
 				Optional:    true,
 				ForceNew:    true,
 				Description: "Base64-encoded user script, executed before initializing the node, currently only effective for adding existing nodes.",
+			},
+
+			"taints": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Node taint.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							ForceNew:    true,
+							Description: "Key of the taint.",
+						},
+						"value": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							ForceNew:    true,
+							Description: "Value of the taint.",
+						},
+						"effect": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							ForceNew:    true,
+							Description: "Effect of the taint.",
+						},
+					},
+				},
 			},
 
 			"user_script": {
@@ -475,6 +539,13 @@ func ResourceTencentCloudKubernetesScaleWorker() *schema.Resource {
 						},
 					},
 				},
+			},
+
+			"create_result_output_file": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Used to save results of CVMs creation error messages.",
 			},
 		},
 	}
@@ -525,28 +596,41 @@ func resourceTencentCloudKubernetesScaleWorkerRead(d *schema.ResourceData, meta 
 		log.Printf("[WARN]%s resource `kubernetes_scale_worker` [%s] not found, please check if it has been deleted.\n", logId, d.Id())
 		return nil
 	}
-	respData1, err := service.DescribeKubernetesScaleWorkerById1(ctx, clusterId)
-	if err != nil {
+	if err := resourceTencentCloudKubernetesScaleWorkerReadPostHandleResponse0(ctx, respData); err != nil {
 		return err
 	}
 
-	if respData1 == nil {
-		d.SetId("")
-		log.Printf("[WARN]%s resource `kubernetes_scale_worker` [%s] not found, please check if it has been deleted.\n", logId, d.Id())
-		return nil
-	}
-	respData2, err := service.DescribeKubernetesScaleWorkerById2(ctx)
-	if err != nil {
-		return err
-	}
-
-	if respData2 == nil {
-		d.SetId("")
-		log.Printf("[WARN]%s resource `kubernetes_scale_worker` [%s] not found, please check if it has been deleted.\n", logId, d.Id())
-		return nil
-	}
 	_ = instanceIdSet
 	return nil
+}
+
+func resourceTencentCloudKubernetesScaleWorkerUpdate(d *schema.ResourceData, meta interface{}) error {
+	defer tccommon.LogElapsed("resource.tencentcloud_kubernetes_scale_worker.update")()
+	defer tccommon.InconsistentCheck(d, meta)()
+
+	logId := tccommon.GetLogId(tccommon.ContextNil)
+	ctx := tccommon.NewResourceLifeCycleHandleFuncContext(context.Background(), logId, d, meta)
+
+	idSplit := strings.Split(d.Id(), tccommon.FILED_SP)
+	if len(idSplit) != 2 {
+		return fmt.Errorf("id is broken,%s", d.Id())
+	}
+
+	instanceIds := strings.Split(idSplit[1], tccommon.COMMA_SP)
+	if len(instanceIds) == 0 {
+		return fmt.Errorf("instance ids is empty, id:%s", d.Id())
+	}
+
+	// Only the instance charge type related arguments support modification.
+	if d.HasChange("worker_config.0.instance_charge_type") ||
+		d.HasChange("worker_config.0.instance_charge_type_prepaid_period") ||
+		d.HasChange("worker_config.0.instance_charge_type_prepaid_renew_flag") {
+		if err := modifyKubernetesScaleWorkerInstancesChargeType(ctx, meta, d, instanceIds); err != nil {
+			return err
+		}
+	}
+
+	return resourceTencentCloudKubernetesScaleWorkerRead(d, meta)
 }
 
 func resourceTencentCloudKubernetesScaleWorkerDelete(d *schema.ResourceData, meta interface{}) error {
@@ -564,14 +648,14 @@ func resourceTencentCloudKubernetesScaleWorkerDelete(d *schema.ResourceData, met
 	instanceIdSet := idSplit[1]
 
 	var (
-		request  = tke.NewDescribeClustersRequest()
-		response = tke.NewDescribeClustersResponse()
+		request  = tkev20180525.NewDescribeClustersRequest()
+		response = tkev20180525.NewDescribeClustersResponse()
 	)
 
 	request.ClusterIds = []*string{helper.String(clusterId)}
 
 	err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
-		result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseTkeClient().DescribeClustersWithContext(ctx, request)
+		result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseTkeV20180525Client().DescribeClustersWithContext(ctx, request)
 		if e != nil {
 			return tccommon.RetryError(e)
 		} else {

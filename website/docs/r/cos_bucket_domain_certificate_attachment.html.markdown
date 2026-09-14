@@ -15,16 +15,75 @@ Provides a resource to attach/detach the corresponding certificate for the domai
 
 ## Example Usage
 
+### Use cert_id
+
 ```hcl
-resource "tencentcloud_cos_bucket_domain_certificate_attachment" "foo" {
-  bucket = ""
+variable "custom_origin_domain" {
+  default = "tf.example.com"
+}
+
+data "tencentcloud_user_info" "info" {}
+
+locals {
+  app_id = data.tencentcloud_user_info.info.app_id
+}
+
+resource "tencentcloud_cos_bucket" "example" {
+  bucket      = "private-bucket-${local.app_id}"
+  acl         = "private"
+  force_clean = true
+
+  origin_domain_rules {
+    domain = var.custom_origin_domain
+    status = "ENABLED"
+    type   = "REST"
+  }
+}
+
+resource "tencentcloud_cos_bucket_domain_certificate_attachment" "example" {
+  bucket = tencentcloud_cos_bucket.example.id
   domain_certificate {
-    domain = "domain_name"
+    domain = var.custom_origin_domain
     certificate {
       cert_type = "CustomCert"
       custom_cert {
-        cert        = "===CERTIFICATE==="
-        private_key = "===PRIVATE_KEY==="
+        cert_id = "JG65alUy"
+      }
+    }
+  }
+}
+```
+
+### Use cert and key
+
+```hcl
+resource "tencentcloud_cos_bucket_domain_certificate_attachment" "example" {
+  bucket = tencentcloud_cos_bucket.example.id
+  domain_certificate {
+    domain = var.custom_origin_domain
+    certificate {
+      cert_type = "CustomCert"
+      custom_cert {
+        cert = <<-EOF
+-----BEGIN CERTIFICATE-----
+MIIG1DCCBLygAwIBAgIQDpfXbVCbQpEy5NNNSXxeeDANBgkqhkiG9w0BAQsFADBb
+***
+***
+***
+ynZ7SbC03yR+gKZQDeTXrNP1kk5Qhe7jSXgw+nhbspe0q/M1ZcNCz+sPxeOwdCcC
+gJE=
+-----END CERTIFICATE-----
+EOF
+
+        private_key = <<-EOF
+-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEAlnWPIMF4BnVyezE7KCoL+7Y1OpJ8V76g1Q9EvwWRbHus8xSM
+***
+***
+***
+Z8SK8+vMkRO9T9PBsZVMYmtQ0EtOLFtElep59iI3Mb3SdRyu+sCPmw==
+-----END RSA PRIVATE KEY-----
+EOF
       }
     }
   }
@@ -40,18 +99,19 @@ The following arguments are supported:
 
 The `certificate` object of `domain_certificate` supports the following:
 
-* `cert_type` - (Required, String) Certificate type.
-* `custom_cert` - (Required, List) Custom certificate.
+* `cert_type` - (Required, String, ForceNew) Certificate type.
+* `custom_cert` - (Required, List, ForceNew) Custom certificate.
 
 The `custom_cert` object of `certificate` supports the following:
 
-* `cert` - (Required, String) Public key of certificate.
-* `private_key` - (Required, String) Private key of certificate.
+* `cert_id` - (Optional, String, ForceNew) ID of certificate.
+* `cert` - (Optional, String, ForceNew) Public key of certificate.
+* `private_key` - (Optional, String, ForceNew) Private key of certificate.
 
 The `domain_certificate` object supports the following:
 
-* `certificate` - (Required, List) Certificate info.
-* `domain` - (Required, String) The name of domain.
+* `certificate` - (Required, List, ForceNew) Certificate info.
+* `domain` - (Required, String, ForceNew) The name of domain.
 
 ## Attributes Reference
 

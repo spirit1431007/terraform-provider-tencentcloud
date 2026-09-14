@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+// Copyright (c) 2017-2025 Tencent. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,6 +32,9 @@ const (
 	// 桶内无相应前缀文件，请使用正确的桶、文件前缀和压缩方式。
 	FAILEDOPERATION_BUCKETNOFILE = "FailedOperation.BucketNoFile"
 
+	// 调用云产品接口异常
+	FAILEDOPERATION_CLOUDPRODUCTINVOCATIONERROR = "FailedOperation.CloudProductInvocationError"
+
 	// 文件解压缩失败，请选择正确的压缩方式。
 	FAILEDOPERATION_DECOMPRESSFILE = "FailedOperation.DecompressFile"
 
@@ -47,13 +50,16 @@ const (
 	// 低频不支持配置kv和tag索引。
 	FAILEDOPERATION_INVALIDINDEXRULEFORSEARCHLOW = "FailedOperation.InValidIndexRuleForSearchLow"
 
+	// 目标索引不支持 update/delete
+	FAILEDOPERATION_INDEXSEGMENTOFFLOADED = "FailedOperation.IndexSegmentOffloaded"
+
 	// 该告警策略状态异常，请检查下日志主题ID是否都存在。
 	FAILEDOPERATION_INVALIDALARM = "FailedOperation.InvalidAlarm"
 
 	// 检索游标已失效或不存在。
 	FAILEDOPERATION_INVALIDCONTEXT = "FailedOperation.InvalidContext"
 
-	// 离线存储保存时间不得少于7天。
+	// 低频存储保存时间不得少于7天。
 	FAILEDOPERATION_INVALIDPERIOD = "FailedOperation.InvalidPeriod"
 
 	// 相同的日志集已存在。
@@ -64,6 +70,9 @@ const (
 
 	// 无效的Content。
 	FAILEDOPERATION_MISSINGCONTENT = "FailedOperation.MissingContent"
+
+	// 不能修改系统字段
+	FAILEDOPERATION_MODIFYSYSTEMFIELD = "FailedOperation.ModifySystemField"
 
 	// 修改的生命周期被禁止。
 	FAILEDOPERATION_PERIODMODIFYFORBIDDEN = "FailedOperation.PeriodModifyForbidden"
@@ -89,6 +98,9 @@ const (
 	// 查询语句解析错误。
 	FAILEDOPERATION_SYNTAXERROR = "FailedOperation.SyntaxError"
 
+	// 标签侧并发冲突
+	FAILEDOPERATION_TAGCONCURRENTCONFLICT = "FailedOperation.TagConcurrentConflict"
+
 	// 请求标签服务限频。
 	FAILEDOPERATION_TAGQPSLIMIT = "FailedOperation.TagQpsLimit"
 
@@ -98,11 +110,14 @@ const (
 	// 日志主题已关闭。
 	FAILEDOPERATION_TOPICCLOSED = "FailedOperation.TopicClosed"
 
-	// topic创建中
+	// Topic 创建中
 	FAILEDOPERATION_TOPICCREATING = "FailedOperation.TopicCreating"
 
 	// 日志主题已隔离。
 	FAILEDOPERATION_TOPICISOLATED = "FailedOperation.TopicIsolated"
+
+	// 命中文档数超过 10000 上限
+	FAILEDOPERATION_WRITEBYQUERYREACHLIMIT = "FailedOperation.WriteByQueryReachLimit"
 
 	// 写qps超过限制。
 	FAILEDOPERATION_WRITEQPSLIMIT = "FailedOperation.WriteQpsLimit"
@@ -125,6 +140,9 @@ const (
 	// 检索失败
 	INTERNALERROR_SEARCHFAILED = "InternalError.SearchFailed"
 
+	// 内部错误服务器繁忙
+	INTERNALERROR_SERVERBUSY = "InternalError.ServerBusy"
+
 	// 参数错误。
 	INVALIDPARAMETER = "InvalidParameter"
 
@@ -139,6 +157,9 @@ const (
 
 	// 无效的Content。
 	INVALIDPARAMETER_CONTENT = "InvalidParameter.Content"
+
+	// 跨账号标识错误
+	INVALIDPARAMETER_CROSSACCOUNTCONFLICT = "InvalidParameter.CrossAccountConflict"
 
 	// 仪表盘命名冲突。
 	INVALIDPARAMETER_DASHBOARDNAMECONFLICT = "InvalidParameter.DashboardNameConflict"
@@ -185,11 +206,20 @@ const (
 	// 超过配额限制。
 	LIMITEXCEEDED = "LimitExceeded"
 
+	// 一个billing topic只能创建一个cos采集配置
+	LIMITEXCEEDED_BILLINGCOSRECHARGEOUTOFLIMIT = "LimitExceeded.BillingCosRechargeOutOfLimit"
+
+	// 一个uin只能创建一个billing topic
+	LIMITEXCEEDED_BILLINGTOPICOUTOFLIMIT = "LimitExceeded.BillingTopicOutOfLimit"
+
 	// 采集规则配置超过最大值限制。
 	LIMITEXCEEDED_CONFIG = "LimitExceeded.Config"
 
 	// 创建日志导出任务数量超出限制。
 	LIMITEXCEEDED_EXPORT = "LimitExceeded.Export"
+
+	// 键值索引个数超过限制
+	LIMITEXCEEDED_INDEXKEYOVERLIMIT = "LimitExceeded.IndexKeyOverLimit"
 
 	// 索引操作超过频率限制。
 	LIMITEXCEEDED_INDEXOPERATING = "LimitExceeded.IndexOperating"
@@ -293,6 +323,9 @@ const (
 	// 告警策略通知模板不存在。
 	RESOURCENOTFOUND_ALARMNOTICENOTEXIST = "ResourceNotFound.AlarmNoticeNotExist"
 
+	// 集群id不存在
+	RESOURCENOTFOUND_CLUSTERNOTFOUND = "ResourceNotFound.ClusterNotFound"
+
 	// 指定的采集规则配置不存在。
 	RESOURCENOTFOUND_CONFIGNOTEXIST = "ResourceNotFound.ConfigNotExist"
 
@@ -340,4 +373,10 @@ const (
 
 	// 操作不支持。
 	UNSUPPORTEDOPERATION = "UnsupportedOperation"
+
+	// billing topic不允许修改cos导入配置
+	UNSUPPORTEDOPERATION_MODIFYBILLINGCOSRECHARGENOSUPPORT = "UnsupportedOperation.ModifyBillingCosRechargeNoSupport"
+
+	// 当前地域不支持
+	UNSUPPORTEDOPERATION_UNSUPPORTEDREGION = "UnsupportedOperation.UnsupportedRegion"
 )

@@ -18,10 +18,11 @@ import (
 
 func ResourceTencentCloudMonitorTmpScrapeJob() *schema.Resource {
 	return &schema.Resource{
-		Read:   resourceTencentCloudMonitorTmpScrapeJobRead,
-		Create: resourceTencentCloudMonitorTmpScrapeJobCreate,
-		Update: resourceTencentCloudMonitorTmpScrapeJobUpdate,
-		Delete: resourceTencentCloudMonitorTmpScrapeJobDelete,
+		DeprecationMessage: "This resource has been deprecated in Terraform TencentCloud provider version 1.83.26.",
+		Read:               resourceTencentCloudMonitorTmpScrapeJobRead,
+		Create:             resourceTencentCloudMonitorTmpScrapeJobCreate,
+		Update:             resourceTencentCloudMonitorTmpScrapeJobUpdate,
+		Delete:             resourceTencentCloudMonitorTmpScrapeJobDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
@@ -118,7 +119,8 @@ func resourceTencentCloudMonitorTmpScrapeJobRead(d *schema.ResourceData, meta in
 
 	if tmpScrapeJob == nil {
 		d.SetId("")
-		return fmt.Errorf("resource `tmpScrapeJob` %s does not exist", tmpScrapeJobId)
+		log.Printf("[WARN]%s resource `tmpScrapeJob` [%s] not found, please check if it has been deleted.\n", logId, d.Id())
+		return nil
 	}
 
 	_ = d.Set("instance_id", strings.Split(tmpScrapeJobId, tccommon.FILED_SP)[1])

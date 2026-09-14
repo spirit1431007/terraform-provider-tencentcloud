@@ -3,10 +3,11 @@ package cam
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"log"
 	"math/rand"
 	"strconv"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
 	tccommon "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/common"
 
@@ -21,10 +22,6 @@ import (
 func DataSourceTencentCloudUserInfo() *schema.Resource {
 	return &schema.Resource{
 		Read: datasourceTencentCloudUserInfoRead,
-
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
 		Schema: map[string]*schema.Schema{
 			"app_id": {
 				Type:        schema.TypeString,
@@ -43,11 +40,13 @@ func DataSourceTencentCloudUserInfo() *schema.Resource {
 				Computed:    true,
 				Description: "Current account OwnerUIN.",
 			},
+
 			"name": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "Current account Name. NOTE: only support subaccount.",
 			},
+
 			"result_output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,

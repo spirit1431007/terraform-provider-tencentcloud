@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+// Copyright (c) 2017-2025 Tencent. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -76,6 +76,9 @@ const (
 
 	// 数据库错误。
 	INTERNALERROR_DBERROR = "InternalError.DBError"
+
+	// 数据错误。
+	INTERNALERROR_DATAERROR = "InternalError.DataError"
 
 	// GCS接口错误。
 	INTERNALERROR_GCSERROR = "InternalError.GcsError"
@@ -217,6 +220,9 @@ const (
 
 	// 数据库超过限制。
 	LIMITEXCEEDED_TOOMANYDB = "LimitExceeded.TooManyDB"
+
+	// 缺少参数错误。
+	MISSINGPARAMETER = "MissingParameter"
 
 	// 已经存在一个准备启动的增量导入任务。
 	RESOURCEINUSE_INCREMENTALMIGRATIONEXIST = "ResourceInUse.IncrementalMigrationExist"

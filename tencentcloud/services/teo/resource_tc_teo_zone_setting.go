@@ -22,6 +22,7 @@ func ResourceTencentCloudTeoZoneSetting() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
+		DeprecationMessage: "This resource has been deprecated in favour of the Terraform equivalent resource `tencentcloud_teo_l7_acc_setting`.",
 		Schema: map[string]*schema.Schema{
 			"zone_id": {
 				Type:        schema.TypeString,
@@ -34,6 +35,12 @@ func ResourceTencentCloudTeoZoneSetting() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "Acceleration area of the zone. Valid values: `mainland`, `overseas`.",
+			},
+
+			"zone_name": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Zone name.",
 			},
 
 			"cache": {
@@ -539,6 +546,10 @@ func resourceTencentCloudTeoZoneSettingRead(d *schema.ResourceData, meta interfa
 	}
 	if respData.Area != nil {
 		_ = d.Set("area", respData.Area)
+	}
+
+	if respData.ZoneName != nil {
+		_ = d.Set("zone_name", respData.ZoneName)
 	}
 
 	cacheConfigMap := map[string]interface{}{}

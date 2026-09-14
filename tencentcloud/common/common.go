@@ -23,6 +23,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
+	sdkErrorsIntlEn "github.com/tencentcloud/tencentcloud-sdk-go-intl-en/tencentcloud/common/errors"
 	sdkErrors "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
 	"github.com/tencentyun/cos-go-sdk-v5"
 	"gopkg.in/yaml.v2"
@@ -202,7 +203,7 @@ func InconsistentCheck(d *schema.ResourceData, meta interface{}) func() {
 // RetryError returns retry error
 func RetryError(err error, additionRetryableError ...string) *resource.RetryError {
 	switch realErr := errors.Cause(err).(type) {
-	case *sdkErrors.TencentCloudSDKError:
+	case *sdkErrors.TencentCloudSDKError, *sdkErrorsIntlEn.TencentCloudSDKError:
 		if IsExpectError(realErr, retryableErrorCode) {
 			log.Printf("[CRITAL] Retryable defined error: %v", err)
 			return resource.RetryableError(err)
@@ -276,6 +277,22 @@ func isCosExpectedError(err error, expectedError []string) bool {
 func IsExpectError(err error, expectError []string) bool {
 	e, ok := err.(*sdkErrors.TencentCloudSDKError)
 	if !ok {
+		if eIntlEn, ok := err.(*sdkErrorsIntlEn.TencentCloudSDKError); ok {
+			longCode := eIntlEn.Code
+			if IsContains(expectError, longCode) {
+				return true
+			}
+
+			if strings.Contains(longCode, ".") {
+				shortCode := strings.Split(longCode, ".")[0]
+				if IsContains(expectError, shortCode) {
+					return true
+				}
+			}
+
+			return false
+		}
+
 		return false
 	}
 
@@ -715,4 +732,60 @@ func EqualArrayIgnoreOrder(sliceA, sliceB []string) bool {
 	}
 
 	return true
+}
+
+// StringListDiffSuppressIgnoreOrder suppresses diff for a TypeList field that contains strings,
+// when the old and new lists have the same elements but in different order.
+//
+// This is useful when:
+//   - The API requires strict ordering when creating resources (must use TypeList)
+//   - The API returns an unordered list when reading resources
+//   - Without suppression, users would see unnecessary diffs due to order differences
+//
+// fieldName is the exact schema attribute name (e.g. "availability_zone_list").
+// This function handles calls at both list level and element level made by Terraform for TypeList.
+func StringListDiffSuppressIgnoreOrder(fieldName string) schema.SchemaDiffSuppressFunc {
+	return func(k, old, new string, d *schema.ResourceData) bool {
+		if !strings.Contains(k, fieldName) {
+			return false
+		}
+
+		oldVal, newVal := d.GetChange(fieldName)
+
+		if oldVal == nil && newVal == nil {
+			return true
+		}
+		if oldVal == nil || newVal == nil {
+			return false
+		}
+
+		oldList, ok1 := oldVal.([]interface{})
+		newList, ok2 := newVal.([]interface{})
+		if !ok1 || !ok2 {
+			return false
+		}
+
+		if len(oldList) != len(newList) {
+			return false
+		}
+
+		if len(oldList) == 0 {
+			return true
+		}
+
+		oldStrings := make([]string, 0, len(oldList))
+		newStrings := make([]string, 0, len(newList))
+		for _, v := range oldList {
+			if s, ok := v.(string); ok {
+				oldStrings = append(oldStrings, s)
+			}
+		}
+		for _, v := range newList {
+			if s, ok := v.(string); ok {
+				newStrings = append(newStrings, s)
+			}
+		}
+
+		return EqualArrayIgnoreOrder(oldStrings, newStrings)
+	}
 }

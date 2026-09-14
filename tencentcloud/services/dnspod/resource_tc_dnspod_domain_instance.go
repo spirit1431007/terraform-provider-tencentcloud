@@ -55,6 +55,11 @@ func ResourceTencentCloudDnspodDomainInstance() *schema.Resource {
 				Description: "The remark of Domain.",
 			},
 			//computed
+			"domain_id": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "ID of the domain.",
+			},
 			"create_time": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -64,6 +69,21 @@ func ResourceTencentCloudDnspodDomainInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "Is secondary DNS enabled.",
+			},
+			"record_count": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "Number of DNS records under this domain.",
+			},
+			"grade": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The DNS plan/package grade of the domain (e.g., DP_Free, DP_Plus).",
+			},
+			"updated_on": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Last modification time of the domain.",
 			},
 		},
 	}
@@ -85,8 +105,8 @@ func resourceTencentCloudDnspodDomainInstanceCreate(d *schema.ResourceData, meta
 	if v, ok := d.GetOk("domain"); ok {
 		domain = v.(string)
 	}
-	if v, ok := d.GetOk("group_id"); ok {
-		groupId = v.(uint64)
+	if v, ok := d.GetOkExists("group_id"); ok {
+		groupId = *helper.IntUint64(v.(int))
 	}
 	if v, ok := d.GetOk("is_mark"); ok {
 		isMark = v.(string)
@@ -151,12 +171,39 @@ func resourceTencentCloudDnspodDomainInstanceRead(d *schema.ResourceData, meta i
 		response = result
 		info := response.Response.DomainInfo
 
-		d.SetId(*response.Response.DomainInfo.Domain)
-
+		_ = d.Set("domain_id", info.DomainId)
 		_ = d.Set("domain", info.Domain)
 		_ = d.Set("create_time", info.CreatedOn)
 		_ = d.Set("is_mark", info.IsMark)
 		_ = d.Set("slave_dns", info.SlaveDNS)
+
+		if info.Status != nil {
+			if *info.Status == "pause" {
+				_ = d.Set("status", DNSPOD_DOMAIN_STATUS_DISABLE)
+			} else {
+				_ = d.Set("status", info.Status)
+			}
+		}
+
+		if info.RecordCount != nil {
+			_ = d.Set("record_count", int(*info.RecordCount))
+		}
+
+		if info.Grade != nil {
+			_ = d.Set("grade", info.Grade)
+		}
+
+		if info.UpdatedOn != nil {
+			_ = d.Set("updated_on", info.UpdatedOn)
+		}
+
+		if info.Remark != nil {
+			_ = d.Set("remark", info.Remark)
+		}
+
+		if info.GroupId != nil {
+			_ = d.Set("group_id", info.GroupId)
+		}
 
 		return nil
 	})

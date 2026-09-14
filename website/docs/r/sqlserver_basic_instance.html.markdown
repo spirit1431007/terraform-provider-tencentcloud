@@ -58,6 +58,41 @@ resource "tencentcloud_sqlserver_basic_instance" "example" {
 }
 ```
 
+### Example with custom timezone:
+
+```hcl
+resource "tencentcloud_sqlserver_basic_instance" "example_timezone" {
+  name              = "tf-example-utc"
+  availability_zone = data.tencentcloud_availability_zones_by_product.zones.zones.4.name
+  charge_type       = "POSTPAID_BY_HOUR"
+  vpc_id            = tencentcloud_vpc.vpc.id
+  subnet_id         = tencentcloud_subnet.subnet.id
+  memory            = 4
+  storage           = 100
+  cpu               = 2
+  machine_type      = "CLOUD_PREMIUM"
+  time_zone         = "UTC"
+}
+```
+
+### Example with disk encryption enabled:
+
+```hcl
+resource "tencentcloud_sqlserver_basic_instance" "example_encrypted" {
+  name              = "tf-example-encrypted"
+  availability_zone = data.tencentcloud_availability_zones_by_product.zones.zones.4.name
+  charge_type       = "POSTPAID_BY_HOUR"
+  vpc_id            = tencentcloud_vpc.vpc.id
+  subnet_id         = tencentcloud_subnet.subnet.id
+  memory            = 4
+  storage           = 100
+  cpu               = 2
+  machine_type      = "CLOUD_SSD"
+  disk_encrypt_flag = 1
+  time_zone         = "China Standard Time"
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -72,6 +107,7 @@ The following arguments are supported:
 * `availability_zone` - (Optional, String, ForceNew) Availability zone.
 * `charge_type` - (Optional, String, ForceNew) Pay type of the SQL Server basic instance. For now, only `POSTPAID_BY_HOUR` is valid.
 * `collation` - (Optional, String) System character set sorting rule, default: Chinese_PRC_CI_AS.
+* `disk_encrypt_flag` - (Optional, Int, ForceNew) Disk encryption flag. `0` - Disabled (default), `1` - Enabled. Disk encryption cannot be changed after instance creation.
 * `engine_version` - (Optional, String, ForceNew) Version of the SQL Server basic database engine. Allowed values are `2008R2`(SQL Server 2008 Enterprise), `2012SP3`(SQL Server 2012 Enterprise), `2016SP1` (SQL Server 2016 Enterprise), `201602`(SQL Server 2016 Standard) and `2017`(SQL Server 2017 Enterprise). Default is `2008R2`.
 * `maintenance_start_time` - (Optional, String) Start time of the maintenance in one day, format like `HH:mm`.
 * `maintenance_time_span` - (Optional, Int) The timespan of maintenance in one day, unit is hour.
@@ -81,6 +117,7 @@ The following arguments are supported:
 * `security_groups` - (Optional, Set: [`String`]) Security group bound to the instance.
 * `subnet_id` - (Optional, String, ForceNew) ID of subnet.
 * `tags` - (Optional, Map) The tags of the SQL Server basic instance.
+* `time_zone` - (Optional, String, ForceNew) System timezone for the SQL Server instance. Default is `China Standard Time`. This setting cannot be changed after creation.
 * `voucher_ids` - (Optional, Set: [`String`]) An array of voucher IDs, currently only one can be used for a single order.
 * `vpc_id` - (Optional, String, ForceNew) ID of VPC.
 
@@ -90,7 +127,9 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - ID of the resource.
 * `create_time` - Create time of the SQL Server basic instance.
+* `dns_pod_domain` - Internet address domain name.
 * `status` - Status of the SQL Server basic instance. 1 for applying, 2 for running, 3 for running with limit, 4 for isolated, 5 for recycling, 6 for recycled, 7 for running with task, 8 for off-line, 9 for expanding, 10 for migrating, 11 for readonly, 12 for rebooting.
+* `tgw_wan_vport` - External port number.
 * `vip` - IP for private access.
 * `vport` - Port for private access.
 

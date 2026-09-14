@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+// Copyright (c) 2017-2025 Tencent. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -86,6 +86,7 @@ func (c *Client) CreateHealthCheckPolicyWithContext(ctx context.Context, request
     if request == nil {
         request = NewCreateHealthCheckPolicyRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "tke", APIVersion, "CreateHealthCheckPolicy")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateHealthCheckPolicy require credential")
@@ -118,7 +119,185 @@ func NewCreateNodePoolResponse() (response *CreateNodePoolResponse) {
 }
 
 // CreateNodePool
-// 创建 TKE 节点池
+// **通过 CAM 策略强制节点池安全配置**
+//
+// 
+//
+// 创建原生节点池（`CreateNodePool`）接口已接入 CAM 条件鉴权，会根据请求参数计算出一组**条件键（Condition Key）**并传入 CAM 鉴权。您可以在 CAM/SCP 策略中基于这些条件键配置 `deny` 规则，从而强制约束节点池的安全配置（如必须开启磁盘加密、安全加固等）。
+//
+// 
+//
+// **支持的条件键**
+//
+// 
+//
+// | 条件键 | 含义 | 取值 | 取值判定说明 |
+//
+// |--------|------|------|-------------|
+//
+// | `tke:NodePoolType` | 节点池类型 | `Native` / `External` | 取请求的节点池类型，未指定时默认为 `Native` |
+//
+// | `tke:SystemDiskEncrypted` | 系统盘是否加密 | `true` / `false` | 系统盘加密属性为 `ENCRYPT`（大小写不敏感）时为 `true`，否则为 `false` |
+//
+// | `tke:AllDataDisksEncrypted` | 所有数据盘是否都已加密 | `true` / `false` | 全部数据盘加密属性均为 `ENCRYPT` 时为 `true`；未配置数据盘时也为 `true`；只要有任一数据盘未加密即为 `false` |
+//
+// | `tke:SecurityAgentEnabled` | 是否开启安全加固（Security Agent） | `true` / `false` | 开启安全加固时为 `true`，否则为 `false` |
+//
+// 
+//
+// > 说明：所有条件键的取值均为字符串 `"true"` / `"false"`，请在策略中使用字符串形式匹配。
+//
+// 
+//
+// **使用方式**
+//
+// 
+//
+// 在 CAM 策略中使用 `bool_equal` 匹配条件键值为 `"false"`，配合 `effect: deny`，即可实现"未满足安全配置则拒绝创建节点池"的强制约束。
+//
+// 
+//
+// **示例一：强制开启安全加固**
+//
+// 
+//
+// 创建节点池时若未开启安全加固（`tke:SecurityAgentEnabled = "false"`），则拒绝。
+//
+// 
+//
+// ```json
+//
+// {
+//
+//     "version": "2.0",
+//
+//     "statement": [
+//
+//         {
+//
+//             "effect": "deny",
+//
+//             "action": ["tke:CreateNodePool"],
+//
+//             "resource": ["*"],
+//
+//             "condition": {
+//
+//                 "bool_equal": {
+//
+//                     "tke:SecurityAgentEnabled": "false"
+//
+//                 }
+//
+//             }
+//
+//         }
+//
+//     ]
+//
+// }
+//
+// ```
+//
+// 
+//
+// **示例二：强制数据盘加密**
+//
+// 
+//
+// 创建节点池时若存在未加密的数据盘（`tke:AllDataDisksEncrypted = "false"`），则拒绝。
+//
+// 
+//
+// ```json
+//
+// {
+//
+//     "version": "2.0",
+//
+//     "statement": [
+//
+//         {
+//
+//             "effect": "deny",
+//
+//             "action": ["tke:CreateNodePool"],
+//
+//             "resource": ["*"],
+//
+//             "condition": {
+//
+//                 "bool_equal": {
+//
+//                     "tke:AllDataDisksEncrypted": "false"
+//
+//                 }
+//
+//             }
+//
+//         }
+//
+//     ]
+//
+// }
+//
+// ```
+//
+// 
+//
+// **示例三：强制系统盘加密**
+//
+// 
+//
+// 创建节点池时若系统盘未加密（`tke:SystemDiskEncrypted = "false"`），则拒绝。
+//
+// 
+//
+// ```json
+//
+// {
+//
+//     "version": "2.0",
+//
+//     "statement": [
+//
+//         {
+//
+//             "effect": "deny",
+//
+//             "action": ["tke:CreateNodePool"],
+//
+//             "resource": ["*"],
+//
+//             "condition": {
+//
+//                 "bool_equal": {
+//
+//                     "tke:SystemDiskEncrypted": "false"
+//
+//                 }
+//
+//             }
+//
+//         }
+//
+//     ]
+//
+// }
+//
+// ```
+//
+// 
+//
+// **注意事项**
+//
+// 
+//
+// - 上述条件键在**未配置任何 CAM 策略**时不会影响节点池创建，仅在您显式配置了对应 `deny` 策略时才生效。
+//
+// - 如需同时强制多项安全配置，必须在同一策略的 `statement` 中配置多条 `deny` 规则，不能将多个条件键写入同一条 `condition`。
+//
+// - `tke:AllDataDisksEncrypted` 在**无数据盘**场景下取值为 `true`（不存在未加密的数据盘），因此仅约束"已配置的数据盘必须加密"，不会强制要求必须挂载数据盘。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -131,7 +310,185 @@ func (c *Client) CreateNodePool(request *CreateNodePoolRequest) (response *Creat
 }
 
 // CreateNodePool
-// 创建 TKE 节点池
+// **通过 CAM 策略强制节点池安全配置**
+//
+// 
+//
+// 创建原生节点池（`CreateNodePool`）接口已接入 CAM 条件鉴权，会根据请求参数计算出一组**条件键（Condition Key）**并传入 CAM 鉴权。您可以在 CAM/SCP 策略中基于这些条件键配置 `deny` 规则，从而强制约束节点池的安全配置（如必须开启磁盘加密、安全加固等）。
+//
+// 
+//
+// **支持的条件键**
+//
+// 
+//
+// | 条件键 | 含义 | 取值 | 取值判定说明 |
+//
+// |--------|------|------|-------------|
+//
+// | `tke:NodePoolType` | 节点池类型 | `Native` / `External` | 取请求的节点池类型，未指定时默认为 `Native` |
+//
+// | `tke:SystemDiskEncrypted` | 系统盘是否加密 | `true` / `false` | 系统盘加密属性为 `ENCRYPT`（大小写不敏感）时为 `true`，否则为 `false` |
+//
+// | `tke:AllDataDisksEncrypted` | 所有数据盘是否都已加密 | `true` / `false` | 全部数据盘加密属性均为 `ENCRYPT` 时为 `true`；未配置数据盘时也为 `true`；只要有任一数据盘未加密即为 `false` |
+//
+// | `tke:SecurityAgentEnabled` | 是否开启安全加固（Security Agent） | `true` / `false` | 开启安全加固时为 `true`，否则为 `false` |
+//
+// 
+//
+// > 说明：所有条件键的取值均为字符串 `"true"` / `"false"`，请在策略中使用字符串形式匹配。
+//
+// 
+//
+// **使用方式**
+//
+// 
+//
+// 在 CAM 策略中使用 `bool_equal` 匹配条件键值为 `"false"`，配合 `effect: deny`，即可实现"未满足安全配置则拒绝创建节点池"的强制约束。
+//
+// 
+//
+// **示例一：强制开启安全加固**
+//
+// 
+//
+// 创建节点池时若未开启安全加固（`tke:SecurityAgentEnabled = "false"`），则拒绝。
+//
+// 
+//
+// ```json
+//
+// {
+//
+//     "version": "2.0",
+//
+//     "statement": [
+//
+//         {
+//
+//             "effect": "deny",
+//
+//             "action": ["tke:CreateNodePool"],
+//
+//             "resource": ["*"],
+//
+//             "condition": {
+//
+//                 "bool_equal": {
+//
+//                     "tke:SecurityAgentEnabled": "false"
+//
+//                 }
+//
+//             }
+//
+//         }
+//
+//     ]
+//
+// }
+//
+// ```
+//
+// 
+//
+// **示例二：强制数据盘加密**
+//
+// 
+//
+// 创建节点池时若存在未加密的数据盘（`tke:AllDataDisksEncrypted = "false"`），则拒绝。
+//
+// 
+//
+// ```json
+//
+// {
+//
+//     "version": "2.0",
+//
+//     "statement": [
+//
+//         {
+//
+//             "effect": "deny",
+//
+//             "action": ["tke:CreateNodePool"],
+//
+//             "resource": ["*"],
+//
+//             "condition": {
+//
+//                 "bool_equal": {
+//
+//                     "tke:AllDataDisksEncrypted": "false"
+//
+//                 }
+//
+//             }
+//
+//         }
+//
+//     ]
+//
+// }
+//
+// ```
+//
+// 
+//
+// **示例三：强制系统盘加密**
+//
+// 
+//
+// 创建节点池时若系统盘未加密（`tke:SystemDiskEncrypted = "false"`），则拒绝。
+//
+// 
+//
+// ```json
+//
+// {
+//
+//     "version": "2.0",
+//
+//     "statement": [
+//
+//         {
+//
+//             "effect": "deny",
+//
+//             "action": ["tke:CreateNodePool"],
+//
+//             "resource": ["*"],
+//
+//             "condition": {
+//
+//                 "bool_equal": {
+//
+//                     "tke:SystemDiskEncrypted": "false"
+//
+//                 }
+//
+//             }
+//
+//         }
+//
+//     ]
+//
+// }
+//
+// ```
+//
+// 
+//
+// **注意事项**
+//
+// 
+//
+// - 上述条件键在**未配置任何 CAM 策略**时不会影响节点池创建，仅在您显式配置了对应 `deny` 策略时才生效。
+//
+// - 如需同时强制多项安全配置，必须在同一策略的 `statement` 中配置多条 `deny` 规则，不能将多个条件键写入同一条 `condition`。
+//
+// - `tke:AllDataDisksEncrypted` 在**无数据盘**场景下取值为 `true`（不存在未加密的数据盘），因此仅约束"已配置的数据盘必须加密"，不会强制要求必须挂载数据盘。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -143,6 +500,7 @@ func (c *Client) CreateNodePoolWithContext(ctx context.Context, request *CreateN
     if request == nil {
         request = NewCreateNodePoolRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "tke", APIVersion, "CreateNodePool")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateNodePool require credential")
@@ -151,6 +509,66 @@ func (c *Client) CreateNodePoolWithContext(ctx context.Context, request *CreateN
     request.SetContext(ctx)
     
     response = NewCreateNodePoolResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDeleteClusterMachinesRequest() (request *DeleteClusterMachinesRequest) {
+    request = &DeleteClusterMachinesRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("tke", APIVersion, "DeleteClusterMachines")
+    
+    
+    return
+}
+
+func NewDeleteClusterMachinesResponse() (response *DeleteClusterMachinesResponse) {
+    response = &DeleteClusterMachinesResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DeleteClusterMachines
+// 删除原生节点池节点
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_PARAM = "InvalidParameter.Param"
+//  OPERATIONDENIED = "OperationDenied"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
+func (c *Client) DeleteClusterMachines(request *DeleteClusterMachinesRequest) (response *DeleteClusterMachinesResponse, err error) {
+    return c.DeleteClusterMachinesWithContext(context.Background(), request)
+}
+
+// DeleteClusterMachines
+// 删除原生节点池节点
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_PARAM = "InvalidParameter.Param"
+//  OPERATIONDENIED = "OperationDenied"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
+func (c *Client) DeleteClusterMachinesWithContext(ctx context.Context, request *DeleteClusterMachinesRequest) (response *DeleteClusterMachinesResponse, err error) {
+    if request == nil {
+        request = NewDeleteClusterMachinesRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "tke", APIVersion, "DeleteClusterMachines")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DeleteClusterMachines require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDeleteClusterMachinesResponse()
     err = c.Send(request, response)
     return
 }
@@ -196,6 +614,7 @@ func (c *Client) DeleteHealthCheckPolicyWithContext(ctx context.Context, request
     if request == nil {
         request = NewDeleteHealthCheckPolicyRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "tke", APIVersion, "DeleteHealthCheckPolicy")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteHealthCheckPolicy require credential")
@@ -255,6 +674,7 @@ func (c *Client) DeleteNodePoolWithContext(ctx context.Context, request *DeleteN
     if request == nil {
         request = NewDeleteNodePoolRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "tke", APIVersion, "DeleteNodePool")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteNodePool require credential")
@@ -296,7 +716,6 @@ func NewDescribeClusterInstancesResponse() (response *DescribeClusterInstancesRe
 //  INTERNALERROR_DBAFFECTIVEDROWS = "InternalError.DbAffectivedRows"
 //  INTERNALERROR_INITMASTERFAILED = "InternalError.InitMasterFailed"
 //  INTERNALERROR_PARAM = "InternalError.Param"
-//  INTERNALERROR_PUBLICCLUSTEROPNOTSUPPORT = "InternalError.PublicClusterOpNotSupport"
 //  INTERNALERROR_UNEXCEPTEDINTERNAL = "InternalError.UnexceptedInternal"
 //  INTERNALERROR_UNEXPECTEDINTERNAL = "InternalError.UnexpectedInternal"
 //  INVALIDPARAMETER_CLUSTERNOTFOUND = "InvalidParameter.ClusterNotFound"
@@ -317,7 +736,6 @@ func (c *Client) DescribeClusterInstances(request *DescribeClusterInstancesReque
 //  INTERNALERROR_DBAFFECTIVEDROWS = "InternalError.DbAffectivedRows"
 //  INTERNALERROR_INITMASTERFAILED = "InternalError.InitMasterFailed"
 //  INTERNALERROR_PARAM = "InternalError.Param"
-//  INTERNALERROR_PUBLICCLUSTEROPNOTSUPPORT = "InternalError.PublicClusterOpNotSupport"
 //  INTERNALERROR_UNEXCEPTEDINTERNAL = "InternalError.UnexceptedInternal"
 //  INTERNALERROR_UNEXPECTEDINTERNAL = "InternalError.UnexpectedInternal"
 //  INVALIDPARAMETER_CLUSTERNOTFOUND = "InvalidParameter.ClusterNotFound"
@@ -328,6 +746,7 @@ func (c *Client) DescribeClusterInstancesWithContext(ctx context.Context, reques
     if request == nil {
         request = NewDescribeClusterInstancesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "tke", APIVersion, "DescribeClusterInstances")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeClusterInstances require credential")
@@ -336,6 +755,216 @@ func (c *Client) DescribeClusterInstancesWithContext(ctx context.Context, reques
     request.SetContext(ctx)
     
     response = NewDescribeClusterInstancesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeClusterMachinesRequest() (request *DescribeClusterMachinesRequest) {
+    request = &DescribeClusterMachinesRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("tke", APIVersion, "DescribeClusterMachines")
+    
+    
+    return
+}
+
+func NewDescribeClusterMachinesResponse() (response *DescribeClusterMachinesResponse) {
+    response = &DescribeClusterMachinesResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeClusterMachines
+// 查询托原生点列表
+//
+// 可能返回的错误码:
+//  INTERNALERROR_DBRECORDNOTFOUND = "InternalError.DbRecordNotFound"
+//  INTERNALERROR_PARAM = "InternalError.Param"
+//  INTERNALERROR_UNEXPECTEDINTERNAL = "InternalError.UnexpectedInternal"
+//  INVALIDPARAMETER_PARAM = "InvalidParameter.Param"
+//  RESOURCENOTFOUND_CLUSTERNOTFOUND = "ResourceNotFound.ClusterNotFound"
+func (c *Client) DescribeClusterMachines(request *DescribeClusterMachinesRequest) (response *DescribeClusterMachinesResponse, err error) {
+    return c.DescribeClusterMachinesWithContext(context.Background(), request)
+}
+
+// DescribeClusterMachines
+// 查询托原生点列表
+//
+// 可能返回的错误码:
+//  INTERNALERROR_DBRECORDNOTFOUND = "InternalError.DbRecordNotFound"
+//  INTERNALERROR_PARAM = "InternalError.Param"
+//  INTERNALERROR_UNEXPECTEDINTERNAL = "InternalError.UnexpectedInternal"
+//  INVALIDPARAMETER_PARAM = "InvalidParameter.Param"
+//  RESOURCENOTFOUND_CLUSTERNOTFOUND = "ResourceNotFound.ClusterNotFound"
+func (c *Client) DescribeClusterMachinesWithContext(ctx context.Context, request *DescribeClusterMachinesRequest) (response *DescribeClusterMachinesResponse, err error) {
+    if request == nil {
+        request = NewDescribeClusterMachinesRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "tke", APIVersion, "DescribeClusterMachines")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeClusterMachines require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeClusterMachinesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeClustersRequest() (request *DescribeClustersRequest) {
+    request = &DescribeClustersRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("tke", APIVersion, "DescribeClusters")
+    
+    
+    return
+}
+
+func NewDescribeClustersResponse() (response *DescribeClustersResponse) {
+    response = &DescribeClustersResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeClusters
+// 查询集群列表
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INTERNALERROR_CAMNOAUTH = "InternalError.CamNoAuth"
+//  INTERNALERROR_DB = "InternalError.Db"
+//  INTERNALERROR_DBAFFECTIVEDROWS = "InternalError.DbAffectivedRows"
+//  INTERNALERROR_PARAM = "InternalError.Param"
+//  INTERNALERROR_PUBLICCLUSTEROPNOTSUPPORT = "InternalError.PublicClusterOpNotSupport"
+//  INTERNALERROR_QUOTAMAXCLSLIMIT = "InternalError.QuotaMaxClsLimit"
+//  INTERNALERROR_QUOTAMAXNODLIMIT = "InternalError.QuotaMaxNodLimit"
+//  INTERNALERROR_UNEXPECTEDINTERNAL = "InternalError.UnexpectedInternal"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_PARAM = "InvalidParameter.Param"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  UNAUTHORIZEDOPERATION_CAMNOAUTH = "UnauthorizedOperation.CamNoAuth"
+func (c *Client) DescribeClusters(request *DescribeClustersRequest) (response *DescribeClustersResponse, err error) {
+    return c.DescribeClustersWithContext(context.Background(), request)
+}
+
+// DescribeClusters
+// 查询集群列表
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INTERNALERROR_CAMNOAUTH = "InternalError.CamNoAuth"
+//  INTERNALERROR_DB = "InternalError.Db"
+//  INTERNALERROR_DBAFFECTIVEDROWS = "InternalError.DbAffectivedRows"
+//  INTERNALERROR_PARAM = "InternalError.Param"
+//  INTERNALERROR_PUBLICCLUSTEROPNOTSUPPORT = "InternalError.PublicClusterOpNotSupport"
+//  INTERNALERROR_QUOTAMAXCLSLIMIT = "InternalError.QuotaMaxClsLimit"
+//  INTERNALERROR_QUOTAMAXNODLIMIT = "InternalError.QuotaMaxNodLimit"
+//  INTERNALERROR_UNEXPECTEDINTERNAL = "InternalError.UnexpectedInternal"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_PARAM = "InvalidParameter.Param"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  UNAUTHORIZEDOPERATION_CAMNOAUTH = "UnauthorizedOperation.CamNoAuth"
+func (c *Client) DescribeClustersWithContext(ctx context.Context, request *DescribeClustersRequest) (response *DescribeClustersResponse, err error) {
+    if request == nil {
+        request = NewDescribeClustersRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "tke", APIVersion, "DescribeClusters")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeClusters require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeClustersResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeGPUInfoRequest() (request *DescribeGPUInfoRequest) {
+    request = &DescribeGPUInfoRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("tke", APIVersion, "DescribeGPUInfo")
+    
+    
+    return
+}
+
+func NewDescribeGPUInfoResponse() (response *DescribeGPUInfoResponse) {
+    response = &DescribeGPUInfoResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeGPUInfo
+// 请求该接口，会返回所有适配该机型和操作系统组合的gpu驱动版本
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INTERNALERROR_CAMNOAUTH = "InternalError.CamNoAuth"
+//  INTERNALERROR_DB = "InternalError.Db"
+//  INTERNALERROR_DBAFFECTIVEDROWS = "InternalError.DbAffectivedRows"
+//  INTERNALERROR_PARAM = "InternalError.Param"
+//  INTERNALERROR_PUBLICCLUSTEROPNOTSUPPORT = "InternalError.PublicClusterOpNotSupport"
+//  INTERNALERROR_QUOTAMAXCLSLIMIT = "InternalError.QuotaMaxClsLimit"
+//  INTERNALERROR_QUOTAMAXNODLIMIT = "InternalError.QuotaMaxNodLimit"
+//  INTERNALERROR_UNEXPECTEDINTERNAL = "InternalError.UnexpectedInternal"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_PARAM = "InvalidParameter.Param"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  UNAUTHORIZEDOPERATION_CAMNOAUTH = "UnauthorizedOperation.CamNoAuth"
+func (c *Client) DescribeGPUInfo(request *DescribeGPUInfoRequest) (response *DescribeGPUInfoResponse, err error) {
+    return c.DescribeGPUInfoWithContext(context.Background(), request)
+}
+
+// DescribeGPUInfo
+// 请求该接口，会返回所有适配该机型和操作系统组合的gpu驱动版本
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INTERNALERROR_CAMNOAUTH = "InternalError.CamNoAuth"
+//  INTERNALERROR_DB = "InternalError.Db"
+//  INTERNALERROR_DBAFFECTIVEDROWS = "InternalError.DbAffectivedRows"
+//  INTERNALERROR_PARAM = "InternalError.Param"
+//  INTERNALERROR_PUBLICCLUSTEROPNOTSUPPORT = "InternalError.PublicClusterOpNotSupport"
+//  INTERNALERROR_QUOTAMAXCLSLIMIT = "InternalError.QuotaMaxClsLimit"
+//  INTERNALERROR_QUOTAMAXNODLIMIT = "InternalError.QuotaMaxNodLimit"
+//  INTERNALERROR_UNEXPECTEDINTERNAL = "InternalError.UnexpectedInternal"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_PARAM = "InvalidParameter.Param"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  UNAUTHORIZEDOPERATION_CAMNOAUTH = "UnauthorizedOperation.CamNoAuth"
+func (c *Client) DescribeGPUInfoWithContext(ctx context.Context, request *DescribeGPUInfoRequest) (response *DescribeGPUInfoResponse, err error) {
+    if request == nil {
+        request = NewDescribeGPUInfoRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "tke", APIVersion, "DescribeGPUInfo")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeGPUInfo require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeGPUInfoResponse()
     err = c.Send(request, response)
     return
 }
@@ -381,6 +1010,7 @@ func (c *Client) DescribeHealthCheckPoliciesWithContext(ctx context.Context, req
     if request == nil {
         request = NewDescribeHealthCheckPoliciesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "tke", APIVersion, "DescribeHealthCheckPolicies")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeHealthCheckPolicies require credential")
@@ -434,6 +1064,7 @@ func (c *Client) DescribeHealthCheckPolicyBindingsWithContext(ctx context.Contex
     if request == nil {
         request = NewDescribeHealthCheckPolicyBindingsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "tke", APIVersion, "DescribeHealthCheckPolicyBindings")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeHealthCheckPolicyBindings require credential")
@@ -483,6 +1114,7 @@ func (c *Client) DescribeHealthCheckTemplateWithContext(ctx context.Context, req
     if request == nil {
         request = NewDescribeHealthCheckTemplateRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "tke", APIVersion, "DescribeHealthCheckTemplate")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeHealthCheckTemplate require credential")
@@ -544,6 +1176,7 @@ func (c *Client) DescribeNodePoolsWithContext(ctx context.Context, request *Desc
     if request == nil {
         request = NewDescribeNodePoolsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "tke", APIVersion, "DescribeNodePools")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeNodePools require credential")
@@ -552,6 +1185,228 @@ func (c *Client) DescribeNodePoolsWithContext(ctx context.Context, request *Desc
     request.SetContext(ctx)
     
     response = NewDescribeNodePoolsResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeNodePoolsElasticityStrengthRequest() (request *DescribeNodePoolsElasticityStrengthRequest) {
+    request = &DescribeNodePoolsElasticityStrengthRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("tke", APIVersion, "DescribeNodePoolsElasticityStrength")
+    
+    
+    return
+}
+
+func NewDescribeNodePoolsElasticityStrengthResponse() (response *DescribeNodePoolsElasticityStrengthResponse) {
+    response = &DescribeNodePoolsElasticityStrengthResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeNodePoolsElasticityStrength
+// 查询节点池健康度相关信息
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+func (c *Client) DescribeNodePoolsElasticityStrength(request *DescribeNodePoolsElasticityStrengthRequest) (response *DescribeNodePoolsElasticityStrengthResponse, err error) {
+    return c.DescribeNodePoolsElasticityStrengthWithContext(context.Background(), request)
+}
+
+// DescribeNodePoolsElasticityStrength
+// 查询节点池健康度相关信息
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+func (c *Client) DescribeNodePoolsElasticityStrengthWithContext(ctx context.Context, request *DescribeNodePoolsElasticityStrengthRequest) (response *DescribeNodePoolsElasticityStrengthResponse, err error) {
+    if request == nil {
+        request = NewDescribeNodePoolsElasticityStrengthRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "tke", APIVersion, "DescribeNodePoolsElasticityStrength")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeNodePoolsElasticityStrength require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeNodePoolsElasticityStrengthResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeZoneInstanceConfigInfosRequest() (request *DescribeZoneInstanceConfigInfosRequest) {
+    request = &DescribeZoneInstanceConfigInfosRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("tke", APIVersion, "DescribeZoneInstanceConfigInfos")
+    
+    
+    return
+}
+
+func NewDescribeZoneInstanceConfigInfosResponse() (response *DescribeZoneInstanceConfigInfosResponse) {
+    response = &DescribeZoneInstanceConfigInfosResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeZoneInstanceConfigInfos
+// 查询原生节点机型配置
+//
+// 可能返回的错误码:
+//  INTERNALERROR_DB = "InternalError.Db"
+//  INTERNALERROR_DBRECORDNOTFOUND = "InternalError.DbRecordNotFound"
+//  INVALIDPARAMETER_PARAM = "InvalidParameter.Param"
+func (c *Client) DescribeZoneInstanceConfigInfos(request *DescribeZoneInstanceConfigInfosRequest) (response *DescribeZoneInstanceConfigInfosResponse, err error) {
+    return c.DescribeZoneInstanceConfigInfosWithContext(context.Background(), request)
+}
+
+// DescribeZoneInstanceConfigInfos
+// 查询原生节点机型配置
+//
+// 可能返回的错误码:
+//  INTERNALERROR_DB = "InternalError.Db"
+//  INTERNALERROR_DBRECORDNOTFOUND = "InternalError.DbRecordNotFound"
+//  INVALIDPARAMETER_PARAM = "InvalidParameter.Param"
+func (c *Client) DescribeZoneInstanceConfigInfosWithContext(ctx context.Context, request *DescribeZoneInstanceConfigInfosRequest) (response *DescribeZoneInstanceConfigInfosResponse, err error) {
+    if request == nil {
+        request = NewDescribeZoneInstanceConfigInfosRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "tke", APIVersion, "DescribeZoneInstanceConfigInfos")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeZoneInstanceConfigInfos require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeZoneInstanceConfigInfosResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDetachApplicationRoleRequest() (request *DetachApplicationRoleRequest) {
+    request = &DetachApplicationRoleRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("tke", APIVersion, "DetachApplicationRole")
+    
+    
+    return
+}
+
+func NewDetachApplicationRoleResponse() (response *DetachApplicationRoleResponse) {
+    response = &DetachApplicationRoleResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DetachApplicationRole
+// 解绑原生节点 Application Role
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_CAMNOAUTH = "FailedOperation.CamNoAuth"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  OPERATIONDENIED = "OperationDenied"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  UNKNOWNPARAMETER = "UnknownParameter"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
+func (c *Client) DetachApplicationRole(request *DetachApplicationRoleRequest) (response *DetachApplicationRoleResponse, err error) {
+    return c.DetachApplicationRoleWithContext(context.Background(), request)
+}
+
+// DetachApplicationRole
+// 解绑原生节点 Application Role
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_CAMNOAUTH = "FailedOperation.CamNoAuth"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  OPERATIONDENIED = "OperationDenied"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  UNKNOWNPARAMETER = "UnknownParameter"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
+func (c *Client) DetachApplicationRoleWithContext(ctx context.Context, request *DetachApplicationRoleRequest) (response *DetachApplicationRoleResponse, err error) {
+    if request == nil {
+        request = NewDetachApplicationRoleRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "tke", APIVersion, "DetachApplicationRole")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DetachApplicationRole require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDetachApplicationRoleResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyClusterMachineRequest() (request *ModifyClusterMachineRequest) {
+    request = &ModifyClusterMachineRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("tke", APIVersion, "ModifyClusterMachine")
+    
+    
+    return
+}
+
+func NewModifyClusterMachineResponse() (response *ModifyClusterMachineResponse) {
+    response = &ModifyClusterMachineResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyClusterMachine
+// 修改原生节点
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_PARAM = "InvalidParameter.Param"
+//  OPERATIONDENIED = "OperationDenied"
+//  UNKNOWNPARAMETER = "UnknownParameter"
+func (c *Client) ModifyClusterMachine(request *ModifyClusterMachineRequest) (response *ModifyClusterMachineResponse, err error) {
+    return c.ModifyClusterMachineWithContext(context.Background(), request)
+}
+
+// ModifyClusterMachine
+// 修改原生节点
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_PARAM = "InvalidParameter.Param"
+//  OPERATIONDENIED = "OperationDenied"
+//  UNKNOWNPARAMETER = "UnknownParameter"
+func (c *Client) ModifyClusterMachineWithContext(ctx context.Context, request *ModifyClusterMachineRequest) (response *ModifyClusterMachineResponse, err error) {
+    if request == nil {
+        request = NewModifyClusterMachineRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "tke", APIVersion, "ModifyClusterMachine")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyClusterMachine require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyClusterMachineResponse()
     err = c.Send(request, response)
     return
 }
@@ -597,6 +1452,7 @@ func (c *Client) ModifyHealthCheckPolicyWithContext(ctx context.Context, request
     if request == nil {
         request = NewModifyHealthCheckPolicyRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "tke", APIVersion, "ModifyHealthCheckPolicy")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyHealthCheckPolicy require credential")
@@ -652,6 +1508,7 @@ func (c *Client) ModifyNodePoolWithContext(ctx context.Context, request *ModifyN
     if request == nil {
         request = NewModifyNodePoolRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "tke", APIVersion, "ModifyNodePool")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyNodePool require credential")
@@ -660,6 +1517,322 @@ func (c *Client) ModifyNodePoolWithContext(ctx context.Context, request *ModifyN
     request.SetContext(ctx)
     
     response = NewModifyNodePoolResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewRebootMachinesRequest() (request *RebootMachinesRequest) {
+    request = &RebootMachinesRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("tke", APIVersion, "RebootMachines")
+    
+    
+    return
+}
+
+func NewRebootMachinesResponse() (response *RebootMachinesResponse) {
+    response = &RebootMachinesResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// RebootMachines
+// 重启原生节点实例
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  OPERATIONDENIED = "OperationDenied"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+func (c *Client) RebootMachines(request *RebootMachinesRequest) (response *RebootMachinesResponse, err error) {
+    return c.RebootMachinesWithContext(context.Background(), request)
+}
+
+// RebootMachines
+// 重启原生节点实例
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  OPERATIONDENIED = "OperationDenied"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+func (c *Client) RebootMachinesWithContext(ctx context.Context, request *RebootMachinesRequest) (response *RebootMachinesResponse, err error) {
+    if request == nil {
+        request = NewRebootMachinesRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "tke", APIVersion, "RebootMachines")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("RebootMachines require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewRebootMachinesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewScaleNodePoolRequest() (request *ScaleNodePoolRequest) {
+    request = &ScaleNodePoolRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("tke", APIVersion, "ScaleNodePool")
+    
+    
+    return
+}
+
+func NewScaleNodePoolResponse() (response *ScaleNodePoolResponse) {
+    response = &ScaleNodePoolResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ScaleNodePool
+// 设置 TKE 节点池期望节点数
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_PARAM = "InvalidParameter.Param"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+func (c *Client) ScaleNodePool(request *ScaleNodePoolRequest) (response *ScaleNodePoolResponse, err error) {
+    return c.ScaleNodePoolWithContext(context.Background(), request)
+}
+
+// ScaleNodePool
+// 设置 TKE 节点池期望节点数
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_PARAM = "InvalidParameter.Param"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+func (c *Client) ScaleNodePoolWithContext(ctx context.Context, request *ScaleNodePoolRequest) (response *ScaleNodePoolResponse, err error) {
+    if request == nil {
+        request = NewScaleNodePoolRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "tke", APIVersion, "ScaleNodePool")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ScaleNodePool require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewScaleNodePoolResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewSetMachineLoginRequest() (request *SetMachineLoginRequest) {
+    request = &SetMachineLoginRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("tke", APIVersion, "SetMachineLogin")
+    
+    
+    return
+}
+
+func NewSetMachineLoginResponse() (response *SetMachineLoginResponse) {
+    response = &SetMachineLoginResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// SetMachineLogin
+// 设置是否开启节点登录
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) SetMachineLogin(request *SetMachineLoginRequest) (response *SetMachineLoginResponse, err error) {
+    return c.SetMachineLoginWithContext(context.Background(), request)
+}
+
+// SetMachineLogin
+// 设置是否开启节点登录
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) SetMachineLoginWithContext(ctx context.Context, request *SetMachineLoginRequest) (response *SetMachineLoginResponse, err error) {
+    if request == nil {
+        request = NewSetMachineLoginRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "tke", APIVersion, "SetMachineLogin")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("SetMachineLogin require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewSetMachineLoginResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewStartMachinesRequest() (request *StartMachinesRequest) {
+    request = &StartMachinesRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("tke", APIVersion, "StartMachines")
+    
+    
+    return
+}
+
+func NewStartMachinesResponse() (response *StartMachinesResponse) {
+    response = &StartMachinesResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// StartMachines
+// 本接口 (StartMachines) 用于启动一个或多个原生节点实例。
+//
+// 
+//
+// 只有状态为 Stopped 的实例才可以进行此操作。
+//
+// 接口调用成功后，等待一分钟左右，实例会进入 Running 状态。
+//
+// 支持批量操作。每次请求批量实例的上限为100。
+//
+// 本接口为同步接口，启动实例请求发送成功后会返回一个RequestId，此时操作并未立即完成。实例操作结果可以通过调用 DescribeClusterInstances 接口查询，如果实例的状态为 Running，则代表启动实例操作成功。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER = "InvalidParameter"
+//  OPERATIONDENIED = "OperationDenied"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+func (c *Client) StartMachines(request *StartMachinesRequest) (response *StartMachinesResponse, err error) {
+    return c.StartMachinesWithContext(context.Background(), request)
+}
+
+// StartMachines
+// 本接口 (StartMachines) 用于启动一个或多个原生节点实例。
+//
+// 
+//
+// 只有状态为 Stopped 的实例才可以进行此操作。
+//
+// 接口调用成功后，等待一分钟左右，实例会进入 Running 状态。
+//
+// 支持批量操作。每次请求批量实例的上限为100。
+//
+// 本接口为同步接口，启动实例请求发送成功后会返回一个RequestId，此时操作并未立即完成。实例操作结果可以通过调用 DescribeClusterInstances 接口查询，如果实例的状态为 Running，则代表启动实例操作成功。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER = "InvalidParameter"
+//  OPERATIONDENIED = "OperationDenied"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+func (c *Client) StartMachinesWithContext(ctx context.Context, request *StartMachinesRequest) (response *StartMachinesResponse, err error) {
+    if request == nil {
+        request = NewStartMachinesRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "tke", APIVersion, "StartMachines")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("StartMachines require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewStartMachinesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewStopMachinesRequest() (request *StopMachinesRequest) {
+    request = &StopMachinesRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("tke", APIVersion, "StopMachines")
+    
+    
+    return
+}
+
+func NewStopMachinesResponse() (response *StopMachinesResponse) {
+    response = &StopMachinesResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// StopMachines
+// 本接口 (StopMachines) 用于关闭一个或多个原生节点实例。
+//
+// 
+//
+// 只有状态为 Running 的实例才可以进行此操作。
+//
+// 接口调用成功时，实例会进入 Stopping 状态；关闭实例成功时，实例会进入 Stopped 状态。
+//
+// 支持强制关闭。强制关机的效果等同于关闭物理计算机的电源开关。强制关机可能会导致数据丢失或文件系统损坏，请仅在服务器不能正常关机时使用。
+//
+// 支持批量操作。每次请求批量实例的上限为 100。
+//
+// 本接口为同步接口，关闭实例请求发送成功后会返回一个RequestId，此时操作并未立即完成。实例操作结果可以通过调用 DescribeClusterInstances 接口查询，如果实例的状态为stopped_with_charging，则代表关闭实例操作成功。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER = "InvalidParameter"
+//  OPERATIONDENIED = "OperationDenied"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+func (c *Client) StopMachines(request *StopMachinesRequest) (response *StopMachinesResponse, err error) {
+    return c.StopMachinesWithContext(context.Background(), request)
+}
+
+// StopMachines
+// 本接口 (StopMachines) 用于关闭一个或多个原生节点实例。
+//
+// 
+//
+// 只有状态为 Running 的实例才可以进行此操作。
+//
+// 接口调用成功时，实例会进入 Stopping 状态；关闭实例成功时，实例会进入 Stopped 状态。
+//
+// 支持强制关闭。强制关机的效果等同于关闭物理计算机的电源开关。强制关机可能会导致数据丢失或文件系统损坏，请仅在服务器不能正常关机时使用。
+//
+// 支持批量操作。每次请求批量实例的上限为 100。
+//
+// 本接口为同步接口，关闭实例请求发送成功后会返回一个RequestId，此时操作并未立即完成。实例操作结果可以通过调用 DescribeClusterInstances 接口查询，如果实例的状态为stopped_with_charging，则代表关闭实例操作成功。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER = "InvalidParameter"
+//  OPERATIONDENIED = "OperationDenied"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+func (c *Client) StopMachinesWithContext(ctx context.Context, request *StopMachinesRequest) (response *StopMachinesResponse, err error) {
+    if request == nil {
+        request = NewStopMachinesRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "tke", APIVersion, "StopMachines")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("StopMachines require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewStopMachinesResponse()
     err = c.Send(request, response)
     return
 }

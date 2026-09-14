@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+// Copyright (c) 2017-2025 Tencent. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,11 +32,20 @@ const (
 	// 账号为当前用户
 	FAILEDOPERATION_ACCOUNTISYOURSELF = "FailedOperation.AccountIsYourSelf"
 
+	// 该实例 `ins-xxxxxxx` 已经在 `dgroup-xxxxxx` 置放群组里。
+	FAILEDOPERATION_ALREADYINDISASTERRECOVERGROUP = "FailedOperation.AlreadyInDisasterRecoverGroup"
+
 	// 自带许可镜像暂时不支持共享。
 	FAILEDOPERATION_BYOLIMAGESHAREFAILED = "FailedOperation.BYOLImageShareFailed"
 
 	// 未找到指定的容灾组
 	FAILEDOPERATION_DISASTERRECOVERGROUPNOTFOUND = "FailedOperation.DisasterRecoverGroupNotFound"
+
+	// 实例置放群组信息不匹配，操作失败。
+	FAILEDOPERATION_DISASTERRECOVERGROUPNOTMATCH = "FailedOperation.DisasterRecoverGroupNotMatch"
+
+	// 获取实例的自动化助手状态失败
+	FAILEDOPERATION_GETINSTANCETATAGENTSTATUSFAILED = "FailedOperation.GetInstanceTATAgentStatusFailed"
 
 	// 标签键存在不合法字符
 	FAILEDOPERATION_ILLEGALTAGKEY = "FailedOperation.IllegalTagKey"
@@ -140,7 +149,7 @@ const (
 	// 无效的过滤器。
 	INVALIDFILTER = "InvalidFilter"
 
-	// [`Filter`](/document/api/213/15753#Filter)。
+	// [`Filter`](/document/api/213/15753#Filter)传值超出限制。
 	INVALIDFILTERVALUE_LIMITEXCEEDED = "InvalidFilterValue.LimitExceeded"
 
 	// 不支持该宿主机实例执行指定的操作。
@@ -224,8 +233,14 @@ const (
 	// 最多指定一个参数。
 	INVALIDPARAMETER_ATMOSTONE = "InvalidParameter.AtMostOne"
 
+	// 不支持自动制作快照。
+	INVALIDPARAMETER_AUTOSNAPSHOTNOTSUPPORTED = "InvalidParameter.AutoSnapshotNotSupported"
+
 	// 不支持参数CdcId。
 	INVALIDPARAMETER_CDCNOTSUPPORTED = "InvalidParameter.CdcNotSupported"
+
+	// CDZ不支持实例跨区迁移
+	INVALIDPARAMETER_CDZNOTSUPPORTED = "InvalidParameter.CdzNotSupported"
 
 	// DataDiskIds不应该传入RootDisk的Id。
 	INVALIDPARAMETER_DATADISKIDCONTAINSROOTDISK = "InvalidParameter.DataDiskIdContainsRootDisk"
@@ -239,6 +254,15 @@ const (
 	// 边缘可用区指定三网外网IP参数需要先指定主ip外网IP参数。
 	INVALIDPARAMETER_EDGEZONEMISSINTERNETACCESSIBLE = "InvalidParameter.EdgeZoneMissInternetAccessible"
 
+	// 指定的CDH母机不支持自定义类型的子机规格
+	INVALIDPARAMETER_HOSTIDCUSTOMIZEDINSTANCETYPENOTSUPPORT = "InvalidParameter.HostIdCustomizedInstanceTypeNotSupport"
+
+	// 指定的CDH母机不支持该子机机型规格
+	INVALIDPARAMETER_HOSTIDINSTANCETYPENOTSUPPORT = "InvalidParameter.HostIdInstanceTypeNotSupport"
+
+	// 指定的CDH母机不支持标准类型的子机规格
+	INVALIDPARAMETER_HOSTIDSTANDARDINSTANCETYPENOTSUPPORT = "InvalidParameter.HostIdStandardInstanceTypeNotSupport"
+
 	// 该主机当前状态不支持该操作。
 	INVALIDPARAMETER_HOSTIDSTATUSNOTSUPPORT = "InvalidParameter.HostIdStatusNotSupport"
 
@@ -250,6 +274,12 @@ const (
 
 	// 当前接口不支持实例镜像。
 	INVALIDPARAMETER_INSTANCEIMAGENOTSUPPORT = "InvalidParameter.InstanceImageNotSupport"
+
+	// 指定机型不支持。
+	INVALIDPARAMETER_INSTANCETYPENOTSUPPORT = "InvalidParameter.InstanceTypeNotSupport"
+
+	// 不存在支持指定子机规格的CDH母机
+	INVALIDPARAMETER_INSTANCETYPESUPPORTEDHOSTNOTFOUND = "InvalidParameter.InstanceTypeSupportedHostNotFound"
 
 	// 不支持设置公网带宽相关信息。
 	INVALIDPARAMETER_INTERNETACCESSIBLENOTSUPPORTED = "InvalidParameter.InternetAccessibleNotSupported"
@@ -266,11 +296,17 @@ const (
 	// 指定的私有网络ip格式不正确。
 	INVALIDPARAMETER_INVALIDIPFORMAT = "InvalidParameter.InvalidIpFormat"
 
+	// 指定的 KMS 密钥 ID 非法。
+	INVALIDPARAMETER_INVALIDKMSKEYID = "InvalidParameter.InvalidKmsKeyId"
+
 	// 不能同时指定ImageIds和Filters。
 	INVALIDPARAMETER_INVALIDPARAMETERCOEXISTIMAGEIDSFILTERS = "InvalidParameter.InvalidParameterCoexistImageIdsFilters"
 
 	// 错误的url地址。
 	INVALIDPARAMETER_INVALIDPARAMETERURLERROR = "InvalidParameter.InvalidParameterUrlError"
+
+	// 输入的 TargetOSType 非法
+	INVALIDPARAMETER_INVALIDTARGETOSTYPE = "InvalidParameter.InvalidTargetOSType"
 
 	// CoreCount和ThreadPerCore必须同时提供。
 	INVALIDPARAMETER_LACKCORECOUNTORTHREADPERCORE = "InvalidParameter.LackCoreCountOrThreadPerCore"
@@ -356,6 +392,18 @@ const (
 	// CDC不支持指定的计费模式。
 	INVALIDPARAMETERVALUE_DEDICATEDCLUSTERNOTSUPPORTEDCHARGETYPE = "InvalidParameterValue.DedicatedClusterNotSupportedChargeType"
 
+	// 指定的专有资源包ID不存在
+	INVALIDPARAMETERVALUE_DEDICATEDRESOURCEPACKIDSNOTFOUND = "InvalidParameterValue.DedicatedResourcePackIdsNotFound"
+
+	// 专有资源包名称无效。名称长度必须为1-60个字符，只能包含中文、英文字母、数字、连字符(-)和下划线(_)
+	INVALIDPARAMETERVALUE_DEDICATEDRESOURCEPACKNAME = "InvalidParameterValue.DedicatedResourcePackName"
+
+	// 未找到有效的专有资源包
+	INVALIDPARAMETERVALUE_DEDICATEDRESOURCEPACKNOTVALID = "InvalidParameterValue.DedicatedResourcePackNotValid"
+
+	// 专有资源包ID与专有预扣资源类型不匹配
+	INVALIDPARAMETERVALUE_DEDICATEDRESOURCEPACKTENANCYMISMATCH = "InvalidParameterValue.DedicatedResourcePackTenancyMismatch"
+
 	// 已经存在部署VPC。
 	INVALIDPARAMETERVALUE_DEPLOYVPCALREADYEXISTS = "InvalidParameterValue.DeployVpcAlreadyExists"
 
@@ -368,11 +416,20 @@ const (
 	// 重复标签。
 	INVALIDPARAMETERVALUE_DUPLICATETAGS = "InvalidParameterValue.DuplicateTags"
 
+	// 弹性网卡数据不存在
+	INVALIDPARAMETERVALUE_ELASTICNETWORKNOTEXIST = "InvalidParameterValue.ElasticNetworkNotExist"
+
+	// 弹性网卡数据vpc子网不匹配,必须为同vpc不同子网
+	INVALIDPARAMETERVALUE_ELASTICNETWORKVPCSUBNETMISMATCH = "InvalidParameterValue.ElasticNetworkVpcSubnetMismatch"
+
 	// 实例的申请的外网IP个数超过了这种规格实例的外网ip配额。
 	INVALIDPARAMETERVALUE_EXTERNALIPQUOTALIMITED = "InvalidParameterValue.ExternalIpQuotaLimited"
 
 	// 非GPU实例不允许转为GPU实例。
 	INVALIDPARAMETERVALUE_GPUINSTANCEFAMILY = "InvalidParameterValue.GPUInstanceFamily"
+
+	// 非CDC场景不支持HpcClusterBusinessId。
+	INVALIDPARAMETERVALUE_HPCCLUSTERBUSINESSIDNOTSUPPORTED = "InvalidParameterValue.HpcClusterBusinessIdNotSupported"
 
 	// 您的高性能计算集群已经绑定其他可用区，不能购买当前可用区机器。
 	INVALIDPARAMETERVALUE_HPCCLUSTERIDZONEIDNOTMATCH = "InvalidParameterValue.HpcClusterIdZoneIdNotMatch"
@@ -382,6 +439,9 @@ const (
 
 	// ipv6地址无效
 	INVALIDPARAMETERVALUE_IPV6ADDRESSMALFORMED = "InvalidParameterValue.IPv6AddressMalformed"
+
+	// ISO文件必须强制导入
+	INVALIDPARAMETERVALUE_ISOMUSTIMPORTBYFORCE = "InvalidParameterValue.ISOMustImportByForce"
 
 	// HostName参数值不合法
 	INVALIDPARAMETERVALUE_ILLEGALHOSTNAME = "InvalidParameterValue.IllegalHostName"
@@ -397,6 +457,9 @@ const (
 
 	// 指定机型不存在
 	INVALIDPARAMETERVALUE_INSTANCETYPENOTFOUND = "InvalidParameterValue.InstanceTypeNotFound"
+
+	// 实例类型不支持弹性网卡数据
+	INVALIDPARAMETERVALUE_INSTANCETYPENOTSUPPORTELASTICNETWORKS = "InvalidParameterValue.InstanceTypeNotSupportElasticNetworks"
 
 	// 实例类型不可加入高性能计算集群。
 	INVALIDPARAMETERVALUE_INSTANCETYPENOTSUPPORTHPCCLUSTER = "InvalidParameterValue.InstanceTypeNotSupportHpcCluster"
@@ -425,6 +488,9 @@ const (
 	// 不支持转为非GPU或其他类型GPU实例。
 	INVALIDPARAMETERVALUE_INVALIDGPUFAMILYCHANGE = "InvalidParameterValue.InvalidGPUFamilyChange"
 
+	// 错误格式的镜像族名称
+	INVALIDPARAMETERVALUE_INVALIDIMAGEFAMILY = "InvalidParameterValue.InvalidImageFamily"
+
 	// 镜像ID不支持指定的实例机型。
 	INVALIDPARAMETERVALUE_INVALIDIMAGEFORGIVENINSTANCETYPE = "InvalidParameterValue.InvalidImageForGivenInstanceType"
 
@@ -449,6 +515,9 @@ const (
 	// 该实例配置来自免费升配活动，暂不支持3个月内进行降配。
 	INVALIDPARAMETERVALUE_INVALIDINSTANCESOURCE = "InvalidParameterValue.InvalidInstanceSource"
 
+	// 该机型不支持周期合约
+	INVALIDPARAMETERVALUE_INVALIDINSTANCETYPEPERIODICCONTRACT = "InvalidParameterValue.InvalidInstanceTypePeriodicContract"
+
 	// 指定机型不支持包销付费模式。
 	INVALIDPARAMETERVALUE_INVALIDINSTANCETYPEUNDERWRITE = "InvalidParameterValue.InvalidInstanceTypeUnderwrite"
 
@@ -466,6 +535,12 @@ const (
 
 	// 许可证类型不可用。
 	INVALIDPARAMETERVALUE_INVALIDLICENSETYPE = "InvalidParameterValue.InvalidLicenseType"
+
+	// 指定的弹性网卡id非vrdma网卡
+	INVALIDPARAMETERVALUE_INVALIDNETWORKINTERFACEID = "InvalidParameterValue.InvalidNetworkInterfaceId"
+
+	// 参数MinCount的值必须小于InstanceCount
+	INVALIDPARAMETERVALUE_INVALIDPARAMETERMINCOUNT = "InvalidParameterValue.InvalidParameterMinCount"
 
 	// 参数值错误。
 	INVALIDPARAMETERVALUE_INVALIDPARAMETERVALUELIMIT = "InvalidParameterValue.InvalidParameterValueLimit"
@@ -485,6 +560,9 @@ const (
 	// 无效的模糊查询字符串。
 	INVALIDPARAMETERVALUE_INVALIDVAGUENAME = "InvalidParameterValue.InvalidVagueName"
 
+	// 这个特别的VpcId or SubnetId在弹性网库数据结构未发现
+	INVALIDPARAMETERVALUE_INVALIDVPCIDSUBNETIDNOTFOUND = "InvalidParameterValue.InvalidVpcIdSubnetIdNotFound"
+
 	// 边缘可用区不支持这个运营商。
 	INVALIDPARAMETERVALUE_ISPNOTSUPPORTFOREDGEZONE = "InvalidParameterValue.IspNotSupportForEdgeZone"
 
@@ -500,7 +578,7 @@ const (
 	// 不支持删除默认启动模板版本。
 	INVALIDPARAMETERVALUE_LAUNCHTEMPLATEDEFAULTVERSION = "InvalidParameterValue.LaunchTemplateDefaultVersion"
 
-	// 实例启动模板ID格式错误。
+	// 实例启动模板ID格式错误，请提供规范的实例启动模板ID，类似lt-xxxxxxxx，字母x代表小写字符或者数字。
 	INVALIDPARAMETERVALUE_LAUNCHTEMPLATEIDMALFORMED = "InvalidParameterValue.LaunchTemplateIdMalformed"
 
 	// 实例启动模板ID不存在。
@@ -524,8 +602,14 @@ const (
 	// 本地盘的限制范围。
 	INVALIDPARAMETERVALUE_LOCALDISKSIZERANGE = "InvalidParameterValue.LocalDiskSizeRange"
 
+	// 专属可用区本地COS集群缺少endpoint配置
+	INVALIDPARAMETERVALUE_MISSINGLOCATIONCOSENDPOINT = "InvalidParameterValue.MissingLocationCosEndpoint"
+
 	// 参数值必须为开启DHCP的VPC
 	INVALIDPARAMETERVALUE_MUSTDHCPENABLEDVPC = "InvalidParameterValue.MustDhcpEnabledVpc"
+
+	// 参数值必须为开启弹性rdma接口
+	INVALIDPARAMETERVALUE_MUSTENABLEDISRDMA = "InvalidParameterValue.MustEnabledIsRdma"
 
 	// 子网不属于该cdc集群。
 	INVALIDPARAMETERVALUE_NOTCDCSUBNET = "InvalidParameterValue.NotCdcSubnet"
@@ -551,11 +635,23 @@ const (
 	// 请求需要区域镜像。
 	INVALIDPARAMETERVALUE_REQUIREDLOCATIONIMAGE = "InvalidParameterValue.RequiredLocationImage"
 
+	// 指定的资源池ID格式错误。请确保在请求中提供完整的资源池ID，格式为`rpp-xxxxxxxx`
+	INVALIDPARAMETERVALUE_RESOURCEPOOLPACKIDMALFORMED = "InvalidParameterValue.ResourcePoolPackIdMalformed"
+
+	// 指定的资源池状态不符合预期
+	INVALIDPARAMETERVALUE_RESOURCEPOOLPACKSTATUS = "InvalidParameterValue.ResourcePoolPackStatus"
+
+	// 指定的资源池类型无效
+	INVALIDPARAMETERVALUE_RESOURCEPOOLPACKTYPENOTSUPPORTED = "InvalidParameterValue.ResourcePoolPackTypeNotSupported"
+
 	// 快照ID不合要求，请提供规范的快照ID，类似snap-xxxxxxxx，字母x代表小写字符或者数字
 	INVALIDPARAMETERVALUE_SNAPSHOTIDMALFORMED = "InvalidParameterValue.SnapshotIdMalformed"
 
 	// 子网ID不合要求，请提供规范的子网ID，类似subnet-xxxxxxxx，字母x代表小写字符或者数字
 	INVALIDPARAMETERVALUE_SUBNETIDMALFORMED = "InvalidParameterValue.SubnetIdMalformed"
+
+	// 子网ID所在可用区与实例所在区不匹配。
+	INVALIDPARAMETERVALUE_SUBNETIDZONEIDNOTMATCH = "InvalidParameterValue.SubnetIdZoneIdNotMatch"
 
 	// 创建失败，您指定的子网不存在，请您重新指定
 	INVALIDPARAMETERVALUE_SUBNETNOTEXIST = "InvalidParameterValue.SubnetNotExist"
@@ -583,6 +679,9 @@ const (
 
 	// 指定的VpcId不存在。
 	INVALIDPARAMETERVALUE_VPCIDNOTEXIST = "InvalidParameterValue.VpcIdNotExist"
+
+	// 指定的VpcId和SubnetId不匹配。
+	INVALIDPARAMETERVALUE_VPCIDSUBNETIDNOTMATCH = "InvalidParameterValue.VpcIdSubnetIdNotMatch"
 
 	// VPC网络与实例不在同一可用区
 	INVALIDPARAMETERVALUE_VPCIDZONEIDNOTMATCH = "InvalidParameterValue.VpcIdZoneIdNotMatch"
@@ -722,6 +821,12 @@ const (
 	// 不支持该账户的操作。
 	OPERATIONDENIED_ACCOUNTNOTSUPPORTED = "OperationDenied.AccountNotSupported"
 
+	// CHC的部署配置非法。
+	OPERATIONDENIED_CHCDEPLOYCONFIGINVALID = "OperationDenied.ChcDeployConfigInvalid"
+
+	// chc物理服务器当前状态不支持此项操作
+	OPERATIONDENIED_CHCHOSTSTATENOTSUPPORTED = "OperationDenied.ChcHostStateNotSupported"
+
 	// 不允许未配置部署网络的CHC安装云上镜像。
 	OPERATIONDENIED_CHCINSTALLCLOUDIMAGEWITHOUTDEPLOYNETWORK = "OperationDenied.ChcInstallCloudImageWithoutDeployNetwork"
 
@@ -767,6 +872,9 @@ const (
 	// 安全组资源配额不足。
 	RESOURCEINSUFFICIENT_INSUFFICIENTGROUPQUOTA = "ResourceInsufficient.InsufficientGroupQuota"
 
+	// 库存不满足最小数量。
+	RESOURCEINSUFFICIENT_INSUFFICIENTOFFERINGMINIMUM = "ResourceInsufficient.InsufficientOfferingMinimum"
+
 	// 指定的实例类型库存不足。
 	RESOURCEINSUFFICIENT_SPECIFIEDINSTANCETYPE = "ResourceInsufficient.SpecifiedInstanceType"
 
@@ -775,6 +883,9 @@ const (
 
 	// 高性能计算集群不存在。
 	RESOURCENOTFOUND_HPCCLUSTER = "ResourceNotFound.HpcCluster"
+
+	// 实例ID未找到。
+	RESOURCENOTFOUND_INVALIDINSTANCEIDNOTFOUND = "ResourceNotFound.InvalidInstanceIdNotFound"
 
 	// 指定的置放群组不存在。
 	RESOURCENOTFOUND_INVALIDPLACEMENTSET = "ResourceNotFound.InvalidPlacementSet"
@@ -790,6 +901,9 @@ const (
 
 	// 无可用的缺省类型的CBS资源。
 	RESOURCENOTFOUND_NODEFAULTCBSWITHREASON = "ResourceNotFound.NoDefaultCbsWithReason"
+
+	// 指定的资源池ID不存在
+	RESOURCENOTFOUND_RESOURCEPOOLPACKIDNOTFOUND = "ResourceNotFound.ResourcePoolPackIdNotFound"
 
 	// 资源不可用。
 	RESOURCEUNAVAILABLE = "ResourceUnavailable"
@@ -836,8 +950,17 @@ const (
 	// 操作不支持。
 	UNSUPPORTEDOPERATION = "UnsupportedOperation"
 
+	// 该操作暂不支持Arm机器。
+	UNSUPPORTEDOPERATION_ARMARCHITECTURE = "UnsupportedOperation.ArmArchitecture"
+
 	// 指定的实例付费模式或者网络付费模式不支持共享带宽包
 	UNSUPPORTEDOPERATION_BANDWIDTHPACKAGEIDNOTSUPPORTED = "UnsupportedOperation.BandwidthPackageIdNotSupported"
+
+	// cbs远端ssd盘不支持该操作
+	UNSUPPORTEDOPERATION_CBSREMOTESSDNOTSUPPORT = "UnsupportedOperation.CbsRemoteSsdNotSupport"
+
+	// 实例使用商业镜像暂不支持调整付费模式。
+	UNSUPPORTEDOPERATION_COMMERCIALIMAGECHANGECHARGETYPE = "UnsupportedOperation.CommercialImageChangeChargeType"
 
 	// 实例创建快照的时间距今不到24小时。
 	UNSUPPORTEDOPERATION_DISKSNAPCREATETIMETOOOLD = "UnsupportedOperation.DiskSnapCreateTimeTooOld"
@@ -847,6 +970,9 @@ const (
 
 	// 所选择的边缘可用区不支持云盘操作。
 	UNSUPPORTEDOPERATION_EDGEZONENOTSUPPORTCLOUDDISK = "UnsupportedOperation.EdgeZoneNotSupportCloudDisk"
+
+	// 边缘可用区不支持预扣资源包。
+	UNSUPPORTEDOPERATION_EDGEZONENOTSUPPORTPURCHASERESERVED = "UnsupportedOperation.EdgeZoneNotSupportPurchaseReserved"
 
 	// 云服务器绑定了弹性网卡，请解绑弹性网卡后再切换私有网络。
 	UNSUPPORTEDOPERATION_ELASTICNETWORKINTERFACE = "UnsupportedOperation.ElasticNetworkInterface"
@@ -875,8 +1001,14 @@ const (
 	// 不支持混合付费模式。
 	UNSUPPORTEDOPERATION_INSTANCEMIXEDPRICINGMODEL = "UnsupportedOperation.InstanceMixedPricingModel"
 
+	// 不支持混合升配和降配实例。
+	UNSUPPORTEDOPERATION_INSTANCEMIXEDRESETINSTANCETYPE = "UnsupportedOperation.InstanceMixedResetInstanceType"
+
 	// 中心可用区和边缘可用区实例不能混用批量操作。
 	UNSUPPORTEDOPERATION_INSTANCEMIXEDZONETYPE = "UnsupportedOperation.InstanceMixedZoneType"
+
+	// 指定实例不支持操作系统转换。
+	UNSUPPORTEDOPERATION_INSTANCEOSCONVERTOSNOTSUPPORT = "UnsupportedOperation.InstanceOsConvertOsNotSupport"
 
 	// 请求不支持操作系统为`Xserver windows2012cndatacenterx86_64`的实例`ins-xxxxxx` 。
 	UNSUPPORTEDOPERATION_INSTANCEOSWINDOWS = "UnsupportedOperation.InstanceOsWindows"
@@ -911,6 +1043,9 @@ const (
 	// 不支持操作创建失败的实例。
 	UNSUPPORTEDOPERATION_INSTANCESTATELAUNCHFAILED = "UnsupportedOperation.InstanceStateLaunchFailed"
 
+	// 指定操作不支持非运行中状态的实例。
+	UNSUPPORTEDOPERATION_INSTANCESTATENOTRUNNING = "UnsupportedOperation.InstanceStateNotRunning"
+
 	// 请求不支持创建未完成的实例
 	UNSUPPORTEDOPERATION_INSTANCESTATEPENDING = "UnsupportedOperation.InstanceStatePending"
 
@@ -944,6 +1079,21 @@ const (
 	// 请求不支持正在销毁的实例
 	UNSUPPORTEDOPERATION_INSTANCESTATETERMINATING = "UnsupportedOperation.InstanceStateTerminating"
 
+	// 实例类型不支持设置`Confidentiality` 状态
+	UNSUPPORTEDOPERATION_INSTANCETYPENOTSUPPORTCONFIDENTIALITY = "UnsupportedOperation.InstanceTypeNotSupportConfidentiality"
+
+	// 实例类型不支持设置`GridDriverService` 状态
+	UNSUPPORTEDOPERATION_INSTANCETYPENOTSUPPORTGRIDLICENCE = "UnsupportedOperation.InstanceTypeNotSupportGridLicence"
+
+	// 实例类型不支持设置 HighDensityMode 状态
+	UNSUPPORTEDOPERATION_INSTANCETYPENOTSUPPORTHIGHDENSITYMODESETTING = "UnsupportedOperation.InstanceTypeNotSupportHighDensityModeSetting"
+
+	// 实例类型不支持设置`EnableJumboFrame` 状态
+	UNSUPPORTEDOPERATION_INSTANCETYPENOTSUPPORTJUMBOFRAME = "UnsupportedOperation.InstanceTypeNotSupportJumboFrame"
+
+	// 不支持不重启情况下修改Jumbo Frame状态
+	UNSUPPORTEDOPERATION_INSTANCESENABLEJUMBOWITHOUTREBOOT = "UnsupportedOperation.InstancesEnableJumboWithoutReboot"
+
 	// 不支持已启用销毁保护的实例，请先到设置实例销毁保护，关闭实例销毁保护，然后重试。
 	UNSUPPORTEDOPERATION_INSTANCESPROTECTED = "UnsupportedOperation.InstancesProtected"
 
@@ -974,9 +1124,6 @@ const (
 	// 用户无权限操作当前实例。
 	UNSUPPORTEDOPERATION_INVALIDINSTANCESOWNER = "UnsupportedOperation.InvalidInstancesOwner"
 
-	// 当前操作只支持国际版用户。
-	UNSUPPORTEDOPERATION_INVALIDPERMISSIONNONINTERNATIONALACCOUNT = "UnsupportedOperation.InvalidPermissionNonInternationalAccount"
-
 	// 指定的地域不支持加密盘。
 	UNSUPPORTEDOPERATION_INVALIDREGIONDISKENCRYPT = "UnsupportedOperation.InvalidRegionDiskEncrypt"
 
@@ -995,8 +1142,17 @@ const (
 	// 此请求不支持该区域镜像,请更换其他镜像。
 	UNSUPPORTEDOPERATION_LOCATIONIMAGENOTSUPPORTED = "UnsupportedOperation.LocationImageNotSupported"
 
+	// 市场镜像实例不支持操作系统转换
+	UNSUPPORTEDOPERATION_MARKETIMAGECONVERTOSUNSUPPORTED = "UnsupportedOperation.MarketImageConvertOSUnsupported"
+
 	// 从市场镜像创建的自定义镜像不支持导出。
 	UNSUPPORTEDOPERATION_MARKETIMAGEEXPORTUNSUPPORTED = "UnsupportedOperation.MarketImageExportUnsupported"
+
+	// 此计费方式不支持部分发货MinCount参数
+	UNSUPPORTEDOPERATION_MINCOUNTUNSUPPORTEDCHARGETYPE = "UnsupportedOperation.MinCountUnsupportedChargeType"
+
+	// 此区域暂不支持部分发货MinCount参数
+	UNSUPPORTEDOPERATION_MINCOUNTUNSUPPORTEDREGION = "UnsupportedOperation.MinCountUnsupportedRegion"
 
 	// 不支持修改系统盘的加密属性，例如使用非加密镜像重装加密系统盘。
 	UNSUPPORTEDOPERATION_MODIFYENCRYPTIONNOTSUPPORTED = "UnsupportedOperation.ModifyEncryptionNotSupported"
@@ -1031,6 +1187,9 @@ const (
 	// 无效的原机型。
 	UNSUPPORTEDOPERATION_ORIGINALINSTANCETYPEINVALID = "UnsupportedOperation.OriginalInstanceTypeInvalid"
 
+	// 该机型为周期合约机型不支持手动续费模式
+	UNSUPPORTEDOPERATION_PERIODICCONTRACTNOTSUPPORTMANUALRENEW = "UnsupportedOperation.PeriodicContractNotSupportManualRenew"
+
 	// 您的账户不支持镜像预热
 	UNSUPPORTEDOPERATION_PREHEATIMAGE = "UnsupportedOperation.PreheatImage"
 
@@ -1052,14 +1211,14 @@ const (
 	// 不支持该地域
 	UNSUPPORTEDOPERATION_REGION = "UnsupportedOperation.Region"
 
-	// 当前用户暂不支持购买预留实例计费。
-	UNSUPPORTEDOPERATION_RESERVEDINSTANCEINVISIBLEFORUSER = "UnsupportedOperation.ReservedInstanceInvisibleForUser"
-
-	// 用户预留实例计费配额已达上限。
-	UNSUPPORTEDOPERATION_RESERVEDINSTANCEOUTOFQUATA = "UnsupportedOperation.ReservedInstanceOutofQuata"
+	// 该资源池对用户不可见
+	UNSUPPORTEDOPERATION_RESOURCEPOOLPACKAGEINVISIBLEFORUSER = "UnsupportedOperation.ResourcePoolPackageInvisibleForUser"
 
 	// 共享镜像不支持导出。
 	UNSUPPORTEDOPERATION_SHAREDIMAGEEXPORTUNSUPPORTED = "UnsupportedOperation.SharedImageExportUnsupported"
+
+	// 从其他账号共享的镜像不支持修改属性。
+	UNSUPPORTEDOPERATION_SHAREDIMAGEMODIFYUNSUPPORTED = "UnsupportedOperation.SharedImageModifyUnsupported"
 
 	// 请求不支持特殊机型的实例
 	UNSUPPORTEDOPERATION_SPECIALINSTANCETYPE = "UnsupportedOperation.SpecialInstanceType"
@@ -1073,8 +1232,14 @@ const (
 	// 不支持关机不收费机器做同类型变配操作。
 	UNSUPPORTEDOPERATION_STOPPEDMODESTOPCHARGINGSAMEFAMILY = "UnsupportedOperation.StoppedModeStopChargingSameFamily"
 
+	// 指定的镜像不支持转为加密自定义镜像。
+	UNSUPPORTEDOPERATION_SYNCENCRYPTIMAGENOTSUPPORT = "UnsupportedOperation.SyncEncryptImageNotSupport"
+
 	// 请求不支持该类型系统盘。
 	UNSUPPORTEDOPERATION_SYSTEMDISKTYPE = "UnsupportedOperation.SystemDiskType"
+
+	// 自动化助手不在线情况下，不支持该操作。
+	UNSUPPORTEDOPERATION_TATAGENTNOTONLINE = "UnsupportedOperation.TatAgentNotOnline"
 
 	// 包月转包销，不支持包销折扣高于现有包年包月折扣。
 	UNSUPPORTEDOPERATION_UNDERWRITEDISCOUNTGREATERTHANPREPAIDDISCOUNT = "UnsupportedOperation.UnderwriteDiscountGreaterThanPrepaidDiscount"
@@ -1099,6 +1264,9 @@ const (
 
 	// 指定的Pool非法。
 	UNSUPPORTEDOPERATION_UNSUPPORTEDPOOL = "UnsupportedOperation.UnsupportedPool"
+
+	// 指定用户不支持执行操作系统转换。
+	UNSUPPORTEDOPERATION_USERCONVERTOSNOTSUPPORT = "UnsupportedOperation.UserConvertOsNotSupport"
 
 	// 用户限额操作的配额不足。
 	UNSUPPORTEDOPERATION_USERLIMITOPERATIONEXCEEDQUOTA = "UnsupportedOperation.UserLimitOperationExceedQuota"

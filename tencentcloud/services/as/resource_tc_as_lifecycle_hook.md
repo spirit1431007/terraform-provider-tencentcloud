@@ -45,16 +45,18 @@ resource "tencentcloud_as_scaling_group" "example" {
 }
 
 resource "tencentcloud_as_lifecycle_hook" "example" {
-  scaling_group_id      = tencentcloud_as_scaling_group.example.id
-  lifecycle_hook_name   = "tf-as-lifecycle-hook"
-  lifecycle_transition  = "INSTANCE_LAUNCHING"
-  default_result        = "CONTINUE"
-  heartbeat_timeout     = 500
-  notification_metadata = "tf test"
+  scaling_group_id          = tencentcloud_as_scaling_group.example.id
+  lifecycle_hook_name       = "tf-as-lifecycle-hook"
+  lifecycle_transition      = "INSTANCE_LAUNCHING"
+  default_result            = "CONTINUE"
+  heartbeat_timeout         = 500
+  lifecycle_transition_type = "NORMAL"
+  #  lifecycle_transition_type = "EXTENSION"
+  notification_metadata     = "tf test"
 }
 ```
 
-If `notification_target_type` is `CMQ_QUEUE`
+If notification_target_type is CMQ_QUEUE
 
 ```hcl
 resource "tencentcloud_as_lifecycle_hook" "example" {
@@ -69,7 +71,7 @@ resource "tencentcloud_as_lifecycle_hook" "example" {
 }
 ```
 
-Or `notification_target_type` is `CMQ_TOPIC`
+Or notification_target_type is CMQ_TOPIC
 
 ```hcl
 resource "tencentcloud_as_lifecycle_hook" "example" {
@@ -105,5 +107,5 @@ Import
 lifecycle hook can be imported using the id, e.g.
 
 ```
-terraform import tencentcloud_as_lifecycle_hook.example lifecycle_hook_id
+terraform import tencentcloud_as_lifecycle_hook.example ash-ahg67203
 ```

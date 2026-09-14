@@ -1,0 +1,538 @@
+package cls
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"strings"
+	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	clsv20201016 "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cls/v20201016"
+
+	tccommon "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/common"
+	"github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/internal/helper"
+)
+
+func ResourceTencentCloudClsCloudProductLogTaskV2() *schema.Resource {
+	return &schema.Resource{
+		Create: resourceTencentCloudClsCloudProductLogTaskV2Create,
+		Read:   resourceTencentCloudClsCloudProductLogTaskV2Read,
+		Update: resourceTencentCloudClsCloudProductLogTaskV2Update,
+		Delete: resourceTencentCloudClsCloudProductLogTaskV2Delete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
+		Schema: map[string]*schema.Schema{
+			"instance_id": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "Instance ID. Obtain it from the official documentation of the corresponding cloud product.",
+			},
+
+			"assumer_name": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "Cloud product identification. Supported values: APIS, BH, CDB, CDS, CFS, CLB, CSIP, CWP, DCDB, DNSPod, EMR, HTTPDNS, KHL, llmsgw, MariaDB, MDP, MongoDB, PostgreSQL, TCSS, TDSQL-C, TDStore, TencentDB-Redis, TEO, TokenHub, TSE.",
+			},
+
+			"log_type": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "Log type, must correspond to the `assumer_name` value. Mapping:\n- APIS: APIS-ACCESS\n- BH: BH-COMMANDLOG, BH-FILELOG\n- CDB: CDB-AUDIT\n- CDS: CDS-AUDIT, CDS-RISK\n- CFS: CFS-AUDIT\n- CLB: CMR-SPEND\n- CSIP: CSIP\n- CWP: CWP\n- DCDB: DCDB-AUDIT, DCDB-ERROR, DCDB-SLOW\n- DNSPod: DNSPod-RESOLVELOG\n- EMR: EMR-OPERATION\n- HTTPDNS: HTTPDNS-RESOLVELOG\n- MariaDB: MariaDB-AUDIT, MariaDB-ERROR, MariaDB-SLOW\n- MDP: MDP-SSAI\n- MongoDB: MongoDB-AUDIT, MongoDB-ErrorLog, MongoDB-OperationLog, MongoDB-SlowLog\n- PostgreSQL: PostgreSQL-AUDIT, PostgreSQL-ERROR, PostgreSQL-SLOW\n- TCSS: TCSS\n- TDSQL-C: TDSQL-C-AUDIT\n- TDStore: TDMYSQL-SLOW\n- TencentDB-Redis: Redis-AUDIT, Redis-ERROR, Redis-SLOW\n- TEO: TEO-INEFERENCE\n- llmsgw: llmsgw-mcp-security-alarm.",
+			},
+
+			"cloud_product_region": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "Cloud product region. The input format varies by log type:\n- Short region code (e.g., `gz`, `sh`, `bj`): applies to APIS (all), CDB-AUDIT, TDSQL-C-AUDIT, TDMYSQL-SLOW, DCDB (all), MariaDB (all), PostgreSQL (all), MongoDB-AUDIT, TencentDB-Redis (all), EMR-OPERATION.\n- Long region code (e.g., `ap-guangzhou`, `ap-shanghai`): applies to CDS (all), MongoDB-SlowLog, MongoDB-ErrorLog, MongoDB-OperationLog, DNSPod-RESOLVELOG, HTTPDNS-RESOLVELOG, MDP-SSAI, CFS-AUDIT, TEO-INEFERENCE, CSIP, TCSS, TSE, CWP, KHL.\n- BH Polaris name: applies to BH (all), values: `overseas-polaris` (Hong Kong and overseas), `fsi-polaris` (finance zone), `general-polaris` (general zone), `intl-sg-prod` (international site).",
+			},
+
+			"cls_region": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "CLS target region. Refer to the region list documentation for supported regions.",
+			},
+
+			"logset_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
+				Description: "Log set name, required when `logset_id` is not specified. If the log set does not exist, it will be created automatically.",
+			},
+
+			"topic_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
+				Description: "Log topic name, required when `topic_id` is not specified. If the log topic does not exist, it will be created automatically.",
+			},
+
+			"extend": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "Log configuration extension information, generally used to store additional log delivery configurations. Example: `{\"ServiceName\":[\"HDFS\",\"KNOX\",\"YARN\",\"ZOOKEEPER\"],\"Policy\":0}`.",
+			},
+
+			"logset_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
+				Description: "Log set ID. Obtain it via the DescribeLogsets API.",
+			},
+
+			"topic_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
+				Description: "Log topic ID. Obtain it via the DescribeTopics API.",
+			},
+
+			"force_delete": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Deprecated:  "It has been deprecated from version 1.82.102. Please use `is_delete_topic` or `is_delete_logset` instead.",
+				Description: "Indicate whether to forcibly delete the corresponding logset and topic. If set to true, it will be forcibly deleted. Default is false.",
+			},
+
+			"is_delete_topic": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Whether to delete the associated Topic when deleting the log collection task. This field only takes effect when `force_delete` is false. Default is false.",
+			},
+
+			"is_delete_logset": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Whether to delete the associated Logset when deleting the log collection task. This field only takes effect when `force_delete` is false. If the Logset has other Topics, it will not be deleted. Default is false.",
+			},
+
+			"tags": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "Tag description list. Up to 10 tag key-value pairs are supported, and each tag key can only be bound to the same resource once. Tags are bound to the associated log topic.",
+			},
+		},
+	}
+}
+
+func resourceTencentCloudClsCloudProductLogTaskV2Create(d *schema.ResourceData, meta interface{}) error {
+	defer tccommon.LogElapsed("resource.tencentcloud_cls_cloud_product_log_task_v2.create")()
+	defer tccommon.InconsistentCheck(d, meta)()
+
+	var (
+		logId              = tccommon.GetLogId(tccommon.ContextNil)
+		ctx                = tccommon.NewResourceLifeCycleHandleFuncContext(context.Background(), logId, d, meta)
+		request            = clsv20201016.NewCreateCloudProductLogCollectionRequest()
+		instanceId         string
+		assumerName        string
+		logType            string
+		cloudProductRegion string
+	)
+
+	if v, ok := d.GetOk("instance_id"); ok {
+		request.InstanceId = helper.String(v.(string))
+		instanceId = v.(string)
+	}
+
+	if v, ok := d.GetOk("assumer_name"); ok {
+		request.AssumerName = helper.String(v.(string))
+		assumerName = v.(string)
+	}
+
+	if v, ok := d.GetOk("log_type"); ok {
+		request.LogType = helper.String(v.(string))
+		logType = v.(string)
+	}
+
+	if v, ok := d.GetOk("cloud_product_region"); ok {
+		request.CloudProductRegion = helper.String(v.(string))
+		cloudProductRegion = v.(string)
+	}
+
+	if v, ok := d.GetOk("cls_region"); ok {
+		request.ClsRegion = helper.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("logset_name"); ok {
+		request.LogsetName = helper.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("topic_name"); ok {
+		request.TopicName = helper.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("extend"); ok {
+		request.Extend = helper.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("logset_id"); ok {
+		request.LogsetId = helper.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("topic_id"); ok {
+		request.TopicId = helper.String(v.(string))
+	}
+
+	if tags := helper.GetTags(d, "tags"); len(tags) > 0 {
+		for k, v := range tags {
+			key := k
+			value := v
+			request.Tags = append(request.Tags, &clsv20201016.Tag{
+				Key:   &key,
+				Value: &value,
+			})
+		}
+	}
+
+	err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+		result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseClsV20201016Client().CreateCloudProductLogCollectionWithContext(ctx, request)
+		if e != nil {
+			return tccommon.RetryError(e)
+		} else {
+			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+		}
+
+		if result == nil || result.Response == nil {
+			return resource.NonRetryableError(fmt.Errorf("Create cls cloud product log task failed, Response is nil."))
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		log.Printf("[CRITAL]%s create cls cloud product log task failed, reason:%+v", logId, err)
+		return err
+	}
+
+	d.SetId(strings.Join([]string{instanceId, assumerName, logType, cloudProductRegion}, tccommon.FILED_SP))
+
+	// wait
+	service := ClsService{client: meta.(tccommon.ProviderMeta).GetAPIV3Conn()}
+	conf := tccommon.BuildStateChangeConf([]string{}, []string{"1"}, 10*tccommon.ReadRetryTimeout, time.Second, service.ClsCloudProductLogTaskStateRefreshFunc(ctx, instanceId, assumerName, logType, []string{}))
+	if _, e := conf.WaitForState(); e != nil {
+		return e
+	}
+
+	return resourceTencentCloudClsCloudProductLogTaskV2Read(d, meta)
+}
+
+func resourceTencentCloudClsCloudProductLogTaskV2Read(d *schema.ResourceData, meta interface{}) error {
+	defer tccommon.LogElapsed("resource.tencentcloud_cls_cloud_product_log_task_v2.read")()
+	defer tccommon.InconsistentCheck(d, meta)()
+
+	var (
+		logId       = tccommon.GetLogId(tccommon.ContextNil)
+		ctx         = tccommon.NewResourceLifeCycleHandleFuncContext(context.Background(), logId, d, meta)
+		service     = ClsService{client: meta.(tccommon.ProviderMeta).GetAPIV3Conn()}
+		deleteForce bool
+	)
+
+	idSplit := strings.Split(d.Id(), tccommon.FILED_SP)
+	if len(idSplit) != 4 {
+		return fmt.Errorf("id is broken,%s", d.Id())
+	}
+
+	instanceId := idSplit[0]
+	assumerName := idSplit[1]
+	logType := idSplit[2]
+	cloudProductRegion := idSplit[3]
+
+	respData, err := service.DescribeClsCloudProductLogTaskById(ctx, instanceId, assumerName, logType)
+	if err != nil {
+		return err
+	}
+
+	if respData == nil || len(respData.Tasks) < 1 {
+		log.Printf("[WARN]%s resource `tencentcloud_cls_cloud_product_log_task_v2` [%s] not found, please check if it has been deleted.\n", logId, d.Id())
+		d.SetId("")
+		return nil
+	}
+
+	_ = d.Set("instance_id", instanceId)
+	_ = d.Set("assumer_name", assumerName)
+	_ = d.Set("log_type", logType)
+	_ = d.Set("cloud_product_region", cloudProductRegion)
+
+	if respData.Tasks[0].ClsRegion != nil {
+		_ = d.Set("cls_region", respData.Tasks[0].ClsRegion)
+	}
+
+	if respData.Tasks[0].Extend != nil {
+		_ = d.Set("extend", respData.Tasks[0].Extend)
+	}
+
+	// Use topic tags first, if not, use logset tags
+	var readTags []*clsv20201016.Tag
+	if len(respData.Tasks[0].LogsetTags) > 0 {
+		readTags = respData.Tasks[0].LogsetTags
+	}
+
+	if len(respData.Tasks[0].TopicTags) > 0 {
+		readTags = respData.Tasks[0].TopicTags
+	}
+
+	if len(readTags) > 0 {
+		tagsMap := make(map[string]string, len(readTags))
+		for _, tag := range readTags {
+			if tag.Key != nil && tag.Value != nil {
+				tagsMap[*tag.Key] = *tag.Value
+			}
+		}
+
+		_ = d.Set("tags", tagsMap)
+	}
+
+	if respData.Tasks[0].LogsetId != nil {
+		_ = d.Set("logset_id", respData.Tasks[0].LogsetId)
+		info, err := service.DescribeClsLogset(ctx, *respData.Tasks[0].LogsetId)
+		if err != nil {
+			return err
+		}
+
+		if info != nil {
+			if info.LogsetName != nil {
+				_ = d.Set("logset_name", info.LogsetName)
+			}
+		}
+	}
+
+	if respData.Tasks[0].TopicId != nil {
+		_ = d.Set("topic_id", respData.Tasks[0].TopicId)
+		info, err := service.DescribeClsTopicById(ctx, *respData.Tasks[0].TopicId, nil)
+		if err != nil {
+			return err
+		}
+
+		if info != nil {
+			if info.TopicName != nil {
+				_ = d.Set("topic_name", info.TopicName)
+			}
+		}
+	}
+
+	if v, ok := d.GetOkExists("force_delete"); ok {
+		deleteForce = v.(bool)
+	}
+
+	_ = d.Set("force_delete", deleteForce)
+
+	return nil
+}
+
+func resourceTencentCloudClsCloudProductLogTaskV2Update(d *schema.ResourceData, meta interface{}) error {
+	defer tccommon.LogElapsed("resource.tencentcloud_cls_cloud_product_log_task_v2.update")()
+	defer tccommon.InconsistentCheck(d, meta)()
+
+	var (
+		logId = tccommon.GetLogId(tccommon.ContextNil)
+		ctx   = tccommon.NewResourceLifeCycleHandleFuncContext(context.Background(), logId, d, meta)
+	)
+
+	immutableArgs := []string{"cls_region"}
+	for _, v := range immutableArgs {
+		if d.HasChange(v) {
+			return fmt.Errorf("argument `%s` cannot be changed", v)
+		}
+	}
+
+	idSplit := strings.Split(d.Id(), tccommon.FILED_SP)
+	if len(idSplit) != 4 {
+		return fmt.Errorf("id is broken,%s", d.Id())
+	}
+
+	instanceId := idSplit[0]
+	assumerName := idSplit[1]
+	logType := idSplit[2]
+	cloudProductRegion := idSplit[3]
+
+	needChange := false
+	mutableArgs := []string{"extend", "tags"}
+	for _, v := range mutableArgs {
+		if d.HasChange(v) {
+			needChange = true
+			break
+		}
+	}
+
+	if needChange {
+		request := clsv20201016.NewModifyCloudProductLogCollectionRequest()
+		request.InstanceId = helper.String(instanceId)
+		request.AssumerName = helper.String(assumerName)
+		request.LogType = helper.String(logType)
+		request.CloudProductRegion = helper.String(cloudProductRegion)
+		if v, ok := d.GetOk("extend"); ok {
+			request.Extend = helper.String(v.(string))
+		}
+
+		if d.HasChange("tags") {
+			tags := helper.GetTags(d, "tags")
+			request.Tags = make([]*clsv20201016.Tag, 0, len(tags))
+			for k, v := range tags {
+				key := k
+				value := v
+				request.Tags = append(request.Tags, &clsv20201016.Tag{
+					Key:   &key,
+					Value: &value,
+				})
+			}
+		}
+
+		err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+			result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseClsV20201016Client().ModifyCloudProductLogCollectionWithContext(ctx, request)
+			if e != nil {
+				return tccommon.RetryError(e)
+			} else {
+				log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			log.Printf("[CRITAL]%s update cls cloud product log task failed, reason:%+v", logId, err)
+			return err
+		}
+	}
+
+	return resourceTencentCloudClsCloudProductLogTaskV2Read(d, meta)
+}
+
+func resourceTencentCloudClsCloudProductLogTaskV2Delete(d *schema.ResourceData, meta interface{}) error {
+	defer tccommon.LogElapsed("resource.tencentcloud_cls_cloud_product_log_task_v2.delete")()
+	defer tccommon.InconsistentCheck(d, meta)()
+
+	var (
+		logId       = tccommon.GetLogId(tccommon.ContextNil)
+		ctx         = tccommon.NewResourceLifeCycleHandleFuncContext(context.Background(), logId, d, meta)
+		request     = clsv20201016.NewDeleteCloudProductLogCollectionRequest()
+		deleteForce bool
+	)
+
+	idSplit := strings.Split(d.Id(), tccommon.FILED_SP)
+	if len(idSplit) != 4 {
+		return fmt.Errorf("id is broken,%s", d.Id())
+	}
+
+	instanceId := idSplit[0]
+	assumerName := idSplit[1]
+	logType := idSplit[2]
+	cloudProductRegion := idSplit[3]
+
+	request.InstanceId = helper.String(instanceId)
+	request.AssumerName = helper.String(assumerName)
+	request.LogType = helper.String(logType)
+	request.CloudProductRegion = helper.String(cloudProductRegion)
+
+	// Read the delete option configuration
+	if v, ok := d.GetOkExists("force_delete"); ok {
+		deleteForce = v.(bool)
+	}
+
+	// Parameter validation: is_delete_* fields cannot be set when force_delete is true
+	if deleteForce {
+		if _, ok := d.GetOkExists("is_delete_topic"); ok {
+			return fmt.Errorf("`is_delete_topic` cannot be set when `force_delete` is true")
+		}
+		if _, ok := d.GetOkExists("is_delete_logset"); ok {
+			return fmt.Errorf("`is_delete_logset` cannot be set when `force_delete` is true")
+		}
+	}
+
+	// Read is_delete_* fields (only used when force_delete is false)
+	if !deleteForce {
+		if v, ok := d.GetOkExists("is_delete_topic"); ok {
+			request.IsDeleteTopic = helper.Bool(v.(bool))
+		}
+
+		if v, ok := d.GetOkExists("is_delete_logset"); ok {
+			request.IsDeleteLogset = helper.Bool(v.(bool))
+		}
+	}
+
+	err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+		result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseClsV20201016Client().DeleteCloudProductLogCollectionWithContext(ctx, request)
+		if e != nil {
+			return tccommon.RetryError(e)
+		} else {
+			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		log.Printf("[CRITAL]%s delete cls cloud product log task failed, reason:%+v", logId, err)
+		return err
+	}
+
+	// wait delete
+	service := ClsService{client: meta.(tccommon.ProviderMeta).GetAPIV3Conn()}
+	conf := tccommon.BuildStateChangeConf([]string{}, []string{"3"}, 10*tccommon.ReadRetryTimeout, time.Second, service.ClsCloudProductLogTaskStateRefreshFunc(ctx, instanceId, assumerName, logType, []string{}))
+	if _, e := conf.WaitForState(); e != nil {
+		return e
+	}
+
+	// When force_delete is true, manually delete the Topic and Logset
+	if deleteForce {
+		var (
+			request1 = clsv20201016.NewDeleteTopicRequest()
+			request2 = clsv20201016.NewDeleteLogsetRequest()
+		)
+
+		if v, ok := d.GetOk("topic_id"); ok {
+			request1.TopicId = helper.String(v.(string))
+		}
+
+		err = resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+			result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseClsV20201016Client().DeleteTopicWithContext(ctx, request1)
+			if e != nil {
+				return tccommon.RetryError(e)
+			} else {
+				log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request1.GetAction(), request1.ToJsonString(), result.ToJsonString())
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			log.Printf("[CRITAL]%s delete cls cloud product log task topic failed, reason:%+v", logId, err)
+			return err
+		}
+
+		if v, ok := d.GetOk("logset_id"); ok {
+			request2.LogsetId = helper.String(v.(string))
+		}
+
+		err = resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+			result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseClsV20201016Client().DeleteLogsetWithContext(ctx, request2)
+			if e != nil {
+				return tccommon.RetryError(e)
+			} else {
+				log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request2.GetAction(), request2.ToJsonString(), result.ToJsonString())
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			log.Printf("[CRITAL]%s delete cls cloud product log task logset failed, reason:%+v", logId, err)
+			return err
+		}
+	}
+
+	return nil
+}

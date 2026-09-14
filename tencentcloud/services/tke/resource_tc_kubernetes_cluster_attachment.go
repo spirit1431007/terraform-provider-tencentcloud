@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -20,6 +21,9 @@ func ResourceTencentCloudKubernetesClusterAttachment() *schema.Resource {
 		Create: resourceTencentCloudKubernetesClusterAttachmentCreate,
 		Read:   resourceTencentCloudKubernetesClusterAttachmentRead,
 		Delete: resourceTencentCloudKubernetesClusterAttachmentDelete,
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			"cluster_id": {
 				Type:        schema.TypeString,
@@ -88,8 +92,8 @@ func ResourceTencentCloudKubernetesClusterAttachment() *schema.Resource {
 							Type:        schema.TypeString,
 							Optional:    true,
 							ForceNew:    true,
-							Default:     "/var/lib/docker",
-							Description: "Docker graph path. Default is `/var/lib/docker`.",
+							Computed:    true,
+							Description: "Docker graph path. Default is determined by the platform (currently /var/lib/containerd for containerd-based nodes).",
 						},
 						"data_disk": {
 							Type:        schema.TypeList,
@@ -154,16 +158,53 @@ func ResourceTencentCloudKubernetesClusterAttachment() *schema.Resource {
 							},
 						},
 						"user_data": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							ForceNew:    true,
-							Description: "Base64-encoded User Data text, the length limit is 16KB.",
+							Type:          schema.TypeString,
+							Optional:      true,
+							ForceNew:      true,
+							Deprecated:    "It has been deprecated from version 1.83.16. Use `user_script` instead.",
+							ConflictsWith: []string{"worker_config.0.user_script"},
+							Description:   "Base64-encoded User Data text, the length limit is 16KB.",
+						},
+						"user_script": {
+							Type:          schema.TypeString,
+							Optional:      true,
+							ForceNew:      true,
+							ConflictsWith: []string{"worker_config.0.user_data"},
+							Description:   "A Base64-encoded user script that executes after Kubernetes components start. Users must ensure the script supports re-entrancy and retry logic. The script and its generated log files can be found in the `/data/ccs_userscript/` directory on the node. If the node should only join the scheduling pool after initialization is complete, the `unschedulable` parameter can be used; in this case, add the command `kubectl uncordon nodename --kubeconfig=/root/.kube/config` at the end of the user script to enable scheduling on the node. Note: This field may return null, indicating that no valid value is available. Example value: `#!/bin/sh echo \"hello world\"`.",
 						},
 						"pre_start_user_script": {
 							Type:        schema.TypeString,
 							Optional:    true,
 							ForceNew:    true,
 							Description: "Base64-encoded user script, executed before initializing the node, currently only effective for adding existing nodes.",
+						},
+						"taints": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							ForceNew:    true,
+							Description: "Node taint.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										ForceNew:    true,
+										Description: "Key of the taint.",
+									},
+									"value": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										ForceNew:    true,
+										Description: "Value of the taint.",
+									},
+									"effect": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										ForceNew:    true,
+										Description: "Effect of the taint.",
+									},
+								},
+							},
 						},
 						"is_schedule": {
 							Type:        schema.TypeBool,
@@ -242,9 +283,9 @@ func ResourceTencentCloudKubernetesClusterAttachment() *schema.Resource {
 							Type:        schema.TypeString,
 							Optional:    true,
 							ForceNew:    true,
-							Default:     "/var/lib/docker",
+							Computed:    true,
 							Deprecated:  "This argument was no longer supported by TencentCloud TKE.",
-							Description: "Docker graph path. Default is `/var/lib/docker`.",
+							Description: "Docker graph path. Default is determined by the platform (currently /var/lib/containerd for containerd-based nodes).",
 						},
 						"data_disk": {
 							Type:        schema.TypeList,
@@ -397,8 +438,10 @@ func ResourceTencentCloudKubernetesClusterAttachment() *schema.Resource {
 			},
 
 			"security_groups": {
-				Type:        schema.TypeSet,
+				Type:        schema.TypeList,
 				Computed:    true,
+				Optional:    true,
+				ForceNew:    true,
 				Description: "A list of security group IDs after attach to cluster.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -484,11 +527,33 @@ func resourceTencentCloudKubernetesClusterAttachmentCreate(d *schema.ResourceDat
 				instanceAdvancedSettings.DataDisks = append(instanceAdvancedSettings.DataDisks, &dataDisk)
 			}
 		}
-		if v, ok := instanceAdvancedSettingsMap["user_data"]; ok {
+		// user_script (new) and user_data (deprecated) are mutually exclusive
+		// (ConflictsWith). InterfacesHeadMap returns a map containing every
+		// block attribute (unset ones are ""), so check non-empty to pick the
+		// actually configured one, preferring the new user_script field.
+		if v, ok := instanceAdvancedSettingsMap["user_script"]; ok && v.(string) != "" {
+			instanceAdvancedSettings.UserScript = helper.String(v.(string))
+		} else if v, ok := instanceAdvancedSettingsMap["user_data"]; ok && v.(string) != "" {
 			instanceAdvancedSettings.UserScript = helper.String(v.(string))
 		}
 		if v, ok := instanceAdvancedSettingsMap["pre_start_user_script"]; ok {
 			instanceAdvancedSettings.PreStartUserScript = helper.String(v.(string))
+		}
+		if v, ok := instanceAdvancedSettingsMap["taints"]; ok {
+			for _, item := range v.([]interface{}) {
+				taintsMap := item.(map[string]interface{})
+				taint := tke.Taint{}
+				if v, ok := taintsMap["key"]; ok {
+					taint.Key = helper.String(v.(string))
+				}
+				if v, ok := taintsMap["value"]; ok {
+					taint.Value = helper.String(v.(string))
+				}
+				if v, ok := taintsMap["effect"]; ok {
+					taint.Effect = helper.String(v.(string))
+				}
+				instanceAdvancedSettings.Taints = append(instanceAdvancedSettings.Taints, &taint)
+			}
 		}
 		if v, ok := instanceAdvancedSettingsMap["docker_graph_path"]; ok {
 			instanceAdvancedSettings.DockerGraphPath = helper.String(v.(string))
@@ -508,6 +573,14 @@ func resourceTencentCloudKubernetesClusterAttachmentCreate(d *schema.ResourceDat
 
 	if v, ok := d.GetOk("hostname"); ok {
 		request.HostName = helper.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("security_groups"); ok {
+		securityGroupIdsSet := v.([]interface{})
+		for i := range securityGroupIdsSet {
+			securityGroupIds := securityGroupIdsSet[i].(string)
+			request.SecurityGroupIds = append(request.SecurityGroupIds, helper.String(securityGroupIds))
+		}
 	}
 
 	if v, ok := d.GetOk("worker_config_overrides"); ok {
@@ -622,8 +695,8 @@ func resourceTencentCloudKubernetesClusterAttachmentRead(d *schema.ResourceData,
 	}
 
 	if respData == nil {
+		log.Printf("[WARN]%s resource `tencentcloud_kubernetes_cluster_attachment` [%s] not found, please check if it has been deleted.\n", logId, d.Id())
 		d.SetId("")
-		log.Printf("[WARN]%s resource `kubernetes_cluster_attachment` [%s] not found, please check if it has been deleted.\n", logId, d.Id())
 		return nil
 	}
 
@@ -633,8 +706,8 @@ func resourceTencentCloudKubernetesClusterAttachmentRead(d *schema.ResourceData,
 	}
 
 	if respData1 == nil {
+		log.Printf("[WARN]%s resource `tencentcloud_kubernetes_cluster_attachment` [%s] not found, please check if it has been deleted.\n", logId, d.Id())
 		d.SetId("")
-		log.Printf("[WARN]%s resource `kubernetes_cluster_attachment` [%s] not found, please check if it has been deleted.\n", logId, d.Id())
 		return nil
 	}
 	if respData1.LoginSettings != nil {
@@ -670,8 +743,8 @@ func resourceTencentCloudKubernetesClusterAttachmentRead(d *schema.ResourceData,
 	}
 
 	if respData2 == nil {
+		log.Printf("[WARN]%s resource `tencentcloud_kubernetes_cluster_attachment` [%s] not found, please check if it has been deleted.\n", logId, d.Id())
 		d.SetId("")
-		log.Printf("[WARN]%s resource `kubernetes_cluster_attachment` [%s] not found, please check if it has been deleted.\n", logId, d.Id())
 		return nil
 	}
 	if respData2.InstanceAdvancedSettings != nil {

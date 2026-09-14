@@ -9,15 +9,16 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"hash"
 	"hash/crc64"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -32,6 +33,7 @@ type ObjectGetOptions struct {
 	ResponseCacheControl       string `url:"response-cache-control,omitempty" header:"-"`
 	ResponseContentDisposition string `url:"response-content-disposition,omitempty" header:"-"`
 	ResponseContentEncoding    string `url:"response-content-encoding,omitempty" header:"-"`
+	CiProcess                  string `url:"ci-process,omitempty" header:"-"`
 	Range                      string `url:"-" header:"Range,omitempty"`
 	IfModifiedSince            string `url:"-" header:"If-Modified-Since,omitempty"`
 	// SSE-C
@@ -57,6 +59,9 @@ type presignedURLTestingOptions struct {
 //
 // https://www.qcloud.com/document/product/436/7753
 func (s *ObjectService) Get(ctx context.Context, name string, opt *ObjectGetOptions, id ...string) (*Response, error) {
+	if s.client.Conf.ObjectKeySimplifyCheck && !CheckObjectKeySimplify("/"+name) {
+		return nil, ObjectKeySimplifyCheckErr
+	}
 	var u string
 	if len(id) == 1 {
 		u = fmt.Sprintf("/%s?versionId=%s", encodeURIComponent(name), id[0])
@@ -94,6 +99,20 @@ func (s *ObjectService) GetToFile(ctx context.Context, name, localpath string, o
 	}
 	defer resp.Body.Close()
 
+	// 使用 teeReader 做流式 CRC64 校验
+	var crcWriter hash.Hash64
+	if s.client.Conf.EnableCRC {
+		if tr, ok := resp.Body.(*teeReader); ok {
+			// Get 已包装了 teeReader（有 Listener），设置 CRC64 writer
+			crcWriter = crc64.New(crc64.MakeTable(crc64.ECMA))
+			tr.writer = crcWriter
+		} else {
+			// 没有 Listener，用 TeeReader 包装，传入 CRC64 writer
+			crcWriter = crc64.New(crc64.MakeTable(crc64.ECMA))
+			resp.Body = TeeReader(resp.Body, crcWriter, 0, nil)
+		}
+	}
+
 	// If file exist, overwrite it
 	fd, err := os.OpenFile(localpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0660)
 	if err != nil {
@@ -101,9 +120,27 @@ func (s *ObjectService) GetToFile(ctx context.Context, name, localpath string, o
 	}
 
 	_, err = io.Copy(fd, resp.Body)
-	fd.Close()
 	if err != nil {
 		return resp, err
+	}
+	if err = fd.Sync(); err != nil {
+		fd.Close()
+		return resp, err
+	}
+	if err = fd.Close(); err != nil {
+		return resp, err
+	}
+
+	// CRC64 校验
+	if crcWriter != nil {
+		scoscrc := resp.Header.Get("x-cos-hash-crc64ecma")
+		if scoscrc != "" {
+			icoscrc, err := strconv.ParseUint(scoscrc, 10, 64)
+			localcrc := crcWriter.Sum64()
+			if localcrc != icoscrc {
+				return resp, fmt.Errorf("verification failed, want:%v, return:%v, x-cos-hash-crc64ecma:%v, err:%v, header:%+v", localcrc, icoscrc, scoscrc, err, resp.Header)
+			}
+		}
 	}
 
 	return resp, nil
@@ -115,14 +152,20 @@ func (s *ObjectService) GetObjectURL(name string) *url.URL {
 }
 
 type PresignedURLOptions struct {
-	Query      *url.Values  `xml:"-" url:"-" header:"-"`
-	Header     *http.Header `header:"-,omitempty" url:"-" xml:"-"`
-	SignMerged bool         `xml:"-" url:"-" header:"-"`
+	Query           *url.Values  `xml:"-" url:"-" header:"-"`
+	Header          *http.Header `header:"-,omitempty" url:"-" xml:"-"`
+	SignMerged      bool         `xml:"-" url:"-" header:"-"`
+	AuthTime        *AuthTime    `xml:"-" url:"-" header:"-"`
+	EncodeDelimiter bool         `xml:"-" url:"-" header:"-"`
+	EnablePathMerge bool         `xml:"-" url:"-" header:"-"`
 }
 
 // GetPresignedURL get the object presigned to down or upload file by url
 // 预签名函数，signHost: 默认签入Header Host, 您也可以选择不签入Header Host，但可能导致请求失败或安全漏洞
 func (s *ObjectService) GetPresignedURL(ctx context.Context, httpMethod, name, ak, sk string, expired time.Duration, opt interface{}, signHost ...bool) (*url.URL, error) {
+	if name == "" {
+		return nil, fmt.Errorf("object key is empty.")
+	}
 	// 兼容 name 以 / 开头的情况
 	if strings.HasPrefix(name, "/") {
 		name = encodeURIComponent("/") + encodeURIComponent(name[1:], []byte{'/'})
@@ -137,25 +180,32 @@ func (s *ObjectService) GetPresignedURL(ctx context.Context, httpMethod, name, a
 		optQuery:  opt,
 		optHeader: opt,
 	}
-	if popt, ok := opt.(*PresignedURLOptions); ok {
-		if popt != nil && popt.Query != nil {
-			qs := popt.Query.Encode()
-			if qs != "" {
-				sendOpt.uri = fmt.Sprintf("%s?%s", sendOpt.uri, qs)
+	var authTime *AuthTime
+	var enablePathMerge bool
+	if opt != nil {
+		if popt, ok := opt.(*presignedURLTestingOptions); ok {
+			authTime = popt.authTime
+		}
+		if popt, ok := opt.(*PresignedURLOptions); ok {
+			if popt.Query != nil {
+				qs := popt.Query.Encode()
+				if qs != "" {
+					sendOpt.uri = fmt.Sprintf("%s?%s", sendOpt.uri, qs)
+				}
+			}
+			if popt.AuthTime != nil {
+				authTime = popt.AuthTime
+			}
+			if popt.EnablePathMerge {
+				enablePathMerge = true
 			}
 		}
 	}
-	req, err := s.client.newRequest(ctx, sendOpt.baseURL, sendOpt.uri, sendOpt.method, sendOpt.body, sendOpt.optQuery, sendOpt.optHeader)
+	req, err := s.client.newPresignedRequest(ctx, &sendOpt, enablePathMerge)
 	if err != nil {
 		return nil, err
 	}
 
-	var authTime *AuthTime
-	if opt != nil {
-		if opt, ok := opt.(*presignedURLTestingOptions); ok {
-			authTime = opt.authTime
-		}
-	}
 	if authTime == nil {
 		authTime = NewAuthTime(expired)
 	}
@@ -187,13 +237,184 @@ func (s *ObjectService) GetPresignedURL(ctx context.Context, httpMethod, name, a
 	return req.URL, nil
 }
 
-func (s *ObjectService) GetSignature(ctx context.Context, httpMethod, name, ak, sk string, expired time.Duration, opt *PresignedURLOptions, signHost ...bool) string {
+func (s *ObjectService) GetPresignedURL2(ctx context.Context, httpMethod, name string, expired time.Duration, opt interface{}, signHost ...bool) (*url.URL, error) {
+	if name == "" {
+		return nil, fmt.Errorf("object key is empty.")
+	}
 	// 兼容 name 以 / 开头的情况
 	if strings.HasPrefix(name, "/") {
 		name = encodeURIComponent("/") + encodeURIComponent(name[1:], []byte{'/'})
 	} else {
 		name = encodeURIComponent(name, []byte{'/'})
 	}
+
+	cred := s.client.GetCredential()
+	if cred == nil {
+		return nil, fmt.Errorf("GetCredential failed")
+	}
+	sendOpt := sendOptions{
+		baseURL:   s.client.BaseURL.BucketURL,
+		uri:       "/" + name,
+		method:    httpMethod,
+		optQuery:  opt,
+		optHeader: opt,
+	}
+	var enablePathMerge bool
+	var authTime *AuthTime
+	mark := "?"
+	if opt != nil {
+		if popt, ok := opt.(*presignedURLTestingOptions); ok {
+			authTime = popt.authTime
+		}
+		if popt, ok := opt.(*PresignedURLOptions); ok {
+			if popt.Query != nil {
+				qs := popt.Query.Encode()
+				if qs != "" {
+					sendOpt.uri = fmt.Sprintf("%s?%s", sendOpt.uri, qs)
+					mark = "&"
+				}
+			}
+			if popt.AuthTime != nil {
+				authTime = popt.AuthTime
+			}
+			if popt.EnablePathMerge {
+				enablePathMerge = true
+			}
+		}
+	}
+	if cred.SessionToken != "" {
+		sendOpt.uri = fmt.Sprintf("%s%s%s", sendOpt.uri, mark, url.Values{"x-cos-security-token": []string{cred.SessionToken}}.Encode())
+	}
+
+	req, err := s.client.newPresignedRequest(ctx, &sendOpt, enablePathMerge)
+	if err != nil {
+		return nil, err
+	}
+
+	if authTime == nil {
+		authTime = NewAuthTime(expired)
+	}
+	signedHost := true
+	if len(signHost) > 0 {
+		signedHost = signHost[0]
+	}
+	authorization := newAuthorization(cred.SecretID, cred.SecretKey, req, authTime, signedHost)
+	if opt != nil {
+		if opt, ok := opt.(*PresignedURLOptions); ok {
+			if opt.SignMerged {
+				sign := encodeURIComponent(authorization)
+				if req.URL.RawQuery == "" {
+					req.URL.RawQuery = fmt.Sprintf("sign=%s", sign)
+				} else {
+					req.URL.RawQuery = fmt.Sprintf("%s&sign=%s", req.URL.RawQuery, sign)
+				}
+				return req.URL, nil
+			}
+		}
+	}
+	sign := encodeURIComponent(authorization, []byte{'&', '='})
+
+	if req.URL.RawQuery == "" {
+		req.URL.RawQuery = fmt.Sprintf("%s", sign)
+	} else {
+		req.URL.RawQuery = fmt.Sprintf("%s&%s", req.URL.RawQuery, sign)
+	}
+	return req.URL, nil
+}
+
+func (s *ObjectService) GetPresignedURL3(ctx context.Context, httpMethod, name string, expired time.Duration, opt interface{}, signHost ...bool) (*url.URL, error) {
+	if name == "" {
+		return nil, fmt.Errorf("object key is empty.")
+	}
+	var encodeDelimiter bool
+	if opt != nil {
+		if popt, ok := opt.(*PresignedURLOptions); ok {
+			encodeDelimiter = popt.EncodeDelimiter
+		}
+	}
+	if encodeDelimiter {
+		name = encodeURIComponent(name)
+	} else {
+		name = encodeURIComponent(name, []byte("/"))
+	}
+
+	cred := s.client.GetCredential()
+	if cred == nil {
+		return nil, fmt.Errorf("GetCredential failed")
+	}
+	sendOpt := sendOptions{
+		baseURL:   s.client.BaseURL.BucketURL,
+		uri:       "/" + name,
+		method:    httpMethod,
+		optQuery:  opt,
+		optHeader: opt,
+	}
+	var enablePathMerge bool
+	var authTime *AuthTime
+	mark := "?"
+	if opt != nil {
+		if popt, ok := opt.(*presignedURLTestingOptions); ok {
+			authTime = popt.authTime
+		}
+		if popt, ok := opt.(*PresignedURLOptions); ok {
+			if popt.Query != nil {
+				qs := popt.Query.Encode()
+				if qs != "" {
+					sendOpt.uri = fmt.Sprintf("%s?%s", sendOpt.uri, qs)
+					mark = "&"
+				}
+			}
+			if popt.AuthTime != nil {
+				authTime = popt.AuthTime
+			}
+			if popt.EnablePathMerge {
+				enablePathMerge = true
+			}
+		}
+	}
+	if cred.SessionToken != "" {
+		sendOpt.uri = fmt.Sprintf("%s%s%s", sendOpt.uri, mark, url.Values{"x-cos-security-token": []string{cred.SessionToken}}.Encode())
+	}
+
+	req, err := s.client.newPresignedRequest(ctx, &sendOpt, enablePathMerge)
+	if err != nil {
+		return nil, err
+	}
+
+	if authTime == nil {
+		authTime = NewAuthTime(expired)
+	}
+	signedHost := true
+	if len(signHost) > 0 {
+		signedHost = signHost[0]
+	}
+	authorization := newAuthorization(cred.SecretID, cred.SecretKey, req, authTime, signedHost)
+	if opt != nil {
+		if opt, ok := opt.(*PresignedURLOptions); ok {
+			if opt.SignMerged {
+				sign := encodeURIComponent(authorization)
+				if req.URL.RawQuery == "" {
+					req.URL.RawQuery = fmt.Sprintf("sign=%s", sign)
+				} else {
+					req.URL.RawQuery = fmt.Sprintf("%s&sign=%s", req.URL.RawQuery, sign)
+				}
+				return req.URL, nil
+			}
+		}
+	}
+	sign := encodeURIComponent(authorization, []byte{'&', '='})
+
+	if req.URL.RawQuery == "" {
+		req.URL.RawQuery = fmt.Sprintf("%s", sign)
+	} else {
+		req.URL.RawQuery = fmt.Sprintf("%s&%s", req.URL.RawQuery, sign)
+	}
+	return req.URL, nil
+}
+
+func (s *ObjectService) GetSignature(ctx context.Context, httpMethod, name, ak, sk string, expired time.Duration, opt *PresignedURLOptions, signHost ...bool) string {
+	// 兼容 name 以 / 开头的情况
+	name = encodeURIComponent(name)
 
 	sendOpt := sendOptions{
 		baseURL:   s.client.BaseURL.BucketURL,
@@ -208,7 +429,7 @@ func (s *ObjectService) GetSignature(ctx context.Context, httpMethod, name, ak, 
 			sendOpt.uri = fmt.Sprintf("%s?%s", sendOpt.uri, qs)
 		}
 	}
-	req, err := s.client.newRequest(ctx, sendOpt.baseURL, sendOpt.uri, sendOpt.method, sendOpt.body, sendOpt.optQuery, sendOpt.optHeader)
+	req, err := s.client.newPresignedRequest(ctx, &sendOpt, false)
 	if err != nil {
 		return ""
 	}
@@ -257,6 +478,9 @@ type ObjectPutHeaderOptions struct {
 type ObjectPutOptions struct {
 	*ACLHeaderOptions       `header:",omitempty" url:"-" xml:"-"`
 	*ObjectPutHeaderOptions `header:",omitempty" url:"-" xml:"-"`
+
+	// PutFromFile 使用
+	innerSwitchURL *url.URL `header:"-" url:"-" xml:"-"`
 }
 
 // Put Object请求可以将一个文件（Oject）上传至指定Bucket。
@@ -277,33 +501,91 @@ func (s *ObjectService) Put(ctx context.Context, name string, r io.Reader, uopt 
 		}
 		totalBytes = opt.ContentLength
 	}
+	var isNoBody bool
 	if err == nil {
 		// 非bytes.Buffer/bytes.Reader/strings.Reader/os.File 由用户指定ContentLength, 或使用 Chunk 上传
 		if opt != nil && opt.ContentLength == 0 && IsLenReader(r) {
 			opt.ContentLength = totalBytes
+			if opt.ContentLength == 0 {
+				isNoBody = true
+			}
 		}
 	}
-	reader := TeeReader(r, nil, totalBytes, nil)
-	if s.client.Conf.EnableCRC {
-		reader.writer = crc64.New(crc64.MakeTable(crc64.ECMA))
+	// 如果是io.Seeker，则重试
+	count := 1
+	var position int64
+	if seeker, ok := r.(io.Seeker); ok {
+		// 记录原始位置
+		position, err = seeker.Seek(0, io.SeekCurrent)
+		if err == nil && s.client.Conf.RetryOpt.Count > 0 {
+			count = s.client.Conf.RetryOpt.Count
+		}
 	}
-	if opt != nil && opt.Listener != nil {
-		reader.listener = opt.Listener
+	var resp *Response
+	var retrieable bool
+	sUrl := s.client.BaseURL.BucketURL
+	if opt.innerSwitchURL != nil {
+		sUrl = opt.innerSwitchURL
 	}
-	sendOpt := sendOptions{
-		baseURL:   s.client.BaseURL.BucketURL,
-		uri:       "/" + encodeURIComponent(name),
-		method:    http.MethodPut,
-		body:      reader,
-		optHeader: opt,
+	retryErr := &RetryError{}
+	for nr := 0; nr < count; nr++ {
+		reader := TeeReader(r, nil, totalBytes, nil)
+		if s.client.Conf.EnableCRC {
+			reader.writer = crc64.New(crc64.MakeTable(crc64.ECMA))
+		}
+		if opt != nil && opt.Listener != nil {
+			reader.listener = opt.Listener
+		}
+		sendOpt := sendOptions{
+			baseURL:   sUrl,
+			uri:       "/" + encodeURIComponent(name),
+			method:    http.MethodPut,
+			body:      reader,
+			optHeader: opt,
+			isRetry:   nr > 0,
+		}
+		// 如果长度为0，则配置为NoBody，避免使用chunk上传
+		if isNoBody {
+			sendOpt.body = http.NoBody
+			if nr == 0 {
+				defer func() {
+					if rc, ok := r.(io.ReadCloser); ok {
+						rc.Close()
+					}
+				}()
+			}
+		}
+
+		// 把上一次错误记录下来
+		if err != nil {
+			retryErr.Add(err)
+		}
+		resp, err = s.client.send(ctx, &sendOpt)
+		sUrl, retrieable = s.client.CheckRetrieable(sUrl, resp, err, nr >= count-2)
+		if retrieable && nr+1 < count {
+			if seeker, ok := r.(io.Seeker); ok {
+				_, e := seeker.Seek(position, io.SeekStart)
+				if e != nil {
+					break
+				}
+				continue
+			}
+		}
+		break
 	}
-	resp, err := s.client.send(ctx, &sendOpt)
+	if err != nil {
+		if _, ok := err.(*ErrorResponse); !ok {
+			retryErr.Add(err)
+			err = retryErr
+		}
+	}
 
 	return resp, err
 }
 
 // PutFromFile put object from local file
-func (s *ObjectService) PutFromFile(ctx context.Context, name string, filePath string, opt *ObjectPutOptions) (resp *Response, err error) {
+func (s *ObjectService) PutFromFile(ctx context.Context, name string, filePath string, uopt *ObjectPutOptions) (resp *Response, err error) {
+	opt := CloneObjectPutOptions(uopt)
 	nr := 0
 	for nr < 3 {
 		fd, e := os.Open(filePath)
@@ -315,6 +597,12 @@ func (s *ObjectService) PutFromFile(ctx context.Context, name string, filePath s
 		if err != nil {
 			nr++
 			fd.Close()
+			if s.client.Conf.RetryOpt.AutoSwitchHost {
+				// 收不到报文 或者 不存在RequestId
+				if resp == nil || resp.Header.Get("X-Cos-Request-Id") == "" {
+					opt.innerSwitchURL = toSwitchHost(s.client.BaseURL.BucketURL)
+				}
+			}
 			continue
 		}
 		fd.Close()
@@ -334,6 +622,7 @@ type ObjectCopyHeaderOptions struct {
 	Expires                         string `header:"Expires,omitempty" url:"-"`
 	Expect                          string `header:"Expect,omitempty" url:"-"`
 	XCosMetadataDirective           string `header:"x-cos-metadata-directive,omitempty" url:"-" xml:"-"`
+	XCosTaggingDirective            string `header:"x-cos-tagging-directive,omitempty" url:"-" xml:"-"`
 	XCosCopySourceIfModifiedSince   string `header:"x-cos-copy-source-If-Modified-Since,omitempty" url:"-" xml:"-"`
 	XCosCopySourceIfUnmodifiedSince string `header:"x-cos-copy-source-If-Unmodified-Since,omitempty" url:"-" xml:"-"`
 	XCosCopySourceIfMatch           string `header:"x-cos-copy-source-If-Match,omitempty" url:"-" xml:"-"`
@@ -378,15 +667,23 @@ type ObjectCopyResult struct {
 //
 // https://cloud.tencent.com/document/product/436/10881
 func (s *ObjectService) Copy(ctx context.Context, name, sourceURL string, opt *ObjectCopyOptions, id ...string) (*ObjectCopyResult, *Response, error) {
+	if strings.HasPrefix(sourceURL, "http://") || strings.HasPrefix(sourceURL, "https://") {
+		return nil, nil, errors.New("sourceURL format is invalid.")
+	}
 	surl := strings.SplitN(sourceURL, "/", 2)
 	if len(surl) < 2 {
-		return nil, nil, errors.New(fmt.Sprintf("x-cos-copy-source format error: %s", sourceURL))
+		return nil, nil, fmt.Errorf("x-cos-copy-source format error: %s", sourceURL)
 	}
 	var u string
 	if len(id) == 1 {
 		u = fmt.Sprintf("%s/%s?versionId=%s", surl[0], encodeURIComponent(surl[1]), id[0])
 	} else if len(id) == 0 {
-		u = fmt.Sprintf("%s/%s", surl[0], encodeURIComponent(surl[1]))
+		keyAndVer := strings.SplitN(surl[1], "?versionId=", 2)
+		if len(keyAndVer) < 2 {
+			u = fmt.Sprintf("%s/%s", surl[0], encodeURIComponent(surl[1], []byte{'/'}))
+		} else {
+			u = fmt.Sprintf("%v/%v?versionId=%v", surl[0], encodeURIComponent(keyAndVer[0], []byte{'/'}), encodeURIComponent(keyAndVer[1], []byte{'='}))
+		}
 	} else {
 		return nil, nil, errors.New("wrong params")
 	}
@@ -419,9 +716,6 @@ func (s *ObjectService) Copy(ctx context.Context, name, sourceURL string, opt *O
 
 	if err == nil { // 请求正常
 		err = xml.Unmarshal(bs.Bytes(), &res) // body 正常返回
-		if err == io.EOF {
-			err = nil
-		}
 		// If the error occurs during the copy operation, the error response is embedded in the 200 OK response. This means that a 200 OK response can contain either a success or an error.
 		if resp != nil && resp.StatusCode == 200 {
 			if err != nil {
@@ -442,6 +736,7 @@ type ObjectDeleteOptions struct {
 	XCosSSECustomerKeyMD5 string `header:"x-cos-server-side-encryption-customer-key-MD5,omitempty" url:"-" xml:"-"`
 	//兼容其他自定义头部
 	XOptionHeader *http.Header `header:"-,omitempty" url:"-" xml:"-"`
+	XOptionQuery  *url.Values  `header:"-" url:"-" xml:"-"`
 	VersionId     string       `header:"-" url:"VersionId,omitempty" xml:"-"`
 }
 
@@ -450,17 +745,25 @@ type ObjectDeleteOptions struct {
 // https://www.qcloud.com/document/product/436/7743
 func (s *ObjectService) Delete(ctx context.Context, name string, opt ...*ObjectDeleteOptions) (*Response, error) {
 	var optHeader *ObjectDeleteOptions
-	// When use "" string might call the delete bucket interface
 	if len(name) == 0 || name == "/" {
 		return nil, errors.New("empty object name")
 	}
+	// When use "" string might call the delete bucket interface
+	if s.client.Conf.ObjectKeySimplifyCheck && !CheckObjectKeySimplify("/"+name) {
+		return nil, ObjectKeySimplifyCheckErr
+	}
+
 	if len(opt) > 0 {
 		optHeader = opt[0]
+	}
+	uri := "/" + encodeURIComponent(name)
+	if optHeader != nil && optHeader.XOptionQuery != nil {
+		uri = uri + "?" + optHeader.XOptionQuery.Encode()
 	}
 
 	sendOpt := sendOptions{
 		baseURL:   s.client.BaseURL.BucketURL,
-		uri:       "/" + encodeURIComponent(name),
+		uri:       uri,
 		method:    http.MethodDelete,
 		optHeader: optHeader,
 		optQuery:  optHeader,
@@ -500,7 +803,7 @@ func (s *ObjectService) Head(ctx context.Context, name string, opt *ObjectHeadOp
 	}
 	resp, err := s.client.doRetry(ctx, &sendOpt)
 	if resp != nil && resp.Header["X-Cos-Object-Type"] != nil && resp.Header["X-Cos-Object-Type"][0] == "appendable" {
-		resp.Header.Add("x-cos-next-append-position", resp.Header["Content-Length"][0])
+		resp.Header.Add("x-cos-next-append-position", resp.Header.Get("Content-Length"))
 	}
 
 	return resp, err
@@ -548,7 +851,7 @@ type CASJobParameters struct {
 // ObjectRestoreOptions is the option of object restore
 type ObjectRestoreOptions struct {
 	XMLName       xml.Name          `xml:"RestoreRequest" header:"-" url:"-"`
-	Days          int               `xml:"Days" header:"-" url:"-"`
+	Days          int               `xml:"Days,omitempty" header:"-" url:"-"`
 	Tier          *CASJobParameters `xml:"CASJobParameters" header:"-" url:"-"`
 	XOptionHeader *http.Header      `xml:"-" header:",omitempty" url:"-"`
 }
@@ -703,6 +1006,8 @@ type MultiUploadOptions struct {
 	ThreadPoolSize  int
 	CheckPoint      bool
 	DisableChecksum bool
+	WorkerChannel   chan<- *Jobs
+	ResultChannel   <-chan *Results
 }
 
 type MultiDownloadOptions struct {
@@ -712,6 +1017,8 @@ type MultiDownloadOptions struct {
 	CheckPoint      bool
 	CheckPointFile  string
 	DisableChecksum bool
+	WorkerChannel   chan<- *Jobs
+	ResultChannel   <-chan *Results
 }
 
 type MultiDownloadCPInfo struct {
@@ -739,17 +1046,19 @@ type Jobs struct {
 	Name       string
 	UploadId   string
 	FilePath   string
+	Fd         *os.File // shared file descriptor for download workers (WriteAt)
 	RetryTimes int
-	VersionId  []string
+	VersionId  string
 	Chunk      Chunk
 	Data       io.Reader
-	Opt        *ObjectUploadPartOptions
+	UpOpt      *ObjectUploadPartOptions
 	DownOpt    *ObjectGetOptions
 }
 
 type Results struct {
 	PartNumber int
 	Resp       *Response
+	CRC64      uint64
 	err        error
 }
 
@@ -800,9 +1109,14 @@ func (drc *DiscardReadCloser) Close() error {
 	return nil
 }
 
+// Worker 用于分块上传的工作协程，调用方可通过 MultiUploadOptions 的 WorkerChannel/ResultChannel 传入外部 channel 来复用
+func UploadWorker(ctx context.Context, s *ObjectService, jobs <-chan *Jobs, results chan<- *Results) {
+	worker(ctx, s, jobs, results)
+}
+
 func worker(ctx context.Context, s *ObjectService, jobs <-chan *Jobs, results chan<- *Results) {
 	for j := range jobs {
-		j.Opt.ContentLength = j.Chunk.Size
+		j.UpOpt.ContentLength = j.Chunk.Size
 
 		rt := j.RetryTimes
 		for {
@@ -816,9 +1130,9 @@ func worker(ctx context.Context, s *ObjectService, jobs <-chan *Jobs, results ch
 				results <- &res
 				break
 			}
-			fd.Seek(j.Chunk.OffSet, os.SEEK_SET)
+			fd.Seek(j.Chunk.OffSet, io.SeekStart)
 			resp, err := s.UploadPart(ctx, j.Name, j.UploadId, j.Chunk.Number,
-				LimitReadCloser(fd, j.Chunk.Size), j.Opt)
+				LimitReadCloser(fd, j.Chunk.Size), j.UpOpt)
 			res.PartNumber = j.Chunk.Number
 			res.Resp = resp
 			res.err = err
@@ -828,6 +1142,12 @@ func worker(ctx context.Context, s *ObjectService, jobs <-chan *Jobs, results ch
 					results <- &res
 					break
 				}
+				if s.client.Conf.RetryOpt.AutoSwitchHost {
+					// 收不到报文 或者 不存在RequestId
+					if resp == nil || resp.Header.Get("X-Cos-Request-Id") == "" {
+						j.UpOpt.innerSwitchURL = toSwitchHost(s.client.BaseURL.BucketURL)
+					}
+				}
 				time.Sleep(time.Millisecond)
 				continue
 			}
@@ -835,6 +1155,23 @@ func worker(ctx context.Context, s *ObjectService, jobs <-chan *Jobs, results ch
 			break
 		}
 	}
+}
+
+// DownloadWorker 用于分块下载的工作协程，调用方可通过 MultiDownloadOptions 的 WorkerChannel/ResultChannel 传入外部 channel 来复用
+func DownloadWorker(ctx context.Context, s *ObjectService, jobs <-chan *Jobs, results chan<- *Results) {
+	downloadWorker(ctx, s, jobs, results)
+}
+
+// downloadCopyBufSize 是流式写入时使用的固定复制缓冲区大小。
+// 每个 worker goroutine 仅占用该大小的内存，与 chunkSize 无关。
+const downloadCopyBufSize = 32 * 1024 // 32 KB
+
+// downloadBufPool 复用 32KB 的复制缓冲区，降低 GC 压力。
+var downloadBufPool = sync.Pool{
+	New: func() interface{} {
+		buf := make([]byte, downloadCopyBufSize)
+		return &buf
+	},
 }
 
 func downloadWorker(ctx context.Context, s *ObjectService, jobs <-chan *Jobs, results chan<- *Results) {
@@ -850,40 +1187,83 @@ func downloadWorker(ctx context.Context, s *ObjectService, jobs <-chan *Jobs, re
 		for {
 			var res Results
 			res.PartNumber = j.Chunk.Number
-			resp, err := s.Get(ctx, j.Name, j.DownOpt, j.VersionId...)
+			if j.Fd == nil {
+				res.err = fmt.Errorf("download chunk Failed, part %d: Jobs.Fd is nil", j.Chunk.Number)
+				results <- &res
+				break
+			}
+			resp, err := s.Get(ctx, j.Name, j.DownOpt, j.VersionId)
 			res.err = err
 			res.Resp = resp
 			if err != nil {
 				results <- &res
 				break
 			}
-			fd, err := os.OpenFile(j.FilePath, os.O_WRONLY, 0660)
-			if err != nil {
-				resp.Body.Close()
-				res.err = err
-				results <- &res
-				break
-			}
-			fd.Seek(j.Chunk.OffSet, os.SEEK_SET)
-			n, err := io.Copy(fd, LimitReadCloser(resp.Body, j.Chunk.Size))
-			if n != j.Chunk.Size || err != nil {
-				fd.Close()
-				resp.Body.Close()
+			crcHash := crc64.New(crc64.MakeTable(crc64.ECMA))
+			bufp := downloadBufPool.Get().(*[]byte)
+			written, werr, isRetryErr := copyChunkToFileAt(j.Fd, resp.Body, j.Chunk.OffSet, j.Chunk.Size, *bufp, crcHash)
+			downloadBufPool.Put(bufp)
+			resp.Body.Close()
+			if written != j.Chunk.Size || werr != nil {
 				rt--
-				if rt == 0 {
-					res.err = fmt.Errorf("io.Copy Failed, nread:%v, want:%v, err:%v", n, j.Chunk.Size, err)
+				if rt == 0 || !isRetryErr {
+					res.err = fmt.Errorf("download chunk Failed, nwrite:%v, want:%v, err:%v, reqid: %v, rt: %v, isRetryErr: %v", written, j.Chunk.Size, werr, resp.Header.Get("X-Cos-Request-Id"), rt, isRetryErr)
 					results <- &res
 					break
 				}
 				time.Sleep(time.Millisecond)
 				continue
 			}
-			fd.Close()
-			resp.Body.Close()
+			res.CRC64 = crcHash.Sum64()
 			results <- &res
 			break
 		}
 	}
+}
+
+// copyChunkToFileAt 将 src 中 size 字节流式写入 fd 的 off 偏移处，同时更新 crcHash。
+// 使用调用方提供的固定大小 buf 避免按 chunkSize 分配大内存。
+// 返回值：(已写字节数, 错误, 是否可重试)
+//   - 写入错误（如磁盘满）：isRetry=false，不重试
+//   - 数据不足（io.ErrUnexpectedEOF / io.EOF）：统一返回 io.ErrUnexpectedEOF，isRetry=true，可重新请求
+func copyChunkToFileAt(fd *os.File, src io.Reader, off int64, size int64, buf []byte, crcHash io.Writer) (int64, error, bool) {
+	var written int64
+	remain := size
+	for remain > 0 {
+		readSize := int64(len(buf))
+		if remain < readSize {
+			readSize = remain
+		}
+		nr, rerr := io.ReadFull(src, buf[:readSize])
+		if nr > 0 {
+			nw, werr := fd.WriteAt(buf[:nr], off+written)
+			if nw > 0 {
+				crcHash.Write(buf[:nw])
+				written += int64(nw)
+				remain -= int64(nw)
+			}
+			if werr != nil {
+				return written, werr, false
+			}
+			if nw != nr {
+				return written, io.ErrShortWrite, false
+			}
+		}
+		if rerr != nil {
+			// io.ReadFull 在 nr==0 时返回 io.EOF，在 0<nr<readSize 时返回 io.ErrUnexpectedEOF。
+			// 两者都意味着 src 数据不足 size 字节，统一转为 io.ErrUnexpectedEOF 并标记可重试。
+			if rerr == io.EOF {
+				rerr = io.ErrUnexpectedEOF
+			}
+			return written, rerr, true
+		}
+		// 防御：nr==0 且 rerr==nil 理论上不应发生（io.ReadFull 保证），
+		// 若发生则视为数据不足并中止，避免死循环。
+		if nr == 0 {
+			return written, io.ErrUnexpectedEOF, true
+		}
+	}
+	return written, nil, false
 }
 
 func DividePart(fileSize int64, last int) (int64, int64) {
@@ -1004,19 +1384,25 @@ func (s *ObjectService) checkUploadedParts(ctx context.Context, name, UploadID, 
 			return ret(errors.New("Part Number is not consistent"))
 		}
 		partNumber = partNumber - 1
-		fd.Seek(chunks[partNumber].OffSet, os.SEEK_SET)
-		bs, err := ioutil.ReadAll(io.LimitReader(fd, chunks[partNumber].Size))
+		fd.Seek(chunks[partNumber].OffSet, io.SeekStart)
+		bs, err := io.ReadAll(io.LimitReader(fd, chunks[partNumber].Size))
 		if err != nil {
 			return ret(err)
 		}
 		localMD5 := fmt.Sprintf("\"%x\"", md5.Sum(bs))
 		if localMD5 != part.ETag {
-			return ret(errors.New(fmt.Sprintf("CheckSum Failed in Part[%d]", part.PartNumber)))
+			return ret(fmt.Errorf("CheckSum Failed in Part[%d]", part.PartNumber))
 		}
 		chunks[partNumber].Done = true
 		chunks[partNumber].ETag = part.ETag
 	}
 	return nil
+}
+
+// 收集每个分块的 CRC64 用于合并校验
+type partCRC struct {
+	crc  uint64
+	size int64
 }
 
 // MultiUpload/Upload 为高级upload接口，并发分块上传
@@ -1056,6 +1442,210 @@ func (s *ObjectService) Upload(ctx context.Context, name string, filepath string
 			opt0 = &ObjectPutOptions{
 				opt.OptIni.ACLHeaderOptions,
 				opt.OptIni.ObjectPutHeaderOptions,
+				nil,
+			}
+		}
+		rsp, err := s.PutFromFile(ctx, name, filepath, opt0)
+		if err != nil {
+			return nil, rsp, err
+		}
+		result := &CompleteMultipartUploadResult{
+			Location: fmt.Sprintf("%s/%s", s.client.BaseURL.BucketURL, name),
+			Key:      name,
+			ETag:     rsp.Header.Get("ETag"),
+		}
+		if rsp != nil && s.client.Conf.EnableCRC && !opt.DisableChecksum {
+			scoscrc := rsp.Header.Get("x-cos-hash-crc64ecma")
+			icoscrc, _ := strconv.ParseUint(scoscrc, 10, 64)
+			if icoscrc != localcrc {
+				return result, rsp, fmt.Errorf("verification failed, want:%v, return:%v, header:%+v", localcrc, icoscrc, rsp.Header)
+			}
+		}
+		return result, rsp, nil
+	}
+
+	var uploadID string
+	resumableFlag := false
+	if opt.CheckPoint {
+		var err error
+		uploadID, err = s.getResumableUploadID(ctx, name)
+		if err == nil && uploadID != "" {
+			err = s.checkUploadedParts(ctx, name, uploadID, filepath, chunks, partNum)
+			resumableFlag = (err == nil)
+		}
+	}
+
+	// 2.Init
+	optini := opt.OptIni
+	if !resumableFlag {
+		res, _, err := s.InitiateMultipartUpload(ctx, name, optini)
+		if err != nil {
+			return nil, nil, err
+		}
+		uploadID = res.UploadID
+	}
+
+	useExternalWorker := opt.WorkerChannel != nil && opt.ResultChannel != nil
+	var chjobs chan *Jobs
+	var chresults chan *Results
+	if !useExternalWorker {
+		var poolSize int
+		if opt.ThreadPoolSize > 0 {
+			poolSize = opt.ThreadPoolSize
+		} else {
+			// Default is one
+			poolSize = 1
+		}
+		chjobs = make(chan *Jobs, 100)
+		chresults = make(chan *Results, 10000)
+		// 3.Start worker
+		for w := 1; w <= poolSize; w++ {
+			go worker(ctx, s, chjobs, chresults)
+		}
+	}
+
+	optcom := &CompleteMultipartUploadOptions{}
+
+	// progress started event
+	var listener ProgressListener
+	var consumedBytes int64
+	if opt.OptIni != nil {
+		if opt.OptIni.ObjectPutHeaderOptions != nil {
+			listener = opt.OptIni.Listener
+		}
+		optcom.XOptionHeader, _ = deliverInitOptions(opt.OptIni)
+	}
+	event := newProgressEvent(ProgressStartedEvent, 0, 0, totalBytes)
+	progressCallback(listener, event)
+
+	// 4.Push jobs
+	go func() {
+		for _, chunk := range chunks {
+			if chunk.Done {
+				continue
+			}
+			partOpt := &ObjectUploadPartOptions{}
+			if optini != nil && optini.ObjectPutHeaderOptions != nil {
+				partOpt.XCosSSECustomerAglo = optini.XCosSSECustomerAglo
+				partOpt.XCosSSECustomerKey = optini.XCosSSECustomerKey
+				partOpt.XCosSSECustomerKeyMD5 = optini.XCosSSECustomerKeyMD5
+				partOpt.XCosTrafficLimit = optini.XCosTrafficLimit
+				partOpt.XOptionHeader = optini.XOptionHeader
+			}
+			job := &Jobs{
+				Name:       name,
+				RetryTimes: 3,
+				FilePath:   filepath,
+				UploadId:   uploadID,
+				Chunk:      chunk,
+				UpOpt:      partOpt,
+			}
+			if !useExternalWorker {
+				chjobs <- job
+			} else {
+				opt.WorkerChannel <- job
+			}
+		}
+		if !useExternalWorker {
+			close(chjobs)
+		}
+	}()
+
+	// 5.Recv the resp etag to complete
+	err = nil
+	for i := 0; i < partNum; i++ {
+		if chunks[i].Done {
+			optcom.Parts = append(optcom.Parts, Object{
+				PartNumber: chunks[i].Number, ETag: chunks[i].ETag},
+			)
+			if err == nil {
+				consumedBytes += chunks[i].Size
+				event = newProgressEvent(ProgressDataEvent, chunks[i].Size, consumedBytes, totalBytes)
+				progressCallback(listener, event)
+			}
+			continue
+		}
+		var res *Results
+		if !useExternalWorker {
+			res = <-chresults
+		} else {
+			res = <-opt.ResultChannel
+		}
+		// Notice one part fail can not get the etag according.
+		if res.Resp == nil || res.err != nil {
+			// Some part already fail, can not to get the header inside.
+			err = fmt.Errorf("UploadID %s, part %d failed to get resp content. error: %w", uploadID, res.PartNumber, res.err)
+			continue
+		}
+		// Notice one part fail can not get the etag according.
+		etag := res.Resp.Header.Get("ETag")
+		optcom.Parts = append(optcom.Parts, Object{
+			PartNumber: res.PartNumber, ETag: etag},
+		)
+		if err == nil {
+			consumedBytes += chunks[res.PartNumber-1].Size
+			event = newProgressEvent(ProgressDataEvent, chunks[res.PartNumber-1].Size, consumedBytes, totalBytes)
+			progressCallback(listener, event)
+		}
+	}
+	if !useExternalWorker {
+		close(chresults)
+	}
+	if err != nil {
+		event = newProgressEvent(ProgressFailedEvent, 0, consumedBytes, totalBytes, err)
+		progressCallback(listener, event)
+		return nil, nil, err
+	}
+	sort.Sort(ObjectList(optcom.Parts))
+
+	event = newProgressEvent(ProgressCompletedEvent, 0, consumedBytes, totalBytes)
+	progressCallback(listener, event)
+
+	v, resp, err := s.CompleteMultipartUpload(context.Background(), name, uploadID, optcom)
+	if err != nil {
+		return v, resp, err
+	}
+
+	if resp != nil && s.client.Conf.EnableCRC && !opt.DisableChecksum {
+		scoscrc := resp.Header.Get("x-cos-hash-crc64ecma")
+		icoscrc, err := strconv.ParseUint(scoscrc, 10, 64)
+		if icoscrc != localcrc {
+			return v, resp, fmt.Errorf("verification failed, want:%v, return:%v, x-cos-hash-crc64ecma: %v, err:%v, header:%+v", localcrc, icoscrc, scoscrc, err, resp.Header)
+		}
+	}
+	return v, resp, err
+}
+
+func (s *ObjectService) UploadWithPicOperations(ctx context.Context, name string, filepath string, opt *MultiUploadOptions) (*CompleteMultipartUploadResult, *Response, error) {
+	if opt == nil {
+		opt = &MultiUploadOptions{}
+	}
+	var localcrc uint64
+	// 1.Get the file chunk
+	totalBytes, chunks, partNum, err := SplitFileIntoChunks(filepath, opt.PartSize*1024*1024)
+	if err != nil {
+		return nil, nil, err
+	}
+	// 校验
+	if s.client.Conf.EnableCRC && !opt.DisableChecksum {
+		fd, err := os.Open(filepath)
+		if err != nil {
+			return nil, nil, err
+		}
+		defer fd.Close()
+		localcrc, err = calCRC64(fd)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+	// filesize=0 , use simple upload
+	if partNum == 0 || partNum == 1 {
+		var opt0 *ObjectPutOptions
+		if opt.OptIni != nil {
+			opt0 = &ObjectPutOptions{
+				opt.OptIni.ACLHeaderOptions,
+				opt.OptIni.ObjectPutHeaderOptions,
+				nil,
 			}
 		}
 		rsp, err := s.PutFromFile(ctx, name, filepath, opt0)
@@ -1138,6 +1728,7 @@ func (s *ObjectService) Upload(ctx context.Context, name string, filepath string
 				partOpt.XCosSSECustomerKey = optini.XCosSSECustomerKey
 				partOpt.XCosSSECustomerKeyMD5 = optini.XCosSSECustomerKeyMD5
 				partOpt.XCosTrafficLimit = optini.XCosTrafficLimit
+				partOpt.XOptionHeader = optini.XOptionHeader
 			}
 			job := &Jobs{
 				Name:       name,
@@ -1145,7 +1736,7 @@ func (s *ObjectService) Upload(ctx context.Context, name string, filepath string
 				FilePath:   filepath,
 				UploadId:   uploadID,
 				Chunk:      chunk,
-				Opt:        partOpt,
+				UpOpt:      partOpt,
 			}
 			chjobs <- job
 		}
@@ -1170,7 +1761,7 @@ func (s *ObjectService) Upload(ctx context.Context, name string, filepath string
 		// Notice one part fail can not get the etag according.
 		if res.Resp == nil || res.err != nil {
 			// Some part already fail, can not to get the header inside.
-			err = fmt.Errorf("UploadID %s, part %d failed to get resp content. error: %s", uploadID, res.PartNumber, res.err.Error())
+			err = fmt.Errorf("UploadID %s, part %d failed to get resp content. error: %w", uploadID, res.PartNumber, res.err)
 			continue
 		}
 		// Notice one part fail can not get the etag according.
@@ -1191,6 +1782,11 @@ func (s *ObjectService) Upload(ctx context.Context, name string, filepath string
 		return nil, nil, err
 	}
 	sort.Sort(ObjectList(optcom.Parts))
+	if opt.OptIni != nil && opt.OptIni.ObjectPutHeaderOptions != nil && opt.OptIni.ObjectPutHeaderOptions.XOptionHeader != nil {
+		if len(opt.OptIni.XOptionHeader.Get("Pic-Operations")) > 0 {
+			optcom.XOptionHeader.Add("Pic-Operations", opt.OptIni.XOptionHeader.Get("Pic-Operations"))
+		}
+	}
 
 	event = newProgressEvent(ProgressCompletedEvent, 0, consumedBytes, totalBytes)
 	progressCallback(listener, event)
@@ -1220,6 +1816,37 @@ func SplitSizeIntoChunks(totalBytes int64, partSize int64) ([]Chunk, int, error)
 		if partNum >= 10000 {
 			return nil, 0, errors.New("Too manry parts, out of 10000")
 		}
+	} else {
+		partNum, partSize = DividePart(totalBytes, 16)
+	}
+
+	var chunks []Chunk
+	var chunk = Chunk{}
+	for i := int64(0); i < partNum; i++ {
+		chunk.Number = int(i + 1)
+		chunk.OffSet = i * partSize
+		chunk.Size = partSize
+		chunks = append(chunks, chunk)
+	}
+
+	if totalBytes%partSize > 0 {
+		chunk.Number = len(chunks) + 1
+		chunk.OffSet = int64(len(chunks)) * partSize
+		chunk.Size = totalBytes % partSize
+		chunks = append(chunks, chunk)
+		partNum++
+	}
+
+	return chunks, int(partNum), nil
+}
+
+func SplitSizeIntoChunksToDownload(totalBytes int64, partSize int64) ([]Chunk, int, error) {
+	var partNum int64
+	if partSize > 0 {
+		if partSize < 1024*1024 {
+			return nil, 0, errors.New("partSize>=1048576 is required")
+		}
+		partNum = totalBytes / partSize
 	} else {
 		partNum, partSize = DividePart(totalBytes, 16)
 	}
@@ -1288,6 +1915,10 @@ func (s *ObjectService) checkDownloadedParts(opt *MultiDownloadCPInfo, chfile st
 }
 
 func (s *ObjectService) Download(ctx context.Context, name string, filepath string, opt *MultiDownloadOptions, id ...string) (*Response, error) {
+	// key 校验
+	if s.client.Conf.ObjectKeySimplifyCheck && !CheckObjectKeySimplify("/"+name) {
+		return nil, ObjectKeySimplifyCheckErr
+	}
 	// 参数校验
 	if opt == nil {
 		opt = &MultiDownloadOptions{}
@@ -1316,31 +1947,13 @@ func (s *ObjectService) Download(ctx context.Context, name string, filepath stri
 	}
 
 	// 切分
-	chunks, partNum, err := SplitSizeIntoChunks(totalBytes, opt.PartSize*1024*1024)
+	chunks, partNum, err := SplitSizeIntoChunksToDownload(totalBytes, opt.PartSize*1024*1024)
 	if err != nil {
 		return resp, err
 	}
-	// 直接下载到文件
+	// 直接下载到文件，GetToFile 内部已做 CRC 校验，无需重复校验
 	if partNum == 0 || partNum == 1 {
 		rsp, err := s.GetToFile(ctx, name, filepath, opt.Opt, id...)
-		if err != nil {
-			return rsp, err
-		}
-		if coscrc != "" && s.client.Conf.EnableCRC && !opt.DisableChecksum {
-			icoscrc, _ := strconv.ParseUint(coscrc, 10, 64)
-			fd, err := os.Open(filepath)
-			if err != nil {
-				return rsp, err
-			}
-			defer fd.Close()
-			localcrc, err := calCRC64(fd)
-			if err != nil {
-				return rsp, err
-			}
-			if localcrc != icoscrc {
-				return rsp, fmt.Errorf("verification failed, want:%v, return:%v, header:%+v", icoscrc, localcrc, resp.Header)
-			}
-		}
 		return rsp, err
 	}
 	// 断点续载
@@ -1365,29 +1978,44 @@ func (s *ObjectService) Download(ctx context.Context, name string, filepath stri
 			return nil, fmt.Errorf("Open CheckPoint File[%v] Failed:%v", cpfile, err)
 		}
 	}
+	// 打开（或创建）文件，保持 fd 供所有 worker 通过 WriteAt 并发写入
+	var dlfd *os.File
 	if !resumableFlag {
-		// 创建文件
-		nfile, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0660)
-		if err != nil {
-			if cpfd != nil {
-				cpfd.Close()
-			}
-			return resp, err
+		dlfd, err = os.OpenFile(filepath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0660)
+	} else {
+		dlfd, err = os.OpenFile(filepath, os.O_RDWR, 0660)
+	}
+	if err != nil {
+		if cpfd != nil {
+			cpfd.Close()
 		}
-		nfile.Close()
+		return resp, err
 	}
 
-	var poolSize int
-	if opt.ThreadPoolSize > 0 {
-		poolSize = opt.ThreadPoolSize
-	} else {
-		poolSize = 1
+	useExternalWorker := opt.WorkerChannel != nil && opt.ResultChannel != nil
+	var chjobs chan *Jobs
+	var chresults chan *Results
+	if !useExternalWorker {
+		var poolSize int
+		if opt.ThreadPoolSize > 0 {
+			poolSize = opt.ThreadPoolSize
+		} else {
+			poolSize = 1
+		}
+		chjobs = make(chan *Jobs, 100)
+		chresults = make(chan *Results, 10000)
+		for w := 1; w <= poolSize; w++ {
+			go downloadWorker(ctx, s, chjobs, chresults)
+		}
 	}
-	chjobs := make(chan *Jobs, 100)
-	chresults := make(chan *Results, 10000)
-	for w := 1; w <= poolSize; w++ {
-		go downloadWorker(ctx, s, chjobs, chresults)
+
+	var listener ProgressListener
+	var consumedBytes int64
+	if opt.Opt != nil && opt.Opt.Listener != nil {
+		listener = opt.Opt.Listener
 	}
+	event := newProgressEvent(ProgressStartedEvent, 0, 0, totalBytes)
+	progressCallback(listener, event)
 
 	go func() {
 		for _, chunk := range chunks {
@@ -1403,63 +2031,134 @@ func (s *ObjectService) Download(ctx context.Context, name string, filepath stri
 				Name:       name,
 				RetryTimes: 3,
 				FilePath:   filepath,
+				Fd:         dlfd,
 				Chunk:      chunk,
 				DownOpt:    &downOpt,
 			}
 			if len(id) > 0 {
-				job.VersionId = append(job.VersionId, id...)
+				job.VersionId = id[0]
 			}
-			chjobs <- job
+			if !useExternalWorker {
+				chjobs <- job
+			} else {
+				opt.WorkerChannel <- job
+			}
 		}
-		close(chjobs)
+		if !useExternalWorker {
+			close(chjobs)
+		}
 	}()
 	err = nil
+	partCRCs := make(map[int]partCRC)
+	// 本次新下载成功的块，暂存于内存，等 sync 成功后才写入 checkpoint
+	var newlyDoneBlocks []DownloadedBlock
 	for i := 0; i < partNum; i++ {
 		if chunks[i].Done {
+			if err == nil {
+				consumedBytes += chunks[i].Size
+				event = newProgressEvent(ProgressDataEvent, chunks[i].Size, consumedBytes, totalBytes)
+				progressCallback(listener, event)
+			}
 			continue
 		}
-		res := <-chresults
+		var res *Results
+		if !useExternalWorker {
+			res = <-chresults
+		} else {
+			res = <-opt.ResultChannel
+		}
 		if res.Resp == nil || res.err != nil {
-			err = fmt.Errorf("part %d get resp Content. error: %s", res.PartNumber, res.err.Error())
+			err = fmt.Errorf("part %d get resp Content. error: %w", res.PartNumber, res.err)
 			continue
 		}
-		// Dump CheckPoint Info
+		partCRCs[res.PartNumber] = partCRC{crc: res.CRC64, size: chunks[res.PartNumber-1].Size}
+		// 仅在内存中记录本次新完成的块，不在此处写 checkpoint
 		if opt.CheckPoint {
-			cpfd.Truncate(0)
-			cpfd.Seek(0, os.SEEK_SET)
-			resumableInfo.DownloadedBlocks = append(resumableInfo.DownloadedBlocks, DownloadedBlock{
+			newlyDoneBlocks = append(newlyDoneBlocks, DownloadedBlock{
 				From: chunks[res.PartNumber-1].OffSet,
 				To:   chunks[res.PartNumber-1].OffSet + chunks[res.PartNumber-1].Size - 1,
 			})
+		}
+
+		// 更新进度
+		consumedBytes += chunks[res.PartNumber-1].Size
+		event = newProgressEvent(ProgressDataEvent, chunks[res.PartNumber-1].Size, consumedBytes, totalBytes)
+		progressCallback(listener, event)
+	}
+	if !useExternalWorker {
+		close(chresults)
+	}
+
+	// 所有分块写入完毕，统一执行一次 Sync 保证数据持久化，然后关闭共享 fd
+	// 无论下载成功还是失败，都先 sync，sync 结果决定是否更新 checkpoint
+	syncErr := dlfd.Sync()
+	if opt.CheckPoint && cpfd != nil {
+		if syncErr == nil {
+			// sync 成功：将本次新完成的块追加到 checkpoint，供下次断点续载使用（下载整体失败时）
+			// 下载整体成功后会删除 checkpoint 文件
+			resumableInfo.DownloadedBlocks = append(resumableInfo.DownloadedBlocks, newlyDoneBlocks...)
+			cpfd.Truncate(0)
+			cpfd.Seek(0, io.SeekStart)
 			json.NewEncoder(cpfd).Encode(resumableInfo)
 		}
-	}
-	close(chresults)
-	if cpfd != nil {
+		// sync 失败：不更新 checkpoint，保留原有断点数据，下次重试时这些块会重新下载
 		cpfd.Close()
 	}
+	if syncErr != nil {
+		dlfd.Close()
+		if err != nil {
+			return nil, fmt.Errorf("sync failed: %v; download error: %w", syncErr, err)
+		}
+		return nil, fmt.Errorf("sync failed: %w", syncErr)
+	}
+
 	if err != nil {
+		dlfd.Close()
+		event = newProgressEvent(ProgressFailedEvent, 0, consumedBytes, totalBytes, err)
+		progressCallback(listener, event)
 		return nil, err
 	}
-	// 下载成功，删除checkpoint文件
+	// 整个下载成功，删除 checkpoint 文件
 	if opt.CheckPoint {
 		os.Remove(cpfile)
 	}
+
 	if coscrc != "" && s.client.Conf.EnableCRC && !opt.DisableChecksum {
 		icoscrc, _ := strconv.ParseUint(coscrc, 10, 64)
-		fd, err := os.Open(filepath)
-		if err != nil {
-			return resp, err
+		// 对已完成的(断点续载)分块，直接通过共享 fd 读取数据计算 CRC64
+		for i := 0; i < partNum; i++ {
+			if !chunks[i].Done {
+				continue
+			}
+			buf := make([]byte, chunks[i].Size)
+			_, ferr := dlfd.ReadAt(buf, chunks[i].OffSet)
+			if ferr != nil && ferr != io.EOF {
+				dlfd.Close()
+				return resp, ferr
+			}
+			partHash := crc64.New(crc64.MakeTable(crc64.ECMA))
+			partHash.Write(buf)
+			partCRCs[chunks[i].Number] = partCRC{crc: partHash.Sum64(), size: chunks[i].Size}
 		}
-		defer fd.Close()
-		localcrc, err := calCRC64(fd)
-		if err != nil {
-			return resp, err
+		// 按分块顺序合并 CRC64
+		var localcrc uint64
+		for i := 1; i <= partNum; i++ {
+			if pc, ok := partCRCs[i]; ok {
+				localcrc = CRC64Combine(localcrc, pc.crc, pc.size)
+			}
 		}
 		if localcrc != icoscrc {
+			dlfd.Close()
 			return resp, fmt.Errorf("verification failed, want:%v, return:%v, header:%+v", icoscrc, localcrc, resp.Header)
 		}
 	}
+	err = dlfd.Close()
+	if err != nil {
+		return resp, err
+	}
+	event = newProgressEvent(ProgressCompletedEvent, 0, consumedBytes, totalBytes)
+	progressCallback(listener, event)
+
 	return resp, err
 }
 
@@ -1523,8 +2222,12 @@ func (s *ObjectService) GetTagging(ctx context.Context, name string, opt ...inte
 }
 
 func (s *ObjectService) DeleteTagging(ctx context.Context, name string, opt ...interface{}) (*Response, error) {
+	// When use "" string might call the delete bucket interface
 	if len(name) == 0 || name == "/" {
 		return nil, errors.New("empty object name")
+	}
+	if s.client.Conf.ObjectKeySimplifyCheck && !CheckObjectKeySimplify("/"+name) {
+		return nil, ObjectKeySimplifyCheckErr
 	}
 	var optHeader *ObjectGetTaggingOptions
 	u := fmt.Sprintf("/%s?tagging", encodeURIComponent(name))
@@ -1558,7 +2261,7 @@ type PutFetchTaskOptions struct {
 	IgnoreSameKey      bool         `json:"IgnoreSameKey,omitempty" header:"-" xml:"-"`
 	SuccessCallbackUrl string       `json:"SuccessCallbackUrl,omitempty" header:"-" xml:"-"`
 	FailureCallbackUrl string       `json:"FailureCallbackUrl,omitempty" header:"-" xml:"-"`
-	XOptionHeader      *http.Header `json:"-", xml:"-" header:"-,omitempty"`
+	XOptionHeader      *http.Header `json:"-" xml:"-" header:"-,omitempty"`
 }
 
 type PutFetchTaskResult struct {
@@ -1583,7 +2286,7 @@ type GetFetchTaskResult struct {
 }
 
 type innerFetchTaskHeader struct {
-	XOptionHeader *http.Header `json:"-", xml:"-" header:"-,omitempty"`
+	XOptionHeader *http.Header `json:"-" xml:"-" header:"-,omitempty"`
 }
 
 func (s *ObjectService) PutFetchTask(ctx context.Context, bucket string, opt *PutFetchTaskOptions) (*PutFetchTaskResult, *Response, error) {
@@ -1633,4 +2336,245 @@ func (s *ObjectService) GetFetchTask(ctx context.Context, bucket string, taskid 
 		err = json.Unmarshal(buf.Bytes(), &res)
 	}
 	return &res, resp, err
+}
+
+type ObjectPutSymlinkOptions struct {
+	SymlinkTarget string       `header:"x-cos-symlink-target" url:"-"`
+	XOptionHeader *http.Header `header:"-,omitempty" url:"-" xml:"-"`
+}
+
+type ObjectGetSymlinkOptions struct {
+	XOptionHeader *http.Header `header:"-,omitempty" url:"-" xml:"-"`
+}
+
+func (s *ObjectService) PutSymlink(ctx context.Context, name string, opt *ObjectPutSymlinkOptions) (*Response, error) {
+	if opt == nil || opt.SymlinkTarget == "" {
+		return nil, errors.New("SymlinkTarget is empty")
+	}
+	copt := &ObjectPutSymlinkOptions{
+		SymlinkTarget: encodeURIComponent(opt.SymlinkTarget),
+		XOptionHeader: opt.XOptionHeader,
+	}
+	sendOpt := &sendOptions{
+		baseURL:   s.client.BaseURL.BucketURL,
+		uri:       "/" + encodeURIComponent(name) + "?symlink",
+		method:    http.MethodPut,
+		optHeader: copt,
+	}
+	resp, err := s.client.doRetry(ctx, sendOpt)
+	return resp, err
+}
+
+func (s *ObjectService) GetSymlink(ctx context.Context, name string, opt *ObjectGetSymlinkOptions) (string, *Response, error) {
+	sendOpt := &sendOptions{
+		baseURL: s.client.BaseURL.BucketURL,
+		uri:     "/" + encodeURIComponent(name) + "?symlink",
+		method:  http.MethodGet,
+	}
+	resp, err := s.client.doRetry(ctx, sendOpt)
+	if err != nil || resp == nil {
+		return "", resp, err
+	}
+	return resp.Header.Get("x-cos-symlink-target"), resp, err
+}
+
+type ObjectPutFromURLOptions struct {
+	PartSize    int
+	QueueSize   int
+	InitOptions *InitiateMultipartUploadOptions
+}
+
+func (s *ObjectService) PutFromURL(ctx context.Context, name string, downloadURL string, opt *ObjectPutFromURLOptions) (*CompleteMultipartUploadResult, *Response, error) {
+	if opt == nil {
+		opt = &ObjectPutFromURLOptions{}
+	}
+	// init
+	v, resp, err := s.InitiateMultipartUpload(ctx, name, opt.InitOptions)
+	if err != nil {
+		return nil, resp, err
+	}
+	uploadId := v.UploadID
+	var isErr bool
+	defer func() {
+		if isErr {
+			s.AbortMultipartUpload(ctx, name, uploadId, nil)
+		}
+	}()
+	// request from url
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, downloadURL, nil)
+	if err != nil {
+		isErr = true
+		return nil, nil, err
+	}
+	rsp, err := http.DefaultClient.Do(req)
+	if err != nil || rsp == nil {
+		isErr = true
+		return nil, nil, err
+	}
+	defer rsp.Body.Close()
+	if rsp.StatusCode > 299 {
+		isErr = true
+		return nil, &Response{rsp}, fmt.Errorf("the status code of downloadURL response is failed: %d", rsp.StatusCode)
+	}
+	factory := newPartFactory(opt.PartSize, opt.QueueSize)
+	partChannel, errChannel := factory.Produce(rsp.Body)
+	defer factory.Close()
+
+	comOpt := &CompleteMultipartUploadOptions{}
+	var partNumber int
+	for {
+		select {
+		case part, ok := <-partChannel:
+			if !ok {
+				partChannel = nil
+				break
+			}
+			partNumber++
+			resp, err := s.UploadPart(ctx, name, uploadId, partNumber, part, nil)
+			if err != nil {
+				isErr = true
+				return nil, resp, err
+			}
+			comOpt.Parts = append(comOpt.Parts, Object{
+				PartNumber: partNumber,
+				ETag:       resp.Header.Get("ETag"),
+			})
+		case err, ok := <-errChannel:
+			if !ok {
+				errChannel = nil
+				break
+			}
+			if err != nil {
+				isErr = true
+				return nil, nil, fmt.Errorf("url download failed: %v", err)
+			}
+		}
+		if partChannel == nil && errChannel == nil {
+			break
+		}
+	}
+	// 兼容0字节文件，如果没有上传分片，则上传一个空分片
+	if len(comOpt.Parts) == 0 {
+		resp, err := s.UploadPart(ctx, name, uploadId, 1, http.NoBody, nil)
+		if err != nil {
+			isErr = true
+			return nil, resp, err
+		}
+		comOpt.Parts = append(comOpt.Parts, Object{
+			PartNumber: 1,
+			ETag:       resp.Header.Get("ETag"),
+		})
+	}
+	res, resp, err := s.CompleteMultipartUpload(ctx, name, uploadId, comOpt)
+	if err != nil {
+		isErr = true
+	}
+	return res, resp, err
+}
+
+type partFactory struct {
+	partSize      int
+	queueSize     int
+	current       *bytes.Buffer
+	partChannel   chan *bytes.Buffer
+	errChannel    chan error
+	cancelChannel chan struct{}
+}
+
+const CHUNK_SIZE = 1024 * 1024
+
+func newPartFactory(partSize int, queueSize int) *partFactory {
+	if partSize <= 0 {
+		partSize = 8
+	}
+	if queueSize <= 0 {
+		queueSize = 10
+	}
+	return &partFactory{
+		partSize:  partSize * 1024 * 1024,
+		queueSize: queueSize,
+		current:   bytes.NewBuffer(nil),
+	}
+}
+
+func (pf *partFactory) Produce(reader io.ReadCloser) (<-chan *bytes.Buffer, <-chan error) {
+	pf.cancelChannel = make(chan struct{}, 1)
+	pf.partChannel = make(chan *bytes.Buffer, pf.queueSize)
+	pf.errChannel = make(chan error, 1)
+
+	go pf.Run(reader)
+	return pf.partChannel, pf.errChannel
+}
+
+func (pf *partFactory) Close() {
+	pf.cancelChannel <- struct{}{}
+}
+
+func (pf *partFactory) Run(reader io.ReadCloser) {
+	var total, parts int
+	defer func() {
+		close(pf.errChannel)
+		close(pf.partChannel)
+	}()
+	buf := make([]byte, CHUNK_SIZE)
+	for {
+		select {
+		case <-pf.cancelChannel:
+			return
+		default:
+			n, err := reader.Read(buf)
+			total += n
+			if n > 0 {
+				part, e := pf.Write(buf[:n])
+				if e != nil {
+					pf.errChannel <- e
+					return
+				}
+				if part != nil {
+					parts++
+					select {
+					case pf.partChannel <- part:
+					case <-pf.cancelChannel:
+						return
+					}
+				}
+			}
+			if err != nil && err != io.EOF {
+				pf.errChannel <- err
+				return
+			}
+			if err == io.EOF || n == 0 {
+				if pf.current.Len() > 0 {
+					parts++
+					select {
+					case pf.partChannel <- pf.current:
+					case <-pf.cancelChannel:
+						return
+					}
+				}
+				return
+			}
+		}
+	}
+}
+
+func (pf *partFactory) Write(p []byte) (*bytes.Buffer, error) {
+	var res *bytes.Buffer
+	for nwrite := 0; nwrite < len(p); {
+		if pf.current.Len() == pf.partSize {
+			res = pf.current
+			pf.current = bytes.NewBuffer(nil)
+		}
+		end := len(p)
+		// 大于缓存区大小
+		if pf.current.Len()+end-nwrite > pf.partSize {
+			end = nwrite + pf.partSize - pf.current.Len()
+		}
+		nr, err := pf.current.Write(p[nwrite:end])
+		if err != nil {
+			return res, err
+		}
+		nwrite += nr
+	}
+	return res, nil
 }

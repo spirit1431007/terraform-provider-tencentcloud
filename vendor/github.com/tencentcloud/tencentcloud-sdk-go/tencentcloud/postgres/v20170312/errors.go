@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+// Copyright (c) 2017-2025 Tencent. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -56,11 +56,20 @@ const (
 	// 获取项目信息失败，请稍后重试。如果持续不成功，请联系客服进行处理。
 	FAILEDOPERATION_CDBCGWCONNECTERROR = "FailedOperation.CdbCgwConnectError"
 
+	// 检查数据库账号状态错误：账号已开启CAM验证，不支持当前操作。
+	FAILEDOPERATION_CHECKACCOUNTCAMCLOSEERROR = "FailedOperation.CheckAccountCAMCloseError"
+
+	// 检查数据库账号状态错误：账号未开启CAM验证，不支持当前操作。
+	FAILEDOPERATION_CHECKACCOUNTCAMOPENERROR = "FailedOperation.CheckAccountCAMOpenError"
+
 	// 不支持新增基础网络。
 	FAILEDOPERATION_CREATEBASICNETWORKDENIEDERROR = "FailedOperation.CreateBasicNetworkDeniedError"
 
 	// 创建续费订单失败。
 	FAILEDOPERATION_CREATEORDERFAILED = "FailedOperation.CreateOrderFailed"
+
+	// 数据库访问失败。
+	FAILEDOPERATION_DBERROR = "FailedOperation.DBError"
 
 	// 管控元数据库访问失败，请稍后重试。如果持续不成功，请联系客服进行处理。
 	FAILEDOPERATION_DATABASEACCESSERROR = "FailedOperation.DatabaseAccessError"
@@ -118,6 +127,9 @@ const (
 
 	// 修改只读组配置失败。
 	FAILEDOPERATION_MODIFYROGROUPERROR = "FailedOperation.ModifyROGroupError"
+
+	// 实例配置变更失败，请稍后重试。如果持续不成功，请联系客服进行处理。
+	FAILEDOPERATION_MODIFYRESOURCEERROR = "FailedOperation.ModifyResourceError"
 
 	// 不符合资源所拥有的网络数量要求。
 	FAILEDOPERATION_NETWORKNUMLIMITERROR = "FailedOperation.NetworkNumLimitError"
@@ -248,11 +260,17 @@ const (
 	// 后台DB执行错误。
 	INTERNALERROR_DBERROR = "InternalError.DBError"
 
+	// 数据库访问异常，请检查连接后重试
+	INTERNALERROR_DATABASEACCESSERROR = "InternalError.DatabaseAccessError"
+
 	// DFW相关错误。
 	INTERNALERROR_DFWERROR = "InternalError.DfwError"
 
 	// 流程创建失败。
 	INTERNALERROR_FLOWERROR = "InternalError.FlowError"
+
+	// 服务异常，请稍后重试。
+	INTERNALERROR_HTTPERROR = "InternalError.HttpError"
 
 	// 管控系统元数据访问异常，请联系客服处理。
 	INTERNALERROR_INSTANCEDATAERROR = "InternalError.InstanceDataError"
@@ -262,6 +280,9 @@ const (
 
 	// Json数据解析失败，请联系客服进行处理。
 	INTERNALERROR_JSONPARSEERROR = "InternalError.JsonParseError"
+
+	// 查询实例不存在
+	INTERNALERROR_LISTINSTANCESERROR = "InternalError.ListInstancesError"
 
 	// 后台数据解析失败，请联系客服进行处理。
 	INTERNALERROR_MARSHALERROR = "InternalError.MarshalError"
@@ -290,8 +311,14 @@ const (
 	// 参数错误。
 	INVALIDPARAMETER = "InvalidParameter"
 
-	// 实例名已存在。
-	INVALIDPARAMETER_INSTANCENAMEEXIST = "InvalidParameter.InstanceNameExist"
+	// 参数异常。
+	INVALIDPARAMETER_EXCEPTIONPARAM = "InvalidParameter.ExceptionParam"
+
+	// 参数不合法
+	INVALIDPARAMETER_ILLEGALINPUTPARAMETER = "InvalidParameter.IllegalInputParameter"
+
+	// 参数不合法。
+	INVALIDPARAMETER_INVALIDPARAMETERERROR = "InvalidParameter.InvalidParameterError"
 
 	// 参数检查失败。
 	INVALIDPARAMETER_PARAMETERCHECKERROR = "InvalidParameter.ParameterCheckError"
@@ -320,6 +347,9 @@ const (
 	// 当前实例所要扩容的规格目前不售卖。
 	INVALIDPARAMETERVALUE_BADSPEC = "InvalidParameterValue.BadSpec"
 
+	// 参数值无效
+	INVALIDPARAMETERVALUE_BIZINVALIDPARAMETERVALUEERROR = "InvalidParameterValue.BizInvalidParameterValueError"
+
 	// 数据库字符集错误。
 	INVALIDPARAMETERVALUE_CHARSETNOTFOUNDERROR = "InvalidParameterValue.CharsetNotFoundError"
 
@@ -343,9 +373,6 @@ const (
 
 	// 非法的Zone参数。
 	INVALIDPARAMETERVALUE_ILLEGALZONE = "InvalidParameterValue.IllegalZone"
-
-	// 当前账号已存在。
-	INVALIDPARAMETERVALUE_INSTANCENAMEEXIST = "InvalidParameterValue.InstanceNameExist"
 
 	// 当前实例不存在。
 	INVALIDPARAMETERVALUE_INSTANCENOTEXIST = "InvalidParameterValue.InstanceNotExist"
@@ -419,9 +446,6 @@ const (
 	// 参数不满足规则，请修改后重试。
 	INVALIDPARAMETERVALUE_PARAMETERCHARACTERLIMITERROR = "InvalidParameterValue.ParameterCharacterLimitError"
 
-	// 参数前缀设置不符合规则要求，请修改后重试。
-	INVALIDPARAMETERVALUE_PARAMETERCHARACTERPRELIMITERROR = "InvalidParameterValue.ParameterCharacterPreLimitError"
-
 	// 参数处理失败，请检参数值设置是否有效。
 	INVALIDPARAMETERVALUE_PARAMETERHANDLEERROR = "InvalidParameterValue.ParameterHandleError"
 
@@ -449,6 +473,9 @@ const (
 	// 解析参数出错。
 	INVALIDPARAMETERVALUE_STRUCTPARSEFAILED = "InvalidParameterValue.StructParseFailed"
 
+	// 传入地域不支持使用本接口功能。
+	INVALIDPARAMETERVALUE_UNSUPPORTEDREGIONERROR = "InvalidParameterValue.UnsupportedRegionError"
+
 	// PID参数输入错误。
 	INVALIDPID = "InvalidPid"
 
@@ -461,11 +488,20 @@ const (
 	// 缺少参数错误。
 	MISSINGPARAMETER = "MissingParameter"
 
+	// 用户没权限
+	OPERATIONDENIED_ACCOUNTOPERATIONDENIED = "OperationDenied.AccountOperationDenied"
+
+	// 下载任务超限。
+	OPERATIONDENIED_AUDITFILEOVERQUOTAERROR = "OperationDenied.AuditFileOverQuotaError"
+
 	// 当前操作被限制。
 	OPERATIONDENIED_CAMDENIEDERROR = "OperationDenied.CamDeniedError"
 
 	// 目标实例状态检查不通过。
 	OPERATIONDENIED_DTSINSTANCESTATUSERROR = "OperationDenied.DTSInstanceStatusError"
+
+	// 禁止删除运行中的备份
+	OPERATIONDENIED_DELETERUNNINGBACKUPTASKERR = "OperationDenied.DeleteRunningBackupTaskErr"
 
 	// 您没有权限操作当前资源。
 	OPERATIONDENIED_INSTANCEACCESSDENIEDERROR = "OperationDenied.InstanceAccessDeniedError"
@@ -485,11 +521,14 @@ const (
 	// 实例类型错误
 	OPERATIONDENIED_INSTANCETYPEDENIED = "OperationDenied.InstanceTypeDenied"
 
+	// 账号余额不足。
+	OPERATIONDENIED_INSUFFICIENTBALANCEERROR = "OperationDenied.InsufficientBalanceError"
+
+	// 计费失败。
+	OPERATIONDENIED_INTERNALTRADEERRORERR = "OperationDenied.InternalTradeErrorErr"
+
 	// 内核版本过低，导致实例无法创建tencentDBSuper账号。如果您想使用此功能，请升级内核版本。
 	OPERATIONDENIED_KERNELVERSIONERROR = "OperationDenied.KernelVersionError"
-
-	// Serverless不支持当前可用区。
-	OPERATIONDENIED_NOTSUPPORTZONEERROR = "OperationDenied.NotSupportZoneError"
 
 	// 不支持的付费类型。
 	OPERATIONDENIED_PAYMODEERROR = "OperationDenied.PayModeError"
@@ -506,14 +545,23 @@ const (
 	// 只读实例状态限制当前操作。
 	OPERATIONDENIED_ROINSTANCESTATUSLIMITOPERROR = "OperationDenied.ROInstanceStatusLimitOpError"
 
+	// 实例不存在。
+	OPERATIONDENIED_RESOURCENOTFOUNDERROR = "OperationDenied.ResourceNotFoundError"
+
+	// 实例不存在。
+	OPERATIONDENIED_RESOURCENOTFUNDERROR = "OperationDenied.ResourceNotFundError"
+
 	// 只读节点总数不能超过上限值。
 	OPERATIONDENIED_ROINSTANCECOUNTEXEEDERROR = "OperationDenied.RoInstanceCountExeedError"
+
+	// 无支付权限，开通失败。
+	OPERATIONDENIED_TRADEPERMISSIONERROR = "OperationDenied.TradePermissionError"
 
 	// 用户未进行实名认证，请先进行实名认证才可购买。
 	OPERATIONDENIED_USERNOTAUTHENTICATEDERROR = "OperationDenied.UserNotAuthenticatedError"
 
-	// Serverless不支持该版本。
-	OPERATIONDENIED_VERSIONNOTSUPPORTERROR = "OperationDenied.VersionNotSupportError"
+	// 用户不在白名单内。
+	OPERATIONDENIED_USERNOTINWHITELISTERROR = "OperationDenied.UserNotInWhiteListError"
 
 	// 您没有权限操作该VPC网络。
 	OPERATIONDENIED_VPCDENIEDERROR = "OperationDenied.VpcDeniedError"
@@ -553,6 +601,15 @@ const (
 
 	// 未知参数错误。
 	UNKNOWNPARAMETER = "UnknownParameter"
+
+	// 创建审计日志文件错误。
+	UNKNOWNPARAMETER_CREATEAUDITLOGFILEERROR = "UnknownParameter.CreateAuditLogFileError"
+
+	// 服务异常，请稍后重试。
+	UNKNOWNPARAMETER_HTTPERROR = "UnknownParameter.HttpError"
+
+	// 内部服务异常，请稍后重试。
+	UNKNOWNPARAMETER_INTERNALINNERSERVICEERROR = "UnknownParameter.InternalInnerServiceError"
 
 	// 操作不支持。
 	UNSUPPORTEDOPERATION = "UnsupportedOperation"

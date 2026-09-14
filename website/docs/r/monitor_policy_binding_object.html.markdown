@@ -73,6 +73,7 @@ The following arguments are supported:
 The `dimensions` object supports the following:
 
 * `dimensions_json` - (Required, String, ForceNew) Represents a collection of dimensions of an object instance, json format.eg:'{"unInstanceId":"ins-ot3cq4bi"}'.
+* `region` - (Optional, String, ForceNew) Region.
 
 ## Attributes Reference
 
@@ -80,6 +81,9 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - ID of the resource.
 
+The `dimensions` object exports the following:
+
+* `unique_id` - Object unique ID.
 
 
 ## Import

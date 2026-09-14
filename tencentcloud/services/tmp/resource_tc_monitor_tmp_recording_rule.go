@@ -122,7 +122,8 @@ func resourceTencentCloudMonitorTmpRecordingRuleRead(d *schema.ResourceData, met
 
 	if recordingRule == nil {
 		d.SetId("")
-		return fmt.Errorf("resource `recordingRule` %s does not exist", ids[1])
+		log.Printf("[WARN]%s resource `recordingRule` [%s] not found, please check if it has been deleted.\n", logId, d.Id())
+		return nil
 	}
 
 	_ = d.Set("instance_id", ids[0])
@@ -165,7 +166,7 @@ func resourceTencentCloudMonitorTmpRecordingRuleUpdate(d *schema.ResourceData, m
 	}
 
 	if v, ok := d.GetOk("group"); ok {
-		request.Group = helper.String(v.(string))
+		request.Group = helper.String(tccommon.StringToBase64(v.(string)))
 	}
 
 	if d.HasChange("rule_state") {

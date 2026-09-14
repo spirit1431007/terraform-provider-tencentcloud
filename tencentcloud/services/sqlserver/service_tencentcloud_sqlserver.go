@@ -13,6 +13,7 @@ import (
 	"github.com/pkg/errors"
 	SDKErrors "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
 	sqlserver "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/sqlserver/v20180328"
+	sqlserverv20180328 "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/sqlserver/v20180328"
 
 	"github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/connectivity"
 	"github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/internal/helper"
@@ -374,6 +375,39 @@ func (me *SqlserverService) DescribeSqlserverInstanceById(ctx context.Context, i
 	return
 }
 
+func (me *SqlserverService) DescribeSqlserverInstanceAttributeById(ctx context.Context, instanceId string) (
+	attribute *sqlserver.DescribeDBInstancesAttributeResponseParams,
+	errRet error,
+) {
+	logId := tccommon.GetLogId(ctx)
+	request := sqlserver.NewDescribeDBInstancesAttributeRequest()
+	request.InstanceId = &instanceId
+
+	defer func() {
+		if errRet != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n",
+				logId, request.GetAction(), request.ToJsonString(), errRet.Error())
+		}
+	}()
+
+	ratelimit.Check(request.GetAction())
+
+	response, err := me.client.UseSqlserverClient().DescribeDBInstancesAttribute(request)
+	if err != nil {
+		errRet = err
+		return
+	}
+
+	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
+		logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
+
+	if response != nil && response.Response != nil {
+		attribute = response.Response
+	}
+
+	return
+}
+
 func (me *SqlserverService) DescribeMaintenanceSpan(ctx context.Context, instanceId string) (weekSet []int, startTime string, timeSpan int, errRet error) {
 	logId := tccommon.GetLogId(ctx)
 	request := sqlserver.NewDescribeMaintenanceSpanRequest()
@@ -554,6 +588,46 @@ func (me *SqlserverService) DescribeReadonlyGroupListByReadonlyInstanceId(ctx co
 	return
 }
 
+func (me *SqlserverService) DescribeReadOnlyGroupListById(ctx context.Context, masterInstanceId, readOnlyGroupId string) (readOnlyGroup *sqlserver.ReadOnlyGroup, errRet error) {
+	logId := tccommon.GetLogId(ctx)
+	request := sqlserver.NewDescribeReadOnlyGroupListRequest()
+	response := sqlserver.NewDescribeReadOnlyGroupListResponse()
+	request.InstanceId = &masterInstanceId
+	defer func() {
+		if errRet != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, reason[%s]", logId, request.GetAction(), errRet.Error())
+		}
+	}()
+
+	outErr := resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
+		ratelimit.Check(request.GetAction())
+		result, err := me.client.UseSqlserverClient().DescribeReadOnlyGroupList(request)
+		if err != nil {
+			return tccommon.RetryError(err)
+		}
+
+		if result == nil || result.Response == nil || result.Response.ReadOnlyGroupSet == nil {
+			return resource.NonRetryableError(fmt.Errorf("TencentCloud SDK return nil response, %s", request.GetAction()))
+		}
+
+		response = result
+		return nil
+	})
+
+	if outErr != nil {
+		return nil, outErr
+	}
+
+	for _, item := range response.Response.ReadOnlyGroupSet {
+		if *item.ReadOnlyGroupId == readOnlyGroupId {
+			readOnlyGroup = item
+			break
+		}
+	}
+
+	return
+}
+
 func (me *SqlserverService) CreateSqlserverAccount(ctx context.Context, instanceId string, userName string, password string, remark string, isAdmin bool) (errRet error) {
 	logId := tccommon.GetLogId(ctx)
 	request := sqlserver.NewCreateAccountRequest()
@@ -589,6 +663,37 @@ func (me *SqlserverService) CreateSqlserverAccount(ctx context.Context, instance
 	return
 }
 
+func (me *SqlserverService) CreateSqlserverAccountReturnFlowId(ctx context.Context, instanceId string, userName string, password string, remark string, isAdmin bool) (flowId int64, errRet error) {
+	logId := tccommon.GetLogId(ctx)
+	request := sqlserver.NewCreateAccountRequest()
+	defer func() {
+		if errRet != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, reason[%s]", logId, request.GetAction(), errRet.Error())
+		}
+	}()
+
+	request.InstanceId = &instanceId
+	account := sqlserver.AccountCreateInfo{UserName: &userName, Password: &password, IsAdmin: &isAdmin}
+	if remark != "" {
+		account.Remark = &remark
+	}
+	request.Accounts = []*sqlserver.AccountCreateInfo{&account}
+
+	ratelimit.Check(request.GetAction())
+	response, err := me.client.UseSqlserverClient().CreateAccount(request)
+	if err != nil {
+		errRet = err
+		return
+	}
+	if response == nil || response.Response == nil {
+		errRet = fmt.Errorf("TencentCloud SDK return nil response, %s", request.GetAction())
+		return
+	}
+
+	flowId = *response.Response.FlowId
+	return
+}
+
 func (me *SqlserverService) DescribeSqlserverAccounts(ctx context.Context, instanceId string) (accounts []*sqlserver.AccountDetail, errRet error) {
 	logId := tccommon.GetLogId(ctx)
 	request := sqlserver.NewDescribeAccountsRequest()
@@ -600,7 +705,7 @@ func (me *SqlserverService) DescribeSqlserverAccounts(ctx context.Context, insta
 
 	request.InstanceId = &instanceId
 
-	var offset, limit uint64 = 0, 20
+	var offset, limit uint64 = 0, 100
 
 	for {
 		request.Offset = &offset
@@ -740,6 +845,28 @@ func (me *SqlserverService) DeleteSqlserverAccount(ctx context.Context, instance
 		}
 	})
 
+	return
+}
+
+func (me *SqlserverService) DeleteSqlserverAccountOnly(ctx context.Context, instanceId string, userName string) (errRet error) {
+	logId := tccommon.GetLogId(ctx)
+	request := sqlserver.NewDeleteAccountRequest()
+	request.UserNames = []*string{&userName}
+	request.InstanceId = &instanceId
+	defer func() {
+		if errRet != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, reason[%s]", logId, request.GetAction(), errRet.Error())
+		}
+	}()
+
+	ratelimit.Check(request.GetAction())
+	_, err := me.client.UseSqlserverClient().DeleteAccount(request)
+	if err != nil {
+		ee, ok := err.(*SDKErrors.TencentCloudSDKError)
+		if !ok || ee.Code != "ResourceNotFound.InstanceNotFound" {
+			errRet = err
+		}
+	}
 	return
 }
 
@@ -1387,6 +1514,17 @@ func (me *SqlserverService) CreateSqlserverBasicInstance(ctx context.Context, pa
 	request.AutoVoucher = helper.IntInt64(autoVoucher)
 	request.Zone = &zone
 	request.Collation = &collation
+
+	// time_zone
+	if v, ok := paramMap["time_zone"]; ok {
+		request.TimeZone = helper.String(v.(string))
+	}
+
+	// disk_encrypt_flag
+	if v, ok := paramMap["disk_encrypt_flag"]; ok {
+		request.DiskEncryptFlag = helper.IntInt64(v.(int))
+	}
+
 	if v, ok := paramMap["projectId"]; ok {
 		projectId := v.(int)
 		request.ProjectId = helper.IntUint64(projectId)
@@ -3416,5 +3554,43 @@ func (me *SqlserverService) DescribeSqlserverDescHaLogByFilter(ctx context.Conte
 	}
 
 	descHaLog = response.Response.SwitchLog
+	return
+}
+
+func (me *SqlserverService) DescribeSqlserverCollationTimeZoneByFilter(ctx context.Context, param map[string]interface{}) (ret *sqlserverv20180328.DescribeCollationTimeZoneResponseParams, errRet error) {
+	var (
+		logId   = tccommon.GetLogId(ctx)
+		request = sqlserver.NewDescribeCollationTimeZoneRequest()
+	)
+
+	defer func() {
+		if errRet != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n", logId, request.GetAction(), request.ToJsonString(), errRet.Error())
+		}
+	}()
+
+	for k, v := range param {
+		if k == "MachineType" {
+			request.MachineType = v.(*string)
+		}
+		if k == "DBVersion" {
+			request.DBVersion = v.(*string)
+		}
+	}
+
+	ratelimit.Check(request.GetAction())
+
+	response, err := me.client.UseSqlserverClient().DescribeCollationTimeZone(request)
+	if err != nil {
+		errRet = err
+		return
+	}
+	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
+
+	if response == nil || response.Response == nil {
+		return
+	}
+
+	ret = response.Response
 	return
 }

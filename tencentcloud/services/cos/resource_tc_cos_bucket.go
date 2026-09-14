@@ -39,8 +39,22 @@ func originPullRules() *schema.Resource {
 			"sync_back_to_source": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
+				Computed:    true,
+				Deprecated:  "It has been deprecated from version 1.81.196. Please use `back_to_source_mode` instead.",
 				Description: "If `true`, COS will not return 3XX status code when pulling data from an origin server. Current available zone: ap-beijing, ap-shanghai, ap-singapore, ap-mumbai.",
+			},
+			"back_to_source_mode": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: tccommon.ValidateAllowedStringValue([]string{"Proxy", "Mirror", "Redirect"}),
+				Description:  "Back to source mode. Allow value: Proxy, Mirror, Redirect.",
+			},
+			"http_redirect_code": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "Redirect code. Effective when `back_to_source_mode` is `Redirect`. ex: 301, 302, 307. Default is 302.",
 			},
 			"prefix": {
 				Type:        schema.TypeString,
@@ -188,7 +202,12 @@ func ResourceTencentCloudCosBucket() *schema.Resource {
 			"encryption_algorithm": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The server-side encryption algorithm to use. Valid value is `AES256`.",
+				Description: "The server-side encryption algorithm to use. Valid values are `AES256`, `KMS` and `SM4`.",
+			},
+			"kms_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The KMS Master Key ID. This value is valid only when `encryption_algorithm` is set to KMS. Set kms id to the specified value. If not specified, the default kms id is used.",
 			},
 			"versioning_enable": {
 				Type:        schema.TypeBool,
@@ -228,13 +247,71 @@ func ResourceTencentCloudCosBucket() *schema.Resource {
 						},
 						"status": {
 							Type:        schema.TypeString,
-							Required:    true,
+							Optional:    true,
 							Description: "Status identifier, available values: `Enabled`, `Disabled`.",
+						},
+						"priority": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Execution priority, used to handle scenarios where the target storage buckets are the same and multiple replication rules match the same object. Note: Supports setting positive integers in the range of 1-1000. The Priority values of different rules cannot be duplicated. Storage bucket replication rules must either all have Priority set or all not have Priority set. When all rules have Priority set, overlapping prefixes are allowed for different rules when the target storage buckets are the same. When different rules match the same object, the rule with the smallest Priority value will be triggered first. When none of the rules have Priority set, overlapping prefixes are not allowed for different rules.",
 						},
 						"prefix": {
 							Type:        schema.TypeString,
 							Optional:    true,
+							Computed:    true,
 							Description: "Prefix matching policy. Policies cannot overlap; otherwise, an error will be returned. To match the root directory, leave this parameter empty.",
+						},
+						"filter": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Computed:    true,
+							MaxItems:    1,
+							Description: "Filter the objects to be copied. The bucket feature will copy objects that match the prefixes and tags specified in the Filter settings.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"and": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										MaxItems:    1,
+										Description: "When filtering objects to be copied, if both prefix and object tag conditions are required simultaneously, or if multiple object tag conditions are needed, they must be enclosed in an `And` statement.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"prefix": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Computed:    true,
+													Description: "Filter objects by prefix; you can specify at most one prefix.",
+												},
+												"tag": {
+													Type:        schema.TypeList,
+													Optional:    true,
+													Description: "When filtering objects to be copied, you can use object tags (multiple tags are supported) as filtering criteria, with a maximum of 10 tags allowed. After adding tags as filtering criteria, the `delete_marker_replication.status` option must be set to false.",
+													Elem: &schema.Resource{
+														Schema: map[string]*schema.Schema{
+															"key": {
+																Type:        schema.TypeString,
+																Required:    true,
+																Description: "Tag key.",
+															},
+															"value": {
+																Type:        schema.TypeString,
+																Required:    true,
+																Description: "Tag value.",
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+									"prefix": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Computed:    true,
+										Description: "Filter objects by prefix; you can specify at most one prefix.",
+									},
+								},
+							},
 						},
 						"destination_bucket": {
 							Type:        schema.TypeString,
@@ -244,7 +321,55 @@ func ResourceTencentCloudCosBucket() *schema.Resource {
 						"destination_storage_class": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "Storage class of destination, available values: `STANDARD`, `INTELLIGENT_TIERING`, `STANDARD_IA`. default is following current class of destination.",
+							Description: "Storage class of destination, available values: `Standard`, `Intelligent_Tiering`, `Standard_IA`. default is following current class of destination.",
+						},
+						"destination_encryption_kms_key_id": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "This field must be included when `source_selection_criteria.sse_kms_encrypted_objects.status` is set to Enabled. It is used to specify the KMS key used for KMS-encrypted objects copied to the destination bucket.",
+						},
+						"delete_marker_replication": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: "Synchronized deletion marker.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"status": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "Whether to synchronously delete the tag, supports Disabled or Enabled. The default value is Enabled, meaning the tag will be deleted synchronously.",
+									},
+								},
+							},
+						},
+						"source_selection_criteria": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Computed:    true,
+							MaxItems:    1,
+							Description: "This is used to specify additional conditions for objects supported by bucket replication rules. Currently, only the option to replicate KMS-encrypted objects is supported.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"sse_kms_encrypted_objects": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										Computed:    true,
+										MaxItems:    1,
+										Description: "Choose whether to copy the KMS-encrypted objects.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"status": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Computed:    true,
+													Description: "Choose whether to copy KMS encrypted objects; supported values are Enabled and Disabled.",
+												},
+											},
+										},
+									},
+								},
+							},
 						},
 					},
 				},
@@ -286,6 +411,12 @@ func ResourceTencentCloudCosBucket() *schema.Resource {
 						},
 					},
 				},
+			},
+			"cors_response_vary": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "Whether to return the `Vary: Origin` header in the CORS response. Valid values: `true`, `false`.",
 			},
 			"origin_pull_rules": {
 				Type:        schema.TypeList,
@@ -339,7 +470,7 @@ func ResourceTencentCloudCosBucket() *schema.Resource {
 						},
 						"filter_prefix": {
 							Type:        schema.TypeString,
-							Required:    true,
+							Optional:    true,
 							Description: "Object key prefix identifying one or more objects to which the rule applies.",
 						},
 						"transition": {
@@ -472,6 +603,57 @@ func ResourceTencentCloudCosBucket() *schema.Resource {
 							Optional:    true,
 							Description: "An absolute path to the document to return in case of a 4XX error.",
 						},
+						"redirect_all_requests_to": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							ValidateFunc: tccommon.ValidateAllowedStringValue([]string{"http", "https"}),
+							Description:  "Redirects all request configurations. Valid values: http, https. Default is `http`.",
+						},
+						"routing_rules": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: "Routing rule configuration. A RoutingRules container can contain up to 100 RoutingRule elements.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"rules": {
+										Type:        schema.TypeList,
+										Required:    true,
+										Description: "Routing rule list.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"condition_error_code": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Description: "Specifies the error code as the match condition for the routing rule. Valid values: only 4xx return codes, such as 403 or 404.",
+												},
+												"condition_prefix": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Description: "Specifies the object key prefix as the match condition for the routing rule.",
+												},
+												"redirect_protocol": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Description: "Specifies the target protocol for the routing rule. Only HTTPS is supported.",
+												},
+												"redirect_replace_key": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Description: "Specifies the target object key to replace the original object key in the request.",
+												},
+												"redirect_replace_key_prefix": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Description: "Specifies the object key prefix to replace the original prefix in the request. You can set this parameter only if the condition is KeyPrefixEquals.",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 						"endpoint": {
 							Type:        schema.TypeString,
 							Computed:    true,
@@ -494,13 +676,11 @@ func ResourceTencentCloudCosBucket() *schema.Resource {
 			"log_target_bucket": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Computed:    true,
 				Description: "The target bucket name which saves the access log of this bucket per 5 minutes. The log access file format is `log_target_bucket`/`log_prefix`{YYYY}/{MM}/{DD}/{time}_{random}_{index}.gz. Only valid when `log_enable` is `true`. User must have full access on this bucket.",
 			},
 			"log_prefix": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Computed:    true,
 				Description: "The prefix log name which saves the access log of this bucket per 5 minutes. Eg. `MyLogPrefix/`. The log access file format is `log_target_bucket`/`log_prefix`{YYYY}/{MM}/{DD}/{time}_{random}_{index}.gz. Only valid when `log_enable` is `true`.",
 			},
 			"multi_az": {
@@ -508,6 +688,13 @@ func ResourceTencentCloudCosBucket() *schema.Resource {
 				Optional:    true,
 				ForceNew:    true,
 				Description: "Indicates whether to create a bucket of multi available zone.",
+			},
+			"chdfs_ofs": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
+				Description: "Indicates whether to create a bucket of metadata acceleration. For more information, please refer to `https://www.tencentcloud.com/document/product/436/43305`.",
 			},
 			"enable_intelligent_tiering": {
 				Type:        schema.TypeBool,
@@ -527,11 +714,154 @@ func ResourceTencentCloudCosBucket() *schema.Resource {
 				Computed:    true,
 				Description: "Specify the access limit for converting standard layer data into low-frequency layer data in the configuration. The default value is once, which can be used in combination with the number of days to achieve the conversion effect. For example, if the parameter is set to 1 and the number of access days is 30, it means that objects with less than one visit in 30 consecutive days will be reduced from the standard layer to the low frequency layer.",
 			},
+			"intelligent_tiering_archiving_rule_list": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "List of intelligent tiered storage, archiving, and deep archiving rules. NOTE: only `enable_intelligent_tiering` is true can configure this argument.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"rule_id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The name of the intelligent tiering rule name list task, with the ID set to a non-default string, indicates that this rule is a conversion rule for archive and deep archive tiers.",
+						},
+						"status": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Indicates whether the intelligent tiering rule is enabled. Possible values: Enabled, Disabled. When the ID is `default`, only `Enabled` is supported.",
+						},
+						"filter": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Computed:    true,
+							MaxItems:    1,
+							Description: "Specifies configuration information related to data transformation in the intelligent tiered storage configuration.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"and": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										MaxItems:    1,
+										Description: "For filtering conditions, if both prefix and object tag conditions are required simultaneously, they need to be wrapped with an `And` operator.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"prefix": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Description: "Filter objects by prefix; you can specify at most one prefix.",
+												},
+												"tag": {
+													Type:        schema.TypeList,
+													Optional:    true,
+													Description: "When filtering objects for analysis, you can use object tags (multiple tags are supported) as filtering criteria.",
+													Elem: &schema.Resource{
+														Schema: map[string]*schema.Schema{
+															"key": {
+																Type:        schema.TypeString,
+																Required:    true,
+																Description: "Tag key.",
+															},
+															"value": {
+																Type:        schema.TypeString,
+																Required:    true,
+																Description: "Tag value.",
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+									"prefix": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "Filter objects by prefix; you can specify at most one prefix.",
+									},
+									"tag": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										Description: "When filtering objects for analysis, you can use object tags (multiple tags are supported) as filtering criteria.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"key": {
+													Type:        schema.TypeString,
+													Required:    true,
+													Description: "Tag key.",
+												},
+												"value": {
+													Type:        schema.TypeString,
+													Required:    true,
+													Description: "Tag value.",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+						"tiering": {
+							Type:        schema.TypeList,
+							Required:    true,
+							Description: "Specifies configuration information related to data transformation in the intelligent tiered storage configuration.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"access_tier": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "When `rule_id` is not `default`, this parameter is used to specify the archiving or deep archiving tier.  The possible value are: ARCHIVE_ACCESS, DEEP_ARCHIVE_ACCESS.",
+									},
+									"days": {
+										Type:        schema.TypeInt,
+										Required:    true,
+										Description: "When the `rule_id` is not set to default, this specifies the number of days after which data is transitioned to the archive or deep archive tier in the intelligent tiering storage configuration. The archive tier (ARCHIVE_ACCESS) supports a range of 91 to 730 days. The deep archive tier (DEEP_ARCHIVE_ACCESS) supports a range of 180 to 730 days. Within the same rule, the number of days for the deep archive tier must be greater than the number of days for the archive tier.",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 			"cdc_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    true,
 				Description: "CDC cluster ID.",
+			},
+			"object_lock_configuration": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Description: "Object locking configuration. Once enabled, this feature cannot be disabled.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:        schema.TypeBool,
+							Required:    true,
+							Description: "Enable object lock configuration.",
+						},
+						"rule": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: "Object locking configuration.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"days": {
+										Type:        schema.TypeInt,
+										Required:    true,
+										Description: "Object lock default duration (range: 1-36500).",
+									},
+									// "mode": {
+									// 	Type:        schema.TypeString,
+									// 	Optional:    true,
+									// 	Description: "The object lock default mode only supports the enumerated value `COMPLIANCE`. If this field is left blank, it defaults to `COMPLIANCE`.",
+									// },
+								},
+							},
+						},
+					},
+				},
 			},
 			//computed
 			"cos_bucket_url": {
@@ -613,10 +943,17 @@ func resourceTencentCloudCosBucketRead(d *schema.ResourceData, meta interface{})
 		}
 	}
 
-	if header != nil && len(header["X-Cos-Bucket-Az-Type"]) > 0 && header["X-Cos-Bucket-Az-Type"][0] == "MAZ" {
-		_ = d.Set("multi_az", true)
+	if header != nil {
+		if len(header["X-Cos-Bucket-Az-Type"]) > 0 && header["X-Cos-Bucket-Az-Type"][0] == "MAZ" {
+			_ = d.Set("multi_az", true)
+		}
+
+		if len(header["X-Cos-Bucket-Arch"]) > 0 && header["X-Cos-Bucket-Arch"][0] == "OFS" {
+			_ = d.Set("chdfs_ofs", true)
+		}
 	}
 
+	ofs := d.Get("chdfs_ofs").(bool)
 	cosDomain := meta.(tccommon.ProviderMeta).GetAPIV3Conn().CosDomain
 	var cosBucketUrl string
 	if cdcId == "" && cosDomain == "" {
@@ -635,63 +972,112 @@ func resourceTencentCloudCosBucketRead(d *schema.ResourceData, meta interface{})
 		_ = d.Set("bucket", d.Id())
 	}
 
-	// acl
-	aclResult, err := cosService.GetBucketACL(ctx, bucket, cdcId)
+	if !ofs {
+		// acl
+		aclResult, err := cosService.GetBucketACL(ctx, bucket, cdcId)
 
-	if err != nil {
-		return err
+		if err != nil {
+			return err
+		}
+
+		aclBody, err := xml.Marshal(aclResult)
+		if err != nil {
+			return err
+		}
+
+		_ = d.Set("acl_body", string(aclBody))
+
+		acl := GetBucketPublicACL(aclResult)
+
+		_ = d.Set("acl", acl)
+
+		if cdcId == "" && cosDomain == "" {
+			originPullRules, err := cosService.GetBucketPullOrigin(ctx, bucket)
+			if err != nil {
+				return err
+			}
+
+			if err = d.Set("origin_pull_rules", originPullRules); err != nil {
+				return fmt.Errorf("setting origin_pull_rules error: %v", err)
+			}
+
+			originDomainRules, err := cosService.GetBucketOriginDomain(ctx, bucket)
+			if err != nil {
+				return err
+			}
+
+			if err = d.Set("origin_domain_rules", originDomainRules); err != nil {
+				return fmt.Errorf("setting origin_domain_rules error: %v", err)
+			}
+
+			replicaResult, err := cosService.GetBucketReplication(ctx, bucket, cdcId)
+			if err != nil {
+				return err
+			}
+
+			if replicaResult != nil {
+				err := setBucketReplication(d, *replicaResult)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		// read the website
+		website, err := cosService.GetBucketWebsite(ctx, bucket, cdcId)
+		if err != nil {
+			return err
+		}
+		if len(website) > 0 && cosDomain == "" {
+			// {bucket}.cos-website.{region}.myqcloud.com
+			endPointUrl := fmt.Sprintf("%s.cos-website.%s.myqcloud.com", d.Id(), meta.(tccommon.ProviderMeta).GetAPIV3Conn().Region)
+			website[0]["endpoint"] = endPointUrl
+		}
+		if err = d.Set("website", website); err != nil {
+			return fmt.Errorf("setting website error: %v", err)
+		}
+
+		// read the encryption algorithm
+		encryption, kmsId, err := cosService.GetBucketEncryption(ctx, bucket, cdcId)
+		if err != nil {
+			return err
+		}
+		if err = d.Set("encryption_algorithm", encryption); err != nil {
+			return fmt.Errorf("setting encryption error: %v", err)
+		}
+		if err = d.Set("kms_id", kmsId); err != nil {
+			return fmt.Errorf("setting kms_id error: %v", err)
+		}
+
+		// read the versioning
+		versioning, err := cosService.GetBucketVersioning(ctx, bucket, cdcId)
+		if err != nil {
+			return err
+		}
+		if err = d.Set("versioning_enable", versioning); err != nil {
+			return fmt.Errorf("setting versioning_enable error: %v", err)
+		}
+
+		// read the acceleration
+		acceleration, err := cosService.GetBucketAccleration(ctx, bucket, cdcId)
+		if err != nil {
+			return err
+		}
+		if err = d.Set("acceleration_enable", acceleration); err != nil {
+			return fmt.Errorf("setting acceleration_enable error: %v", err)
+		}
 	}
-
-	aclBody, err := xml.Marshal(aclResult)
-	if err != nil {
-		return err
-	}
-
-	_ = d.Set("acl_body", string(aclBody))
-
-	acl := GetBucketPublicACL(aclResult)
-
-	_ = d.Set("acl", acl)
 
 	// read the cors
-	corsRules, err := cosService.GetBucketCors(ctx, bucket, cdcId)
+	corsRules, corsResponseVary, err := cosService.GetBucketCorsNew(ctx, bucket, cdcId)
 	if err != nil {
 		return err
 	}
 	if err = d.Set("cors_rules", corsRules); err != nil {
 		return fmt.Errorf("setting cors_rules error: %v", err)
 	}
-
-	if cdcId == "" && cosDomain == "" {
-		originPullRules, err := cosService.GetBucketPullOrigin(ctx, bucket)
-		if err != nil {
-			return err
-		}
-
-		if err = d.Set("origin_pull_rules", originPullRules); err != nil {
-			return fmt.Errorf("setting origin_pull_rules error: %v", err)
-		}
-
-		originDomainRules, err := cosService.GetBucketOriginDomain(ctx, bucket)
-		if err != nil {
-			return err
-		}
-
-		if err = d.Set("origin_domain_rules", originDomainRules); err != nil {
-			return fmt.Errorf("setting origin_domain_rules error: %v", err)
-		}
-
-		replicaResult, err := cosService.GetBucketReplication(ctx, bucket, cdcId)
-		if err != nil {
-			return err
-		}
-
-		if replicaResult != nil {
-			err := setBucketReplication(d, *replicaResult)
-			if err != nil {
-				return err
-			}
-		}
+	if err = d.Set("cors_response_vary", corsResponseVary); err != nil {
+		return fmt.Errorf("setting cors_response_vary error: %v", err)
 	}
 
 	// read the lifecycle
@@ -701,47 +1087,6 @@ func resourceTencentCloudCosBucketRead(d *schema.ResourceData, meta interface{})
 	}
 	if err = d.Set("lifecycle_rules", lifecycleRules); err != nil {
 		return fmt.Errorf("setting lifecycle_rules error: %v", err)
-	}
-
-	// read the website
-	website, err := cosService.GetBucketWebsite(ctx, bucket, cdcId)
-	if err != nil {
-		return err
-	}
-	if len(website) > 0 && cosDomain == "" {
-		// {bucket}.cos-website.{region}.myqcloud.com
-		endPointUrl := fmt.Sprintf("%s.cos-website.%s.myqcloud.com", d.Id(), meta.(tccommon.ProviderMeta).GetAPIV3Conn().Region)
-		website[0]["endpoint"] = endPointUrl
-	}
-	if err = d.Set("website", website); err != nil {
-		return fmt.Errorf("setting website error: %v", err)
-	}
-
-	// read the encryption algorithm
-	encryption, err := cosService.GetBucketEncryption(ctx, bucket, cdcId)
-	if err != nil {
-		return err
-	}
-	if err = d.Set("encryption_algorithm", encryption); err != nil {
-		return fmt.Errorf("setting encryption error: %v", err)
-	}
-
-	// read the versioning
-	versioning, err := cosService.GetBucketVersioning(ctx, bucket, cdcId)
-	if err != nil {
-		return err
-	}
-	if err = d.Set("versioning_enable", versioning); err != nil {
-		return fmt.Errorf("setting versioning_enable error: %v", err)
-	}
-
-	// read the acceleration
-	acceleration, err := cosService.GetBucketAccleration(ctx, bucket, cdcId)
-	if err != nil {
-		return err
-	}
-	if err = d.Set("acceleration_enable", acceleration); err != nil {
-		return fmt.Errorf("setting acceleration_enable error: %v", err)
 	}
 
 	//read the log
@@ -768,21 +1113,129 @@ func resourceTencentCloudCosBucketRead(d *schema.ResourceData, meta interface{})
 	}
 
 	//read intelligent tiering
-	result, err := cosService.BucketGetIntelligentTiering(ctx, bucket, cdcId)
-	if err != nil {
-		return fmt.Errorf("get intelligent tiering failed: %v", err)
-	}
-	if result != nil {
-		if result.Status == "Enabled" {
-			_ = d.Set("enable_intelligent_tiering", true)
-		} else {
-			_ = d.Set("enable_intelligent_tiering", false)
+	if !strings.Contains(cosBucketUrl, ".cos-cdc.") {
+		result, err := cosService.BucketGetIntelligentTiering(ctx, bucket, cdcId)
+		if err != nil {
+			return fmt.Errorf("get intelligent tiering failed: %v", err)
+		}
+		if result != nil {
+			if result.Status == "Enabled" {
+				_ = d.Set("enable_intelligent_tiering", true)
+			} else {
+				_ = d.Set("enable_intelligent_tiering", false)
+			}
+
+			if result.Transition != nil {
+				_ = d.Set("intelligent_tiering_days", result.Transition.Days)
+				_ = d.Set("intelligent_tiering_request_frequent", result.Transition.RequestFrequent)
+			}
+		}
+
+		//read intelligent tiering archiving rule list
+		respData, err := cosService.BucketGetIntelligentTieringArchivingRuleList(ctx, bucket, cdcId)
+		if err != nil {
+			return fmt.Errorf("get intelligent tiering archiving rule list failed: %v", err)
+		}
+
+		if respData != nil {
+			if respData.Configurations != nil && len(respData.Configurations) > 0 {
+				intelligentTieringArchivingRules := make([]map[string]interface{}, 0, len(respData.Configurations))
+				for _, config := range respData.Configurations {
+					intelligentTieringArchivingRule := make(map[string]interface{})
+					if config.Id == "default" {
+						continue
+					}
+
+					intelligentTieringArchivingRule["rule_id"] = config.Id
+					intelligentTieringArchivingRule["status"] = config.Status
+
+					if config.Filter != nil {
+						dMap := make(map[string]interface{})
+						if config.Filter.And != nil {
+							andMap := make(map[string]interface{}, 0)
+							if config.Filter.And.Prefix != "" {
+								andMap["prefix"] = config.Filter.And.Prefix
+							}
+
+							if config.Filter.And.Tag != nil && len(config.Filter.And.Tag) > 0 {
+								tagList := make([]map[string]interface{}, 0, len(config.Filter.And.Tag))
+								for _, item := range config.Filter.And.Tag {
+									dMap := make(map[string]interface{})
+									dMap["key"] = item.Key
+									dMap["value"] = item.Value
+									tagList = append(tagList, dMap)
+								}
+
+								andMap["tag"] = tagList
+							}
+
+							dMap["and"] = []interface{}{andMap}
+						}
+
+						if config.Filter.Prefix != "" {
+							dMap["prefix"] = config.Filter.Prefix
+						}
+
+						if config.Filter.Tag != nil && len(config.Filter.Tag) > 0 {
+							tagList := make([]map[string]interface{}, 0, len(config.Filter.Tag))
+							for _, item := range config.Filter.Tag {
+								dMap := make(map[string]interface{})
+								dMap["key"] = item.Key
+								dMap["value"] = item.Value
+								tagList = append(tagList, dMap)
+							}
+
+							dMap["tag"] = tagList
+						}
+
+						intelligentTieringArchivingRule["filter"] = []interface{}{dMap}
+					}
+
+					if config.Tiering != nil && len(config.Tiering) > 0 {
+						tieringList := make([]map[string]interface{}, 0, len(config.Tiering))
+						for _, item := range config.Tiering {
+							dMap := make(map[string]interface{})
+							dMap["access_tier"] = item.AccessTier
+							dMap["days"] = item.Days
+							tieringList = append(tieringList, dMap)
+						}
+
+						intelligentTieringArchivingRule["tiering"] = tieringList
+					}
+
+					intelligentTieringArchivingRules = append(intelligentTieringArchivingRules, intelligentTieringArchivingRule)
+				}
+
+				_ = d.Set("intelligent_tiering_archiving_rule_list", intelligentTieringArchivingRules)
+			}
 		}
 	}
-	if result != nil && result.Transition != nil {
-		_ = d.Set("intelligent_tiering_days", result.Transition.Days)
-		_ = d.Set("intelligent_tiering_request_frequent", result.Transition.RequestFrequent)
+
+	//read object lock config
+	objLockData, err := cosService.BucketGetObjectLockConfiguration(ctx, bucket, cdcId)
+	if err != nil {
+		return fmt.Errorf("get object lock configuration failed: %v", err)
 	}
+
+	if objLockData != nil {
+		dMap := make(map[string]interface{})
+		if objLockData.ObjectLockEnabled == "Enabled" {
+			dMap["enabled"] = true
+		} else {
+			dMap["enabled"] = false
+		}
+
+		if objLockData.Rule != nil {
+			ruleList := make([]map[string]interface{}, 0, 1)
+			ruleMap := make(map[string]interface{})
+			ruleMap["days"] = objLockData.Rule.Days
+			ruleList = append(ruleList, ruleMap)
+			dMap["rule"] = ruleList
+		}
+
+		_ = d.Set("object_lock_configuration", []interface{}{dMap})
+	}
+
 	return nil
 }
 
@@ -826,6 +1279,124 @@ func resourceTencentCloudCosBucketUpdate(d *schema.ResourceData, meta interface{
 		}
 	}
 
+	if d.HasChange("intelligent_tiering_archiving_rule_list") {
+		oldInterface, newInterface := d.GetChange("intelligent_tiering_archiving_rule_list")
+		oldList := oldInterface.([]interface{})
+		newList := newInterface.([]interface{})
+		if len(oldList) > 0 {
+			ruleIds := make([]string, 0, len(oldList))
+			for _, item := range oldList {
+				dMap := item.(map[string]interface{})
+				if v, ok := dMap["rule_id"].(string); ok && v != "" && v != "default" {
+					ruleIds = append(ruleIds, v)
+				}
+			}
+
+			if len(ruleIds) > 0 {
+				err := cosService.BucketDeleteIntelligentTieringArchivingRule(ctx, d.Id(), cdcId, ruleIds)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		if len(newList) > 0 {
+			rules := make([]*cos.BucketPutIntelligentTieringOptions, 0)
+			for _, item := range newList {
+				dMap := item.(map[string]interface{})
+				rule := &cos.BucketPutIntelligentTieringOptions{}
+				if v, ok := dMap["rule_id"].(string); ok && v != "" && v != "default" {
+					rule.Id = v
+				}
+
+				if v, ok := dMap["status"].(string); ok && v != "" {
+					rule.Status = v
+				}
+
+				if v, ok := dMap["filter"]; ok {
+					for _, filterItem := range v.([]interface{}) {
+						filterMap := filterItem.(map[string]interface{})
+						filter := &cos.BucketIntelligentTieringFilter{}
+						if v, ok := filterMap["and"]; ok {
+							for _, andItem := range v.([]interface{}) {
+								andMap := andItem.(map[string]interface{})
+								and := &cos.BucketIntelligentTieringFilterAnd{}
+								if v, ok := andMap["prefix"].(string); ok && v != "" {
+									and.Prefix = v
+								}
+
+								if v, ok := andMap["tag"]; ok {
+									for _, tag := range v.([]interface{}) {
+										tagMap := tag.(map[string]interface{})
+										tmpTag := cos.BucketTaggingTag{}
+										if v, ok := tagMap["key"].(string); ok && v != "" {
+											tmpTag.Key = v
+										}
+
+										if v, ok := tagMap["value"].(string); ok && v != "" {
+											tmpTag.Value = v
+										}
+
+										and.Tag = append(and.Tag, &tmpTag)
+									}
+								}
+
+								filter.And = and
+							}
+						}
+
+						if v, ok := filterMap["prefix"].(string); ok && v != "" {
+							filter.Prefix = v
+						}
+
+						if v, ok := filterMap["tag"]; ok {
+							for _, tag := range v.([]interface{}) {
+								tagMap := tag.(map[string]interface{})
+								tmpTag := &cos.BucketTaggingTag{}
+								if v, ok := tagMap["key"].(string); ok && v != "" {
+									tmpTag.Key = v
+								}
+
+								if v, ok := tagMap["value"].(string); ok && v != "" {
+									tmpTag.Value = v
+								}
+
+								filter.Tag = append(filter.Tag, tmpTag)
+							}
+						}
+
+						rule.Filter = filter
+					}
+				}
+
+				if v, ok := dMap["tiering"]; ok {
+					for _, tieringItem := range v.([]interface{}) {
+						tieringMap := tieringItem.(map[string]interface{})
+						tiering := &cos.BucketIntelligentTieringTransition{}
+						if v, ok := tieringMap["access_tier"].(string); ok && v != "" {
+							tiering.AccessTier = v
+						}
+
+						if v, ok := tieringMap["days"].(int); ok {
+							tiering.Days = v
+						}
+
+						rule.Tiering = append(rule.Tiering, tiering)
+					}
+				}
+
+				rules = append(rules, rule)
+			}
+
+			if len(rules) > 0 {
+				err := cosService.BucketPutIntelligentTieringArchivingRule(ctx, d.Id(), cdcId, rules)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
 	if d.HasChange("acl") {
 		bucket := d.Get("bucket").(string)
 		err := waitAclEnable(ctx, meta, bucket, cdcId)
@@ -853,7 +1424,7 @@ func resourceTencentCloudCosBucketUpdate(d *schema.ResourceData, meta interface{
 		_ = d.Set("acl_body", body)
 	}
 
-	if d.HasChange("cors_rules") {
+	if d.HasChange("cors_rules") || d.HasChange("cors_response_vary") {
 		err := resourceTencentCloudCosBucketCorsUpdate(ctx, meta, d)
 		if err != nil {
 			return err
@@ -894,12 +1465,11 @@ func resourceTencentCloudCosBucketUpdate(d *schema.ResourceData, meta interface{
 
 	}
 
-	if d.HasChange("encryption_algorithm") {
+	if d.HasChange("encryption_algorithm") || d.HasChange("kms_id") {
 		err := resourceTencentCloudCosBucketEncryptionUpdate(ctx, meta, d)
 		if err != nil {
 			return err
 		}
-
 	}
 
 	if d.HasChange("versioning_enable") {
@@ -944,6 +1514,39 @@ func resourceTencentCloudCosBucketUpdate(d *schema.ResourceData, meta interface{
 
 	}
 
+	if d.HasChange("object_lock_configuration") {
+		if v, ok := d.GetOk("object_lock_configuration"); ok {
+			for _, item := range v.([]interface{}) {
+				dMap := item.(map[string]interface{})
+				objectLockConfig := &cos.BucketPutObjectLockOptions{}
+				if v, ok := dMap["enabled"].(bool); ok {
+					if v {
+						objectLockConfig.ObjectLockEnabled = "Enabled"
+					} else {
+						objectLockConfig.ObjectLockEnabled = "Disabled"
+					}
+				}
+
+				if v, ok := dMap["rule"]; ok {
+					for _, ruleItem := range v.([]interface{}) {
+						ruleMap := ruleItem.(map[string]interface{})
+						rule := &cos.ObjectLockRule{}
+						if v, ok := ruleMap["days"].(int); ok {
+							rule.Days = v
+						}
+
+						objectLockConfig.Rule = rule
+					}
+				}
+
+				err := cosService.BucketPutObjectLockConfiguration(ctx, d.Id(), cdcId, objectLockConfig)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
 	d.Partial(false)
 
 	// wait for update cache
@@ -984,18 +1587,34 @@ func resourceTencentCloudCosBucketDelete(d *schema.ResourceData, meta interface{
 	bucket := d.Id()
 	forced := d.Get("force_clean").(bool)
 	versioned := d.Get("versioning_enable").(bool)
+	multiAz := d.Get("multi_az").(bool)
 	cosService := CosService{
 		client: meta.(tccommon.ProviderMeta).GetAPIV3Conn(),
 	}
 	cdcId := d.Get("cdc_id").(string)
-	err := cosService.DeleteBucket(ctx, bucket, forced, versioned, cdcId)
+	err := cosService.DeleteBucket(ctx, bucket, forced, versioned, cdcId, multiAz)
 	if err != nil {
 		return err
 	}
 
-	// wait for update cache
-	// if not, head bucket may be successful
-	time.Sleep(3 * time.Second)
+	// wait for bucket 404, means deleted
+	err = resource.Retry(tccommon.ReadRetryTimeout*10, func() *resource.RetryError {
+		code, _, e := cosService.TencentcloudHeadBucket(ctx, bucket, cdcId)
+		if e != nil {
+			if code == 404 {
+				log.Printf("[WARN]%s bucket (%s) not found, error code (404)", logId, bucket)
+				return nil
+			} else {
+				return resource.NonRetryableError(e)
+			}
+		}
+
+		return resource.RetryableError(fmt.Errorf("Waiting for cos bucket [%s] deleted...", bucket))
+	})
+
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -1005,6 +1624,7 @@ func resourceTencentCloudCosBucketEncryptionUpdate(ctx context.Context, meta int
 
 	bucket := d.Get("bucket").(string)
 	encryption := d.Get("encryption_algorithm").(string)
+	kmsId := d.Get("kms_id").(string)
 	cdcId := d.Get("cdc_id").(string)
 	if encryption == "" {
 		request := s3.DeleteBucketEncryptionInput{
@@ -1029,7 +1649,8 @@ func resourceTencentCloudCosBucketEncryptionUpdate(ctx context.Context, meta int
 	request.ServerSideEncryptionConfiguration = &s3.ServerSideEncryptionConfiguration{}
 	rules := make([]*s3.ServerSideEncryptionRule, 0)
 	defaultRule := &s3.ServerSideEncryptionByDefault{
-		SSEAlgorithm: aws.String(encryption),
+		SSEAlgorithm:   aws.String(encryption),
+		KMSMasterKeyID: aws.String(kmsId),
 	}
 	rule := &s3.ServerSideEncryptionRule{
 		ApplyServerSideEncryptionByDefault: defaultRule,
@@ -1167,64 +1788,62 @@ func resourceTencentCloudCosBucketCorsUpdate(ctx context.Context, meta interface
 	bucket := d.Get("bucket").(string)
 	cors := d.Get("cors_rules").([]interface{})
 	cdcId := d.Get("cdc_id").(string)
+	responseVary := d.Get("cors_response_vary").(string)
 
-	if len(cors) == 0 {
-		request := s3.DeleteBucketCorsInput{
-			Bucket: aws.String(bucket),
-		}
-		response, err := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseCosClientNew(cdcId).DeleteBucketCors(&request)
+	cosClient := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseTencentCosClientNew(bucket, cdcId)
 
+	if len(cors) == 0 && responseVary == "" {
+		response, err := cosClient.Bucket.DeleteCORS(ctx)
 		if err != nil {
-			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n",
-				logId, "delete bucket cors", request.String(), err.Error())
+			log.Printf("[CRITAL]%s api[%s] fail, bucket [%s], reason[%s]\n",
+				logId, "delete bucket cors", bucket, err.Error())
 			return fmt.Errorf("cos delete bucket cors error: %s, bucket: %s", err.Error(), bucket)
 		}
-		log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
-			logId, "delete bucket cors", request.String(), response.String())
+
+		log.Printf("[DEBUG]%s api[%s] success, bucket [%s], response status [%s]\n",
+			logId, "delete bucket cors", bucket, response.Status)
 	} else {
-		rules := make([]*s3.CORSRule, 0, len(cors))
+		rules := make([]cos.BucketCORSRule, 0, len(cors))
 		for _, item := range cors {
 			corsMap := item.(map[string]interface{})
-			rule := &s3.CORSRule{}
-			for k, v := range corsMap {
-				if k == "max_age_seconds" {
-					rule.MaxAgeSeconds = aws.Int64(int64(v.(int)))
-				} else {
-					vMap := make([]*string, len(v.([]interface{})))
-					for i, value := range v.([]interface{}) {
-						if str, ok := value.(string); ok {
-							vMap[i] = aws.String(str)
-						}
-					}
-					switch k {
-					case "allowed_origins":
-						rule.AllowedOrigins = vMap
-					case "allowed_methods":
-						rule.AllowedMethods = vMap
-					case "allowed_headers":
-						rule.AllowedHeaders = vMap
-					case "expose_headers":
-						rule.ExposeHeaders = vMap
-					}
-				}
+			rule := cos.BucketCORSRule{}
+			if v, ok := corsMap["allowed_origins"]; ok {
+				rule.AllowedOrigins = helper.InterfacesStrings(v.([]interface{}))
 			}
+
+			if v, ok := corsMap["allowed_methods"]; ok {
+				rule.AllowedMethods = helper.InterfacesStrings(v.([]interface{}))
+			}
+
+			if v, ok := corsMap["allowed_headers"]; ok {
+				rule.AllowedHeaders = helper.InterfacesStrings(v.([]interface{}))
+			}
+
+			if v, ok := corsMap["expose_headers"]; ok {
+				rule.ExposeHeaders = helper.InterfacesStrings(v.([]interface{}))
+			}
+
+			if v, ok := corsMap["max_age_seconds"]; ok {
+				rule.MaxAgeSeconds = v.(int)
+			}
+
 			rules = append(rules, rule)
 		}
-		request := s3.PutBucketCorsInput{
-			Bucket: aws.String(bucket),
-			CORSConfiguration: &s3.CORSConfiguration{
-				CORSRules: rules,
-			},
-		}
-		response, err := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseCosClientNew(cdcId).PutBucketCors(&request)
 
+		opt := &cos.BucketPutCORSOptions{
+			Rules:        rules,
+			ResponseVary: responseVary,
+		}
+
+		response, err := cosClient.Bucket.PutCORS(ctx, opt)
 		if err != nil {
-			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n",
-				logId, "put bucket cors", request.String(), err.Error())
+			log.Printf("[CRITAL]%s api[%s] fail, bucket [%s], reason[%s]\n",
+				logId, "put bucket cors", bucket, err.Error())
 			return fmt.Errorf("cos put bucket cors error: %s, bucket: %s", err.Error(), bucket)
 		}
-		log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
-			logId, "put bucket cors", request.String(), response.String())
+
+		log.Printf("[DEBUG]%s api[%s] success, bucket [%s], response status [%s]\n",
+			logId, "put bucket cors", bucket, response.Status)
 	}
 	return nil
 }
@@ -1387,49 +2006,97 @@ func resourceTencentCloudCosBucketWebsiteUpdate(ctx context.Context, meta interf
 		request := s3.DeleteBucketWebsiteInput{
 			Bucket: aws.String(bucket),
 		}
-		response, err := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseCosClientNew(cdcId).DeleteBucketWebsite(&request)
 
+		response, err := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseCosClientNew(cdcId).DeleteBucketWebsite(&request)
 		if err != nil {
 			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n",
 				logId, "delete bucket website", request.String(), err.Error())
 			return fmt.Errorf("cos delete bucket website error: %s, bucket: %s", err.Error(), bucket)
 		}
+
 		log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
 			logId, "delete bucket website", request.String(), response.String())
 	} else {
+		if cdcId != "" {
+			return fmt.Errorf("cdc cos not support set website.\n")
+		}
+
 		var w map[string]interface{}
 		if website[0] != nil {
 			w = website[0].(map[string]interface{})
 		} else {
 			w = make(map[string]interface{})
 		}
-		var indexDocument, errorDocument string
-		if v, ok := w["index_document"]; ok {
-			indexDocument = v.(string)
-		}
-		if v, ok := w["error_document"]; ok {
-			errorDocument = v.(string)
-		}
-		request := s3.PutBucketWebsiteInput{
-			Bucket: aws.String(bucket),
-			WebsiteConfiguration: &s3.WebsiteConfiguration{
-				IndexDocument: &s3.IndexDocument{
-					Suffix: aws.String(indexDocument),
-				},
-				ErrorDocument: &s3.ErrorDocument{
-					Key: aws.String(errorDocument),
-				},
-			},
-		}
-		response, err := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseCosClientNew(cdcId).PutBucketWebsite(&request)
 
+		websiteConfiguration := cos.BucketPutWebsiteOptions{}
+		if v, ok := w["index_document"].(string); ok && v != "" {
+			websiteConfiguration.Index = v
+		}
+
+		if v, ok := w["error_document"].(string); ok && v != "" {
+			websiteConfiguration.Error = &cos.ErrorDocument{
+				Key: v,
+			}
+		}
+
+		if v, ok := w["redirect_all_requests_to"].(string); ok && v != "" {
+			websiteConfiguration.RedirectProtocol = &cos.RedirectRequestsProtocol{
+				Protocol: v,
+			}
+		}
+
+		if v, ok := w["routing_rules"]; ok {
+			websiteRoutingRules := cos.WebsiteRoutingRules{}
+			if len(v.([]interface{})) > 0 {
+				for _, item := range v.([]interface{}) {
+					if rules, ok := item.(map[string]interface{}); ok && rules != nil {
+						if v, ok := rules["rules"]; ok {
+							wbRules := []cos.WebsiteRoutingRule{}
+							for _, rule := range v.([]interface{}) {
+								if dMap, ok := rule.(map[string]interface{}); ok && rules != nil {
+									wbRule := cos.WebsiteRoutingRule{}
+									if v, ok := dMap["condition_error_code"].(string); ok && v != "" {
+										wbRule.ConditionErrorCode = v
+									}
+
+									if v, ok := dMap["condition_prefix"].(string); ok && v != "" {
+										wbRule.ConditionPrefix = v
+									}
+
+									if v, ok := dMap["redirect_protocol"].(string); ok && v != "" {
+										wbRule.RedirectProtocol = v
+									}
+
+									if v, ok := dMap["redirect_replace_key"].(string); ok && v != "" {
+										wbRule.RedirectReplaceKey = v
+									}
+
+									if v, ok := dMap["redirect_replace_key_prefix"].(string); ok && v != "" {
+										wbRule.RedirectReplaceKeyPrefix = v
+									}
+
+									wbRules = append(wbRules, wbRule)
+								}
+							}
+
+							websiteRoutingRules.Rules = wbRules
+						}
+					}
+				}
+
+				websiteConfiguration.RoutingRules = &websiteRoutingRules
+			}
+		}
+
+		request := websiteConfiguration
+		response, err := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseTencentCosClientNew(bucket, cdcId).Bucket.PutWebsite(ctx, &request)
 		if err != nil {
-			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n",
-				logId, "put bucket website", request.String(), err.Error())
 			return fmt.Errorf("cos put bucket website error: %s, bucket: %s", err.Error(), bucket)
 		}
-		log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
-			logId, "put bucket website", request.String(), response.String())
+
+		reqBytes, _ := json.Marshal(request)
+		respBytes, _ := json.Marshal(response.Response.Body)
+		log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, "put bucket website", string(reqBytes), string(respBytes))
 	}
 
 	return nil
@@ -1550,7 +2217,7 @@ func resourceTencentCloudCosBucketOriginPullUpdate(ctx context.Context, service 
 					HTTPStatusCode: "404",
 				},
 				OriginParameter: &cos.BucketOriginParameter{
-					CopyOriginData: true,
+					CopyOriginData: helper.Bool(true),
 					HttpHeader:     &cos.BucketOriginHttpHeader{},
 				},
 				OriginInfo: &cos.BucketOriginInfo{
@@ -1561,10 +2228,21 @@ func resourceTencentCloudCosBucketOriginPullUpdate(ctx context.Context, service 
 			}
 		)
 
-		if v := dMap["sync_back_to_source"]; v.(bool) {
-			item.OriginType = "Mirror"
-		} else {
-			item.OriginType = "Proxy"
+		// has deprecated
+		if v, ok := dMap["sync_back_to_source"]; ok {
+			if v.(bool) {
+				item.OriginType = "Mirror"
+			} else {
+				item.OriginType = "Proxy"
+			}
+		}
+
+		if v, ok := dMap["back_to_source_mode"].(string); ok && v != "" {
+			item.OriginType = v
+		}
+
+		if v, ok := dMap["http_redirect_code"].(string); ok && v != "" {
+			item.OriginParameter.HttpRedirectCode = v
 		}
 
 		if v, ok := dMap["priority"]; ok {
@@ -1577,13 +2255,15 @@ func resourceTencentCloudCosBucketOriginPullUpdate(ctx context.Context, service 
 			item.OriginParameter.Protocol = v.(string)
 		}
 		if v, ok := dMap["host"]; ok {
-			item.OriginInfo.HostInfo = v.(string)
+			tmpHost := cos.BucketOriginHostInfo{}
+			tmpHost.HostName = v.(string)
+			item.OriginInfo.HostInfo = &tmpHost
 		}
 		if v, ok := dMap["follow_query_string"]; ok {
-			item.OriginParameter.FollowQueryString = v.(bool)
+			item.OriginParameter.FollowQueryString = helper.Bool(v.(bool))
 		}
 		if v, ok := dMap["follow_redirection"]; ok {
-			item.OriginParameter.FollowRedirection = v.(bool)
+			item.OriginParameter.FollowRedirection = helper.Bool(v.(bool))
 		}
 		//if v, ok := dMap["copy_origin_data"]; ok {
 		//	item.OriginParameter.CopyOriginData = v.(bool)
@@ -1678,8 +2358,9 @@ func getBucketPutOptions(d *schema.ResourceData) (useCosService bool, options *c
 	}
 	grants, hasGrantHeaders := d.GetOk("grant_headers")
 	maz, hasMAZ := d.GetOk("multi_az")
+	ofs, hasOFS := d.GetOk("chdfs_ofs")
 
-	if !hasGrantHeaders && !hasMAZ {
+	if !hasGrantHeaders && !hasMAZ && !hasOFS {
 		return false, opt
 	}
 
@@ -1702,11 +2383,18 @@ func getBucketPutOptions(d *schema.ResourceData) (useCosService bool, options *c
 		}
 	}
 
+	configOpt := cos.CreateBucketConfiguration{}
 	if hasMAZ {
 		if maz.(bool) {
-			opt.CreateBucketConfiguration = &cos.CreateBucketConfiguration{
-				BucketAZConfig: "MAZ",
-			}
+			configOpt.BucketAZConfig = "MAZ"
+			opt.CreateBucketConfiguration = &configOpt
+		}
+	}
+
+	if hasOFS {
+		if ofs.(bool) {
+			configOpt.BucketArchConfig = "OFS"
+			opt.CreateBucketConfiguration = &configOpt
 		}
 	}
 
@@ -1781,14 +2469,86 @@ func getBucketReplications(d *schema.ResourceData) (role string, rules []cos.Buc
 				Bucket: item["destination_bucket"].(string),
 			},
 		}
+		if v, ok := item["priority"]; ok {
+			rule.Priority = v.(int)
+		}
 		if v, ok := item["prefix"].(string); ok {
 			rule.Prefix = v
+		}
+		if v, ok := item["filter"]; ok {
+			for _, filterItem := range v.([]interface{}) {
+				filterMap := filterItem.(map[string]interface{})
+				filter := &cos.ReplicationFilter{}
+				if v, ok := filterMap["and"]; ok {
+					for _, andItem := range v.([]interface{}) {
+						andMap := andItem.(map[string]interface{})
+						and := &cos.ReplicationFilterAnd{}
+						if v, ok := andMap["prefix"].(string); ok && v != "" {
+							and.Prefix = v
+						}
+
+						if v, ok := andMap["tag"]; ok {
+							for _, tag := range v.([]interface{}) {
+								tagMap := tag.(map[string]interface{})
+								tmpTag := cos.ObjectTaggingTag{}
+								if v, ok := tagMap["key"].(string); ok && v != "" {
+									tmpTag.Key = v
+								}
+
+								if v, ok := tagMap["value"].(string); ok && v != "" {
+									tmpTag.Value = v
+								}
+
+								and.Tag = append(and.Tag, tmpTag)
+							}
+						}
+
+						filter.And = and
+					}
+				}
+
+				if v, ok := filterMap["prefix"].(string); ok && v != "" {
+					filter.Prefix = v
+				}
+
+				rule.Filter = filter
+			}
 		}
 		if v, ok := item["id"].(string); ok {
 			rule.ID = v
 		}
-		if v, ok := item["destination_storage_class"].(string); ok {
+		if v, ok := item["destination_storage_class"].(string); ok && v != "" {
 			rule.Destination.StorageClass = v
+		}
+		if v, ok := item["destination_encryption_kms_key_id"].(string); ok && v != "" {
+			rule.Destination.EncryptionConfiguration = &cos.ReplicationEncryptionConfiguration{
+				ReplicaKmsKeyID: v,
+			}
+		}
+		if v, ok := item["delete_marker_replication"]; ok {
+			for _, dmrConfig := range v.([]interface{}) {
+				dMap := dmrConfig.(map[string]interface{})
+				if vv, ok := dMap["status"].(string); ok {
+					rule.DeleteMarkerReplication = &cos.DeleteMarkerReplication{
+						Status: vv,
+					}
+				}
+			}
+		}
+		if v, ok := item["source_selection_criteria"]; ok {
+			for _, item := range v.([]interface{}) {
+				dMap := item.(map[string]interface{})
+				if v, ok := dMap["sse_kms_encrypted_objects"]; ok {
+					for _, item := range v.([]interface{}) {
+						dMap := item.(map[string]interface{})
+						rule.SourceSelectionCriteria = &cos.SourceSelectionCriteria{
+							SseKmsEncryptedObjects: &cos.SseKmsEncryptedObjects{
+								Status: dMap["status"].(string),
+							},
+						}
+					}
+				}
+			}
 		}
 		rules = append(rules, rule)
 	}
@@ -1811,8 +2571,66 @@ func setBucketReplication(d *schema.ResourceData, result cos.GetBucketReplicatio
 			if item.ID != "" {
 				rule["id"] = item.ID
 			}
+			if item.Priority != 0 {
+				rule["priority"] = item.Priority
+			}
 			if item.Prefix != "" {
 				rule["prefix"] = item.Prefix
+			}
+			if item.Filter != nil {
+				filter := make([]map[string]interface{}, 0)
+				filterMap := map[string]interface{}{}
+				if item.Filter.And != nil {
+					and := make([]map[string]interface{}, 0)
+					andMap := map[string]interface{}{}
+					if item.Filter.And.Prefix != "" {
+						andMap["prefix"] = item.Filter.And.Prefix
+					}
+					if len(item.Filter.And.Tag) > 0 {
+						tags := make([]map[string]interface{}, 0)
+						for i := range item.Filter.And.Tag {
+							tag := item.Filter.And.Tag[i]
+							tagMap := map[string]interface{}{
+								"key":   tag.Key,
+								"value": tag.Value,
+							}
+							tags = append(tags, tagMap)
+						}
+						andMap["tag"] = tags
+					}
+					and = append(and, andMap)
+					filterMap["and"] = and
+				}
+				if item.Filter.Prefix != "" {
+					filterMap["prefix"] = item.Filter.Prefix
+				}
+				filter = append(filter, filterMap)
+				rule["filter"] = filter
+			}
+			if item.Destination.EncryptionConfiguration != nil {
+				rule["destination_encryption_kms_key_id"] = item.Destination.EncryptionConfiguration.ReplicaKmsKeyID
+			}
+			//
+			var deleteMarkerReplicationMap = map[string]interface{}{
+				"status": "Enabled",
+			}
+			if item.DeleteMarkerReplication != nil {
+				if item.DeleteMarkerReplication.Status != "" {
+					deleteMarkerReplicationMap["status"] = item.DeleteMarkerReplication.Status
+				}
+			}
+			rule["delete_marker_replication"] = []interface{}{deleteMarkerReplicationMap}
+			if item.SourceSelectionCriteria != nil {
+				sourceSelectionCriteriaMap := map[string]interface{}{}
+				if item.SourceSelectionCriteria.SseKmsEncryptedObjects != nil {
+					sseKmsEncryptedObjectsMap := map[string]interface{}{
+						"status": item.SourceSelectionCriteria.SseKmsEncryptedObjects.Status,
+					}
+
+					sourceSelectionCriteriaMap["sse_kms_encrypted_objects"] = []interface{}{sseKmsEncryptedObjectsMap}
+				}
+
+				rule["source_selection_criteria"] = []interface{}{sourceSelectionCriteriaMap}
 			}
 			rules = append(rules, rule)
 		}
@@ -1859,9 +2677,14 @@ func ACLBodyDiffFunc(olds, news string, d *schema.ResourceData) (result bool) {
 	newOwnerId := newOwner.SelectElement("ID")
 	newOwnerName := newOwner.SelectElement("DisplayName")
 
+	if oldOwnerId == nil || newOwnerId == nil {
+		log.Println("[CRITAL]oldOwnerId or newOwnerId is nil: return false.")
+		return false
+	}
+
 	// diff: Owner element
-	if oldOwnerId.Text() != newOwnerId.Text() || oldOwnerName.Text() != newOwnerName.Text() {
-		log.Printf("[CRITAL]OwnerId[old:%s, new:%s] or OwnerName[old:%s, new:%s] not equal: return false.\n", oldOwnerId.Text(), newOwnerId.Text(), oldOwnerName.Text(), newOwnerName.Text())
+	if oldOwnerId.Text() != newOwnerId.Text() {
+		log.Printf("[CRITAL]OwnerId[old:%s, new:%s] not equal: return false.\n", oldOwnerId.Text(), newOwnerId.Text())
 		return false
 	}
 
@@ -1878,7 +2701,14 @@ func ACLBodyDiffFunc(olds, news string, d *schema.ResourceData) (result bool) {
 	}
 
 	// diff: ACL element
-	for _, oldGrantee := range oldRoot.FindElements("//Grantee") {
+	oldGrantees := oldRoot.FindElements("//Grantee")
+	newGrantees := newRoot.FindElements("//Grantee")
+	// check count
+	if len(oldGrantees) != len(newGrantees) {
+		return false
+	}
+	// check content
+	for _, oldGrantee := range oldGrantees {
 		for _, attr := range oldGrantee.Attr {
 			if attr.Key != "type" {
 				// only need to handle the type attribute
@@ -1950,7 +2780,9 @@ func ACLBodyDiffFunc(olds, news string, d *schema.ResourceData) (result bool) {
 					uid = oldGranteeURI.Text()
 				}
 				log.Printf("[DEBUG] diff verification passed for grantee:[%s:%s]\n", oldGranteeType, uid)
-				break
+			}
+			if !result {
+				return false
 			}
 		}
 	}

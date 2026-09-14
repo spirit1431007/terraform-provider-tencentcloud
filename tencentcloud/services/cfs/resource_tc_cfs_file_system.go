@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	tccommon "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/common"
 	svctag "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/services/tag"
@@ -24,6 +25,11 @@ func ResourceTencentCloudCfsFileSystem() *schema.Resource {
 		Delete: resourceTencentCloudCfsFileSystemDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
+		},
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Update: schema.DefaultTimeout(20 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -193,7 +199,7 @@ func resourceTencentCloudCfsFileSystemCreate(d *schema.ResourceData, meta interf
 	d.SetId(fsId)
 
 	// wait for success status
-	err = resource.Retry(3*tccommon.ReadRetryTimeout, func() *resource.RetryError {
+	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 		fileSystems, errRet := cfsService.DescribeFileSystem(ctx, fsId, "", "")
 		if errRet != nil {
 			return tccommon.RetryError(errRet, tccommon.InternalError)
@@ -304,7 +310,7 @@ func resourceTencentCloudCfsFileSystemUpdate(d *schema.ResourceData, meta interf
 		client: meta.(tccommon.ProviderMeta).GetAPIV3Conn(),
 	}
 
-	immutableArgs := []string{"ccn_id", "cidr_block", "net_interface", "capacity"}
+	immutableArgs := []string{"ccn_id", "cidr_block", "net_interface"}
 
 	for _, v := range immutableArgs {
 		if d.HasChange(v) {
@@ -355,6 +361,51 @@ func resourceTencentCloudCfsFileSystemUpdate(d *schema.ResourceData, meta interf
 			return err
 		}
 
+	}
+
+	if d.HasChange("capacity") {
+		_, newCapacity := d.GetChange("capacity")
+		newCap := newCapacity.(int)
+
+		// Call ScaleUpFileSystem API
+		err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+			errRet := cfsService.ScaleUpFileSystem(ctx, fsId, uint64(newCap))
+			if errRet != nil {
+				return tccommon.RetryError(errRet)
+			}
+			return nil
+		})
+		if err != nil {
+			return err
+		}
+
+		// Wait for expansion to complete by polling LifeCycleState
+		err = resource.Retry(d.Timeout(schema.TimeoutUpdate), func() *resource.RetryError {
+			instance, errRet := cfsService.DescribeFileSystemById(ctx, fsId)
+			if errRet != nil {
+				return resource.NonRetryableError(errRet)
+			}
+
+			if instance == nil {
+				return resource.NonRetryableError(fmt.Errorf("file system %s not found", fsId))
+			}
+
+			if instance.LifeCycleState == nil {
+				return resource.NonRetryableError(fmt.Errorf("file system %s LifeCycleState is nil", fsId))
+			}
+
+			state := *instance.LifeCycleState
+			if state == "available" {
+				return nil // Expansion completed
+			}
+			if state == "expanding" {
+				return resource.RetryableError(fmt.Errorf("waiting for file system expansion to complete, current state: %s", state))
+			}
+			return resource.NonRetryableError(fmt.Errorf("unexpected file system state during expansion: %s", state))
+		})
+		if err != nil {
+			return fmt.Errorf("error waiting for file system expansion: %w. Please check the file system status in the console", err)
+		}
 	}
 
 	d.Partial(false)

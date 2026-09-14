@@ -4,12 +4,16 @@ layout: "tencentcloud"
 page_title: "TencentCloud: tencentcloud_dasb_bind_device_resource"
 sidebar_current: "docs-tencentcloud-resource-dasb_bind_device_resource"
 description: |-
-  Provides a resource to create a dasb bind_device_resource
+  Provides a resource to create a dasb bind device resource
 ---
 
 # tencentcloud_dasb_bind_device_resource
 
-Provides a resource to create a dasb bind_device_resource
+Provides a resource to create a dasb bind device resource
+
+~> **NOTE:** This resource has been deprecated in Terraform TencentCloud provider version 1.82.101. Please use `tencentcloud_bh_bind_device_resource` instead.
+
+~> **NOTE:** This resource must exclusive in one dasb resource, do not declare additional rule resources of this device elsewhere.
 
 ## Example Usage
 
@@ -20,12 +24,23 @@ resource "tencentcloud_dasb_bind_device_resource" "example" {
 }
 ```
 
+### Or custom domain_id parameters
+
+```hcl
+resource "tencentcloud_dasb_bind_device_resource" "example" {
+  resource_id   = "bh-saas-lx1pxhli"
+  domain_id     = "net-31nssj3n"
+  device_id_set = [115, 116]
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
 
-* `device_id_set` - (Required, Set: [`Int`], ForceNew) Asset ID collection.
+* `device_id_set` - (Required, Set: [`Int`]) Asset ID collection.
 * `resource_id` - (Required, String, ForceNew) Bastion host service ID.
+* `domain_id` - (Optional, String, ForceNew) Network Domain ID.
 
 ## Attributes Reference
 

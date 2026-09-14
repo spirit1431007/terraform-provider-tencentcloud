@@ -24,13 +24,65 @@ resource "tencentcloud_subnet" "subnet" {
   is_multicast      = false
 }
 
-// create clb
-resource "tencentcloud_clb_instance" "example" {
+// create INTERNAL clb
+resource "tencentcloud_clb_instance" "example1" {
   network_type = "INTERNAL"
   clb_name     = "tf-example"
   project_id   = 0
   vpc_id       = tencentcloud_vpc.vpc.id
   subnet_id    = tencentcloud_subnet.subnet.id
+
+  tags = {
+    tagKey = "tagValue"
+  }
+}
+
+// create INTERNAL clb by sla_type and internet_bandwidth_max_out
+resource "tencentcloud_clb_instance" "example2" {
+  network_type               = "INTERNAL"
+  clb_name                   = "tf-example"
+  project_id                 = 0
+  vpc_id                     = tencentcloud_vpc.vpc.id
+  subnet_id                  = tencentcloud_subnet.subnet.id
+  sla_type                   = "clb.c2.medium"
+  internet_bandwidth_max_out = 100
+
+  tags = {
+    tagKey = "tagValue"
+  }
+}
+```
+
+Create CLB with eip_address_id, Only support INTERNAL CLB
+
+```hcl
+variable "availability_zone" {
+  default = "ap-guangzhou-4"
+}
+
+// create vpc
+resource "tencentcloud_vpc" "vpc" {
+  cidr_block = "10.0.0.0/16"
+  name       = "vpc"
+}
+
+// create subnet
+resource "tencentcloud_subnet" "subnet" {
+  vpc_id            = tencentcloud_vpc.vpc.id
+  availability_zone = var.availability_zone
+  name              = "subnet"
+  cidr_block        = "10.0.1.0/24"
+  is_multicast      = false
+}
+
+// create clb
+resource "tencentcloud_clb_instance" "example" {
+  network_type   = "INTERNAL"
+  clb_name       = "tf-example"
+  project_id     = 0
+  vpc_id         = tencentcloud_vpc.vpc.id
+  subnet_id      = tencentcloud_subnet.subnet.id
+  eip_address_id = "eip-lt0w6jhq"
 
   tags = {
     tagKey = "tagValue"
@@ -104,6 +156,46 @@ resource "tencentcloud_clb_instance" "example" {
   clb_name     = "tf-example"
   project_id   = 0
   sla_type     = "clb.c3.medium"
+  vpc_id       = tencentcloud_vpc.vpc.id
+  subnet_id    = tencentcloud_subnet.subnet.id
+
+  tags = {
+    tagKey = "tagValue"
+  }
+}
+```
+
+Forcibly upgrade CLB SLA type
+
+The `force` parameter is used to forcibly upgrade the CLB instance when changing `sla_type`. It only takes effect when `sla_type` changes.
+
+```hcl
+variable "availability_zone" {
+  default = "ap-guangzhou-4"
+}
+
+// create vpc
+resource "tencentcloud_vpc" "vpc" {
+  cidr_block = "10.0.0.0/16"
+  name       = "vpc"
+}
+
+// create subnet
+resource "tencentcloud_subnet" "subnet" {
+  vpc_id            = tencentcloud_vpc.vpc.id
+  availability_zone = var.availability_zone
+  name              = "subnet"
+  cidr_block        = "10.0.1.0/24"
+  is_multicast      = false
+}
+
+// create clb and forcibly upgrade sla_type
+resource "tencentcloud_clb_instance" "example" {
+  network_type = "INTERNAL"
+  clb_name     = "tf-example"
+  project_id   = 0
+  sla_type     = "clb.c3.medium"
+  force        = true
   vpc_id       = tencentcloud_vpc.vpc.id
   subnet_id    = tencentcloud_subnet.subnet.id
 
@@ -464,10 +556,32 @@ resource "tencentcloud_clb_instance" "example" {
 }
 ```
 
+Create instance with associate endpoint
+
+```hcl
+resource "tencentcloud_clb_instance" "example" {
+  network_type       = "OPEN"
+  clb_name           = "tf-example"
+  project_id         = 0
+  vpc_id             = "vpc-e51ilko8"
+  associate_endpoint = "vpce-du9ssd3z"
+  tags = {
+    createBy = "Terraform"
+  }
+}
+```
+
+Timeouts
+
+This resource provides the following Timeouts configuration options:
+
+- `create` - (Default `10 minutes`) Used for creating CLB instance.
+- `update` - (Default `10 minutes`) Used for updating CLB instance.
+
 Import
 
 CLB instance can be imported using the id, e.g.
 
 ```
-$ terraform import tencentcloud_clb_instance.example lb-7a0t6zqb
+terraform import tencentcloud_clb_instance.example lb-7a0t6zqb
 ```

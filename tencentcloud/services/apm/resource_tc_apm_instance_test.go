@@ -24,7 +24,7 @@ func TestAccTencentCloudApmInstanceResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("tencentcloud_apm_instance.example", "name", "tf-example"),
 					resource.TestCheckResourceAttr("tencentcloud_apm_instance.example", "description", "desc."),
 					resource.TestCheckResourceAttr("tencentcloud_apm_instance.example", "trace_duration", "15"),
-					resource.TestCheckResourceAttr("tencentcloud_apm_instance.example", "span_daily_counters", "20"),
+					resource.TestCheckResourceAttr("tencentcloud_apm_instance.example", "span_daily_counters", "0"),
 				),
 			},
 			{
@@ -34,7 +34,43 @@ func TestAccTencentCloudApmInstanceResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("tencentcloud_apm_instance.example", "name", "tf-example-update"),
 					resource.TestCheckResourceAttr("tencentcloud_apm_instance.example", "description", "desc update."),
 					resource.TestCheckResourceAttr("tencentcloud_apm_instance.example", "trace_duration", "15"),
-					resource.TestCheckResourceAttr("tencentcloud_apm_instance.example", "span_daily_counters", "20"),
+					resource.TestCheckResourceAttr("tencentcloud_apm_instance.example", "span_daily_counters", "0"),
+				),
+			},
+			{
+				ResourceName:      "tencentcloud_apm_instance.example",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+// go test -i; go test -test.run TestAccTencentCloudApmInstanceResource_logSpanIdKey -v
+func TestAccTencentCloudApmInstanceResource_logSpanIdKey(t *testing.T) {
+	t.Parallel()
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() {
+			tcacctest.AccPreCheck(t)
+		},
+		Providers: tcacctest.AccProviders,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccApmInstanceLogSpanIdKey,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("tencentcloud_apm_instance.example", "id"),
+					resource.TestCheckResourceAttr("tencentcloud_apm_instance.example", "log_index_type", "1"),
+					resource.TestCheckResourceAttr("tencentcloud_apm_instance.example", "log_trace_id_key", "traceId"),
+					resource.TestCheckResourceAttr("tencentcloud_apm_instance.example", "log_span_id_key", "spanId"),
+				),
+			},
+			{
+				Config: testAccApmInstanceLogSpanIdKeyUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("tencentcloud_apm_instance.example", "id"),
+					resource.TestCheckResourceAttr("tencentcloud_apm_instance.example", "log_index_type", "1"),
+					resource.TestCheckResourceAttr("tencentcloud_apm_instance.example", "log_trace_id_key", "traceId"),
+					resource.TestCheckResourceAttr("tencentcloud_apm_instance.example", "log_span_id_key", "spanId-update"),
 				),
 			},
 			{
@@ -67,5 +103,25 @@ resource "tencentcloud_apm_instance" "example" {
   tags = {
     createdBy = "terraform"
   }
+}
+`
+
+const testAccApmInstanceLogSpanIdKey = `
+resource "tencentcloud_apm_instance" "example" {
+  name            = "tf-example"
+  description     = "desc."
+  log_index_type  = 1
+  log_trace_id_key = "traceId"
+  log_span_id_key  = "spanId"
+}
+`
+
+const testAccApmInstanceLogSpanIdKeyUpdate = `
+resource "tencentcloud_apm_instance" "example" {
+  name            = "tf-example"
+  description     = "desc."
+  log_index_type  = 1
+  log_trace_id_key = "traceId"
+  log_span_id_key  = "spanId-update"
 }
 `

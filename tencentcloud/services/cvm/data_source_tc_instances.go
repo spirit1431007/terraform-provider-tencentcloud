@@ -27,7 +27,7 @@ func DataSourceTencentCloudInstances() *schema.Resource {
 			"instance_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ValidateFunc: tccommon.ValidateStringLengthInRange(1, 30),
+				ValidateFunc: tccommon.ValidateStringLengthInRange(1, 128),
 				Description:  "Name of the instances to be queried.",
 			},
 			"availability_zone": {
@@ -153,6 +153,11 @@ func DataSourceTencentCloudInstances() *schema.Resource {
 							Computed:    true,
 							Description: "Image ID of the system disk.",
 						},
+						"rack_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The rack ID of the instance resource pool to which the instance belongs.",
+						},
 						"data_disks": {
 							Type:        schema.TypeList,
 							Computed:    true,
@@ -258,6 +263,31 @@ func DataSourceTencentCloudInstances() *schema.Resource {
 							Computed:    true,
 							Description: "Globally unique ID of the instance.",
 						},
+						"gpu_info": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "Instance GPU info.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"gpu_count": {
+										Type:        schema.TypeFloat,
+										Computed:    true,
+										Description: "Number of instance GPUs. A value less than 1 indicates a VGPU type, and a value greater than 1 indicates a GPU passthrough type.",
+									},
+									"gpu_id": {
+										Type:        schema.TypeList,
+										Computed:    true,
+										Elem:        &schema.Schema{Type: schema.TypeString},
+										Description: "Instance GPU address.",
+									},
+									"gpu_type": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Instance GPU type.",
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -342,6 +372,7 @@ func dataSourceTencentCloudInstancesRead(d *schema.ResourceData, meta interface{
 			"os_name":                    instance.OsName,
 			"availability_zone":          instance.Placement.Zone,
 			"project_id":                 instance.Placement.ProjectId,
+			"rack_id":                    instance.Placement.RackId,
 			"image_id":                   instance.ImageId,
 			"instance_charge_type":       instance.InstanceChargeType,
 			"system_disk_type":           instance.SystemDisk.DiskType,
@@ -383,6 +414,24 @@ func dataSourceTencentCloudInstancesRead(d *schema.ResourceData, meta interface{
 		}
 
 		mapping["data_disks"] = dataDisks
+
+		if instance.GPUInfo != nil {
+			gpuInfoMap := map[string]interface{}{}
+			if instance.GPUInfo.GPUCount != nil {
+				gpuInfoMap["gpu_count"] = instance.GPUInfo.GPUCount
+			}
+
+			if instance.GPUInfo.GPUId != nil {
+				gpuInfoMap["gpu_id"] = helper.StringsInterfaces(instance.GPUInfo.GPUId)
+			}
+
+			if instance.GPUInfo.GPUType != nil {
+				gpuInfoMap["gpu_type"] = instance.GPUInfo.GPUType
+			}
+
+			mapping["gpu_info"] = []interface{}{gpuInfoMap}
+		}
+
 		instanceList = append(instanceList, mapping)
 		ids = append(ids, *instance.InstanceId)
 	}

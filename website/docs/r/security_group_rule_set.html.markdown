@@ -111,30 +111,30 @@ The following arguments are supported:
 The `egress` object supports the following:
 
 * `action` - (Required, String) Rule policy of security group. Valid values: `ACCEPT` and `DROP`.
-* `address_template_group` - (Optional, String) Specify Group ID of Address template like `ipmg-xxxxxxxx`, conflict with `source_security_id` and `cidr_block`.
-* `address_template_id` - (Optional, String) Specify Address template ID like `ipm-xxxxxxxx`, conflict with `source_security_id` and `cidr_block`.
-* `cidr_block` - (Optional, String) An IP address network or CIDR segment. NOTE: `cidr_block`, `ipv6_cidr_block`, `source_security_id` and `address_template_*` are exclusive and cannot be set in the same time.
+* `address_template_group` - (Optional, String) Specify Group ID of Address template like `ipmg-xxxxxxxx`, conflict with `source_security_id` and `cidr_block`. NOTE: One of `cidr_block`, `ipv6_cidr_block`, `source_security_id` and `address_template_*` must be set.
+* `address_template_id` - (Optional, String) Specify Address template ID like `ipm-xxxxxxxx`, conflict with `source_security_id` and `cidr_block`. NOTE: One of `cidr_block`, `ipv6_cidr_block`, `source_security_id` and `address_template_*` must be set.
+* `cidr_block` - (Optional, String) An IP address network or CIDR segment. NOTE: `cidr_block`, `ipv6_cidr_block`, `source_security_id` and `address_template_*` are exclusive and cannot be set in the same time; One of `cidr_block`, `ipv6_cidr_block`, `source_security_id` and `address_template_*` must be set.
 * `description` - (Optional, String) Description of the security group rule.
-* `ipv6_cidr_block` - (Optional, String) An IPV6 address network or CIDR segment, and conflict with `source_security_id` and `address_template_*`.
-* `port` - (Optional, String) Range of the port. The available value can be one, multiple or one segment. E.g. `80`, `80,90` and `80-90`. Default to all ports, and conflicts with `service_template_*`.
-* `protocol` - (Optional, String) Type of IP protocol. Valid values: `TCP`, `UDP` and `ICMP`. Default to all types protocol, and conflicts with `service_template_*`.
-* `service_template_group` - (Optional, String) Specify Group ID of Protocol template ID like `ppmg-xxxxxxxx`, conflict with `cidr_block` and `port`.
-* `service_template_id` - (Optional, String) Specify Protocol template ID like `ppm-xxxxxxxx`, conflict with `cidr_block` and `port`.
-* `source_security_id` - (Optional, String) ID of the nested security group, and conflicts with `cidr_block` and `address_template_*`.
+* `ipv6_cidr_block` - (Optional, String) An IPV6 address network or CIDR segment, and conflict with `source_security_id` and `address_template_*`. NOTE: One of `cidr_block`, `ipv6_cidr_block`, `source_security_id` and `address_template_*` must be set.
+* `port` - (Optional, String) Range of the port. The available value can be `all`, a single port, or a port range. E.g. `80`, `80,90`, `80-90` or `all`. Note: If the `Protocol` value is set to `ALL`, the `Port` value also needs to be set to `all`. Default to all ports, and conflicts with `service_template_*`.
+* `protocol` - (Optional, String) Type of IP protocol. Valid values: `TCP`, `UDP`, `ICMP`, `ICMPv6` and `ALL`. Default to all types protocol, and conflicts with `service_template_*`.
+* `service_template_group` - (Optional, String) Specify Group ID of Protocol template ID like `ppmg-xxxxxxxx`, conflict with `protocol` and `port`.
+* `service_template_id` - (Optional, String) Specify Protocol template ID like `ppm-xxxxxxxx`, conflict with `protocol` and `port`.
+* `source_security_id` - (Optional, String) ID of the nested security group, and conflicts with `cidr_block` and `address_template_*`. NOTE: One of `cidr_block`, `ipv6_cidr_block`, `source_security_id` and `address_template_*` must be set.
 
 The `ingress` object supports the following:
 
 * `action` - (Required, String) Rule policy of security group. Valid values: `ACCEPT` and `DROP`.
-* `address_template_group` - (Optional, String) Specify Group ID of Address template like `ipmg-xxxxxxxx`, conflict with `source_security_id` and `cidr_block`.
-* `address_template_id` - (Optional, String) Specify Address template ID like `ipm-xxxxxxxx`, conflict with `source_security_id` and `cidr_block`.
-* `cidr_block` - (Optional, String) An IP address network or CIDR segment. NOTE: `cidr_block`, `ipv6_cidr_block`, `source_security_id` and `address_template_*` are exclusive and cannot be set in the same time.
+* `address_template_group` - (Optional, String) Specify Group ID of Address template like `ipmg-xxxxxxxx`, conflict with `source_security_id` and `cidr_block`. NOTE: One of `cidr_block`, `ipv6_cidr_block`, `source_security_id` and `address_template_*` must be set.
+* `address_template_id` - (Optional, String) Specify Address template ID like `ipm-xxxxxxxx`, conflict with `source_security_id` and `cidr_block`. NOTE: One of `cidr_block`, `ipv6_cidr_block`, `source_security_id` and `address_template_*` must be set.
+* `cidr_block` - (Optional, String) An IP address network or CIDR segment. NOTE: `cidr_block`, `ipv6_cidr_block`, `source_security_id` and `address_template_*` are exclusive and cannot be set in the same time; One of `cidr_block`, `ipv6_cidr_block`, `source_security_id` and `address_template_*` must be set.
 * `description` - (Optional, String) Description of the security group rule.
-* `ipv6_cidr_block` - (Optional, String) An IPV6 address network or CIDR segment, and conflict with `source_security_id` and `address_template_*`.
-* `port` - (Optional, String) Range of the port. The available value can be one, multiple or one segment. E.g. `80`, `80,90` and `80-90`. Default to all ports, and conflicts with `service_template_*`.
-* `protocol` - (Optional, String) Type of IP protocol. Valid values: `TCP`, `UDP` and `ICMP`. Default to all types protocol, and conflicts with `service_template_*`.
-* `service_template_group` - (Optional, String) Specify Group ID of Protocol template ID like `ppmg-xxxxxxxx`, conflict with `cidr_block` and `port`.
-* `service_template_id` - (Optional, String) Specify Protocol template ID like `ppm-xxxxxxxx`, conflict with `cidr_block` and `port`.
-* `source_security_id` - (Optional, String) ID of the nested security group, and conflicts with `cidr_block` and `address_template_*`.
+* `ipv6_cidr_block` - (Optional, String) An IPV6 address network or CIDR segment, and conflict with `source_security_id` and `address_template_*`. NOTE: One of `cidr_block`, `ipv6_cidr_block`, `source_security_id` and `address_template_*` must be set.
+* `port` - (Optional, String) Range of the port. The available value can be `all`, a single port, or a port range. E.g. `80`, `80,90`, `80-90` or `all`. Note: If the `Protocol` value is set to `ALL`, the `Port` value also needs to be set to `all`. Default to all ports, and conflicts with `service_template_*`.
+* `protocol` - (Optional, String) Type of IP protocol. Valid values: `TCP`, `UDP`, `ICMP`, `ICMPv6` and `ALL`. Default to all types protocol, and conflicts with `service_template_*`.
+* `service_template_group` - (Optional, String) Specify Group ID of Protocol template ID like `ppmg-xxxxxxxx`, conflict with `protocol` and `port`.
+* `service_template_id` - (Optional, String) Specify Protocol template ID like `ppm-xxxxxxxx`, conflict with `protocol` and `port`.
+* `source_security_id` - (Optional, String) ID of the nested security group, and conflicts with `cidr_block` and `address_template_*`. NOTE: One of `cidr_block`, `ipv6_cidr_block`, `source_security_id` and `address_template_*` must be set.
 
 ## Attributes Reference
 
@@ -142,6 +142,14 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - ID of the resource.
 * `version` - Security policies version, auto increment for every update.
+
+The `egress` object exports the following:
+
+* `policy_index` - The security group rule index number, whose value dynamically changes with changes in security group rules.
+
+The `ingress` object exports the following:
+
+* `policy_index` - The security group rule index number, whose value dynamically changes with changes in security group rules.
 
 
 ## Import

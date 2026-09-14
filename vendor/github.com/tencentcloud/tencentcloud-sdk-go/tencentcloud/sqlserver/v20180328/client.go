@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+// Copyright (c) 2017-2025 Tencent. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -94,6 +94,7 @@ func (c *Client) AssociateSecurityGroupsWithContext(ctx context.Context, request
     if request == nil {
         request = NewAssociateSecurityGroupsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "AssociateSecurityGroups")
     
     if c.GetCredential() == nil {
         return nil, errors.New("AssociateSecurityGroups require credential")
@@ -149,6 +150,7 @@ func (c *Client) BalanceReadOnlyGroupWithContext(ctx context.Context, request *B
     if request == nil {
         request = NewBalanceReadOnlyGroupRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "BalanceReadOnlyGroup")
     
     if c.GetCredential() == nil {
         return nil, errors.New("BalanceReadOnlyGroup require credential")
@@ -240,6 +242,7 @@ func (c *Client) CloneDBWithContext(ctx context.Context, request *CloneDBRequest
     if request == nil {
         request = NewCloneDBRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "CloneDB")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CloneDB require credential")
@@ -297,6 +300,7 @@ func (c *Client) CloseInterCommunicationWithContext(ctx context.Context, request
     if request == nil {
         request = NewCloseInterCommunicationRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "CloseInterCommunication")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CloseInterCommunication require credential")
@@ -305,6 +309,64 @@ func (c *Client) CloseInterCommunicationWithContext(ctx context.Context, request
     request.SetContext(ctx)
     
     response = NewCloseInterCommunicationResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCloseLogRequest() (request *CloseLogRequest) {
+    request = &CloseLogRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("sqlserver", APIVersion, "CloseLog")
+    
+    
+    return
+}
+
+func NewCloseLogResponse() (response *CloseLogResponse) {
+    response = &CloseLogResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CloseLog
+// 关闭日志
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_DBERROR = "FailedOperation.DBError"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_INPUTILLEGAL = "InvalidParameter.InputIllegal"
+//  RESOURCEUNAVAILABLE_INSTANCESTATUSINVALID = "ResourceUnavailable.InstanceStatusInvalid"
+//  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
+func (c *Client) CloseLog(request *CloseLogRequest) (response *CloseLogResponse, err error) {
+    return c.CloseLogWithContext(context.Background(), request)
+}
+
+// CloseLog
+// 关闭日志
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_DBERROR = "FailedOperation.DBError"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_INPUTILLEGAL = "InvalidParameter.InputIllegal"
+//  RESOURCEUNAVAILABLE_INSTANCESTATUSINVALID = "ResourceUnavailable.InstanceStatusInvalid"
+//  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
+func (c *Client) CloseLogWithContext(ctx context.Context, request *CloseLogRequest) (response *CloseLogResponse, err error) {
+    if request == nil {
+        request = NewCloseLogRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "CloseLog")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CloseLog require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCloseLogResponse()
     err = c.Send(request, response)
     return
 }
@@ -354,6 +416,7 @@ func (c *Client) CompleteExpansionWithContext(ctx context.Context, request *Comp
     if request == nil {
         request = NewCompleteExpansionRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "CompleteExpansion")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CompleteExpansion require credential")
@@ -429,6 +492,7 @@ func (c *Client) CompleteMigrationWithContext(ctx context.Context, request *Comp
     if request == nil {
         request = NewCompleteMigrationRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "CompleteMigration")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CompleteMigration require credential")
@@ -502,6 +566,7 @@ func (c *Client) CreateAccountWithContext(ctx context.Context, request *CreateAc
     if request == nil {
         request = NewCreateAccountRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "CreateAccount")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateAccount require credential")
@@ -583,6 +648,7 @@ func (c *Client) CreateBackupWithContext(ctx context.Context, request *CreateBac
     if request == nil {
         request = NewCreateBackupRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "CreateBackup")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateBackup require credential")
@@ -646,6 +712,7 @@ func (c *Client) CreateBackupMigrationWithContext(ctx context.Context, request *
     if request == nil {
         request = NewCreateBackupMigrationRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "CreateBackupMigration")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateBackupMigration require credential")
@@ -678,7 +745,7 @@ func NewCreateBasicDBInstancesResponse() (response *CreateBasicDBInstancesRespon
 }
 
 // CreateBasicDBInstances
-// 本接口（CreateBasicDBInstances）用于创建SQL server基础版实例。
+// 本接口（CreateBasicDBInstances）用于创建基础版实例 (云盘)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION_CREATEORDERFAILED = "FailedOperation.CreateOrderFailed"
@@ -700,7 +767,7 @@ func (c *Client) CreateBasicDBInstances(request *CreateBasicDBInstancesRequest) 
 }
 
 // CreateBasicDBInstances
-// 本接口（CreateBasicDBInstances）用于创建SQL server基础版实例。
+// 本接口（CreateBasicDBInstances）用于创建基础版实例 (云盘)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION_CREATEORDERFAILED = "FailedOperation.CreateOrderFailed"
@@ -721,6 +788,7 @@ func (c *Client) CreateBasicDBInstancesWithContext(ctx context.Context, request 
     if request == nil {
         request = NewCreateBasicDBInstancesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "CreateBasicDBInstances")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateBasicDBInstances require credential")
@@ -753,7 +821,7 @@ func NewCreateBusinessDBInstancesResponse() (response *CreateBusinessDBInstances
 }
 
 // CreateBusinessDBInstances
-// 本接口（CreateBusinessDBInstances）用于创建商业智能服务实例。
+// 本接口（CreateBusinessDBInstances）用于创建商业智能服务实例 (云盘)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION_CREATEORDERFAILED = "FailedOperation.CreateOrderFailed"
@@ -776,7 +844,7 @@ func (c *Client) CreateBusinessDBInstances(request *CreateBusinessDBInstancesReq
 }
 
 // CreateBusinessDBInstances
-// 本接口（CreateBusinessDBInstances）用于创建商业智能服务实例。
+// 本接口（CreateBusinessDBInstances）用于创建商业智能服务实例 (云盘)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION_CREATEORDERFAILED = "FailedOperation.CreateOrderFailed"
@@ -798,6 +866,7 @@ func (c *Client) CreateBusinessDBInstancesWithContext(ctx context.Context, reque
     if request == nil {
         request = NewCreateBusinessDBInstancesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "CreateBusinessDBInstances")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateBusinessDBInstances require credential")
@@ -855,6 +924,7 @@ func (c *Client) CreateBusinessIntelligenceFileWithContext(ctx context.Context, 
     if request == nil {
         request = NewCreateBusinessIntelligenceFileRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "CreateBusinessIntelligenceFile")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateBusinessIntelligenceFile require credential")
@@ -887,7 +957,7 @@ func NewCreateCloudDBInstancesResponse() (response *CreateCloudDBInstancesRespon
 }
 
 // CreateCloudDBInstances
-// 本接口（CreateCloudDBInstances）用于创建高可用实例(虚拟机版本)。
+// 本接口（CreateCloudDBInstances）用于创建高可用实例 (云盘)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION_CREATEORDERFAILED = "FailedOperation.CreateOrderFailed"
@@ -910,7 +980,7 @@ func (c *Client) CreateCloudDBInstances(request *CreateCloudDBInstancesRequest) 
 }
 
 // CreateCloudDBInstances
-// 本接口（CreateCloudDBInstances）用于创建高可用实例(虚拟机版本)。
+// 本接口（CreateCloudDBInstances）用于创建高可用实例 (云盘)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION_CREATEORDERFAILED = "FailedOperation.CreateOrderFailed"
@@ -932,6 +1002,7 @@ func (c *Client) CreateCloudDBInstancesWithContext(ctx context.Context, request 
     if request == nil {
         request = NewCreateCloudDBInstancesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "CreateCloudDBInstances")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateCloudDBInstances require credential")
@@ -964,7 +1035,7 @@ func NewCreateCloudReadOnlyDBInstancesResponse() (response *CreateCloudReadOnlyD
 }
 
 // CreateCloudReadOnlyDBInstances
-// 本接口（CreateCloudReadOnlyDBInstances）用于添加只读副本实例(虚拟机版本)。
+// 本接口（CreateCloudReadOnlyDBInstances）用于创建只读实例 (云盘)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION_CREATEORDERFAILED = "FailedOperation.CreateOrderFailed"
@@ -990,7 +1061,7 @@ func (c *Client) CreateCloudReadOnlyDBInstances(request *CreateCloudReadOnlyDBIn
 }
 
 // CreateCloudReadOnlyDBInstances
-// 本接口（CreateCloudReadOnlyDBInstances）用于添加只读副本实例(虚拟机版本)。
+// 本接口（CreateCloudReadOnlyDBInstances）用于创建只读实例 (云盘)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION_CREATEORDERFAILED = "FailedOperation.CreateOrderFailed"
@@ -1015,6 +1086,7 @@ func (c *Client) CreateCloudReadOnlyDBInstancesWithContext(ctx context.Context, 
     if request == nil {
         request = NewCreateCloudReadOnlyDBInstancesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "CreateCloudReadOnlyDBInstances")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateCloudReadOnlyDBInstances require credential")
@@ -1096,6 +1168,7 @@ func (c *Client) CreateDBWithContext(ctx context.Context, request *CreateDBReque
     if request == nil {
         request = NewCreateDBRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "CreateDB")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateDB require credential")
@@ -1128,7 +1201,7 @@ func NewCreateDBInstancesResponse() (response *CreateDBInstancesResponse) {
 }
 
 // CreateDBInstances
-// 本接口（CreateDBInstances）用于创建实例。
+// 本接口（CreateDBInstances）用于创建高可用实例 (本地盘)
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION_CREATEORDERFAILED = "FailedOperation.CreateOrderFailed"
@@ -1151,7 +1224,7 @@ func (c *Client) CreateDBInstances(request *CreateDBInstancesRequest) (response 
 }
 
 // CreateDBInstances
-// 本接口（CreateDBInstances）用于创建实例。
+// 本接口（CreateDBInstances）用于创建高可用实例 (本地盘)
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION_CREATEORDERFAILED = "FailedOperation.CreateOrderFailed"
@@ -1173,6 +1246,7 @@ func (c *Client) CreateDBInstancesWithContext(ctx context.Context, request *Crea
     if request == nil {
         request = NewCreateDBInstancesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "CreateDBInstances")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateDBInstances require credential")
@@ -1181,6 +1255,84 @@ func (c *Client) CreateDBInstancesWithContext(ctx context.Context, request *Crea
     request.SetContext(ctx)
     
     response = NewCreateDBInstancesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateExportTaskRequest() (request *CreateExportTaskRequest) {
+    request = &CreateExportTaskRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("sqlserver", APIVersion, "CreateExportTask")
+    
+    
+    return
+}
+
+func NewCreateExportTaskResponse() (response *CreateExportTaskResponse) {
+    response = &CreateExportTaskResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateExportTask
+// 创建日志下载任务
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_CREATEORDERFAILED = "FailedOperation.CreateOrderFailed"
+//  FAILEDOPERATION_DBERROR = "FailedOperation.DBError"
+//  FAILEDOPERATION_GETVPCFAILED = "FailedOperation.GetVpcFailed"
+//  INTERNALERROR_DBERROR = "InternalError.DBError"
+//  INTERNALERROR_UNKNOWNERROR = "InternalError.UnknownError"
+//  INVALIDPARAMETER_INPUTILLEGAL = "InvalidParameter.InputIllegal"
+//  INVALIDPARAMETER_PARAMSASSERTFAILED = "InvalidParameter.ParamsAssertFailed"
+//  INVALIDPARAMETER_PAYORDERFAILED = "InvalidParameter.PayOrderFailed"
+//  INVALIDPARAMETERVALUE_ILLEGALREGION = "InvalidParameterValue.IllegalRegion"
+//  INVALIDPARAMETERVALUE_ILLEGALSPEC = "InvalidParameterValue.IllegalSpec"
+//  INVALIDPARAMETERVALUE_ILLEGALZONE = "InvalidParameterValue.IllegalZone"
+//  INVALIDPARAMETERVALUE_SECURITYGROUPIDISILLEGAL = "InvalidParameterValue.SecurityGroupIdIsIllegal"
+//  RESOURCENOTFOUND_VPCNOTEXIST = "ResourceNotFound.VpcNotExist"
+//  RESOURCEUNAVAILABLE_VPCNOTEXIST = "ResourceUnavailable.VpcNotExist"
+//  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
+func (c *Client) CreateExportTask(request *CreateExportTaskRequest) (response *CreateExportTaskResponse, err error) {
+    return c.CreateExportTaskWithContext(context.Background(), request)
+}
+
+// CreateExportTask
+// 创建日志下载任务
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_CREATEORDERFAILED = "FailedOperation.CreateOrderFailed"
+//  FAILEDOPERATION_DBERROR = "FailedOperation.DBError"
+//  FAILEDOPERATION_GETVPCFAILED = "FailedOperation.GetVpcFailed"
+//  INTERNALERROR_DBERROR = "InternalError.DBError"
+//  INTERNALERROR_UNKNOWNERROR = "InternalError.UnknownError"
+//  INVALIDPARAMETER_INPUTILLEGAL = "InvalidParameter.InputIllegal"
+//  INVALIDPARAMETER_PARAMSASSERTFAILED = "InvalidParameter.ParamsAssertFailed"
+//  INVALIDPARAMETER_PAYORDERFAILED = "InvalidParameter.PayOrderFailed"
+//  INVALIDPARAMETERVALUE_ILLEGALREGION = "InvalidParameterValue.IllegalRegion"
+//  INVALIDPARAMETERVALUE_ILLEGALSPEC = "InvalidParameterValue.IllegalSpec"
+//  INVALIDPARAMETERVALUE_ILLEGALZONE = "InvalidParameterValue.IllegalZone"
+//  INVALIDPARAMETERVALUE_SECURITYGROUPIDISILLEGAL = "InvalidParameterValue.SecurityGroupIdIsIllegal"
+//  RESOURCENOTFOUND_VPCNOTEXIST = "ResourceNotFound.VpcNotExist"
+//  RESOURCEUNAVAILABLE_VPCNOTEXIST = "ResourceUnavailable.VpcNotExist"
+//  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
+func (c *Client) CreateExportTaskWithContext(ctx context.Context, request *CreateExportTaskRequest) (response *CreateExportTaskResponse, err error) {
+    if request == nil {
+        request = NewCreateExportTaskRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "CreateExportTask")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateExportTask require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateExportTaskResponse()
     err = c.Send(request, response)
     return
 }
@@ -1244,6 +1396,7 @@ func (c *Client) CreateIncrementalMigrationWithContext(ctx context.Context, requ
     if request == nil {
         request = NewCreateIncrementalMigrationRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "CreateIncrementalMigration")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateIncrementalMigration require credential")
@@ -1329,6 +1482,7 @@ func (c *Client) CreateMigrationWithContext(ctx context.Context, request *Create
     if request == nil {
         request = NewCreateMigrationRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "CreateMigration")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateMigration require credential")
@@ -1394,6 +1548,7 @@ func (c *Client) CreatePublishSubscribeWithContext(ctx context.Context, request 
     if request == nil {
         request = NewCreatePublishSubscribeRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "CreatePublishSubscribe")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreatePublishSubscribe require credential")
@@ -1426,7 +1581,7 @@ func NewCreateReadOnlyDBInstancesResponse() (response *CreateReadOnlyDBInstances
 }
 
 // CreateReadOnlyDBInstances
-// 本接口（CreateReadOnlyDBInstances）用于添加只读副本实例。
+// 本接口（CreateReadOnlyDBInstances）用于创建只读实例 (本地盘)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION_CREATEORDERFAILED = "FailedOperation.CreateOrderFailed"
@@ -1450,7 +1605,7 @@ func (c *Client) CreateReadOnlyDBInstances(request *CreateReadOnlyDBInstancesReq
 }
 
 // CreateReadOnlyDBInstances
-// 本接口（CreateReadOnlyDBInstances）用于添加只读副本实例。
+// 本接口（CreateReadOnlyDBInstances）用于创建只读实例 (本地盘)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION_CREATEORDERFAILED = "FailedOperation.CreateOrderFailed"
@@ -1473,6 +1628,7 @@ func (c *Client) CreateReadOnlyDBInstancesWithContext(ctx context.Context, reque
     if request == nil {
         request = NewCreateReadOnlyDBInstancesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "CreateReadOnlyDBInstances")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateReadOnlyDBInstances require credential")
@@ -1481,6 +1637,66 @@ func (c *Client) CreateReadOnlyDBInstancesWithContext(ctx context.Context, reque
     request.SetContext(ctx)
     
     response = NewCreateReadOnlyDBInstancesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCutXEventsRequest() (request *CutXEventsRequest) {
+    request = &CutXEventsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("sqlserver", APIVersion, "CutXEvents")
+    
+    
+    return
+}
+
+func NewCutXEventsResponse() (response *CutXEventsResponse) {
+    response = &CutXEventsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CutXEvents
+// 本接口（CutXEvents）用于手动切割阻塞日志和死锁日志。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_DBERROR = "FailedOperation.DBError"
+//  FAILEDOPERATION_GCSERROR = "FailedOperation.GcsError"
+//  FAILEDOPERATION_NOTSUPPORT = "FailedOperation.NotSupport"
+//  INVALIDPARAMETER_INPUTILLEGAL = "InvalidParameter.InputIllegal"
+//  RESOURCENOTFOUND_VPCNOTEXIST = "ResourceNotFound.VpcNotExist"
+//  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
+func (c *Client) CutXEvents(request *CutXEventsRequest) (response *CutXEventsResponse, err error) {
+    return c.CutXEventsWithContext(context.Background(), request)
+}
+
+// CutXEvents
+// 本接口（CutXEvents）用于手动切割阻塞日志和死锁日志。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_DBERROR = "FailedOperation.DBError"
+//  FAILEDOPERATION_GCSERROR = "FailedOperation.GcsError"
+//  FAILEDOPERATION_NOTSUPPORT = "FailedOperation.NotSupport"
+//  INVALIDPARAMETER_INPUTILLEGAL = "InvalidParameter.InputIllegal"
+//  RESOURCENOTFOUND_VPCNOTEXIST = "ResourceNotFound.VpcNotExist"
+//  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
+func (c *Client) CutXEventsWithContext(ctx context.Context, request *CutXEventsRequest) (response *CutXEventsResponse, err error) {
+    if request == nil {
+        request = NewCutXEventsRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "CutXEvents")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CutXEvents require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCutXEventsResponse()
     err = c.Send(request, response)
     return
 }
@@ -1538,6 +1754,7 @@ func (c *Client) DeleteAccountWithContext(ctx context.Context, request *DeleteAc
     if request == nil {
         request = NewDeleteAccountRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DeleteAccount")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteAccount require credential")
@@ -1597,6 +1814,7 @@ func (c *Client) DeleteBackupMigrationWithContext(ctx context.Context, request *
     if request == nil {
         request = NewDeleteBackupMigrationRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DeleteBackupMigration")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteBackupMigration require credential")
@@ -1654,6 +1872,7 @@ func (c *Client) DeleteBusinessIntelligenceFileWithContext(ctx context.Context, 
     if request == nil {
         request = NewDeleteBusinessIntelligenceFileRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DeleteBusinessIntelligenceFile")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteBusinessIntelligenceFile require credential")
@@ -1719,6 +1938,7 @@ func (c *Client) DeleteDBWithContext(ctx context.Context, request *DeleteDBReque
     if request == nil {
         request = NewDeleteDBRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DeleteDB")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteDB require credential")
@@ -1776,6 +1996,7 @@ func (c *Client) DeleteDBInstanceWithContext(ctx context.Context, request *Delet
     if request == nil {
         request = NewDeleteDBInstanceRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DeleteDBInstance")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteDBInstance require credential")
@@ -1784,6 +2005,64 @@ func (c *Client) DeleteDBInstanceWithContext(ctx context.Context, request *Delet
     request.SetContext(ctx)
     
     response = NewDeleteDBInstanceResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDeleteExportTaskRequest() (request *DeleteExportTaskRequest) {
+    request = &DeleteExportTaskRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("sqlserver", APIVersion, "DeleteExportTask")
+    
+    
+    return
+}
+
+func NewDeleteExportTaskResponse() (response *DeleteExportTaskResponse) {
+    response = &DeleteExportTaskResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DeleteExportTask
+// 删除日志下载任务
+//
+// 可能返回的错误码:
+//  INTERNALERROR_DBERROR = "InternalError.DBError"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_PARAMSASSERTFAILED = "InvalidParameter.ParamsAssertFailed"
+//  RESOURCEUNAVAILABLE_INSTANCESTATUSINVALID = "ResourceUnavailable.InstanceStatusInvalid"
+//  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
+func (c *Client) DeleteExportTask(request *DeleteExportTaskRequest) (response *DeleteExportTaskResponse, err error) {
+    return c.DeleteExportTaskWithContext(context.Background(), request)
+}
+
+// DeleteExportTask
+// 删除日志下载任务
+//
+// 可能返回的错误码:
+//  INTERNALERROR_DBERROR = "InternalError.DBError"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_PARAMSASSERTFAILED = "InvalidParameter.ParamsAssertFailed"
+//  RESOURCEUNAVAILABLE_INSTANCESTATUSINVALID = "ResourceUnavailable.InstanceStatusInvalid"
+//  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
+func (c *Client) DeleteExportTaskWithContext(ctx context.Context, request *DeleteExportTaskRequest) (response *DeleteExportTaskResponse, err error) {
+    if request == nil {
+        request = NewDeleteExportTaskRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DeleteExportTask")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DeleteExportTask require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDeleteExportTaskResponse()
     err = c.Send(request, response)
     return
 }
@@ -1835,6 +2114,7 @@ func (c *Client) DeleteIncrementalMigrationWithContext(ctx context.Context, requ
     if request == nil {
         request = NewDeleteIncrementalMigrationRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DeleteIncrementalMigration")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteIncrementalMigration require credential")
@@ -1902,6 +2182,7 @@ func (c *Client) DeleteMigrationWithContext(ctx context.Context, request *Delete
     if request == nil {
         request = NewDeleteMigrationRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DeleteMigration")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteMigration require credential")
@@ -1965,6 +2246,7 @@ func (c *Client) DeletePublishSubscribeWithContext(ctx context.Context, request 
     if request == nil {
         request = NewDeletePublishSubscribeRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DeletePublishSubscribe")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeletePublishSubscribe require credential")
@@ -2022,6 +2304,7 @@ func (c *Client) DeleteRestoreTaskWithContext(ctx context.Context, request *Dele
     if request == nil {
         request = NewDeleteRestoreTaskRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DeleteRestoreTask")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteRestoreTask require credential")
@@ -2081,6 +2364,7 @@ func (c *Client) DescribeAccountPrivilegeByDBWithContext(ctx context.Context, re
     if request == nil {
         request = NewDescribeAccountPrivilegeByDBRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeAccountPrivilegeByDB")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeAccountPrivilegeByDB require credential")
@@ -2142,6 +2426,7 @@ func (c *Client) DescribeAccountsWithContext(ctx context.Context, request *Descr
     if request == nil {
         request = NewDescribeAccountsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeAccounts")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeAccounts require credential")
@@ -2203,6 +2488,7 @@ func (c *Client) DescribeBackupByFlowIdWithContext(ctx context.Context, request 
     if request == nil {
         request = NewDescribeBackupByFlowIdRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeBackupByFlowId")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeBackupByFlowId require credential")
@@ -2256,6 +2542,7 @@ func (c *Client) DescribeBackupCommandWithContext(ctx context.Context, request *
     if request == nil {
         request = NewDescribeBackupCommandRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeBackupCommand")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeBackupCommand require credential")
@@ -2288,7 +2575,7 @@ func NewDescribeBackupFilesResponse() (response *DescribeBackupFilesResponse) {
 }
 
 // DescribeBackupFiles
-// 本接口(DescribeBackupFiles)用于查询单库备份明细
+// 本接口（DescribeBackupFiles）用于查询单库备份明细。
 //
 // 可能返回的错误码:
 //  INTERNALERROR = "InternalError"
@@ -2307,7 +2594,7 @@ func (c *Client) DescribeBackupFiles(request *DescribeBackupFilesRequest) (respo
 }
 
 // DescribeBackupFiles
-// 本接口(DescribeBackupFiles)用于查询单库备份明细
+// 本接口（DescribeBackupFiles）用于查询单库备份明细。
 //
 // 可能返回的错误码:
 //  INTERNALERROR = "InternalError"
@@ -2325,6 +2612,7 @@ func (c *Client) DescribeBackupFilesWithContext(ctx context.Context, request *De
     if request == nil {
         request = NewDescribeBackupFilesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeBackupFiles")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeBackupFiles require credential")
@@ -2380,6 +2668,7 @@ func (c *Client) DescribeBackupMigrationWithContext(ctx context.Context, request
     if request == nil {
         request = NewDescribeBackupMigrationRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeBackupMigration")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeBackupMigration require credential")
@@ -2437,6 +2726,7 @@ func (c *Client) DescribeBackupMonitorWithContext(ctx context.Context, request *
     if request == nil {
         request = NewDescribeBackupMonitorRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeBackupMonitor")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeBackupMonitor require credential")
@@ -2490,6 +2780,7 @@ func (c *Client) DescribeBackupStatisticalWithContext(ctx context.Context, reque
     if request == nil {
         request = NewDescribeBackupStatisticalRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeBackupStatistical")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeBackupStatistical require credential")
@@ -2553,6 +2844,7 @@ func (c *Client) DescribeBackupSummaryWithContext(ctx context.Context, request *
     if request == nil {
         request = NewDescribeBackupSummaryRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeBackupSummary")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeBackupSummary require credential")
@@ -2614,6 +2906,7 @@ func (c *Client) DescribeBackupUploadSizeWithContext(ctx context.Context, reques
     if request == nil {
         request = NewDescribeBackupUploadSizeRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeBackupUploadSize")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeBackupUploadSize require credential")
@@ -2683,6 +2976,7 @@ func (c *Client) DescribeBackupsWithContext(ctx context.Context, request *Descri
     if request == nil {
         request = NewDescribeBackupsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeBackups")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeBackups require credential")
@@ -2740,6 +3034,7 @@ func (c *Client) DescribeBusinessIntelligenceFileWithContext(ctx context.Context
     if request == nil {
         request = NewDescribeBusinessIntelligenceFileRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeBusinessIntelligenceFile")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeBusinessIntelligenceFile require credential")
@@ -2793,6 +3088,7 @@ func (c *Client) DescribeCollationTimeZoneWithContext(ctx context.Context, reque
     if request == nil {
         request = NewDescribeCollationTimeZoneRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeCollationTimeZone")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeCollationTimeZone require credential")
@@ -2850,6 +3146,7 @@ func (c *Client) DescribeCrossBackupStatisticalWithContext(ctx context.Context, 
     if request == nil {
         request = NewDescribeCrossBackupStatisticalRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeCrossBackupStatistical")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeCrossBackupStatistical require credential")
@@ -2905,6 +3202,7 @@ func (c *Client) DescribeCrossRegionZoneWithContext(ctx context.Context, request
     if request == nil {
         request = NewDescribeCrossRegionZoneRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeCrossRegionZone")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeCrossRegionZone require credential")
@@ -2958,6 +3256,7 @@ func (c *Client) DescribeCrossRegionsWithContext(ctx context.Context, request *D
     if request == nil {
         request = NewDescribeCrossRegionsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeCrossRegions")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeCrossRegions require credential")
@@ -3035,6 +3334,7 @@ func (c *Client) DescribeDBCharsetsWithContext(ctx context.Context, request *Des
     if request == nil {
         request = NewDescribeDBCharsetsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeDBCharsets")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDBCharsets require credential")
@@ -3090,6 +3390,7 @@ func (c *Client) DescribeDBInstanceInterWithContext(ctx context.Context, request
     if request == nil {
         request = NewDescribeDBInstanceInterRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeDBInstanceInter")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDBInstanceInter require credential")
@@ -3122,7 +3423,7 @@ func NewDescribeDBInstancesResponse() (response *DescribeDBInstancesResponse) {
 }
 
 // DescribeDBInstances
-// 本接口(DescribeDBInstances)用于查询实例列表。
+// 本接口（DescribeDBInstances）用于查询实例列表。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION_DBERROR = "FailedOperation.DBError"
@@ -3141,7 +3442,7 @@ func (c *Client) DescribeDBInstances(request *DescribeDBInstancesRequest) (respo
 }
 
 // DescribeDBInstances
-// 本接口(DescribeDBInstances)用于查询实例列表。
+// 本接口（DescribeDBInstances）用于查询实例列表。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION_DBERROR = "FailedOperation.DBError"
@@ -3159,6 +3460,7 @@ func (c *Client) DescribeDBInstancesWithContext(ctx context.Context, request *De
     if request == nil {
         request = NewDescribeDBInstancesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeDBInstances")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDBInstances require credential")
@@ -3218,6 +3520,7 @@ func (c *Client) DescribeDBInstancesAttributeWithContext(ctx context.Context, re
     if request == nil {
         request = NewDescribeDBInstancesAttributeRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeDBInstancesAttribute")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDBInstancesAttribute require credential")
@@ -3275,6 +3578,7 @@ func (c *Client) DescribeDBPrivilegeByAccountWithContext(ctx context.Context, re
     if request == nil {
         request = NewDescribeDBPrivilegeByAccountRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeDBPrivilegeByAccount")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDBPrivilegeByAccount require credential")
@@ -3314,6 +3618,7 @@ func NewDescribeDBRestoreTimeResponse() (response *DescribeDBRestoreTimeResponse
 //  FAILEDOPERATION_GCSERROR = "FailedOperation.GcsError"
 //  INVALIDPARAMETER_INPUTILLEGAL = "InvalidParameter.InputIllegal"
 //  RESOURCENOTFOUND_INSTANCENOTFOUND = "ResourceNotFound.InstanceNotFound"
+//  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
 func (c *Client) DescribeDBRestoreTime(request *DescribeDBRestoreTimeRequest) (response *DescribeDBRestoreTimeResponse, err error) {
     return c.DescribeDBRestoreTimeWithContext(context.Background(), request)
 }
@@ -3326,10 +3631,12 @@ func (c *Client) DescribeDBRestoreTime(request *DescribeDBRestoreTimeRequest) (r
 //  FAILEDOPERATION_GCSERROR = "FailedOperation.GcsError"
 //  INVALIDPARAMETER_INPUTILLEGAL = "InvalidParameter.InputIllegal"
 //  RESOURCENOTFOUND_INSTANCENOTFOUND = "ResourceNotFound.InstanceNotFound"
+//  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
 func (c *Client) DescribeDBRestoreTimeWithContext(ctx context.Context, request *DescribeDBRestoreTimeRequest) (response *DescribeDBRestoreTimeResponse, err error) {
     if request == nil {
         request = NewDescribeDBRestoreTimeRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeDBRestoreTime")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDBRestoreTime require credential")
@@ -3389,6 +3696,7 @@ func (c *Client) DescribeDBSecurityGroupsWithContext(ctx context.Context, reques
     if request == nil {
         request = NewDescribeDBSecurityGroupsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeDBSecurityGroups")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDBSecurityGroups require credential")
@@ -3450,6 +3758,7 @@ func (c *Client) DescribeDBsWithContext(ctx context.Context, request *DescribeDB
     if request == nil {
         request = NewDescribeDBsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeDBs")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDBs require credential")
@@ -3515,6 +3824,7 @@ func (c *Client) DescribeDBsNormalWithContext(ctx context.Context, request *Desc
     if request == nil {
         request = NewDescribeDBsNormalRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeDBsNormal")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDBsNormal require credential")
@@ -3574,6 +3884,7 @@ func (c *Client) DescribeDatabaseNamesWithContext(ctx context.Context, request *
     if request == nil {
         request = NewDescribeDatabaseNamesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeDatabaseNames")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDatabaseNames require credential")
@@ -3635,6 +3946,7 @@ func (c *Client) DescribeDatabasesWithContext(ctx context.Context, request *Desc
     if request == nil {
         request = NewDescribeDatabasesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeDatabases")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDatabases require credential")
@@ -3700,6 +4012,7 @@ func (c *Client) DescribeDatabasesNormalWithContext(ctx context.Context, request
     if request == nil {
         request = NewDescribeDatabasesNormalRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeDatabasesNormal")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDatabasesNormal require credential")
@@ -3708,6 +4021,72 @@ func (c *Client) DescribeDatabasesNormalWithContext(ctx context.Context, request
     request.SetContext(ctx)
     
     response = NewDescribeDatabasesNormalResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeExportTasksRequest() (request *DescribeExportTasksRequest) {
+    request = &DescribeExportTasksRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("sqlserver", APIVersion, "DescribeExportTasks")
+    
+    
+    return
+}
+
+func NewDescribeExportTasksResponse() (response *DescribeExportTasksResponse) {
+    response = &DescribeExportTasksResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeExportTasks
+// 查询日志下载任务
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_DBERROR = "FailedOperation.DBError"
+//  FAILEDOPERATION_GCSERROR = "FailedOperation.GcsError"
+//  INTERNALERROR_DBERROR = "InternalError.DBError"
+//  INTERNALERROR_GCSERROR = "InternalError.GcsError"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_INPUTILLEGAL = "InvalidParameter.InputIllegal"
+//  INVALIDPARAMETER_INTERFACENAMENOTFOUND = "InvalidParameter.InterfaceNameNotFound"
+//  RESOURCENOTFOUND_INSTANCENOTFOUND = "ResourceNotFound.InstanceNotFound"
+//  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
+func (c *Client) DescribeExportTasks(request *DescribeExportTasksRequest) (response *DescribeExportTasksResponse, err error) {
+    return c.DescribeExportTasksWithContext(context.Background(), request)
+}
+
+// DescribeExportTasks
+// 查询日志下载任务
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_DBERROR = "FailedOperation.DBError"
+//  FAILEDOPERATION_GCSERROR = "FailedOperation.GcsError"
+//  INTERNALERROR_DBERROR = "InternalError.DBError"
+//  INTERNALERROR_GCSERROR = "InternalError.GcsError"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_INPUTILLEGAL = "InvalidParameter.InputIllegal"
+//  INVALIDPARAMETER_INTERFACENAMENOTFOUND = "InvalidParameter.InterfaceNameNotFound"
+//  RESOURCENOTFOUND_INSTANCENOTFOUND = "ResourceNotFound.InstanceNotFound"
+//  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
+func (c *Client) DescribeExportTasksWithContext(ctx context.Context, request *DescribeExportTasksRequest) (response *DescribeExportTasksResponse, err error) {
+    if request == nil {
+        request = NewDescribeExportTasksRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeExportTasks")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeExportTasks require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeExportTasksResponse()
     err = c.Send(request, response)
     return
 }
@@ -3761,6 +4140,7 @@ func (c *Client) DescribeFlowStatusWithContext(ctx context.Context, request *Des
     if request == nil {
         request = NewDescribeFlowStatusRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeFlowStatus")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeFlowStatus require credential")
@@ -3796,6 +4176,7 @@ func NewDescribeHASwitchLogResponse() (response *DescribeHASwitchLogResponse) {
 // 本接口(DescribeHASwitchLog)用于手动主备切换。
 //
 // 可能返回的错误码:
+//  INVALIDPARAMETER_INPUTILLEGAL = "InvalidParameter.InputIllegal"
 //  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
 func (c *Client) DescribeHASwitchLog(request *DescribeHASwitchLogRequest) (response *DescribeHASwitchLogResponse, err error) {
     return c.DescribeHASwitchLogWithContext(context.Background(), request)
@@ -3805,11 +4186,13 @@ func (c *Client) DescribeHASwitchLog(request *DescribeHASwitchLogRequest) (respo
 // 本接口(DescribeHASwitchLog)用于手动主备切换。
 //
 // 可能返回的错误码:
+//  INVALIDPARAMETER_INPUTILLEGAL = "InvalidParameter.InputIllegal"
 //  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
 func (c *Client) DescribeHASwitchLogWithContext(ctx context.Context, request *DescribeHASwitchLogRequest) (response *DescribeHASwitchLogResponse, err error) {
     if request == nil {
         request = NewDescribeHASwitchLogRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeHASwitchLog")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeHASwitchLog require credential")
@@ -3865,6 +4248,7 @@ func (c *Client) DescribeIncrementalMigrationWithContext(ctx context.Context, re
     if request == nil {
         request = NewDescribeIncrementalMigrationRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeIncrementalMigration")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeIncrementalMigration require credential")
@@ -3936,6 +4320,7 @@ func (c *Client) DescribeInquiryPriceParameterWithContext(ctx context.Context, r
     if request == nil {
         request = NewDescribeInquiryPriceParameterRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeInquiryPriceParameter")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeInquiryPriceParameter require credential")
@@ -3989,6 +4374,7 @@ func (c *Client) DescribeInstanceByOrdersWithContext(ctx context.Context, reques
     if request == nil {
         request = NewDescribeInstanceByOrdersRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeInstanceByOrders")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeInstanceByOrders require credential")
@@ -4050,6 +4436,7 @@ func (c *Client) DescribeInstanceParamRecordsWithContext(ctx context.Context, re
     if request == nil {
         request = NewDescribeInstanceParamRecordsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeInstanceParamRecords")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeInstanceParamRecords require credential")
@@ -4117,6 +4504,7 @@ func (c *Client) DescribeInstanceParamsWithContext(ctx context.Context, request 
     if request == nil {
         request = NewDescribeInstanceParamsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeInstanceParams")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeInstanceParams require credential")
@@ -4174,6 +4562,7 @@ func (c *Client) DescribeInstanceTasksWithContext(ctx context.Context, request *
     if request == nil {
         request = NewDescribeInstanceTasksRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeInstanceTasks")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeInstanceTasks require credential")
@@ -4206,7 +4595,7 @@ func NewDescribeInstanceTradeParameterResponse() (response *DescribeInstanceTrad
 }
 
 // DescribeInstanceTradeParameter
-// 本接口（DescribeInstanceTradeParameter）用于查询实例的计费参数，当前接口默认返回创建实例时需要的计费参数。内部接口用于活动页售卖场景。
+// 本接口（DescribeInstanceTradeParameter）用于查询实例的计费参数
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION_CREATEORDERFAILED = "FailedOperation.CreateOrderFailed"
@@ -4229,7 +4618,7 @@ func (c *Client) DescribeInstanceTradeParameter(request *DescribeInstanceTradePa
 }
 
 // DescribeInstanceTradeParameter
-// 本接口（DescribeInstanceTradeParameter）用于查询实例的计费参数，当前接口默认返回创建实例时需要的计费参数。内部接口用于活动页售卖场景。
+// 本接口（DescribeInstanceTradeParameter）用于查询实例的计费参数
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION_CREATEORDERFAILED = "FailedOperation.CreateOrderFailed"
@@ -4251,6 +4640,7 @@ func (c *Client) DescribeInstanceTradeParameterWithContext(ctx context.Context, 
     if request == nil {
         request = NewDescribeInstanceTradeParameterRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeInstanceTradeParameter")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeInstanceTradeParameter require credential")
@@ -4259,6 +4649,162 @@ func (c *Client) DescribeInstanceTradeParameterWithContext(ctx context.Context, 
     request.SetContext(ctx)
     
     response = NewDescribeInstanceTradeParameterResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeLogInstanceListRequest() (request *DescribeLogInstanceListRequest) {
+    request = &DescribeLogInstanceListRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("sqlserver", APIVersion, "DescribeLogInstanceList")
+    
+    
+    return
+}
+
+func NewDescribeLogInstanceListResponse() (response *DescribeLogInstanceListResponse) {
+    response = &DescribeLogInstanceListResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeLogInstanceList
+// 日志实例列表查询
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_CREATEORDERFAILED = "FailedOperation.CreateOrderFailed"
+//  FAILEDOPERATION_DBERROR = "FailedOperation.DBError"
+//  FAILEDOPERATION_GETVPCFAILED = "FailedOperation.GetVpcFailed"
+//  INTERNALERROR_DBERROR = "InternalError.DBError"
+//  INTERNALERROR_UNKNOWNERROR = "InternalError.UnknownError"
+//  INVALIDPARAMETER_INPUTILLEGAL = "InvalidParameter.InputIllegal"
+//  INVALIDPARAMETER_PARAMSASSERTFAILED = "InvalidParameter.ParamsAssertFailed"
+//  INVALIDPARAMETER_PAYORDERFAILED = "InvalidParameter.PayOrderFailed"
+//  INVALIDPARAMETERVALUE_ILLEGALREGION = "InvalidParameterValue.IllegalRegion"
+//  INVALIDPARAMETERVALUE_ILLEGALSPEC = "InvalidParameterValue.IllegalSpec"
+//  INVALIDPARAMETERVALUE_ILLEGALZONE = "InvalidParameterValue.IllegalZone"
+//  INVALIDPARAMETERVALUE_SECURITYGROUPIDISILLEGAL = "InvalidParameterValue.SecurityGroupIdIsIllegal"
+//  RESOURCENOTFOUND_VPCNOTEXIST = "ResourceNotFound.VpcNotExist"
+//  RESOURCEUNAVAILABLE_VPCNOTEXIST = "ResourceUnavailable.VpcNotExist"
+//  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
+func (c *Client) DescribeLogInstanceList(request *DescribeLogInstanceListRequest) (response *DescribeLogInstanceListResponse, err error) {
+    return c.DescribeLogInstanceListWithContext(context.Background(), request)
+}
+
+// DescribeLogInstanceList
+// 日志实例列表查询
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_CREATEORDERFAILED = "FailedOperation.CreateOrderFailed"
+//  FAILEDOPERATION_DBERROR = "FailedOperation.DBError"
+//  FAILEDOPERATION_GETVPCFAILED = "FailedOperation.GetVpcFailed"
+//  INTERNALERROR_DBERROR = "InternalError.DBError"
+//  INTERNALERROR_UNKNOWNERROR = "InternalError.UnknownError"
+//  INVALIDPARAMETER_INPUTILLEGAL = "InvalidParameter.InputIllegal"
+//  INVALIDPARAMETER_PARAMSASSERTFAILED = "InvalidParameter.ParamsAssertFailed"
+//  INVALIDPARAMETER_PAYORDERFAILED = "InvalidParameter.PayOrderFailed"
+//  INVALIDPARAMETERVALUE_ILLEGALREGION = "InvalidParameterValue.IllegalRegion"
+//  INVALIDPARAMETERVALUE_ILLEGALSPEC = "InvalidParameterValue.IllegalSpec"
+//  INVALIDPARAMETERVALUE_ILLEGALZONE = "InvalidParameterValue.IllegalZone"
+//  INVALIDPARAMETERVALUE_SECURITYGROUPIDISILLEGAL = "InvalidParameterValue.SecurityGroupIdIsIllegal"
+//  RESOURCENOTFOUND_VPCNOTEXIST = "ResourceNotFound.VpcNotExist"
+//  RESOURCEUNAVAILABLE_VPCNOTEXIST = "ResourceUnavailable.VpcNotExist"
+//  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
+func (c *Client) DescribeLogInstanceListWithContext(ctx context.Context, request *DescribeLogInstanceListRequest) (response *DescribeLogInstanceListResponse, err error) {
+    if request == nil {
+        request = NewDescribeLogInstanceListRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeLogInstanceList")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeLogInstanceList require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeLogInstanceListResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeLogsRequest() (request *DescribeLogsRequest) {
+    request = &DescribeLogsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("sqlserver", APIVersion, "DescribeLogs")
+    
+    
+    return
+}
+
+func NewDescribeLogsResponse() (response *DescribeLogsResponse) {
+    response = &DescribeLogsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeLogs
+// 查询日志
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_CREATEORDERFAILED = "FailedOperation.CreateOrderFailed"
+//  FAILEDOPERATION_DBERROR = "FailedOperation.DBError"
+//  FAILEDOPERATION_GETVPCFAILED = "FailedOperation.GetVpcFailed"
+//  INTERNALERROR_DBERROR = "InternalError.DBError"
+//  INTERNALERROR_UNKNOWNERROR = "InternalError.UnknownError"
+//  INVALIDPARAMETER_INPUTILLEGAL = "InvalidParameter.InputIllegal"
+//  INVALIDPARAMETER_PARAMSASSERTFAILED = "InvalidParameter.ParamsAssertFailed"
+//  INVALIDPARAMETER_PAYORDERFAILED = "InvalidParameter.PayOrderFailed"
+//  INVALIDPARAMETERVALUE_ILLEGALREGION = "InvalidParameterValue.IllegalRegion"
+//  INVALIDPARAMETERVALUE_ILLEGALSPEC = "InvalidParameterValue.IllegalSpec"
+//  INVALIDPARAMETERVALUE_ILLEGALZONE = "InvalidParameterValue.IllegalZone"
+//  INVALIDPARAMETERVALUE_SECURITYGROUPIDISILLEGAL = "InvalidParameterValue.SecurityGroupIdIsIllegal"
+//  RESOURCENOTFOUND_VPCNOTEXIST = "ResourceNotFound.VpcNotExist"
+//  RESOURCEUNAVAILABLE_VPCNOTEXIST = "ResourceUnavailable.VpcNotExist"
+//  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
+func (c *Client) DescribeLogs(request *DescribeLogsRequest) (response *DescribeLogsResponse, err error) {
+    return c.DescribeLogsWithContext(context.Background(), request)
+}
+
+// DescribeLogs
+// 查询日志
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_CREATEORDERFAILED = "FailedOperation.CreateOrderFailed"
+//  FAILEDOPERATION_DBERROR = "FailedOperation.DBError"
+//  FAILEDOPERATION_GETVPCFAILED = "FailedOperation.GetVpcFailed"
+//  INTERNALERROR_DBERROR = "InternalError.DBError"
+//  INTERNALERROR_UNKNOWNERROR = "InternalError.UnknownError"
+//  INVALIDPARAMETER_INPUTILLEGAL = "InvalidParameter.InputIllegal"
+//  INVALIDPARAMETER_PARAMSASSERTFAILED = "InvalidParameter.ParamsAssertFailed"
+//  INVALIDPARAMETER_PAYORDERFAILED = "InvalidParameter.PayOrderFailed"
+//  INVALIDPARAMETERVALUE_ILLEGALREGION = "InvalidParameterValue.IllegalRegion"
+//  INVALIDPARAMETERVALUE_ILLEGALSPEC = "InvalidParameterValue.IllegalSpec"
+//  INVALIDPARAMETERVALUE_ILLEGALZONE = "InvalidParameterValue.IllegalZone"
+//  INVALIDPARAMETERVALUE_SECURITYGROUPIDISILLEGAL = "InvalidParameterValue.SecurityGroupIdIsIllegal"
+//  RESOURCENOTFOUND_VPCNOTEXIST = "ResourceNotFound.VpcNotExist"
+//  RESOURCEUNAVAILABLE_VPCNOTEXIST = "ResourceUnavailable.VpcNotExist"
+//  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
+func (c *Client) DescribeLogsWithContext(ctx context.Context, request *DescribeLogsRequest) (response *DescribeLogsResponse, err error) {
+    if request == nil {
+        request = NewDescribeLogsRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeLogs")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeLogs require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeLogsResponse()
     err = c.Send(request, response)
     return
 }
@@ -4312,6 +4858,7 @@ func (c *Client) DescribeMaintenanceSpanWithContext(ctx context.Context, request
     if request == nil {
         request = NewDescribeMaintenanceSpanRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeMaintenanceSpan")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeMaintenanceSpan require credential")
@@ -4383,6 +4930,7 @@ func (c *Client) DescribeMigrationDatabasesWithContext(ctx context.Context, requ
     if request == nil {
         request = NewDescribeMigrationDatabasesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeMigrationDatabases")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeMigrationDatabases require credential")
@@ -4448,6 +4996,7 @@ func (c *Client) DescribeMigrationDetailWithContext(ctx context.Context, request
     if request == nil {
         request = NewDescribeMigrationDetailRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeMigrationDetail")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeMigrationDetail require credential")
@@ -4511,6 +5060,7 @@ func (c *Client) DescribeMigrationsWithContext(ctx context.Context, request *Des
     if request == nil {
         request = NewDescribeMigrationsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeMigrations")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeMigrations require credential")
@@ -4568,6 +5118,7 @@ func (c *Client) DescribeOrdersWithContext(ctx context.Context, request *Describ
     if request == nil {
         request = NewDescribeOrdersRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeOrders")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeOrders require credential")
@@ -4600,7 +5151,7 @@ func NewDescribeProductConfigResponse() (response *DescribeProductConfigResponse
 }
 
 // DescribeProductConfig
-// 本接口 (DescribeProductConfig) 用于查询售卖规格配置。
+// 本接口（DescribeProductConfig）用于查询售卖规格配置。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION_DBERROR = "FailedOperation.DBError"
@@ -4616,7 +5167,7 @@ func (c *Client) DescribeProductConfig(request *DescribeProductConfigRequest) (r
 }
 
 // DescribeProductConfig
-// 本接口 (DescribeProductConfig) 用于查询售卖规格配置。
+// 本接口（DescribeProductConfig）用于查询售卖规格配置。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION_DBERROR = "FailedOperation.DBError"
@@ -4631,6 +5182,7 @@ func (c *Client) DescribeProductConfigWithContext(ctx context.Context, request *
     if request == nil {
         request = NewDescribeProductConfigRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeProductConfig")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeProductConfig require credential")
@@ -4682,6 +5234,7 @@ func (c *Client) DescribeProductSpecWithContext(ctx context.Context, request *De
     if request == nil {
         request = NewDescribeProductSpecRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeProductSpec")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeProductSpec require credential")
@@ -4737,6 +5290,7 @@ func (c *Client) DescribeProjectSecurityGroupsWithContext(ctx context.Context, r
     if request == nil {
         request = NewDescribeProjectSecurityGroupsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeProjectSecurityGroups")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeProjectSecurityGroups require credential")
@@ -4800,6 +5354,7 @@ func (c *Client) DescribePublishSubscribeWithContext(ctx context.Context, reques
     if request == nil {
         request = NewDescribePublishSubscribeRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribePublishSubscribe")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribePublishSubscribe require credential")
@@ -4851,6 +5406,7 @@ func (c *Client) DescribeReadOnlyGroupAutoWeightWithContext(ctx context.Context,
     if request == nil {
         request = NewDescribeReadOnlyGroupAutoWeightRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeReadOnlyGroupAutoWeight")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeReadOnlyGroupAutoWeight require credential")
@@ -4910,6 +5466,7 @@ func (c *Client) DescribeReadOnlyGroupByReadOnlyInstanceWithContext(ctx context.
     if request == nil {
         request = NewDescribeReadOnlyGroupByReadOnlyInstanceRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeReadOnlyGroupByReadOnlyInstance")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeReadOnlyGroupByReadOnlyInstance require credential")
@@ -4969,6 +5526,7 @@ func (c *Client) DescribeReadOnlyGroupDetailsWithContext(ctx context.Context, re
     if request == nil {
         request = NewDescribeReadOnlyGroupDetailsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeReadOnlyGroupDetails")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeReadOnlyGroupDetails require credential")
@@ -5026,6 +5584,7 @@ func (c *Client) DescribeReadOnlyGroupListWithContext(ctx context.Context, reque
     if request == nil {
         request = NewDescribeReadOnlyGroupListRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeReadOnlyGroupList")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeReadOnlyGroupList require credential")
@@ -5087,6 +5646,7 @@ func (c *Client) DescribeRegionsWithContext(ctx context.Context, request *Descri
     if request == nil {
         request = NewDescribeRegionsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeRegions")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeRegions require credential")
@@ -5146,6 +5706,7 @@ func (c *Client) DescribeRegularBackupPlanWithContext(ctx context.Context, reque
     if request == nil {
         request = NewDescribeRegularBackupPlanRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeRegularBackupPlan")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeRegularBackupPlan require credential")
@@ -5185,6 +5746,7 @@ func NewDescribeRestoreTaskResponse() (response *DescribeRestoreTaskResponse) {
 //  FAILEDOPERATION_GCSERROR = "FailedOperation.GcsError"
 //  INVALIDPARAMETER_INPUTILLEGAL = "InvalidParameter.InputIllegal"
 //  RESOURCENOTFOUND_INSTANCENOTFOUND = "ResourceNotFound.InstanceNotFound"
+//  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
 func (c *Client) DescribeRestoreTask(request *DescribeRestoreTaskRequest) (response *DescribeRestoreTaskResponse, err error) {
     return c.DescribeRestoreTaskWithContext(context.Background(), request)
 }
@@ -5197,10 +5759,12 @@ func (c *Client) DescribeRestoreTask(request *DescribeRestoreTaskRequest) (respo
 //  FAILEDOPERATION_GCSERROR = "FailedOperation.GcsError"
 //  INVALIDPARAMETER_INPUTILLEGAL = "InvalidParameter.InputIllegal"
 //  RESOURCENOTFOUND_INSTANCENOTFOUND = "ResourceNotFound.InstanceNotFound"
+//  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
 func (c *Client) DescribeRestoreTaskWithContext(ctx context.Context, request *DescribeRestoreTaskRequest) (response *DescribeRestoreTaskResponse, err error) {
     if request == nil {
         request = NewDescribeRestoreTaskRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeRestoreTask")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeRestoreTask require credential")
@@ -5209,6 +5773,66 @@ func (c *Client) DescribeRestoreTaskWithContext(ctx context.Context, request *De
     request.SetContext(ctx)
     
     response = NewDescribeRestoreTaskResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeRestoreTimeRangeRequest() (request *DescribeRestoreTimeRangeRequest) {
+    request = &DescribeRestoreTimeRangeRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("sqlserver", APIVersion, "DescribeRestoreTimeRange")
+    
+    
+    return
+}
+
+func NewDescribeRestoreTimeRangeResponse() (response *DescribeRestoreTimeRangeResponse) {
+    response = &DescribeRestoreTimeRangeResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeRestoreTimeRange
+// 本接口(DescribeRestoreTimeRange)用于查询按照时间点可回档的时间范围。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_DBERROR = "FailedOperation.DBError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_PARAMSASSERTFAILED = "InvalidParameter.ParamsAssertFailed"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
+func (c *Client) DescribeRestoreTimeRange(request *DescribeRestoreTimeRangeRequest) (response *DescribeRestoreTimeRangeResponse, err error) {
+    return c.DescribeRestoreTimeRangeWithContext(context.Background(), request)
+}
+
+// DescribeRestoreTimeRange
+// 本接口(DescribeRestoreTimeRange)用于查询按照时间点可回档的时间范围。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_DBERROR = "FailedOperation.DBError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_PARAMSASSERTFAILED = "InvalidParameter.ParamsAssertFailed"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
+func (c *Client) DescribeRestoreTimeRangeWithContext(ctx context.Context, request *DescribeRestoreTimeRangeRequest) (response *DescribeRestoreTimeRangeResponse, err error) {
+    if request == nil {
+        request = NewDescribeRestoreTimeRangeRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeRestoreTimeRange")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeRestoreTimeRange require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeRestoreTimeRangeResponse()
     err = c.Send(request, response)
     return
 }
@@ -5262,6 +5886,7 @@ func (c *Client) DescribeRollbackTimeWithContext(ctx context.Context, request *D
     if request == nil {
         request = NewDescribeRollbackTimeRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeRollbackTime")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeRollbackTime require credential")
@@ -5327,6 +5952,7 @@ func (c *Client) DescribeSlowlogsWithContext(ctx context.Context, request *Descr
     if request == nil {
         request = NewDescribeSlowlogsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeSlowlogs")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeSlowlogs require credential")
@@ -5382,6 +6008,7 @@ func (c *Client) DescribeSpecSellStatusWithContext(ctx context.Context, request 
     if request == nil {
         request = NewDescribeSpecSellStatusRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeSpecSellStatus")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeSpecSellStatus require credential")
@@ -5451,6 +6078,7 @@ func (c *Client) DescribeUpgradeInstanceCheckWithContext(ctx context.Context, re
     if request == nil {
         request = NewDescribeUpgradeInstanceCheckRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeUpgradeInstanceCheck")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeUpgradeInstanceCheck require credential")
@@ -5520,6 +6148,7 @@ func (c *Client) DescribeUploadBackupInfoWithContext(ctx context.Context, reques
     if request == nil {
         request = NewDescribeUploadBackupInfoRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeUploadBackupInfo")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeUploadBackupInfo require credential")
@@ -5591,6 +6220,7 @@ func (c *Client) DescribeUploadIncrementalInfoWithContext(ctx context.Context, r
     if request == nil {
         request = NewDescribeUploadIncrementalInfoRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeUploadIncrementalInfo")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeUploadIncrementalInfo require credential")
@@ -5654,6 +6284,7 @@ func (c *Client) DescribeXEventsWithContext(ctx context.Context, request *Descri
     if request == nil {
         request = NewDescribeXEventsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeXEvents")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeXEvents require credential")
@@ -5686,7 +6317,7 @@ func NewDescribeZonesResponse() (response *DescribeZonesResponse) {
 }
 
 // DescribeZones
-// 本接口 (DescribeZones) 用于查询当前可售卖的可用区信息。
+// 本接口（DescribeZones）用于查询当前可售卖的可用区信息。
 //
 // 可能返回的错误码:
 //  INTERNALERROR_DBERROR = "InternalError.DBError"
@@ -5700,7 +6331,7 @@ func (c *Client) DescribeZones(request *DescribeZonesRequest) (response *Describ
 }
 
 // DescribeZones
-// 本接口 (DescribeZones) 用于查询当前可售卖的可用区信息。
+// 本接口（DescribeZones）用于查询当前可售卖的可用区信息。
 //
 // 可能返回的错误码:
 //  INTERNALERROR_DBERROR = "InternalError.DBError"
@@ -5713,6 +6344,7 @@ func (c *Client) DescribeZonesWithContext(ctx context.Context, request *Describe
     if request == nil {
         request = NewDescribeZonesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DescribeZones")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeZones require credential")
@@ -5774,6 +6406,7 @@ func (c *Client) DisassociateSecurityGroupsWithContext(ctx context.Context, requ
     if request == nil {
         request = NewDisassociateSecurityGroupsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "DisassociateSecurityGroups")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DisassociateSecurityGroups require credential")
@@ -5845,6 +6478,7 @@ func (c *Client) InquiryPriceCreateDBInstancesWithContext(ctx context.Context, r
     if request == nil {
         request = NewInquiryPriceCreateDBInstancesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "InquiryPriceCreateDBInstances")
     
     if c.GetCredential() == nil {
         return nil, errors.New("InquiryPriceCreateDBInstances require credential")
@@ -5912,6 +6546,7 @@ func (c *Client) InquiryPriceRenewDBInstanceWithContext(ctx context.Context, req
     if request == nil {
         request = NewInquiryPriceRenewDBInstanceRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "InquiryPriceRenewDBInstance")
     
     if c.GetCredential() == nil {
         return nil, errors.New("InquiryPriceRenewDBInstance require credential")
@@ -5981,6 +6616,7 @@ func (c *Client) InquiryPriceUpgradeDBInstanceWithContext(ctx context.Context, r
     if request == nil {
         request = NewInquiryPriceUpgradeDBInstanceRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "InquiryPriceUpgradeDBInstance")
     
     if c.GetCredential() == nil {
         return nil, errors.New("InquiryPriceUpgradeDBInstance require credential")
@@ -6058,6 +6694,7 @@ func (c *Client) ModifyAccountPrivilegeWithContext(ctx context.Context, request 
     if request == nil {
         request = NewModifyAccountPrivilegeRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyAccountPrivilege")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyAccountPrivilege require credential")
@@ -6123,6 +6760,7 @@ func (c *Client) ModifyAccountRemarkWithContext(ctx context.Context, request *Mo
     if request == nil {
         request = NewModifyAccountRemarkRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyAccountRemark")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyAccountRemark require credential")
@@ -6192,6 +6830,7 @@ func (c *Client) ModifyBackupMigrationWithContext(ctx context.Context, request *
     if request == nil {
         request = NewModifyBackupMigrationRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyBackupMigration")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyBackupMigration require credential")
@@ -6259,6 +6898,7 @@ func (c *Client) ModifyBackupNameWithContext(ctx context.Context, request *Modif
     if request == nil {
         request = NewModifyBackupNameRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyBackupName")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyBackupName require credential")
@@ -6320,6 +6960,7 @@ func (c *Client) ModifyBackupStrategyWithContext(ctx context.Context, request *M
     if request == nil {
         request = NewModifyBackupStrategyRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyBackupStrategy")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyBackupStrategy require credential")
@@ -6381,6 +7022,7 @@ func (c *Client) ModifyCloseWanIpWithContext(ctx context.Context, request *Modif
     if request == nil {
         request = NewModifyCloseWanIpRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyCloseWanIp")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyCloseWanIp require credential")
@@ -6438,6 +7080,7 @@ func (c *Client) ModifyCrossBackupStrategyWithContext(ctx context.Context, reque
     if request == nil {
         request = NewModifyCrossBackupStrategyRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyCrossBackupStrategy")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyCrossBackupStrategy require credential")
@@ -6477,6 +7120,7 @@ func NewModifyDBEncryptAttributesResponse() (response *ModifyDBEncryptAttributes
 //  FAILEDOPERATION_GCSERROR = "FailedOperation.GcsError"
 //  FAILEDOPERATION_NOTSUPPORT = "FailedOperation.NotSupport"
 //  INVALIDPARAMETER_INPUTILLEGAL = "InvalidParameter.InputIllegal"
+//  RESOURCENOTFOUND_INSTANCENOTFOUND = "ResourceNotFound.InstanceNotFound"
 //  RESOURCENOTFOUND_PARAMSNOTFOUND = "ResourceNotFound.ParamsNotFound"
 //  RESOURCEUNAVAILABLE_INSTANCESTATUSINVALID = "ResourceUnavailable.InstanceStatusInvalid"
 //  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
@@ -6494,6 +7138,7 @@ func (c *Client) ModifyDBEncryptAttributes(request *ModifyDBEncryptAttributesReq
 //  FAILEDOPERATION_GCSERROR = "FailedOperation.GcsError"
 //  FAILEDOPERATION_NOTSUPPORT = "FailedOperation.NotSupport"
 //  INVALIDPARAMETER_INPUTILLEGAL = "InvalidParameter.InputIllegal"
+//  RESOURCENOTFOUND_INSTANCENOTFOUND = "ResourceNotFound.InstanceNotFound"
 //  RESOURCENOTFOUND_PARAMSNOTFOUND = "ResourceNotFound.ParamsNotFound"
 //  RESOURCEUNAVAILABLE_INSTANCESTATUSINVALID = "ResourceUnavailable.InstanceStatusInvalid"
 //  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
@@ -6503,6 +7148,7 @@ func (c *Client) ModifyDBEncryptAttributesWithContext(ctx context.Context, reque
     if request == nil {
         request = NewModifyDBEncryptAttributesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyDBEncryptAttributes")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyDBEncryptAttributes require credential")
@@ -6564,6 +7210,7 @@ func (c *Client) ModifyDBInstanceNameWithContext(ctx context.Context, request *M
     if request == nil {
         request = NewModifyDBInstanceNameRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyDBInstanceName")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyDBInstanceName require credential")
@@ -6657,6 +7304,7 @@ func (c *Client) ModifyDBInstanceNetworkWithContext(ctx context.Context, request
     if request == nil {
         request = NewModifyDBInstanceNetworkRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyDBInstanceNetwork")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyDBInstanceNetwork require credential")
@@ -6716,6 +7364,7 @@ func (c *Client) ModifyDBInstanceNoteWithContext(ctx context.Context, request *M
     if request == nil {
         request = NewModifyDBInstanceNoteRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyDBInstanceNote")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyDBInstanceNote require credential")
@@ -6777,6 +7426,7 @@ func (c *Client) ModifyDBInstanceProjectWithContext(ctx context.Context, request
     if request == nil {
         request = NewModifyDBInstanceProjectRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyDBInstanceProject")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyDBInstanceProject require credential")
@@ -6838,6 +7488,7 @@ func (c *Client) ModifyDBInstanceRenewFlagWithContext(ctx context.Context, reque
     if request == nil {
         request = NewModifyDBInstanceRenewFlagRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyDBInstanceRenewFlag")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyDBInstanceRenewFlag require credential")
@@ -6895,6 +7546,7 @@ func (c *Client) ModifyDBInstanceSSLWithContext(ctx context.Context, request *Mo
     if request == nil {
         request = NewModifyDBInstanceSSLRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyDBInstanceSSL")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyDBInstanceSSL require credential")
@@ -6954,6 +7606,7 @@ func (c *Client) ModifyDBInstanceSecurityGroupsWithContext(ctx context.Context, 
     if request == nil {
         request = NewModifyDBInstanceSecurityGroupsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyDBInstanceSecurityGroups")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyDBInstanceSecurityGroups require credential")
@@ -7027,6 +7680,7 @@ func (c *Client) ModifyDBNameWithContext(ctx context.Context, request *ModifyDBN
     if request == nil {
         request = NewModifyDBNameRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyDBName")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyDBName require credential")
@@ -7094,6 +7748,7 @@ func (c *Client) ModifyDBRemarkWithContext(ctx context.Context, request *ModifyD
     if request == nil {
         request = NewModifyDBRemarkRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyDBRemark")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyDBRemark require credential")
@@ -7102,6 +7757,68 @@ func (c *Client) ModifyDBRemarkWithContext(ctx context.Context, request *ModifyD
     request.SetContext(ctx)
     
     response = NewModifyDBRemarkResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyDReadableRequest() (request *ModifyDReadableRequest) {
+    request = &ModifyDReadableRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("sqlserver", APIVersion, "ModifyDReadable")
+    
+    
+    return
+}
+
+func NewModifyDReadableResponse() (response *ModifyDReadableResponse) {
+    response = &ModifyDReadableResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyDReadable
+// 本接口（ModifyDReadable）用于开通或者关闭备机只读
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_DBERROR = "FailedOperation.DBError"
+//  FAILEDOPERATION_GCSERROR = "FailedOperation.GcsError"
+//  FAILEDOPERATION_NOTSUPPORT = "FailedOperation.NotSupport"
+//  RESOURCENOTFOUND_PARAMSNOTFOUND = "ResourceNotFound.ParamsNotFound"
+//  RESOURCENOTFOUND_VPCNOTEXIST = "ResourceNotFound.VpcNotExist"
+//  RESOURCEUNAVAILABLE_INSTANCESTATUSINVALID = "ResourceUnavailable.InstanceStatusInvalid"
+//  RESOURCEUNAVAILABLE_VPCNOTEXIST = "ResourceUnavailable.VpcNotExist"
+func (c *Client) ModifyDReadable(request *ModifyDReadableRequest) (response *ModifyDReadableResponse, err error) {
+    return c.ModifyDReadableWithContext(context.Background(), request)
+}
+
+// ModifyDReadable
+// 本接口（ModifyDReadable）用于开通或者关闭备机只读
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_DBERROR = "FailedOperation.DBError"
+//  FAILEDOPERATION_GCSERROR = "FailedOperation.GcsError"
+//  FAILEDOPERATION_NOTSUPPORT = "FailedOperation.NotSupport"
+//  RESOURCENOTFOUND_PARAMSNOTFOUND = "ResourceNotFound.ParamsNotFound"
+//  RESOURCENOTFOUND_VPCNOTEXIST = "ResourceNotFound.VpcNotExist"
+//  RESOURCEUNAVAILABLE_INSTANCESTATUSINVALID = "ResourceUnavailable.InstanceStatusInvalid"
+//  RESOURCEUNAVAILABLE_VPCNOTEXIST = "ResourceUnavailable.VpcNotExist"
+func (c *Client) ModifyDReadableWithContext(ctx context.Context, request *ModifyDReadableRequest) (response *ModifyDReadableResponse, err error) {
+    if request == nil {
+        request = NewModifyDReadableRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyDReadable")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyDReadable require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyDReadableResponse()
     err = c.Send(request, response)
     return
 }
@@ -7159,6 +7876,7 @@ func (c *Client) ModifyDatabaseCDCWithContext(ctx context.Context, request *Modi
     if request == nil {
         request = NewModifyDatabaseCDCRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyDatabaseCDC")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyDatabaseCDC require credential")
@@ -7224,6 +7942,7 @@ func (c *Client) ModifyDatabaseCTWithContext(ctx context.Context, request *Modif
     if request == nil {
         request = NewModifyDatabaseCTRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyDatabaseCT")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyDatabaseCT require credential")
@@ -7287,6 +8006,7 @@ func (c *Client) ModifyDatabaseMdfWithContext(ctx context.Context, request *Modi
     if request == nil {
         request = NewModifyDatabaseMdfRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyDatabaseMdf")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyDatabaseMdf require credential")
@@ -7295,6 +8015,76 @@ func (c *Client) ModifyDatabaseMdfWithContext(ctx context.Context, request *Modi
     request.SetContext(ctx)
     
     response = NewModifyDatabaseMdfResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyDatabasePrivilegeRequest() (request *ModifyDatabasePrivilegeRequest) {
+    request = &ModifyDatabasePrivilegeRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("sqlserver", APIVersion, "ModifyDatabasePrivilege")
+    
+    
+    return
+}
+
+func NewModifyDatabasePrivilegeResponse() (response *ModifyDatabasePrivilegeResponse) {
+    response = &ModifyDatabasePrivilegeResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyDatabasePrivilege
+// 本接口（ModifyDatabasePrivilege）用于修改实例数据库权限。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_DATAERROR = "InternalError.DataError"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_INPUTILLEGAL = "InvalidParameter.InputIllegal"
+//  INVALIDPARAMETER_INTERFACENAMENOTFOUND = "InvalidParameter.InterfaceNameNotFound"
+//  INVALIDPARAMETERVALUE_GRANTISILLEGAL = "InvalidParameterValue.GrantIsIllegal"
+//  RESOURCENOTFOUND_ACCOUNTNOTEXIST = "ResourceNotFound.AccountNotExist"
+//  RESOURCENOTFOUND_DBNOTEXIT = "ResourceNotFound.DBNotExit"
+//  RESOURCENOTFOUND_DBNOTFOUND = "ResourceNotFound.DBNotFound"
+//  RESOURCENOTFOUND_INSTANCENOTFOUND = "ResourceNotFound.InstanceNotFound"
+//  RESOURCEUNAVAILABLE_INSTANCESTATUSINVALID = "ResourceUnavailable.InstanceStatusInvalid"
+//  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
+func (c *Client) ModifyDatabasePrivilege(request *ModifyDatabasePrivilegeRequest) (response *ModifyDatabasePrivilegeResponse, err error) {
+    return c.ModifyDatabasePrivilegeWithContext(context.Background(), request)
+}
+
+// ModifyDatabasePrivilege
+// 本接口（ModifyDatabasePrivilege）用于修改实例数据库权限。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_DATAERROR = "InternalError.DataError"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_INPUTILLEGAL = "InvalidParameter.InputIllegal"
+//  INVALIDPARAMETER_INTERFACENAMENOTFOUND = "InvalidParameter.InterfaceNameNotFound"
+//  INVALIDPARAMETERVALUE_GRANTISILLEGAL = "InvalidParameterValue.GrantIsIllegal"
+//  RESOURCENOTFOUND_ACCOUNTNOTEXIST = "ResourceNotFound.AccountNotExist"
+//  RESOURCENOTFOUND_DBNOTEXIT = "ResourceNotFound.DBNotExit"
+//  RESOURCENOTFOUND_DBNOTFOUND = "ResourceNotFound.DBNotFound"
+//  RESOURCENOTFOUND_INSTANCENOTFOUND = "ResourceNotFound.InstanceNotFound"
+//  RESOURCEUNAVAILABLE_INSTANCESTATUSINVALID = "ResourceUnavailable.InstanceStatusInvalid"
+//  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
+func (c *Client) ModifyDatabasePrivilegeWithContext(ctx context.Context, request *ModifyDatabasePrivilegeRequest) (response *ModifyDatabasePrivilegeResponse, err error) {
+    if request == nil {
+        request = NewModifyDatabasePrivilegeRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyDatabasePrivilege")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyDatabasePrivilege require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyDatabasePrivilegeResponse()
     err = c.Send(request, response)
     return
 }
@@ -7319,7 +8109,7 @@ func NewModifyDatabaseShrinkMDFResponse() (response *ModifyDatabaseShrinkMDFResp
 }
 
 // ModifyDatabaseShrinkMDF
-// 本接口(ModifyDatabaseShrinkDMF)用于收缩数据库mdf(Shrink mdf)。
+// 本接口（ModifyDatabaseShrinkMDF）用于收缩数据库 mdf（Shrink mdf）。
 //
 // 可能返回的错误码:
 //  INTERNALERROR_DBERROR = "InternalError.DBError"
@@ -7335,7 +8125,7 @@ func (c *Client) ModifyDatabaseShrinkMDF(request *ModifyDatabaseShrinkMDFRequest
 }
 
 // ModifyDatabaseShrinkMDF
-// 本接口(ModifyDatabaseShrinkDMF)用于收缩数据库mdf(Shrink mdf)。
+// 本接口（ModifyDatabaseShrinkMDF）用于收缩数据库 mdf（Shrink mdf）。
 //
 // 可能返回的错误码:
 //  INTERNALERROR_DBERROR = "InternalError.DBError"
@@ -7350,6 +8140,7 @@ func (c *Client) ModifyDatabaseShrinkMDFWithContext(ctx context.Context, request
     if request == nil {
         request = NewModifyDatabaseShrinkMDFRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyDatabaseShrinkMDF")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyDatabaseShrinkMDF require credential")
@@ -7419,6 +8210,7 @@ func (c *Client) ModifyIncrementalMigrationWithContext(ctx context.Context, requ
     if request == nil {
         request = NewModifyIncrementalMigrationRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyIncrementalMigration")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyIncrementalMigration require credential")
@@ -7474,6 +8266,7 @@ func (c *Client) ModifyInstanceEncryptAttributesWithContext(ctx context.Context,
     if request == nil {
         request = NewModifyInstanceEncryptAttributesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyInstanceEncryptAttributes")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyInstanceEncryptAttributes require credential")
@@ -7543,6 +8336,7 @@ func (c *Client) ModifyInstanceParamWithContext(ctx context.Context, request *Mo
     if request == nil {
         request = NewModifyInstanceParamRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyInstanceParam")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyInstanceParam require credential")
@@ -7551,6 +8345,68 @@ func (c *Client) ModifyInstanceParamWithContext(ctx context.Context, request *Mo
     request.SetContext(ctx)
     
     response = NewModifyInstanceParamResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyLogRequest() (request *ModifyLogRequest) {
+    request = &ModifyLogRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("sqlserver", APIVersion, "ModifyLog")
+    
+    
+    return
+}
+
+func NewModifyLogResponse() (response *ModifyLogResponse) {
+    response = &ModifyLogResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyLog
+// 修改日志
+//
+// 可能返回的错误码:
+//  AUTHFAILURE = "AuthFailure"
+//  INTERNALERROR_DBERROR = "InternalError.DBError"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_INPUTILLEGAL = "InvalidParameter.InputIllegal"
+//  RESOURCENOTFOUND_INSTANCENOTFOUND = "ResourceNotFound.InstanceNotFound"
+//  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
+//  UNKNOWNPARAMETER = "UnknownParameter"
+func (c *Client) ModifyLog(request *ModifyLogRequest) (response *ModifyLogResponse, err error) {
+    return c.ModifyLogWithContext(context.Background(), request)
+}
+
+// ModifyLog
+// 修改日志
+//
+// 可能返回的错误码:
+//  AUTHFAILURE = "AuthFailure"
+//  INTERNALERROR_DBERROR = "InternalError.DBError"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_INPUTILLEGAL = "InvalidParameter.InputIllegal"
+//  RESOURCENOTFOUND_INSTANCENOTFOUND = "ResourceNotFound.InstanceNotFound"
+//  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
+//  UNKNOWNPARAMETER = "UnknownParameter"
+func (c *Client) ModifyLogWithContext(ctx context.Context, request *ModifyLogRequest) (response *ModifyLogResponse, err error) {
+    if request == nil {
+        request = NewModifyLogRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyLog")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyLog require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyLogResponse()
     err = c.Send(request, response)
     return
 }
@@ -7602,6 +8458,7 @@ func (c *Client) ModifyMaintenanceSpanWithContext(ctx context.Context, request *
     if request == nil {
         request = NewModifyMaintenanceSpanRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyMaintenanceSpan")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyMaintenanceSpan require credential")
@@ -7681,6 +8538,7 @@ func (c *Client) ModifyMigrationWithContext(ctx context.Context, request *Modify
     if request == nil {
         request = NewModifyMigrationRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyMigration")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyMigration require credential")
@@ -7742,6 +8600,7 @@ func (c *Client) ModifyOpenWanIpWithContext(ctx context.Context, request *Modify
     if request == nil {
         request = NewModifyOpenWanIpRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyOpenWanIp")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyOpenWanIp require credential")
@@ -7803,6 +8662,7 @@ func (c *Client) ModifyPublishSubscribeWithContext(ctx context.Context, request 
     if request == nil {
         request = NewModifyPublishSubscribeRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyPublishSubscribe")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyPublishSubscribe require credential")
@@ -7860,6 +8720,7 @@ func (c *Client) ModifyPublishSubscribeNameWithContext(ctx context.Context, requ
     if request == nil {
         request = NewModifyPublishSubscribeNameRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyPublishSubscribeName")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyPublishSubscribeName require credential")
@@ -7917,6 +8778,7 @@ func (c *Client) ModifyReadOnlyGroupDetailsWithContext(ctx context.Context, requ
     if request == nil {
         request = NewModifyReadOnlyGroupDetailsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ModifyReadOnlyGroupDetails")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyReadOnlyGroupDetails require credential")
@@ -7974,6 +8836,7 @@ func (c *Client) OpenInterCommunicationWithContext(ctx context.Context, request 
     if request == nil {
         request = NewOpenInterCommunicationRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "OpenInterCommunication")
     
     if c.GetCredential() == nil {
         return nil, errors.New("OpenInterCommunication require credential")
@@ -7982,6 +8845,64 @@ func (c *Client) OpenInterCommunicationWithContext(ctx context.Context, request 
     request.SetContext(ctx)
     
     response = NewOpenInterCommunicationResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewOpenLogRequest() (request *OpenLogRequest) {
+    request = &OpenLogRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("sqlserver", APIVersion, "OpenLog")
+    
+    
+    return
+}
+
+func NewOpenLogResponse() (response *OpenLogResponse) {
+    response = &OpenLogResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// OpenLog
+// 开启审计日志
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_DBERROR = "FailedOperation.DBError"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_INPUTILLEGAL = "InvalidParameter.InputIllegal"
+//  RESOURCEUNAVAILABLE_INSTANCESTATUSINVALID = "ResourceUnavailable.InstanceStatusInvalid"
+//  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
+func (c *Client) OpenLog(request *OpenLogRequest) (response *OpenLogResponse, err error) {
+    return c.OpenLogWithContext(context.Background(), request)
+}
+
+// OpenLog
+// 开启审计日志
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_DBERROR = "FailedOperation.DBError"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_INPUTILLEGAL = "InvalidParameter.InputIllegal"
+//  RESOURCEUNAVAILABLE_INSTANCESTATUSINVALID = "ResourceUnavailable.InstanceStatusInvalid"
+//  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
+func (c *Client) OpenLogWithContext(ctx context.Context, request *OpenLogRequest) (response *OpenLogResponse, err error) {
+    if request == nil {
+        request = NewOpenLogRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "OpenLog")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("OpenLog require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewOpenLogResponse()
     err = c.Send(request, response)
     return
 }
@@ -8043,6 +8964,7 @@ func (c *Client) QueryMigrationCheckProcessWithContext(ctx context.Context, requ
     if request == nil {
         request = NewQueryMigrationCheckProcessRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "QueryMigrationCheckProcess")
     
     if c.GetCredential() == nil {
         return nil, errors.New("QueryMigrationCheckProcess require credential")
@@ -8102,6 +9024,7 @@ func (c *Client) RecycleDBInstanceWithContext(ctx context.Context, request *Recy
     if request == nil {
         request = NewRecycleDBInstanceRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "RecycleDBInstance")
     
     if c.GetCredential() == nil {
         return nil, errors.New("RecycleDBInstance require credential")
@@ -8161,6 +9084,7 @@ func (c *Client) RecycleReadOnlyGroupWithContext(ctx context.Context, request *R
     if request == nil {
         request = NewRecycleReadOnlyGroupRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "RecycleReadOnlyGroup")
     
     if c.GetCredential() == nil {
         return nil, errors.New("RecycleReadOnlyGroup require credential")
@@ -8222,6 +9146,7 @@ func (c *Client) RemoveBackupsWithContext(ctx context.Context, request *RemoveBa
     if request == nil {
         request = NewRemoveBackupsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "RemoveBackups")
     
     if c.GetCredential() == nil {
         return nil, errors.New("RemoveBackups require credential")
@@ -8289,6 +9214,7 @@ func (c *Client) RenewDBInstanceWithContext(ctx context.Context, request *RenewD
     if request == nil {
         request = NewRenewDBInstanceRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "RenewDBInstance")
     
     if c.GetCredential() == nil {
         return nil, errors.New("RenewDBInstance require credential")
@@ -8346,6 +9272,7 @@ func (c *Client) RenewPostpaidDBInstanceWithContext(ctx context.Context, request
     if request == nil {
         request = NewRenewPostpaidDBInstanceRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "RenewPostpaidDBInstance")
     
     if c.GetCredential() == nil {
         return nil, errors.New("RenewPostpaidDBInstance require credential")
@@ -8378,7 +9305,7 @@ func NewResetAccountPasswordResponse() (response *ResetAccountPasswordResponse) 
 }
 
 // ResetAccountPassword
-// 本接口（ResetAccountPassword）用于重置实例的账户密码。
+// 本接口（ResetAccountPassword）用于重置实例的账号密码。
 //
 // 可能返回的错误码:
 //  INTERNALERROR_DBERROR = "InternalError.DBError"
@@ -8397,7 +9324,7 @@ func (c *Client) ResetAccountPassword(request *ResetAccountPasswordRequest) (res
 }
 
 // ResetAccountPassword
-// 本接口（ResetAccountPassword）用于重置实例的账户密码。
+// 本接口（ResetAccountPassword）用于重置实例的账号密码。
 //
 // 可能返回的错误码:
 //  INTERNALERROR_DBERROR = "InternalError.DBError"
@@ -8415,6 +9342,7 @@ func (c *Client) ResetAccountPasswordWithContext(ctx context.Context, request *R
     if request == nil {
         request = NewResetAccountPasswordRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "ResetAccountPassword")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ResetAccountPassword require credential")
@@ -8476,6 +9404,7 @@ func (c *Client) RestartDBInstanceWithContext(ctx context.Context, request *Rest
     if request == nil {
         request = NewRestartDBInstanceRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "RestartDBInstance")
     
     if c.GetCredential() == nil {
         return nil, errors.New("RestartDBInstance require credential")
@@ -8549,6 +9478,7 @@ func (c *Client) RestoreInstanceWithContext(ctx context.Context, request *Restor
     if request == nil {
         request = NewRestoreInstanceRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "RestoreInstance")
     
     if c.GetCredential() == nil {
         return nil, errors.New("RestoreInstance require credential")
@@ -8620,6 +9550,7 @@ func (c *Client) RollbackInstanceWithContext(ctx context.Context, request *Rollb
     if request == nil {
         request = NewRollbackInstanceRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "RollbackInstance")
     
     if c.GetCredential() == nil {
         return nil, errors.New("RollbackInstance require credential")
@@ -8687,6 +9618,7 @@ func (c *Client) RunMigrationWithContext(ctx context.Context, request *RunMigrat
     if request == nil {
         request = NewRunMigrationRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "RunMigration")
     
     if c.GetCredential() == nil {
         return nil, errors.New("RunMigration require credential")
@@ -8758,6 +9690,7 @@ func (c *Client) StartBackupMigrationWithContext(ctx context.Context, request *S
     if request == nil {
         request = NewStartBackupMigrationRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "StartBackupMigration")
     
     if c.GetCredential() == nil {
         return nil, errors.New("StartBackupMigration require credential")
@@ -8829,6 +9762,7 @@ func (c *Client) StartIncrementalMigrationWithContext(ctx context.Context, reque
     if request == nil {
         request = NewStartIncrementalMigrationRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "StartIncrementalMigration")
     
     if c.GetCredential() == nil {
         return nil, errors.New("StartIncrementalMigration require credential")
@@ -8890,6 +9824,7 @@ func (c *Client) StartInstanceXEventWithContext(ctx context.Context, request *St
     if request == nil {
         request = NewStartInstanceXEventRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "StartInstanceXEvent")
     
     if c.GetCredential() == nil {
         return nil, errors.New("StartInstanceXEvent require credential")
@@ -8967,6 +9902,7 @@ func (c *Client) StartMigrationCheckWithContext(ctx context.Context, request *St
     if request == nil {
         request = NewStartMigrationCheckRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "StartMigrationCheck")
     
     if c.GetCredential() == nil {
         return nil, errors.New("StartMigrationCheck require credential")
@@ -9042,6 +9978,7 @@ func (c *Client) StopMigrationWithContext(ctx context.Context, request *StopMigr
     if request == nil {
         request = NewStopMigrationRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "StopMigration")
     
     if c.GetCredential() == nil {
         return nil, errors.New("StopMigration require credential")
@@ -9097,6 +10034,7 @@ func (c *Client) SwitchCloudInstanceHAWithContext(ctx context.Context, request *
     if request == nil {
         request = NewSwitchCloudInstanceHARequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "SwitchCloudInstanceHA")
     
     if c.GetCredential() == nil {
         return nil, errors.New("SwitchCloudInstanceHA require credential")
@@ -9152,6 +10090,7 @@ func (c *Client) TerminateDBInstanceWithContext(ctx context.Context, request *Te
     if request == nil {
         request = NewTerminateDBInstanceRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "TerminateDBInstance")
     
     if c.GetCredential() == nil {
         return nil, errors.New("TerminateDBInstance require credential")
@@ -9196,6 +10135,7 @@ func NewUpgradeDBInstanceResponse() (response *UpgradeDBInstanceResponse) {
 //  INVALIDPARAMETER_PARAMSASSERTFAILED = "InvalidParameter.ParamsAssertFailed"
 //  INVALIDPARAMETER_PAYORDERFAILED = "InvalidParameter.PayOrderFailed"
 //  INVALIDPARAMETERVALUE_ILLEGALSPEC = "InvalidParameterValue.IllegalSpec"
+//  INVALIDPARAMETERVALUE_PARAMETERTYPEERROR = "InvalidParameterValue.ParameterTypeError"
 //  RESOURCENOTFOUND_INSTANCENOTFOUND = "ResourceNotFound.InstanceNotFound"
 //  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
 func (c *Client) UpgradeDBInstance(request *UpgradeDBInstanceRequest) (response *UpgradeDBInstanceResponse, err error) {
@@ -9215,12 +10155,14 @@ func (c *Client) UpgradeDBInstance(request *UpgradeDBInstanceRequest) (response 
 //  INVALIDPARAMETER_PARAMSASSERTFAILED = "InvalidParameter.ParamsAssertFailed"
 //  INVALIDPARAMETER_PAYORDERFAILED = "InvalidParameter.PayOrderFailed"
 //  INVALIDPARAMETERVALUE_ILLEGALSPEC = "InvalidParameterValue.IllegalSpec"
+//  INVALIDPARAMETERVALUE_PARAMETERTYPEERROR = "InvalidParameterValue.ParameterTypeError"
 //  RESOURCENOTFOUND_INSTANCENOTFOUND = "ResourceNotFound.InstanceNotFound"
 //  UNAUTHORIZEDOPERATION_PERMISSIONDENIED = "UnauthorizedOperation.PermissionDenied"
 func (c *Client) UpgradeDBInstanceWithContext(ctx context.Context, request *UpgradeDBInstanceRequest) (response *UpgradeDBInstanceResponse, err error) {
     if request == nil {
         request = NewUpgradeDBInstanceRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "sqlserver", APIVersion, "UpgradeDBInstance")
     
     if c.GetCredential() == nil {
         return nil, errors.New("UpgradeDBInstance require credential")

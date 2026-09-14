@@ -6,20 +6,19 @@ import (
 	"fmt"
 	"log"
 	"math"
-	"net"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
+	tchttp "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/http"
 	cvm "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cvm/v20170312"
 
 	tccommon "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/common"
 	"github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/internal/helper"
 	svcas "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/services/as"
 	svccvm "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/services/cvm"
-	svctag "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/services/tag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -63,9 +62,8 @@ func resourceTencentCloudKubernetesClusterCreatePostFillRequest0(ctx context.Con
 	}
 
 	_, workerConfigOk := d.GetOk("worker_config")
-	if !workerConfigOk && (clusterInternet || clusterIntranet) {
-		return fmt.Errorf("when creating a cluster, if `cluster_internet` or `cluster_intranet` is true, " +
-			"you need to configure the `worker_config` field to ensure that there are available nodes in the cluster")
+	if !workerConfigOk && clusterInternet {
+		return fmt.Errorf("when creating a cluster, if `cluster_internet` is true, you need to configure the `worker_config` field to ensure that there are available nodes in the cluster.")
 	}
 
 	vpcId := d.Get("vpc_id").(string)
@@ -273,7 +271,7 @@ func resourceTencentCloudKubernetesClusterCreatePostFillRequest0(ctx context.Con
 	// ExistedInstancesForNode
 	existInstances := make([]*tke.ExistedInstancesForNode, 0)
 	if instances, ok := d.GetOk("exist_instance"); ok {
-		instanceList := instances.([]interface{})
+		instanceList := instances.(*schema.Set).List()
 		for index := range instanceList {
 			instance := instanceList[index].(map[string]interface{})
 			existedInstance, _ := tkeGetCvmExistInstancesPara(instance)
@@ -416,7 +414,7 @@ func resourceTencentCloudKubernetesClusterCreatePostHandleResponse0(ctx context.
 	//intranet
 	if clusterIntranet {
 		err = resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
-			inErr := service.CreateClusterEndpoint(ctx, id, intranetSubnetId, clusterInternetSecurityGroup, false, clusterIntranetDomain, "")
+			inErr := service.CreateClusterEndpoint(ctx, id, intranetSubnetId, clusterInternetSecurityGroup, false, clusterIntranetDomain, "", "")
 			if inErr != nil {
 				return tccommon.RetryError(inErr)
 			}
@@ -425,21 +423,21 @@ func resourceTencentCloudKubernetesClusterCreatePostHandleResponse0(ctx context.
 		if err != nil {
 			return err
 		}
-		err = resource.Retry(2*tccommon.ReadRetryTimeout, func() *resource.RetryError {
+
+		finishStates := []string{TkeInternetStatusNotfound, TkeInternetStatusCreated}
+		err = resource.Retry(10*tccommon.ReadRetryTimeout, func() *resource.RetryError {
 			status, message, inErr := service.DescribeClusterEndpointStatus(ctx, id, false)
 			if inErr != nil {
 				return tccommon.RetryError(inErr)
 			}
-			if status == TkeInternetStatusCreating {
-				return resource.RetryableError(
-					fmt.Errorf("%s create intranet cluster endpoint status still is %s", id, status))
-			}
-			if status == TkeInternetStatusNotfound || status == TkeInternetStatusCreated {
+
+			if tccommon.IsContains(finishStates, status) {
 				return nil
 			}
-			return resource.NonRetryableError(
-				fmt.Errorf("%s create intranet cluster endpoint error ,status is %s,message is %s", id, status, message))
+
+			return resource.RetryableError(fmt.Errorf("%s create cluster intranet endpoint status is %s, message is %s. retry...", id, status, message))
 		})
+
 		if err != nil {
 			return err
 		}
@@ -447,7 +445,7 @@ func resourceTencentCloudKubernetesClusterCreatePostHandleResponse0(ctx context.
 
 	if clusterInternet {
 		err = resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
-			inErr := service.CreateClusterEndpoint(ctx, id, "", clusterInternetSecurityGroup, true, clusterInternetDomain, "")
+			inErr := service.CreateClusterEndpoint(ctx, id, "", clusterInternetSecurityGroup, true, clusterInternetDomain, "", "")
 			if inErr != nil {
 				return tccommon.RetryError(inErr)
 			}
@@ -456,27 +454,27 @@ func resourceTencentCloudKubernetesClusterCreatePostHandleResponse0(ctx context.
 		if err != nil {
 			return err
 		}
-		err = resource.Retry(2*tccommon.ReadRetryTimeout, func() *resource.RetryError {
+
+		finishStates := []string{TkeInternetStatusNotfound, TkeInternetStatusCreated}
+		err = resource.Retry(10*tccommon.ReadRetryTimeout, func() *resource.RetryError {
 			status, message, inErr := service.DescribeClusterEndpointStatus(ctx, id, true)
 			if inErr != nil {
 				return tccommon.RetryError(inErr)
 			}
-			if status == TkeInternetStatusCreating {
-				return resource.RetryableError(
-					fmt.Errorf("%s create cluster internet endpoint status still is %s", id, status))
-			}
-			if status == TkeInternetStatusNotfound || status == TkeInternetStatusCreated {
+
+			if tccommon.IsContains(finishStates, status) {
 				return nil
 			}
-			return resource.NonRetryableError(
-				fmt.Errorf("%s create cluster internet endpoint error ,status is %s,message is %s", id, status, message))
+
+			return resource.RetryableError(fmt.Errorf("%s create cluster internet endpoint status is %s, message is %s. retry...", id, status, message))
 		})
+
 		if err != nil {
 			return err
 		}
 	}
 
-	//Modify node pool global config
+	//Modify node pool global config(sync)
 	if _, ok := d.GetOk("node_pool_global_config"); ok {
 		request := tkeGetNodePoolGlobalConfig(d)
 		request.ClusterId = &id
@@ -492,20 +490,45 @@ func resourceTencentCloudKubernetesClusterCreatePostHandleResponse0(ctx context.
 		}
 	}
 
+	// sync
 	if v, ok := d.GetOk("acquire_cluster_admin_role"); ok && v.(bool) {
-		err := service.AcquireClusterAdminRole(ctx, id)
+		_, err := service.AcquireClusterAdminRole(ctx, id)
 		if err != nil {
 			return err
 		}
 	}
 
+	// async
 	if _, ok := d.GetOk("auth_options"); ok {
-		request := tkeGetAuthOptions(d)
+		request := tkeGetAuthOptions(d, id)
 		if err := service.ModifyClusterAuthenticationOptions(ctx, request); err != nil {
+			return err
+		}
+
+		// wait
+		err = resource.Retry(3*tccommon.ReadRetryTimeout, func() *resource.RetryError {
+			resp, inErr := service.DescribeKubernetesAuthAttachmentById(ctx, id)
+			if inErr != nil {
+				return tccommon.RetryError(inErr)
+			}
+
+			if resp == nil {
+				return resource.NonRetryableError(fmt.Errorf("Describe cluster aauthentication options failed, Response is nil."))
+			}
+
+			if resp.LatestOperationState != nil || *resp.LatestOperationState == "Success" {
+				return nil
+			}
+
+			return resource.RetryableError(fmt.Errorf("Modify auth options running..."))
+		})
+
+		if err != nil {
 			return err
 		}
 	}
 
+	// async
 	if v, ok := helper.InterfacesHeadMap(d, "log_agent"); ok {
 		enabled := v["enabled"].(bool)
 		rootDir := v["kubelet_root_dir"].(string)
@@ -515,15 +538,62 @@ func resourceTencentCloudKubernetesClusterCreatePostHandleResponse0(ctx context.
 			if err != nil {
 				return err
 			}
+
+			// wait
+			err = resource.Retry(3*tccommon.ReadRetryTimeout, func() *resource.RetryError {
+				resp, inErr := service.DescribeLogSwitches(ctx, id)
+				if inErr != nil {
+					return tccommon.RetryError(inErr)
+				}
+
+				if resp == nil || len(resp) < 1 {
+					return resource.NonRetryableError(fmt.Errorf("Describe log switches failed, Response is nil."))
+				}
+
+				ret := resp[0]
+				if ret.Log != nil && ret.Log.Status != nil && *ret.Log.Status == "opened" {
+					return nil
+				}
+
+				return resource.RetryableError(fmt.Errorf("Modify log agent running..."))
+			})
+
+			if err != nil {
+				return err
+			}
 		}
 	}
 
+	// async
 	if v, ok := helper.InterfacesHeadMap(d, "event_persistence"); ok {
 		enabled := v["enabled"].(bool)
 		logSetId := v["log_set_id"].(string)
 		topicId := v["topic_id"].(string)
 		if enabled {
 			err := service.SwitchEventPersistence(ctx, id, logSetId, topicId, enabled, false)
+			if err != nil {
+				return err
+			}
+
+			// wait
+			err = resource.Retry(3*tccommon.ReadRetryTimeout, func() *resource.RetryError {
+				resp, inErr := service.DescribeLogSwitches(ctx, id)
+				if inErr != nil {
+					return tccommon.RetryError(inErr)
+				}
+
+				if resp == nil || len(resp) < 1 {
+					return resource.NonRetryableError(fmt.Errorf("Describe event persistence failed, Response is nil."))
+				}
+
+				ret := resp[0]
+				if ret.Event != nil && ret.Event.Status != nil && *ret.Event.Status == "opened" {
+					return nil
+				}
+
+				return resource.RetryableError(fmt.Errorf("Modify event persistence running..."))
+			})
+
 			if err != nil {
 				return err
 			}
@@ -536,6 +606,29 @@ func resourceTencentCloudKubernetesClusterCreatePostHandleResponse0(ctx context.
 		topicId := v["topic_id"].(string)
 		if enabled {
 			err := service.SwitchClusterAudit(ctx, id, logSetId, topicId, enabled, false)
+			if err != nil {
+				return err
+			}
+
+			// wait
+			err = resource.Retry(3*tccommon.ReadRetryTimeout, func() *resource.RetryError {
+				resp, inErr := service.DescribeLogSwitches(ctx, id)
+				if inErr != nil {
+					return tccommon.RetryError(inErr)
+				}
+
+				if resp == nil || len(resp) < 1 {
+					return resource.NonRetryableError(fmt.Errorf("Describe cluster audit failed, Response is nil."))
+				}
+
+				ret := resp[0]
+				if ret.Audit != nil && ret.Audit.Status != nil && *ret.Audit.Status == "opened" {
+					return nil
+				}
+
+				return resource.RetryableError(fmt.Errorf("Modify cluster audit running..."))
+			})
+
 			if err != nil {
 				return err
 			}
@@ -557,6 +650,7 @@ func resourceTencentCloudKubernetesClusterReadPostHandleResponse0(ctx context.Co
 	if cluster.ClusterNetworkSettings != nil {
 		clusterInfo.KubeProxyMode = helper.PString(cluster.ClusterNetworkSettings.KubeProxyMode)
 		clusterInfo.ServiceCIDR = helper.PString(cluster.ClusterNetworkSettings.ServiceCIDR)
+		clusterInfo.IsDualStack = helper.PBool(cluster.ClusterNetworkSettings.IsDualStack)
 	}
 	clusterInfo.ContainerRuntime = helper.PString(cluster.ContainerRuntime)
 	clusterInfo.OsCustomizeType = helper.PString(cluster.OsCustomizeType)
@@ -593,6 +687,11 @@ func resourceTencentCloudKubernetesClusterReadPostHandleResponse0(ctx context.Co
 		newOs = oldOs
 	}
 	_ = d.Set("cluster_os", newOs)
+	// When ImageId is not empty, cluster_os is ImageId. When ImageId is empty, cluster_os displays ClusterOs
+	if cluster.ImageId != nil && *cluster.ImageId != "" {
+		_ = d.Set("cluster_os", *cluster.ImageId)
+	}
+
 	_ = d.Set("tags", clusterInfo.Tags)
 
 	_ = d.Set("vpc_cni_type", clusterInfo.VpcCniType)
@@ -705,6 +804,7 @@ func resourceTencentCloudKubernetesClusterReadPostHandleResponse0(ctx context.Co
 	}
 
 	if importClsFlag {
+		_ = d.Set("is_dual_stack", clusterInfo.IsDualStack)
 		networkType, _ := data["NetworkType"].(string)
 		_ = d.Set("network_type", networkType)
 
@@ -768,43 +868,6 @@ func resourceTencentCloudKubernetesClusterReadPostHandleResponse0(ctx context.Co
 			_ = d.Set("cluster_audit", audits)
 		}
 
-		applist, err := service.DescribeExtensionAddonList(ctx, d.Id())
-		if err != nil {
-			return err
-		}
-		addons := make([]map[string]interface{}, 0)
-		for _, item := range applist.Items {
-			if item.Status.Phase == "Succeeded" && item.Labels["application.tkestack.io/type"] == "internal-addon" {
-				addonParam := AddonRequestBody{
-					Kind: helper.String("App"),
-					Spec: &AddonSpec{
-						Chart: &AddonSpecChart{
-							ChartName:    item.Spec.Chart.ChartName,
-							ChartVersion: item.Spec.Chart.ChartVersion,
-						},
-						Values: &AddonSpecValues{
-							Values:        item.Spec.Values.Values,
-							RawValues:     item.Spec.Values.RawValues,
-							RawValuesType: item.Spec.Values.RawValuesType,
-						},
-					},
-				}
-				result, err := json.Marshal(addonParam)
-				if err != nil {
-					return err
-				}
-
-				addon := map[string]interface{}{
-					"name":  item.Name,
-					"param": string(result),
-				}
-				addons = append(addons, addon)
-			}
-		}
-		if len(addons) > 0 {
-			_ = d.Set("extension_addon", addons)
-		}
-
 		resp, err := service.DescribeClusterExtraArgs(ctx, d.Id())
 		if err != nil {
 			return err
@@ -836,7 +899,12 @@ func resourceTencentCloudKubernetesClusterReadPostHandleResponse0(ctx context.Co
 			}
 			_ = d.Set("cluster_subnet_id", resp.SubnetId)
 		}
+
 		if networkType == TKE_CLUSTER_NETWORK_TYPE_VPC_CNI {
+			if cluster.ClusterNetworkSettings != nil && cluster.ClusterNetworkSettings.SubnetId != nil {
+				_ = d.Set("cluster_subnet_id", cluster.ClusterNetworkSettings.SubnetId)
+			}
+
 			resp, err := service.DescribeIPAMD(ctx, d.Id())
 			if err != nil {
 				return err
@@ -862,10 +930,12 @@ func resourceTencentCloudKubernetesClusterReadPostHandleResponse0(ctx context.Co
 				authOptions := make(map[string]interface{}, 0)
 				if helper.PBool(options.UseTKEDefault) {
 					authOptions["use_tke_default"] = helper.PBool(options.UseTKEDefault)
-				} else {
-					authOptions["jwks_uri"] = helper.PString(options.JWKSURI)
-					authOptions["issuer"] = helper.PString(options.Issuer)
 				}
+				// Always read back issuer and jwks_uri from the API so that users can
+				// see the auto-generated values when use_tke_default=true. These fields
+				// are Optional+Computed, so reading them back does not produce drift.
+				authOptions["jwks_uri"] = helper.PString(options.JWKSURI)
+				authOptions["issuer"] = helper.PString(options.Issuer)
 				authOptions["auto_create_discovery_anonymous_auth"] = helper.PBool(options.AutoCreateDiscoveryAnonymousAuth)
 				_ = d.Set("auth_options", []map[string]interface{}{authOptions})
 			}
@@ -1066,21 +1136,11 @@ func resourceTencentCloudKubernetesClusterUpdatePostHandleResponse1(ctx context.
 			return resource.RetryableError(fmt.Errorf("cluster %s status %s, retry...", id, ins.ClusterStatus))
 		}
 	})
+
 	if err != nil {
 		return err
 	}
 
-	// upgrade instances version
-	upgrade := false
-	if v, ok := d.GetOk("upgrade_instances_follow_cluster"); ok {
-		upgrade = v.(bool)
-	}
-	if upgrade {
-		err = upgradeClusterInstances(tkeService, ctx, id)
-		if err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
@@ -1172,10 +1232,7 @@ func resourceTencentCloudKubernetesClusterUpdateOnStart(ctx context.Context) err
 	d := tccommon.ResourceDataFromContext(ctx)
 	meta := tccommon.ProviderMetaFromContext(ctx)
 
-	client := meta.(tccommon.ProviderMeta).GetAPIV3Conn()
-	service := svctag.NewTagService(client)
 	tkeService := TkeService{client: meta.(tccommon.ProviderMeta).GetAPIV3Conn()}
-	region := client.Region
 
 	d.Partial(true)
 	id := d.Id()
@@ -1185,11 +1242,25 @@ func resourceTencentCloudKubernetesClusterUpdateOnStart(ctx context.Context) err
 	}
 
 	if d.HasChange("tags") {
-		oldTags, newTags := d.GetChange("tags")
-		replaceTags, deleteTags := svctag.DiffTags(oldTags.(map[string]interface{}), newTags.(map[string]interface{}))
+		if err := modifyClusterTags(ctx); err != nil {
+			return err
+		}
 
-		resourceName := tccommon.BuildTagResourceName("ccs", "cluster", region, id)
-		if err := service.ModifyTags(ctx, resourceName, replaceTags, deleteTags); err != nil {
+		// wait for tags ok
+		err := resource.Retry(5*tccommon.ReadRetryTimeout, func() *resource.RetryError {
+			request := tke.NewDescribeBatchModifyTagsStatusRequest()
+			request.ClusterId = &id
+			resp, errRet := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseTkeClient().DescribeBatchModifyTagsStatus(request)
+			if errRet != nil {
+				return tccommon.RetryError(errRet, tccommon.InternalError)
+			}
+			// TaskFailed = "failed"; TaskRunning = "running"; TaskDone = "done"
+			if resp != nil && *resp.Response.Status == "done" {
+				return nil
+			}
+			return resource.RetryableError(fmt.Errorf("modify tags status is %s, retry...", *resp.Response.Status))
+		})
+		if err != nil {
 			return err
 		}
 
@@ -1225,7 +1296,6 @@ func resourceTencentCloudKubernetesClusterUpdateOnStart(ctx context.Context) err
 		if err := ModifyClusterInternetOrIntranetAccess(ctx, d, &tkeService, TKE_CLUSTER_INTRANET, clusterIntranet, clusterInternetSecurityGroup, intranetSubnetId, clusterIntranetDomain); err != nil {
 			return err
 		}
-
 	}
 
 	if d.HasChange("cluster_internet") {
@@ -1381,7 +1451,7 @@ func resourceTencentCloudKubernetesClusterUpdateOnExit(ctx context.Context) erro
 	id := d.Id()
 
 	if d.HasChange("auth_options") {
-		request := tkeGetAuthOptions(d)
+		request := tkeGetAuthOptions(d, id)
 		err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
 			inErr := tkeService.ModifyClusterAuthenticationOptions(ctx, request)
 			if inErr != nil {
@@ -1411,7 +1481,7 @@ func resourceTencentCloudKubernetesClusterUpdateOnExit(ctx context.Context) erro
 		if o.(bool) && !n.(bool) {
 			return fmt.Errorf("argument `acquire_cluster_admin_role` cannot set to false")
 		}
-		err := tkeService.AcquireClusterAdminRole(ctx, id)
+		_, err := tkeService.AcquireClusterAdminRole(ctx, id)
 		if err != nil {
 			return err
 		}
@@ -1469,55 +1539,6 @@ func resourceTencentCloudKubernetesClusterUpdateOnExit(ctx context.Context) erro
 		}
 	}
 
-	if d.HasChange("extension_addon") {
-		o, n := d.GetChange("extension_addon")
-		adds, removes, changes := ResourceTkeGetAddonsDiffs(o.([]interface{}), n.([]interface{}))
-		updates := append(adds, changes...)
-		for i := range updates {
-			var err error
-			addon := updates[i].(map[string]interface{})
-			param := addon["param"].(string)
-			name, err := tkeService.GetAddonNameFromJson(param)
-			if err != nil {
-				return err
-			}
-			_, has, _ := tkeService.PollingAddonsPhase(ctx, id, name, nil)
-			if has {
-				err = tkeService.UpdateExtensionAddon(ctx, id, name, param)
-			} else {
-				err = tkeService.CreateExtensionAddon(ctx, id, param)
-			}
-			if err != nil {
-				return err
-			}
-			_, _, err = tkeService.PollingAddonsPhase(ctx, id, name, nil)
-			if err != nil {
-				return err
-			}
-		}
-
-		for i := range removes {
-			addon := removes[i].(map[string]interface{})
-			param := addon["param"].(string)
-			name, err := tkeService.GetAddonNameFromJson(param)
-			if err != nil {
-				return err
-			}
-			_, has, _ := tkeService.PollingAddonsPhase(ctx, id, name, nil)
-			if !has {
-				continue
-			}
-			err = tkeService.DeleteExtensionAddon(ctx, id, name)
-			if err != nil {
-				return err
-			}
-			_, has, _ = tkeService.PollingAddonsPhase(ctx, id, name, nil)
-			if has {
-				return fmt.Errorf("addon %s still exists", name)
-			}
-		}
-
-	}
 	d.Partial(false)
 	return nil
 }
@@ -1536,74 +1557,6 @@ func dockerGraphPathDiffSuppressFunc(k, oldValue, newValue string, d *schema.Res
 	} else {
 		return oldValue == newValue
 	}
-}
-
-func clusterCidrValidateFunc(v interface{}, k string) (ws []string, errs []error) {
-	value := v.(string)
-	if value == "" {
-		return
-	}
-	_, ipnet, err := net.ParseCIDR(value)
-	if err != nil {
-		errs = append(errs, fmt.Errorf("%q must contain a valid CIDR, got error parsing: %s", k, err))
-		return
-	}
-	if ipnet == nil || value != ipnet.String() {
-		errs = append(errs, fmt.Errorf("%q must contain a valid network CIDR, expected %q, got %q", k, ipnet, value))
-		return
-	}
-	if !strings.Contains(value, "/") {
-		errs = append(errs, fmt.Errorf("%q must be a network segment", k))
-		return
-	}
-	if !strings.HasPrefix(value, "9.") && !strings.HasPrefix(value, "10.") && !strings.HasPrefix(value, "192.168.") && !strings.HasPrefix(value, "172.") {
-		errs = append(errs, fmt.Errorf("%q must in 9. | 10. | 192.168. | 172.[16-31]", k))
-		return
-	}
-
-	if strings.HasPrefix(value, "172.") {
-		nextNo := strings.Split(value, ".")[1]
-		no, _ := strconv.ParseInt(nextNo, 10, 64)
-		if no < 16 || no > 31 {
-			errs = append(errs, fmt.Errorf("%q must in 9.0 | 10. | 192.168. | 172.[16-31]", k))
-			return
-		}
-	}
-	return
-}
-
-func serviceCidrValidateFunc(v interface{}, k string) (ws []string, errs []error) {
-	value := v.(string)
-	if value == "" {
-		return
-	}
-	_, ipnet, err := net.ParseCIDR(value)
-	if err != nil {
-		errs = append(errs, fmt.Errorf("%q must contain a valid CIDR, got error parsing: %s", k, err))
-		return
-	}
-	if ipnet == nil || value != ipnet.String() {
-		errs = append(errs, fmt.Errorf("%q must contain a valid network CIDR, expected %q, got %q", k, ipnet, value))
-		return
-	}
-	if !strings.Contains(value, "/") {
-		errs = append(errs, fmt.Errorf("%q must be a network segment", k))
-		return
-	}
-	if !strings.HasPrefix(value, "9.") && !strings.HasPrefix(value, "10.") && !strings.HasPrefix(value, "192.168.") && !strings.HasPrefix(value, "172.") {
-		errs = append(errs, fmt.Errorf("%q must in 9. | 10. | 192.168. | 172.[16-31]", k))
-		return
-	}
-
-	if strings.HasPrefix(value, "172.") {
-		nextNo := strings.Split(value, ".")[1]
-		no, _ := strconv.ParseInt(nextNo, 10, 64)
-		if no < 16 || no > 31 {
-			errs = append(errs, fmt.Errorf("%q must in 9. | 10. | 192.168. | 172.[16-31]", k))
-			return
-		}
-	}
-	return
 }
 
 func claimExpiredSecondsValidateFunc(v interface{}, k string) (ws []string, errs []error) {
@@ -1638,6 +1591,39 @@ func ResourceTkeGetAddonsDiffs(o, n []interface{}) (adds, removes, changes []int
 
 	changes = fullIndexedKeeps.Difference(fullIndexedOlds).List()
 	return
+}
+
+func modifyClusterTags(ctx context.Context) error {
+	d := tccommon.ResourceDataFromContext(ctx)
+	meta := tccommon.ProviderMetaFromContext(ctx)
+	logId := tccommon.GetLogId(ctx)
+
+	id := d.Id()
+	tags := GetTkeTags(d, "tags")
+	body := map[string]interface{}{
+		"ClusterId":       id,
+		"SyncSubresource": false,
+		"Tags":            tags,
+	}
+
+	client := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseOmitNilClient("tke")
+	request := tchttp.NewCommonRequest("tke", "2018-05-25", "ModifyClusterTags")
+	err := request.SetActionParameters(body)
+	if err != nil {
+		return err
+	}
+
+	response := tchttp.NewCommonResponse()
+	err = client.Send(request, response)
+	if err != nil {
+		fmt.Printf("Modify Cluster Tags failed: %v \n", err)
+		return err
+	}
+	reqBody, _ := request.MarshalJSON()
+	respBody := response.GetBody()
+
+	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), string(reqBody), string(respBody))
+	return nil
 }
 
 // upgradeClusterInstances upgrade instances, upgrade type try seq:major, hot.
@@ -1835,8 +1821,9 @@ func tkeGetCvmRunInstancesPara(dMap map[string]interface{}, meta interface{},
 		if len(keyIds) != 0 {
 			request.LoginSettings.KeyIds = make([]*string, 0, len(keyIds))
 			for i := range keyIds {
-				keyId := keyIds[i].(string)
-				request.LoginSettings.KeyIds = append(request.LoginSettings.KeyIds, &keyId)
+				if keyId, ok := keyIds[i].(string); ok && keyId != "" {
+					request.LoginSettings.KeyIds = append(request.LoginSettings.KeyIds, &keyId)
+				}
 			}
 		}
 	}
@@ -1855,8 +1842,9 @@ func tkeGetCvmRunInstancesPara(dMap map[string]interface{}, meta interface{},
 		securityGroups := v.([]interface{})
 		request.SecurityGroupIds = make([]*string, 0, len(securityGroups))
 		for i := range securityGroups {
-			securityGroup := securityGroups[i].(string)
-			request.SecurityGroupIds = append(request.SecurityGroupIds, &securityGroup)
+			if securityGroup, ok := securityGroups[i].(string); ok && securityGroup != "" {
+				request.SecurityGroupIds = append(request.SecurityGroupIds, &securityGroup)
+			}
 		}
 	}
 
@@ -1864,8 +1852,9 @@ func tkeGetCvmRunInstancesPara(dMap map[string]interface{}, meta interface{},
 		disasterGroups := v.([]interface{})
 		request.DisasterRecoverGroupIds = make([]*string, 0, len(disasterGroups))
 		for i := range disasterGroups {
-			disasterGroup := disasterGroups[i].(string)
-			request.DisasterRecoverGroupIds = append(request.DisasterRecoverGroupIds, &disasterGroup)
+			if disasterGroup, ok := disasterGroups[i].(string); ok && disasterGroup != "" {
+				request.DisasterRecoverGroupIds = append(request.DisasterRecoverGroupIds, &disasterGroup)
+			}
 		}
 	}
 
@@ -1895,7 +1884,7 @@ func tkeGetCvmRunInstancesPara(dMap map[string]interface{}, meta interface{},
 	if v, ok := dMap["instance_charge_type"]; ok {
 		instanceChargeType := v.(string)
 		request.InstanceChargeType = &instanceChargeType
-		if instanceChargeType == svccvm.CVM_CHARGE_TYPE_PREPAID {
+		if instanceChargeType == svccvm.CVM_CHARGE_TYPE_PREPAID || instanceChargeType == svccvm.CVM_CHARGE_TYPE_UNDERWRITE {
 			request.InstanceChargePrepaid = &cvm.InstanceChargePrepaid{}
 			if period, ok := dMap["instance_charge_type_prepaid_period"]; ok {
 				periodInt64 := int64(period.(int))
@@ -1905,8 +1894,8 @@ func tkeGetCvmRunInstancesPara(dMap map[string]interface{}, meta interface{},
 					instanceChargeType)
 				return
 			}
-			if renewFlag, ok := dMap["instance_charge_type_prepaid_renew_flag"]; ok {
-				request.InstanceChargePrepaid.RenewFlag = helper.String(renewFlag.(string))
+			if renewFlag, ok := dMap["instance_charge_type_prepaid_renew_flag"].(string); ok && renewFlag != "" {
+				request.InstanceChargePrepaid.RenewFlag = helper.String(renewFlag)
 			}
 		}
 	}
@@ -1932,6 +1921,30 @@ func tkeGetCvmRunInstancesPara(dMap map[string]interface{}, meta interface{},
 		request.HpcClusterId = helper.String(v.(string))
 	}
 
+	if v, ok := dMap["tags"].([]interface{}); ok && len(v) != 0 {
+		tmpTagSpec := cvm.TagSpecification{}
+		tmpTagSpec.ResourceType = helper.String("instance")
+		for _, item := range v {
+			value := item.(map[string]interface{})
+			tmpTag := cvm.Tag{}
+			if v, ok := value["key"].(string); ok && v != "" {
+				tmpTag.Key = &v
+			}
+
+			if v, ok := value["value"].(string); ok && v != "" {
+				tmpTag.Value = &v
+			}
+
+			tmpTagSpec.Tags = append(tmpTagSpec.Tags, &tmpTag)
+		}
+
+		request.TagSpecification = append(request.TagSpecification, &tmpTagSpec)
+	}
+
+	if v, ok := dMap["cdc_id"]; ok && v.(string) != "" {
+		request.DedicatedClusterId = helper.String(v.(string))
+	}
+
 	cvmJson = request.ToJsonString()
 
 	cvmJson = strings.Replace(cvmJson, `"Password":"",`, "", -1)
@@ -1940,31 +1953,232 @@ func tkeGetCvmRunInstancesPara(dMap map[string]interface{}, meta interface{},
 }
 
 func tkeGetCvmExistInstancesPara(dMap map[string]interface{}) (tke.ExistedInstancesForNode, error) {
-
 	inst := tke.ExistedInstancesForNode{}
+	if temp, ok := dMap["node_role"]; ok {
+		nodeRole := temp.(string)
+		inst.NodeRole = &nodeRole
+	}
 
 	if temp, ok := dMap["instances_para"]; ok {
 		paras := temp.([]interface{})
 		if len(paras) > 0 {
 			paraMap := paras[0].(map[string]interface{})
-			instanceIds := paraMap["instance_ids"].([]interface{})
 			inst.ExistedInstancesPara = &tke.ExistedInstancesPara{}
-			inst.ExistedInstancesPara.InstanceIds = make([]*string, 0)
-			for _, v := range instanceIds {
-				inst.ExistedInstancesPara.InstanceIds = append(inst.ExistedInstancesPara.InstanceIds, helper.String(v.(string)))
+			loginSettings := &tke.LoginSettings{}
+			enhancedService := &tke.EnhancedService{}
+
+			if v, ok := paraMap["instance_ids"]; ok && len(v.([]interface{})) > 0 {
+				insIDs := v.([]interface{})
+				inst.ExistedInstancesPara.InstanceIds = make([]*string, 0, len(insIDs))
+				for _, v := range insIDs {
+					inst.ExistedInstancesPara.InstanceIds = append(inst.ExistedInstancesPara.InstanceIds, helper.String(v.(string)))
+				}
+			}
+
+			if v, ok := paraMap["security_group_ids"]; ok && len(v.([]interface{})) > 0 {
+				sgIds := v.([]interface{})
+				inst.ExistedInstancesPara.SecurityGroupIds = make([]*string, 0, len(sgIds))
+				for i := range sgIds {
+					if sgId, ok := sgIds[i].(string); ok && sgId != "" {
+						inst.ExistedInstancesPara.SecurityGroupIds = append(inst.ExistedInstancesPara.SecurityGroupIds, &sgId)
+					}
+				}
+			}
+
+			if v, ok := paraMap["password"]; ok {
+				loginSettings.Password = helper.String(v.(string))
+				inst.ExistedInstancesPara.LoginSettings = loginSettings
+			}
+
+			if v, ok := paraMap["key_ids"]; ok && len(v.([]interface{})) > 0 {
+				keyIds := v.([]interface{})
+				loginSettings.KeyIds = make([]*string, 0, len(keyIds))
+				for i := range keyIds {
+					if keyId, ok := keyIds[i].(string); ok && keyId != "" {
+						loginSettings.KeyIds = append(loginSettings.KeyIds, &keyId)
+					}
+				}
+
+				inst.ExistedInstancesPara.LoginSettings = loginSettings
+			}
+
+			if v, ok := paraMap["enhanced_security_service"]; ok {
+				enhancedService.SecurityService = &tke.RunSecurityServiceEnabled{Enabled: helper.Bool(v.(bool))}
+				inst.ExistedInstancesPara.EnhancedService = enhancedService
+			}
+
+			if v, ok := paraMap["enhanced_monitor_service"]; ok {
+				enhancedService.MonitorService = &tke.RunMonitorServiceEnabled{Enabled: helper.Bool(v.(bool))}
+				inst.ExistedInstancesPara.EnhancedService = enhancedService
+			}
+
+			if v, ok := paraMap["master_config"]; ok && len(v.([]interface{})) > 0 {
+				for _, item := range v.([]interface{}) {
+					instanceAdvancedSettingsOverridesMap := item.(map[string]interface{})
+					instanceAdvancedSettings := tke.InstanceAdvancedSettings{}
+					if v, ok := instanceAdvancedSettingsOverridesMap["mount_target"]; ok {
+						instanceAdvancedSettings.MountTarget = helper.String(v.(string))
+					}
+
+					if v, ok := instanceAdvancedSettingsOverridesMap["docker_graph_path"]; ok {
+						instanceAdvancedSettings.DockerGraphPath = helper.String(v.(string))
+					}
+
+					if v, ok := instanceAdvancedSettingsOverridesMap["user_script"]; ok {
+						instanceAdvancedSettings.UserScript = helper.String(v.(string))
+					}
+
+					if v, ok := instanceAdvancedSettingsOverridesMap["unschedulable"]; ok {
+						instanceAdvancedSettings.Unschedulable = helper.IntInt64(v.(int))
+					}
+
+					if v, ok := instanceAdvancedSettingsOverridesMap["labels"]; ok && len(v.([]interface{})) > 0 {
+						for _, item := range v.([]interface{}) {
+							labelsMap := item.(map[string]interface{})
+							labels := tke.Label{}
+							if v, ok := labelsMap["name"]; ok {
+								labels.Name = helper.String(v.(string))
+							}
+
+							if v, ok := labelsMap["value"]; ok {
+								labels.Value = helper.String(v.(string))
+							}
+
+							instanceAdvancedSettings.Labels = append(instanceAdvancedSettings.Labels, &labels)
+						}
+					}
+
+					if v, ok := instanceAdvancedSettingsOverridesMap["data_disk"]; ok && len(v.([]interface{})) > 0 {
+						for _, item := range v.([]interface{}) {
+							dataDisksMap := item.(map[string]interface{})
+							dataDisk := tke.DataDisk{}
+							if v, ok := dataDisksMap["disk_type"]; ok {
+								dataDisk.DiskType = helper.String(v.(string))
+							}
+
+							if v, ok := dataDisksMap["file_system"]; ok {
+								dataDisk.FileSystem = helper.String(v.(string))
+							}
+
+							if v, ok := dataDisksMap["disk_size"]; ok {
+								dataDisk.DiskSize = helper.IntInt64(v.(int))
+							}
+
+							if v, ok := dataDisksMap["auto_format_and_mount"]; ok {
+								dataDisk.AutoFormatAndMount = helper.Bool(v.(bool))
+							}
+
+							if v, ok := dataDisksMap["mount_target"]; ok {
+								dataDisk.MountTarget = helper.String(v.(string))
+							}
+
+							if v, ok := dataDisksMap["disk_partition"]; ok {
+								dataDisk.DiskPartition = helper.String(v.(string))
+							}
+
+							instanceAdvancedSettings.DataDisks = append(instanceAdvancedSettings.DataDisks, &dataDisk)
+						}
+					}
+
+					if v, ok := instanceAdvancedSettingsOverridesMap["extra_args"]; ok && len(v.([]interface{})) > 0 {
+						for _, item := range v.([]interface{}) {
+							extraArgsMap := item.(map[string]interface{})
+							args := tke.InstanceExtraArgs{}
+							if v, ok := extraArgsMap["kubelet"]; ok {
+								args.Kubelet = helper.InterfacesStringsPoint(v.([]interface{}))
+							}
+
+							instanceAdvancedSettings.ExtraArgs = &args
+						}
+					}
+
+					if v, ok := instanceAdvancedSettingsOverridesMap["desired_pod_number"]; ok {
+						instanceAdvancedSettings.DesiredPodNumber = helper.IntInt64(v.(int))
+					}
+
+					if v, ok := instanceAdvancedSettingsOverridesMap["gpu_args"]; ok && len(v.([]interface{})) > 0 {
+						gpuArgs := v.([]interface{})[0].(map[string]interface{})
+
+						var (
+							migEnable    = gpuArgs["mig_enable"].(bool)
+							driver       = gpuArgs["driver"].(map[string]interface{})
+							cuda         = gpuArgs["cuda"].(map[string]interface{})
+							cudnn        = gpuArgs["cudnn"].(map[string]interface{})
+							customDriver = gpuArgs["custom_driver"].(map[string]interface{})
+						)
+
+						tkeGpuArgs := tke.GPUArgs{}
+						tkeGpuArgs.MIGEnable = &migEnable
+						if len(driver) > 0 {
+							tkeGpuArgs.Driver = &tke.DriverVersion{
+								Version: helper.String(driver["version"].(string)),
+								Name:    helper.String(driver["name"].(string)),
+							}
+						}
+
+						if len(cuda) > 0 {
+							tkeGpuArgs.CUDA = &tke.DriverVersion{
+								Version: helper.String(cuda["version"].(string)),
+								Name:    helper.String(cuda["name"].(string)),
+							}
+						}
+
+						if len(cudnn) > 0 {
+							tkeGpuArgs.CUDNN = &tke.CUDNN{
+								Version: helper.String(cudnn["version"].(string)),
+								Name:    helper.String(cudnn["name"].(string)),
+							}
+
+							if cudnn["doc_name"] != nil {
+								tkeGpuArgs.CUDNN.DocName = helper.String(cudnn["doc_name"].(string))
+							}
+
+							if cudnn["dev_name"] != nil {
+								tkeGpuArgs.CUDNN.DevName = helper.String(cudnn["dev_name"].(string))
+							}
+						}
+
+						if len(customDriver) > 0 {
+							tkeGpuArgs.CustomDriver = &tke.CustomDriver{
+								Address: helper.String(customDriver["address"].(string)),
+							}
+						}
+
+						instanceAdvancedSettings.GPUArgs = &tkeGpuArgs
+					}
+
+					if v, ok := instanceAdvancedSettingsOverridesMap["taints"]; ok && len(v.([]interface{})) > 0 {
+						for _, item := range v.([]interface{}) {
+							taintsMap := item.(map[string]interface{})
+							taint := tke.Taint{}
+							if v, ok := taintsMap["key"]; ok {
+								taint.Key = helper.String(v.(string))
+							}
+
+							if v, ok := taintsMap["value"]; ok {
+								taint.Value = helper.String(v.(string))
+							}
+
+							if v, ok := taintsMap["effect"]; ok {
+								taint.Effect = helper.String(v.(string))
+							}
+
+							instanceAdvancedSettings.Taints = append(instanceAdvancedSettings.Taints, &taint)
+						}
+					}
+
+					inst.InstanceAdvancedSettingsOverride = &instanceAdvancedSettings
+				}
 			}
 		}
 	}
+
 	if temp, ok := dMap["desired_pod_numbers"]; ok {
 		inst.DesiredPodNumbers = make([]*int64, 0)
 		podNums := temp.([]interface{})
 		for _, v := range podNums {
 			inst.DesiredPodNumbers = append(inst.DesiredPodNumbers, helper.Int64(int64(v.(int))))
 		}
-	}
-	if temp, ok := dMap["node_role"]; ok {
-		nodeRole := temp.(string)
-		inst.NodeRole = &nodeRole
 	}
 
 	return inst, nil
@@ -2007,12 +2221,12 @@ func tkeGetNodePoolGlobalConfig(d *schema.ResourceData) *tke.ModifyClusterAsGrou
 	return request
 }
 
-func tkeGetAuthOptions(d *schema.ResourceData) *tke.ModifyClusterAuthenticationOptionsRequest {
+func tkeGetAuthOptions(d *schema.ResourceData, clusterId string) *tke.ModifyClusterAuthenticationOptionsRequest {
 	raw, ok := d.GetOk("auth_options")
 	options := raw.([]interface{})
 
 	request := tke.NewModifyClusterAuthenticationOptionsRequest()
-	request.ClusterId = helper.String(d.Id())
+	request.ClusterId = helper.String(clusterId)
 	request.ServiceAccounts = &tke.ServiceAccountAuthenticationOptions{
 		AutoCreateDiscoveryAnonymousAuth: helper.Bool(false),
 	}
@@ -2116,77 +2330,6 @@ func checkClusterEndpointStatus(ctx context.Context, service *TkeService, d *sch
 	}
 	return nil
 }
-
-func tkeCvmState() map[string]*schema.Schema {
-	return map[string]*schema.Schema{
-		"instance_id": {
-			Type:        schema.TypeString,
-			Computed:    true,
-			Description: "ID of the cvm.",
-		},
-		"instance_role": {
-			Type:        schema.TypeString,
-			Computed:    true,
-			Description: "Role of the cvm.",
-		},
-		"instance_state": {
-			Type:        schema.TypeString,
-			Computed:    true,
-			Description: "State of the cvm.",
-		},
-		"failed_reason": {
-			Type:        schema.TypeString,
-			Computed:    true,
-			Description: "Information of the cvm when it is failed.",
-		},
-		"lan_ip": {
-			Type:        schema.TypeString,
-			Computed:    true,
-			Description: "LAN IP of the cvm.",
-		},
-	}
-}
-
-//func tkeSecurityInfo() map[string]*schema.Schema {
-//	return map[string]*schema.Schema{
-//		"user_name": {
-//			Type:        schema.TypeString,
-//			Computed:    true,
-//			Description: "User name of account.",
-//		},
-//		"password": {
-//			Type:        schema.TypeString,
-//			Computed:    true,
-//			Description: "Password of account.",
-//		},
-//		"certification_authority": {
-//			Type:        schema.TypeString,
-//			Computed:    true,
-//			Description: "The certificate used for access.",
-//		},
-//		"cluster_external_endpoint": {
-//			Type:        schema.TypeString,
-//			Computed:    true,
-//			Description: "External network address to access.",
-//		},
-//		"domain": {
-//			Type:        schema.TypeString,
-//			Computed:    true,
-//			Description: "Domain name for access.",
-//		},
-//		"pgw_endpoint": {
-//			Type:        schema.TypeString,
-//			Computed:    true,
-//			Description: "The Intranet address used for access.",
-//		},
-//		"security_policy": {
-//			Type:        schema.TypeList,
-//			Computed:    true,
-//			Elem:        &schema.Schema{Type: schema.TypeString},
-//			Description: "Access policy.",
-//		},
-//	}
-//}
 
 func TkeCvmCreateInfo() map[string]*schema.Schema {
 	return map[string]*schema.Schema{

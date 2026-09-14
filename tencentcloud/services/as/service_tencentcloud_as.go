@@ -96,13 +96,21 @@ func (me *AsService) DeleteLaunchConfiguration(ctx context.Context, configuratio
 	logId := tccommon.GetLogId(ctx)
 	request := as.NewDeleteLaunchConfigurationRequest()
 	request.LaunchConfigurationId = &configurationId
-	ratelimit.Check(request.GetAction())
-	_, err := me.client.UseAsClient().DeleteLaunchConfiguration(request)
+
+	err := resource.Retry(4*tccommon.WriteRetryTimeout, func() *resource.RetryError {
+		ratelimit.Check(request.GetAction())
+		_, e := me.client.UseAsClient().DeleteLaunchConfiguration(request)
+		if e != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n",
+				logId, request.GetAction(), request.ToJsonString(), e.Error())
+			return tccommon.RetryError(e)
+		}
+		return nil
+	})
 	if err != nil {
-		log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n",
-			logId, request.GetAction(), request.ToJsonString(), err.Error())
 		return err
 	}
+
 	return nil
 }
 
@@ -116,6 +124,9 @@ func (me *AsService) DescribeAutoScalingGroupById(ctx context.Context, scalingGr
 		log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n",
 			logId, request.GetAction(), request.ToJsonString(), err.Error())
 		errRet = err
+		return
+	}
+	if response == nil || response.Response == nil || response.Response.AutoScalingGroupSet == nil {
 		return
 	}
 	has = len(response.Response.AutoScalingGroupSet)
@@ -637,6 +648,14 @@ func flattenInstanceTagsMapping(list []*as.InstanceTag) map[string]interface{} {
 	return result
 }
 
+func flattenTagsMapping(list []*as.Tag) map[string]interface{} {
+	result := make(map[string]interface{}, len(list))
+	for _, v := range list {
+		result[*v.Key] = *v.Value
+	}
+	return result
+}
+
 func (me *AsService) DescribeAsAdvices(ctx context.Context, param map[string]interface{}) (advices []*as.AutoScalingAdvice, errRet error) {
 	var (
 		logId   = tccommon.GetLogId(ctx)
@@ -711,19 +730,21 @@ func (me *AsService) DescribeAsLastActivity(ctx context.Context, param map[strin
 		if k == "AutoScalingGroupIds" {
 			request.AutoScalingGroupIds = v.([]*string)
 		}
+
+		if k == "ExcludeCancelledActivity" {
+			request.ExcludeCancelledActivity = v.(*bool)
+		}
 	}
 
 	ratelimit.Check(request.GetAction())
-
 	response, err := me.client.UseAsClient().DescribeAutoScalingGroupLastActivities(request)
 	if err != nil {
 		errRet = err
 		return
 	}
+
 	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
-
 	lastActivity = response.Response.ActivitySet
-
 	return
 }
 
@@ -731,22 +752,25 @@ func (me *AsService) DescribeAsLoadBalancerById(ctx context.Context, autoScaling
 	logId := tccommon.GetLogId(ctx)
 
 	request := as.NewDescribeAutoScalingGroupsRequest()
+	response := as.NewDescribeAutoScalingGroupsResponse()
 	request.AutoScalingGroupIds = []*string{&autoScalingGroupId}
-
-	defer func() {
-		if errRet != nil {
-			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n", logId, request.GetAction(), request.ToJsonString(), errRet.Error())
+	err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+		ratelimit.Check(request.GetAction())
+		result, e := me.client.UseAsClient().DescribeAutoScalingGroups(request)
+		if e != nil {
+			return tccommon.RetryError(e)
+		} else {
+			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
 		}
-	}()
 
-	ratelimit.Check(request.GetAction())
+		response = result
+		return nil
+	})
 
-	response, err := me.client.UseAsClient().DescribeAutoScalingGroups(request)
 	if err != nil {
 		errRet = err
 		return
 	}
-	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
 
 	if len(response.Response.AutoScalingGroupSet) < 1 {
 		return
@@ -759,7 +783,7 @@ func (me *AsService) DescribeAsLoadBalancerById(ctx context.Context, autoScaling
 func (me *AsService) DeleteAsLoadBalancerById(ctx context.Context, autoScalingGroupId string) (errRet error) {
 	logId := tccommon.GetLogId(ctx)
 
-	request := as.NewDetachLoadBalancersRequest()
+	request := as.NewModifyLoadBalancersRequest()
 	request.AutoScalingGroupId = &autoScalingGroupId
 
 	defer func() {
@@ -770,7 +794,7 @@ func (me *AsService) DeleteAsLoadBalancerById(ctx context.Context, autoScalingGr
 
 	ratelimit.Check(request.GetAction())
 
-	response, err := me.client.UseAsClient().DetachLoadBalancers(request)
+	response, err := me.client.UseAsClient().ModifyLoadBalancers(request)
 	if err != nil {
 		errRet = err
 		return

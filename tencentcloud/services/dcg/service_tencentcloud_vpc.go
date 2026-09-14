@@ -5591,6 +5591,7 @@ func (me *VpcService) DescribeVpcEndPointServiceById(ctx context.Context, endPoi
 	logId := tccommon.GetLogId(ctx)
 
 	request := vpc.NewDescribeVpcEndPointServiceRequest()
+	response := vpc.NewDescribeVpcEndPointServiceResponse()
 	request.EndPointServiceIds = []*string{&endPointServiceId}
 
 	defer func() {
@@ -5609,12 +5610,28 @@ func (me *VpcService) DescribeVpcEndPointServiceById(ctx context.Context, endPoi
 	for {
 		request.Offset = &offset
 		request.Limit = &limit
-		response, err := me.client.UseVpcClient().DescribeVpcEndPointService(request)
+
+		err := resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
+			ratelimit.Check(request.GetAction())
+			result, e := me.client.UseVpcClient().DescribeVpcEndPointService(request)
+			if e != nil {
+				return tccommon.RetryError(e)
+			} else {
+				log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+			}
+
+			if result == nil || result.Response == nil {
+				return resource.NonRetryableError(fmt.Errorf("Describe vpc endPoint service failed, Response is nil."))
+			}
+
+			response = result
+			return nil
+		})
+
 		if err != nil {
 			errRet = err
 			return
 		}
-		log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
 
 		if response == nil || len(response.Response.EndPointServiceSet) < 1 {
 			break
@@ -5662,6 +5679,7 @@ func (me *VpcService) DescribeVpcEndPointById(ctx context.Context, endPointId st
 	logId := tccommon.GetLogId(ctx)
 
 	request := vpc.NewDescribeVpcEndPointRequest()
+	response := vpc.NewDescribeVpcEndPointResponse()
 	request.EndPointId = []*string{&endPointId}
 
 	defer func() {
@@ -5680,12 +5698,27 @@ func (me *VpcService) DescribeVpcEndPointById(ctx context.Context, endPointId st
 	for {
 		request.Offset = &offset
 		request.Limit = &limit
-		response, err := me.client.UseVpcClient().DescribeVpcEndPoint(request)
+		err := resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
+			ratelimit.Check(request.GetAction())
+			result, e := me.client.UseVpcClient().DescribeVpcEndPoint(request)
+			if e != nil {
+				return tccommon.RetryError(e)
+			} else {
+				log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+			}
+
+			if result == nil || result.Response == nil {
+				return resource.NonRetryableError(fmt.Errorf("Describe vpc endPoint failed, Response is nil."))
+			}
+
+			response = result
+			return nil
+		})
+
 		if err != nil {
 			errRet = err
 			return
 		}
-		log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
 
 		if response == nil || len(response.Response.EndPointSet) < 1 {
 			break
@@ -5849,37 +5882,6 @@ func (me *VpcService) DescribeVpcBandwidthPackageByEip(ctx context.Context, eipI
 
 	if response != nil && len(response.Response.BandwidthPackageSet) > 0 {
 		resource = response.Response.BandwidthPackageSet[0]
-	}
-
-	return
-}
-
-func (me *VpcService) DescribeVpcCcnRoutesById(ctx context.Context, ccnId string, routeId string) (ccnRoutes *vpc.CcnRoute, errRet error) {
-	logId := tccommon.GetLogId(ctx)
-
-	request := vpc.NewDescribeCcnRoutesRequest()
-	request.CcnId = &ccnId
-
-	defer func() {
-		if errRet != nil {
-			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n", logId, request.GetAction(), request.ToJsonString(), errRet.Error())
-		}
-	}()
-
-	ratelimit.Check(request.GetAction())
-
-	response, err := me.client.UseVpcClient().DescribeCcnRoutes(request)
-	if err != nil {
-		errRet = err
-		return
-	}
-	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
-
-	for _, route := range response.Response.RouteSet {
-		if *route.RouteId == routeId {
-			ccnRoutes = route
-			return
-		}
 	}
 
 	return

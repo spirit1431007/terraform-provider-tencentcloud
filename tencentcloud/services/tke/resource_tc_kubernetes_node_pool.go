@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -23,6 +24,10 @@ func ResourceTencentCloudKubernetesNodePool() *schema.Resource {
 		Read:   resourceTencentCloudKubernetesNodePoolRead,
 		Update: resourceTencentCloudKubernetesNodePoolUpdate,
 		Delete: resourceTencentCloudKubernetesNodePoolDelete,
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
+		},
 		Importer: &schema.ResourceImporter{
 			StateContext: nodePoolCustomResourceImporter,
 		},
@@ -60,6 +65,19 @@ func ResourceTencentCloudKubernetesNodePool() *schema.Resource {
 				Computed:     true,
 				Description:  "Desired capacity of the node. If `enable_auto_scale` is set `true`, this will be a computed parameter.",
 				ValidateFunc: tccommon.ValidateIntegerInRange(0, 2000),
+			},
+
+			"wait_node_ready": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Whether to wait for all desired nodes to be ready. Default is false. Only can be set if `enable_auto_scale` is `false`.",
+			},
+
+			"scale_tolerance": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Description:  "Control how many expectations(`desired_capacity`) can be tolerated successfully. Unit is percentage, Default is `100`. Only can be set if `wait_node_ready` is `true`.",
+				ValidateFunc: tccommon.ValidateIntegerInRange(0, 100),
 			},
 
 			"enable_auto_scale": {
@@ -102,6 +120,14 @@ func ResourceTencentCloudKubernetesNodePool() *schema.Resource {
 				Description: "Auto scaling mode. Valid values are `CLASSIC_SCALING`(scaling by create/destroy instances), `WAKE_UP_STOPPED_SCALING`(Boot priority for expansion. When expanding the capacity, the shutdown operation is given priority to the shutdown of the instance. If the number of instances is still lower than the expected number of instances after the startup, the instance will be created, and the method of destroying the instance will still be used for shrinking).",
 			},
 
+			"auto_update_instance_tags": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
+				Description: "Automatically update instance tags. The default value is false. After configuration, if the scaling group tags are updated, the tags of the running instances in the scaling group will be updated synchronously (synchronous updates only support adding and modifying tags, and do not support deleting tags for the time being). Synchronous updates do not take effect immediately and there is a certain delay.",
+			},
+
 			"multi_zone_subnet_policy": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -142,7 +168,7 @@ func ResourceTencentCloudKubernetesNodePool() *schema.Resource {
 										Optional:     true,
 										ForceNew:     true,
 										Default:      "CLOUD_PREMIUM",
-										Description:  "Types of disk. Valid value: `LOCAL_BASIC`, `LOCAL_SSD`, `CLOUD_BASIC`, `CLOUD_PREMIUM`, `CLOUD_SSD`, `CLOUD_HSSD`, `CLOUD_TSSD` and `CLOUD_BSSD`.",
+										Description:  "Types of disk. Valid value: `LOCAL_BASIC`, `LOCAL_SSD`, `CLOUD_BASIC`, `CLOUD_PREMIUM`, `CLOUD_SSD`, `CLOUD_HSSD`, `CLOUD_TSSD`, `CLOUD_BSSD` and `LOCAL_NVME`.",
 										ValidateFunc: tccommon.ValidateAllowedStringValue(svcas.SYSTEM_DISK_ALLOW_TYPE),
 									},
 									"disk_size": {
@@ -194,13 +220,11 @@ func ResourceTencentCloudKubernetesNodePool() *schema.Resource {
 						"user_data": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							ForceNew:    true,
 							Description: "Base64-encoded User Data text, the length limit is 16KB.",
 						},
 						"pre_start_user_script": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							ForceNew:    true,
 							Description: "Base64-encoded user script, executed before initializing the node, currently only effective for adding existing nodes.",
 						},
 						"is_schedule": {
@@ -285,7 +309,7 @@ func ResourceTencentCloudKubernetesNodePool() *schema.Resource {
 							Type:         schema.TypeString,
 							Optional:     true,
 							Default:      "CLOUD_PREMIUM",
-							Description:  "Type of a CVM disk. Valid value: `LOCAL_BASIC`, `LOCAL_SSD`, `CLOUD_BASIC`, `CLOUD_PREMIUM`, `CLOUD_SSD`, `CLOUD_HSSD`, `CLOUD_TSSD` and `CLOUD_BSSD`. Default is `CLOUD_PREMIUM`.",
+							Description:  "Type of a CVM disk. Valid value: `LOCAL_BASIC`, `LOCAL_SSD`, `CLOUD_BASIC`, `CLOUD_PREMIUM`, `CLOUD_SSD`, `CLOUD_HSSD`, `CLOUD_TSSD`, `CLOUD_BSSD` and `LOCAL_NVME`. Default is `CLOUD_PREMIUM`.",
 							ValidateFunc: tccommon.ValidateAllowedStringValue(svcas.SYSTEM_DISK_ALLOW_TYPE),
 						},
 						"system_disk_size": {
@@ -293,7 +317,7 @@ func ResourceTencentCloudKubernetesNodePool() *schema.Resource {
 							Optional:     true,
 							Default:      50,
 							Description:  "Volume of system disk in GB. Default is `50`.",
-							ValidateFunc: tccommon.ValidateIntegerInRange(20, 1024),
+							ValidateFunc: tccommon.ValidateIntegerInRange(20, 2048),
 						},
 						"data_disk": {
 							Type:        schema.TypeList,
@@ -342,7 +366,7 @@ func ResourceTencentCloudKubernetesNodePool() *schema.Resource {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Computed:    true,
-							Description: "Charge type of instance. Valid values are `PREPAID`, `POSTPAID_BY_HOUR`, `SPOTPAID`. The default is `POSTPAID_BY_HOUR`. NOTE: `SPOTPAID` instance must set `spot_instance_type` and `spot_max_price` at the same time.",
+							Description: "Charge type of instance. Valid values are `PREPAID`, `POSTPAID_BY_HOUR`, `SPOTPAID`, `CDCPAID`. The default is `POSTPAID_BY_HOUR`. NOTE: `SPOTPAID` instance must set `spot_instance_type` and `spot_max_price` at the same time.",
 						},
 						"instance_charge_type_prepaid_period": {
 							Type:         schema.TypeInt,
@@ -391,6 +415,12 @@ func ResourceTencentCloudKubernetesNodePool() *schema.Resource {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Description: "Specify whether to assign an Internet IP address.",
+						},
+						"ipv4_address_type": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							Description: "Type of public IP address. WanIP: Ordinary public IP address; HighQualityEIP: High Quality EIP is supported only in Singapore and Hong Kong; AntiDDoSEIP: Anti-DDoS IP is supported only in specific regions. For details, see EIP Product Overview. Specify the type of public IPv4 address to assign a public IPv4 address to the resource. HighQualityEIP and AntiDDoSEIP features are gradually released in select regions. For usage, submit a ticket for consultation.",
 						},
 						"password": {
 							Type:          schema.TypeString,
@@ -475,6 +505,12 @@ func ResourceTencentCloudKubernetesNodePool() *schema.Resource {
 							Computed:    true,
 							Description: "The style of the host name of the cloud server, the value range includes ORIGINAL and UNIQUE, and the default is ORIGINAL. For usage, refer to `HostNameSettings` in https://www.tencentcloud.com/document/product/377/31001.",
 						},
+						"cdc_id": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							ForceNew:    true,
+							Description: "CDC ID.",
+						},
 					},
 				},
 			},
@@ -532,11 +568,32 @@ func ResourceTencentCloudKubernetesNodePool() *schema.Resource {
 				Description: "Indicates whether the node pool deletion protection is enabled.",
 			},
 
+			"annotations": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Computed:    true,
+				Description: "Node Annotation List.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Name in the map table.",
+						},
+						"value": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Value in the map table.",
+						},
+					},
+				},
+			},
+
 			"node_os": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "tlinux2.4x86_64",
-				Description: "Operating system of the cluster. Please refer to [TencentCloud Documentation](https://www.tencentcloud.com/document/product/457/46750?lang=en&pg=#list-of-public-images-supported-by-tke) for available values. Default is 'tlinux2.4x86_64'. This parameter will only affect new nodes, not including the existing nodes.",
+				Description: "Node pool operating system (enter the image ID for a custom image, and enter the OS name for a public image). If custom image, please refer to [TencentCloud Documentation](https://www.tencentcloud.com/document/product/457/46750?lang=en&pg=#list-of-public-images-supported-by-tke) for available values. Default is 'tlinux2.4x86_64'. This parameter will only affect new nodes, not including the existing nodes.",
 			},
 
 			"node_os_type": {
@@ -684,6 +741,20 @@ func resourceTencentCloudKubernetesNodePoolCreate(d *schema.ResourceData, meta i
 
 	if v, ok := d.GetOkExists("deletion_protection"); ok {
 		request.DeletionProtection = helper.Bool(v.(bool))
+	}
+
+	if v, ok := d.GetOk("annotations"); ok {
+		for _, item := range v.(*schema.Set).List() {
+			annotationsMap := item.(map[string]interface{})
+			annotationValue := tkev20180525.AnnotationValue{}
+			if v, ok := annotationsMap["name"]; ok {
+				annotationValue.Name = helper.String(v.(string))
+			}
+			if v, ok := annotationsMap["value"]; ok {
+				annotationValue.Value = helper.String(v.(string))
+			}
+			request.Annotations = append(request.Annotations, &annotationValue)
+		}
 	}
 
 	if err := resourceTencentCloudKubernetesNodePoolCreatePostFillRequest0(ctx, request); err != nil {
@@ -843,6 +914,25 @@ func resourceTencentCloudKubernetesNodePoolRead(d *schema.ResourceData, meta int
 		_ = d.Set("deletion_protection", respData1.DeletionProtection)
 	}
 
+	annotationsList := make([]map[string]interface{}, 0, len(respData1.Annotations))
+	if respData1.Annotations != nil {
+		for _, annotations := range respData1.Annotations {
+			annotationsMap := map[string]interface{}{}
+
+			if annotations.Name != nil {
+				annotationsMap["name"] = annotations.Name
+			}
+
+			if annotations.Value != nil {
+				annotationsMap["value"] = annotations.Value
+			}
+
+			annotationsList = append(annotationsList, annotationsMap)
+		}
+
+		_ = d.Set("annotations", annotationsList)
+	}
+
 	if err := resourceTencentCloudKubernetesNodePoolReadPostHandleResponse1(ctx, respData1); err != nil {
 		return err
 	}
@@ -870,7 +960,7 @@ func resourceTencentCloudKubernetesNodePoolUpdate(d *schema.ResourceData, meta i
 	}
 
 	needChange := false
-	mutableArgs := []string{"name", "max_size", "min_size", "taints", "enable_auto_scale", "deletion_protection"}
+	mutableArgs := []string{"name", "max_size", "min_size", "enable_auto_scale", "deletion_protection", "annotations"}
 	for _, v := range mutableArgs {
 		if d.HasChange(v) {
 			needChange = true
@@ -897,29 +987,26 @@ func resourceTencentCloudKubernetesNodePoolUpdate(d *schema.ResourceData, meta i
 			request.MinNodesNum = helper.IntInt64(v.(int))
 		}
 
-		if v, ok := d.GetOk("taints"); ok {
-			for _, item := range v.([]interface{}) {
-				taintsMap := item.(map[string]interface{})
-				taint := tkev20180525.Taint{}
-				if v, ok := taintsMap["key"]; ok {
-					taint.Key = helper.String(v.(string))
-				}
-				if v, ok := taintsMap["value"]; ok {
-					taint.Value = helper.String(v.(string))
-				}
-				if v, ok := taintsMap["effect"]; ok {
-					taint.Effect = helper.String(v.(string))
-				}
-				request.Taints = append(request.Taints, &taint)
-			}
-		}
-
 		if v, ok := d.GetOkExists("enable_auto_scale"); ok {
 			request.EnableAutoscale = helper.Bool(v.(bool))
 		}
 
 		if v, ok := d.GetOkExists("deletion_protection"); ok {
 			request.DeletionProtection = helper.Bool(v.(bool))
+		}
+
+		if v, ok := d.GetOk("annotations"); ok {
+			for _, item := range v.(*schema.Set).List() {
+				annotationsMap := item.(map[string]interface{})
+				annotationValue := tkev20180525.AnnotationValue{}
+				if v, ok := annotationsMap["name"]; ok {
+					annotationValue.Name = helper.String(v.(string))
+				}
+				if v, ok := annotationsMap["value"]; ok {
+					annotationValue.Value = helper.String(v.(string))
+				}
+				request.Annotations = append(request.Annotations, &annotationValue)
+			}
 		}
 
 		err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
@@ -933,6 +1020,16 @@ func resourceTencentCloudKubernetesNodePoolUpdate(d *schema.ResourceData, meta i
 		})
 		if err != nil {
 			log.Printf("[CRITAL]%s update kubernetes node pool failed, reason:%+v", logId, err)
+			return err
+		}
+		if _, err := (&resource.StateChangeConf{
+			Delay:      10 * time.Second,
+			MinTimeout: 3 * time.Second,
+			Pending:    []string{},
+			Refresh:    resourceKubernetesNodePoolUpdateStateRefreshFunc_0_0(ctx, clusterId, nodePoolId),
+			Target:     []string{"normal"},
+			Timeout:    600 * time.Second,
+		}).WaitForStateContext(ctx); err != nil {
 			return err
 		}
 	}
@@ -999,4 +1096,35 @@ func resourceTencentCloudKubernetesNodePoolDelete(d *schema.ResourceData, meta i
 	}
 
 	return nil
+}
+
+func resourceKubernetesNodePoolUpdateStateRefreshFunc_0_0(ctx context.Context, clusterId string, nodePoolId string) resource.StateRefreshFunc {
+	var req *tkev20180525.DescribeClusterNodePoolDetailRequest
+	return func() (interface{}, string, error) {
+		meta := tccommon.ProviderMetaFromContext(ctx)
+		if meta == nil {
+			return nil, "", fmt.Errorf("resource data can not be nil")
+		}
+		if req == nil {
+			d := tccommon.ResourceDataFromContext(ctx)
+			if d == nil {
+				return nil, "", fmt.Errorf("resource data can not be nil")
+			}
+			_ = d
+			req = tkev20180525.NewDescribeClusterNodePoolDetailRequest()
+			req.ClusterId = helper.String(clusterId)
+
+			req.NodePoolId = helper.String(nodePoolId)
+
+		}
+		resp, err := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseTkeV20180525Client().DescribeClusterNodePoolDetailWithContext(ctx, req)
+		if err != nil {
+			return nil, "", err
+		}
+		if resp == nil || resp.Response == nil {
+			return nil, "", nil
+		}
+		state := fmt.Sprintf("%v", *resp.Response.NodePool.LifeState)
+		return resp.Response, state, nil
+	}
 }

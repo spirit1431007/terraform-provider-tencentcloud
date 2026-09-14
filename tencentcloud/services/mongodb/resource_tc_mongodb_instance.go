@@ -6,6 +6,7 @@ import (
 	"log"
 	"reflect"
 	"strings"
+	"time"
 
 	tccommon "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/common"
 	svctag "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/services/tag"
@@ -48,6 +49,12 @@ func ResourceTencentCloudMongodbInstance() *schema.Resource {
 			Optional:    true,
 			Computed:    true,
 			Description: "The number of nodes in each replica set. Default value: 3.",
+		},
+		"cpu": {
+			Type:        schema.TypeInt,
+			Optional:    true,
+			Computed:    true,
+			Description: "The CPU core count of the MongoDB instance after the configuration change. Unit: C. When this parameter is empty, the current CPU size of the instance is used by default. The supported CPU specifications can be obtained through the DescribeSpecInfo API.",
 		},
 		"add_node_list": {
 			Type:        schema.TypeList,
@@ -103,25 +110,23 @@ func ResourceTencentCloudMongodbInstance() *schema.Resource {
 			},
 		},
 		"availability_zone_list": {
-			Type:     schema.TypeList,
-			Optional: true,
-			Computed: true,
+			Type:             schema.TypeList,
+			Optional:         true,
+			Computed:         true,
+			DiffSuppressFunc: tccommon.StringListDiffSuppressIgnoreOrder("availability_zone_list"),
 			Elem: &schema.Schema{
 				Type: schema.TypeString,
 			},
-			RequiredWith: []string{"hidden_zone"},
-			Description: `A list of nodes deployed in multiple availability zones. For more information, please use the API DescribeSpecInfo.
-			- Multi-availability zone deployment nodes can only be deployed in 3 different availability zones. It is not supported to deploy most nodes of the cluster in the same availability zone. For example, a 3-node cluster does not support the deployment of 2 nodes in the same zone.
-			- Version 4.2 and above are not supported.
-			- Read-only disaster recovery instances are not supported.
-			- Basic network cannot be selected.`,
+			Description: "If cloud database instances are deployed in multiple availability zones, specify a list of multiple availability zones.\n" +
+				"	- To deploy an instance with multiple availability zones, the parameter Zone specifies the primary availability zone information of the instance; Availability ZoneList specifies all availability zone information, including the primary availability zone. The input format is as follows: [ap-Guangzhou-2,ap-Guangzhou-3,ap-Guangzhou-4].\n" +
+				"	- You can obtain availability zone information planned in different regions of the cloud database through the interface DescribeSpecInfo, so as to specify effective availability zones.\n" +
+				"	- Multiple availability zone deployment nodes can only be deployed in 3 different availability zones. Deploying most nodes of a cluster in the same availability zone is not supported. For example, a 3-node cluster does not support 2 nodes deployed in the same zone.",
 		},
 		"hidden_zone": {
-			Type:         schema.TypeString,
-			Optional:     true,
-			Computed:     true,
-			RequiredWith: []string{"availability_zone_list"},
-			Description:  "The availability zone to which the Hidden node belongs. This parameter must be configured to deploy instances across availability zones.",
+			Type:        schema.TypeString,
+			Optional:    true,
+			Computed:    true,
+			Description: "The availability zone to which the Hidden node belongs. This parameter is required in cross-AZ instance deployment.",
 		},
 		"maintenance_start": {
 			Type:        schema.TypeString,
@@ -166,6 +171,7 @@ func mongodbAllInstanceReqSet(requestInter interface{}, d *schema.ResourceData) 
 		nodeNum               = 3
 		goodsNum              = 1
 		clusterType           = MONGODB_CLUSTER_TYPE_REPLSET
+		cpu                   = d.Get("cpu").(int)
 		memoryInterface       = d.Get("memory").(int)
 		volumeInterface       = d.Get("volume").(int)
 		mongoVersionInterface = d.Get("engine_version").(string)
@@ -186,10 +192,8 @@ func mongodbAllInstanceReqSet(requestInter interface{}, d *schema.ResourceData) 
 		nodeNum = v.(int)
 	}
 
-	if v, ok := d.GetOk("password"); ok && v.(string) != "" {
+	if v, ok := d.GetOk("password"); ok {
 		password = v.(string)
-	} else {
-		return fmt.Errorf("`password` cannot be empty when creating")
 	}
 
 	getType := reflect.TypeOf(requestInter)
@@ -200,6 +204,7 @@ func mongodbAllInstanceReqSet(requestInter interface{}, d *schema.ResourceData) 
 		"NodeNum":         helper.IntUint64(nodeNum),
 		"GoodsNum":        helper.IntUint64(goodsNum),
 		"ClusterType":     &clusterType,
+		"CpuCore":         helper.IntInt64(cpu),
 		"Memory":          helper.IntUint64(memoryInterface),
 		"Volume":          helper.IntUint64(volumeInterface),
 		"MongoVersion":    &mongoVersionInterface,
@@ -243,6 +248,18 @@ func mongodbAllInstanceReqSet(requestInter interface{}, d *schema.ResourceData) 
 	}
 	if v, ok := d.GetOk("hidden_zone"); ok {
 		value.FieldByName("HiddenZone").Set(reflect.ValueOf(helper.String(v.(string))))
+	}
+	if v, ok := d.GetOk("data_encryption"); ok {
+		value.FieldByName("DataEncryption").Set(reflect.ValueOf(helper.String(v.(string))))
+	}
+	if v, ok := d.GetOk("encryption_key_source"); ok {
+		value.FieldByName("EncryptionKeySource").Set(reflect.ValueOf(helper.String(v.(string))))
+	}
+	if v, ok := d.GetOk("key_id"); ok {
+		value.FieldByName("KeyId").Set(reflect.ValueOf(helper.String(v.(string))))
+	}
+	if v, ok := d.GetOk("kms_region"); ok {
+		value.FieldByName("KmsRegion").Set(reflect.ValueOf(helper.String(v.(string))))
 	}
 	return nil
 }
@@ -466,6 +483,9 @@ func resourceTencentCloudMongodbInstanceRead(d *schema.ResourceData, meta interf
 	_ = d.Set("vport", instance.Vport)
 	_ = d.Set("create_time", instance.CreateTime)
 	_ = d.Set("node_num", *instance.SecondaryNum+1)
+	if instance.CpuNum != nil {
+		_ = d.Set("cpu", int(*instance.CpuNum/(*instance.ReplicationSetNum)))
+	}
 	if instance.MaintenanceStart != nil && len(*instance.MaintenanceStart) == 8 {
 		_ = d.Set("maintenance_start", (*instance.MaintenanceStart)[:5])
 	}
@@ -508,6 +528,35 @@ func resourceTencentCloudMongodbInstanceRead(d *schema.ResourceData, meta interf
 		_ = d.Set("standby_instance_list", standbyInsList)
 	}
 
+	// encryption
+	encryptResp, err := mongodbService.DescribeTransparentDataEncryptionStatusById(ctx, instanceId)
+	if err != nil {
+		return err
+	}
+
+	if encryptResp != nil {
+		if encryptResp.TransparentDataEncryptionStatus != nil {
+			if *encryptResp.TransparentDataEncryptionStatus == "open" {
+				_ = d.Set("data_encryption", "TDE")
+			}
+
+			if *encryptResp.TransparentDataEncryptionStatus == "close" {
+				_ = d.Set("data_encryption", "No_Encryption")
+			}
+		}
+
+		if encryptResp.KeyInfoList != nil && len(encryptResp.KeyInfoList) > 0 {
+			keyInfo := encryptResp.KeyInfoList[0]
+			if keyInfo.KeyName != nil {
+				_ = d.Set("key_id", keyInfo.KeyName)
+			}
+
+			if keyInfo.KmsRegion != nil {
+				_ = d.Set("kms_region", keyInfo.KmsRegion)
+			}
+		}
+	}
+
 	tags, _ := tagService.DescribeResourceTags(ctx, "mongodb", "instance", client.Region, instanceId)
 
 	_ = d.Set("tags", tags)
@@ -528,17 +577,16 @@ func resourceTencentCloudMongodbInstanceUpdate(d *schema.ResourceData, meta inte
 	tagService := svctag.NewTagService(client)
 	region := client.Region
 
-	d.Partial(true)
-
-	immutableArgs := []string{"availability_zone_list", "hidden_zone"}
-
+	immutableArgs := []string{"data_encryption", "encryption_key_source", "key_id", "kms_region"}
 	for _, v := range immutableArgs {
 		if d.HasChange(v) {
 			return fmt.Errorf("argument `%s` cannot be changed", v)
 		}
 	}
 
-	if d.HasChange("memory") || d.HasChange("volume") || d.HasChange("node_num") {
+	d.Partial(true)
+
+	if d.HasChange("memory") || d.HasChange("volume") || d.HasChange("node_num") || d.HasChange("cpu") {
 		memory := d.Get("memory").(int)
 		volume := d.Get("volume").(int)
 		params := make(map[string]interface{})
@@ -555,6 +603,14 @@ func resourceTencentCloudMongodbInstanceUpdate(d *schema.ResourceData, meta inte
 			removeNodeList := v.([]interface{})
 			params["remove_node_list"] = removeNodeList
 		}
+		var inMaintenance int
+		if v, ok := d.GetOkExists("in_maintenance"); ok {
+			inMaintenance = v.(int)
+			params["in_maintenance"] = v.(int)
+		}
+		if v, ok := d.GetOkExists("cpu"); ok {
+			params["cpu"] = v.(int)
+		}
 		dealId, err := mongodbService.UpgradeInstance(ctx, instanceId, memory, volume, params)
 		if err != nil {
 			return err
@@ -564,26 +620,148 @@ func resourceTencentCloudMongodbInstanceUpdate(d *schema.ResourceData, meta inte
 			return fmt.Errorf("deal id is empty")
 		}
 
-		errUpdate := resource.Retry(20*tccommon.ReadRetryTimeout, func() *resource.RetryError {
-			dealResponseParams, err := mongodbService.DescribeDBInstanceDeal(ctx, dealId)
-			if err != nil {
-				if sdkError, ok := err.(*errors.TencentCloudSDKError); ok {
-					if sdkError.Code == "InvalidParameter" && sdkError.Message == "deal resource not found." {
-						return resource.RetryableError(err)
+		if inMaintenance == 0 {
+			errUpdate := resource.Retry(20*tccommon.ReadRetryTimeout, func() *resource.RetryError {
+				dealResponseParams, err := mongodbService.DescribeDBInstanceDeal(ctx, dealId)
+				if err != nil {
+					if sdkError, ok := err.(*errors.TencentCloudSDKError); ok {
+						if sdkError.Code == "InvalidParameter" && sdkError.Message == "deal resource not found." {
+							return resource.RetryableError(err)
+						}
 					}
+					return resource.NonRetryableError(err)
 				}
-				return resource.NonRetryableError(err)
-			}
 
-			if *dealResponseParams.Status != MONGODB_STATUS_DELIVERY_SUCCESS {
-				return resource.RetryableError(fmt.Errorf("mongodb status is not delivery success"))
+				if dealResponseParams == nil || dealResponseParams.Status == nil {
+					return resource.NonRetryableError(fmt.Errorf("Status is nil"))
+				}
+
+				if *dealResponseParams.Status != MONGODB_STATUS_DELIVERY_SUCCESS && *dealResponseParams.Status != MONGODB_STATUS_RETURN_SUCCESS {
+					return resource.RetryableError(fmt.Errorf("mongodb status is not delivery success"))
+				}
+
+				return nil
+			})
+			if errUpdate != nil {
+				return errUpdate
 			}
-			return nil
-		})
-		if errUpdate != nil {
-			return errUpdate
+		}
+	}
+
+	if d.HasChange("available_zone") || d.HasChange("availability_zone_list") || d.HasChange("hidden_zone") {
+		request := mongodb.NewModifyInstanceAzRequest()
+		response := mongodb.NewModifyInstanceAzResponse()
+		var (
+			primaryNodeZone      string
+			hiddenNodeZone       string
+			availabilityZoneList []string
+		)
+
+		if v, ok := d.GetOk("available_zone"); ok {
+			request.PrimaryNodeZone = helper.String(v.(string))
+			primaryNodeZone = v.(string)
 		}
 
+		if v, ok := d.GetOk("hidden_zone"); ok {
+			request.HiddenNodeZone = helper.String(v.(string))
+			hiddenNodeZone = v.(string)
+		}
+
+		if v, ok := d.GetOk("availability_zone_list"); ok {
+			for _, item := range v.([]interface{}) {
+				availabilityZoneList = append(availabilityZoneList, item.(string))
+			}
+
+			// Validate: primaryNodeZone and hiddenNodeZone must be in availabilityZoneList if not empty
+			zoneSet := make(map[string]bool, len(availabilityZoneList))
+			for _, z := range availabilityZoneList {
+				zoneSet[z] = true
+			}
+			if primaryNodeZone != "" && !zoneSet[primaryNodeZone] {
+				return fmt.Errorf("available_zone `%s` must be in availability_zone_list", primaryNodeZone)
+			}
+			if hiddenNodeZone != "" && !zoneSet[hiddenNodeZone] {
+				return fmt.Errorf("hidden_zone `%s` must be in availability_zone_list", hiddenNodeZone)
+			}
+
+			// Pick secondary node zone: remove first and last element, rest go to secondaryNodeZones
+			var secondaryNodeZones []*string
+			for i := 1; i < len(availabilityZoneList)-1; i++ {
+				z := availabilityZoneList[i]
+				secondaryNodeZones = append(secondaryNodeZones, &z)
+			}
+
+			request.SecondaryNodeZone = secondaryNodeZones
+		}
+
+		needModifyFlag := true
+		request.InstanceId = &instanceId
+		request.InMaintenance = helper.IntUint64(0)
+		err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+			result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseMongodbClient().ModifyInstanceAz(request)
+			if e != nil {
+				if ee, ok := e.(*errors.TencentCloudSDKError); ok {
+					if ee.GetCode() == "InvalidParameter" && ee.GetMessage() == "The target az already distribution." {
+						needModifyFlag = false
+						return nil
+					}
+				}
+
+				return tccommon.RetryError(e)
+			} else {
+				log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+			}
+
+			if result == nil || result.Response == nil || result.Response.DealId == nil {
+				return resource.NonRetryableError(fmt.Errorf("Modify instance az failed, Response is nil"))
+			}
+
+			response = result
+			return nil
+		})
+
+		if err != nil {
+			log.Printf("[CRITAL]%s update mongodb az failed, reason:%+v", logId, err)
+			return err
+		}
+
+		if !needModifyFlag {
+			return nil
+		}
+
+		dealId := *response.Response.DealId
+
+		// wait for api sync
+		time.Sleep(10 * time.Second)
+		waitReq := mongodb.NewDescribeDBInstanceDealRequest()
+		waitReq.DealId = &dealId
+		err = resource.Retry(tccommon.ReadRetryTimeout*20, func() *resource.RetryError {
+			result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseMongodbClient().DescribeDBInstanceDeal(waitReq)
+			if e != nil {
+				return tccommon.RetryError(e)
+			} else {
+				log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, waitReq.GetAction(), waitReq.ToJsonString(), result.ToJsonString())
+			}
+
+			if result == nil || result.Response == nil {
+				return resource.NonRetryableError(fmt.Errorf("Describe db instance deal failed, Response is nil"))
+			}
+
+			if result.Response.Status == nil {
+				return resource.NonRetryableError(fmt.Errorf("Describe db instance deal failed, Status is nil"))
+			}
+
+			if *result.Response.Status == 4 {
+				return nil
+			}
+
+			return resource.RetryableError(fmt.Errorf("mongodb az is still in running, status: %d", *result.Response.Status))
+		})
+
+		if err != nil {
+			log.Printf("[CRITAL]%s update mongodb az failed, reason:%+v", logId, err)
+			return err
+		}
 	}
 
 	if d.HasChange("instance_name") {
@@ -668,6 +846,41 @@ func resourceTencentCloudMongodbInstanceUpdate(d *schema.ResourceData, meta inte
 			if err != nil {
 				return err
 			}
+		}
+	}
+
+	if d.HasChange("engine_version") {
+		request := mongodb.NewUpgradeDbInstanceVersionRequest()
+		response := mongodb.NewUpgradeDbInstanceVersionResponse()
+		request.InstanceId = &instanceId
+		if v, ok := d.GetOk("engine_version"); ok {
+			request.MongoVersion = helper.String(v.(string))
+		}
+
+		reqErr := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+			result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseMongodbClient().UpgradeDbInstanceVersionWithContext(ctx, request)
+			if e != nil {
+				return tccommon.RetryError(e)
+			} else {
+				log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+			}
+
+			if result == nil || result.Response == nil || result.Response.FlowId == nil {
+				return resource.NonRetryableError(fmt.Errorf("Upgrade engine version failed, Response is nil."))
+			}
+
+			response = result
+			return nil
+		})
+
+		if reqErr != nil {
+			log.Printf("[CRITAL]%s upgrade engine version failed, reason:%+v", logId, reqErr)
+			return reqErr
+		}
+
+		flowIdStr := helper.UInt64ToStr(*response.Response.FlowId)
+		if err := mongodbService.DescribeAsyncRequestInfo(ctx, flowIdStr, 20*tccommon.ReadRetryTimeout); err != nil {
+			return err
 		}
 	}
 

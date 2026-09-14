@@ -1,4 +1,6 @@
-Provides a resource to create a tke kubernetes_log_config
+Provides a resource to create a TKE kubernetes log config
+
+~> **NOTE:** The value of Field `log_config_name` must be identical to Value `metadata.name` in Field `log_config`.
 
 Example Usage
 

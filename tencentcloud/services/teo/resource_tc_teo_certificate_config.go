@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -19,7 +20,11 @@ func ResourceTencentCloudTeoCertificateConfig() *schema.Resource {
 		Update: resourceTencentCloudTeoCertificateConfigUpdate,
 		Delete: resourceTencentCloudTeoCertificateConfigDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Update: schema.DefaultTimeout(20 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"zone_id": {
@@ -88,11 +93,211 @@ func ResourceTencentCloudTeoCertificateConfig() *schema.Resource {
 				},
 			},
 
+			"upstream_cert_info": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Description: "Configures the certificate presented by the EO node during origin-pull for mutual TLS authentication. Disabled by default; leaving the field blank will retain the current configuration. This feature is currently in beta testing. please [contact us](https://cloud.tencent.com/online-service) to request access.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"upstream_mutual_tls": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Computed:    true,
+							MaxItems:    1,
+							Description: "In the origin-pull mutual authentication scenario, this field represents the certificate (including the public and private keys) carried during EO node origin-pull, which is deployed in the EO node for the origin server to authenticate the EO node. When used as an input parameter, it is left blank to indicate retaining the original configuration.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"switch": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "Mutual authentication configuration switch, the values are: `on`: enable; `off`: disable.",
+									},
+									"cert_infos": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										Computed:    true,
+										Description: "Mutual authentication certificate list.\nNote: When using MutualTLS as an input parameter in ModifyHostsCertificate, you only need to provide the CertId of the corresponding certificate. You can check the CertId from the [SSL Certificate List](https://console.cloud.tencent.com/ssl).",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"cert_id": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Computed:    true,
+													Description: "Certificate ID, which originates from the SSL side. You can check the CertId from the [SSL Certificate List](https://console.cloud.tencent.com/ssl).",
+												},
+												"alias": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "Alias of the certificate.",
+												},
+												"type": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "Type of the certificate. Values: `default`: Default certificate `upload`: Specified certificate `managed`: Tencent Cloud-managed certificate.",
+												},
+												"expire_time": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The certificate expiration time.",
+												},
+												"deploy_time": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "Time when the certificate is deployed.",
+												},
+												"sign_algo": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "Signature algorithm.",
+												},
+												"status": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "Certificate status.",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+						"upstream_certificate_verify": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Computed:    true,
+							MaxItems:    1,
+							Description: "In the origin certificate verification scenario, this field is the CA certificate used by EO nodes during origin-pull for verifying the origin server's certificate. Deployed on EO nodes for EO to authenticate the server certificate. When used as an input parameter, leaving it blank means retaining the original configuration.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"verification_mode": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Computed:    true,
+										Description: "Origin certificate verification mode. Values: `disable`: Disable origin certificate verification; `custom_ca`: Use specified trusted CA certificate for verification.",
+									},
+									"custom_ca_certs": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										Computed:    true,
+										Description: "List of specified trusted CA certificates. The origin certificate must be signed by this CA to pass verification.\nNote: Only required when VerificationMode is custom_ca. When used as input in ModifyHostsCertificate, you only need to provide the CertId.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"cert_id": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Computed:    true,
+													Description: "Certificate ID, which originates from the SSL side.",
+												},
+												"alias": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "Alias of the certificate.",
+												},
+												"type": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "Type of the certificate.",
+												},
+												"expire_time": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The certificate expiration time.",
+												},
+												"deploy_time": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "Time when the certificate is deployed.",
+												},
+												"sign_algo": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "Signature algorithm.",
+												},
+												"status": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "Certificate status.",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+
+			"client_cert_info": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Description: "Edge mutual TLS authentication configuration, where client CA certificates are deployed on EO nodes for client-to-EO-node authentication. Disabled by default; leaving the field blank will retain the current configuration. This feature is currently in beta testing. please [contact us](https://cloud.tencent.com/online-service) to request access.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"switch": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Edge mutual TLS configuration switch, the values are: `on`: enable; `off`: disable.",
+						},
+						"cert_infos": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Computed:    true,
+							Description: "Mutual TLS certificate list.\nNote: When using ClientCertInfo as an input parameter in ModifyHostsCertificate, you only need to provide the CertId of the corresponding certificate. You can check the CertId from the [SSL Certificate List](https://console.cloud.tencent.com/ssl).",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"cert_id": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Computed:    true,
+										Description: "Certificate ID, which originates from the SSL side. You can check the CertId from the [SSL Certificate List](https://console.cloud.tencent.com/ssl).",
+									},
+									"alias": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Alias of the certificate.",
+									},
+									"type": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Type of the certificate. Values: `default`: Default certificate; `upload`: Specified certificate; `managed`: Tencent Cloud-managed certificate.",
+									},
+									"expire_time": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The certificate expiration time.",
+									},
+									"deploy_time": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Time when the certificate is deployed.",
+									},
+									"sign_algo": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Signature algorithm.",
+									},
+									"status": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Certificate status.",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+
 			"mode": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "Mode of configuring the certificate, the values are: `disable`: Do not configure the certificate; `eofreecert`: Configure EdgeOne free certificate; `sslcert`: Configure SSL certificate. If not filled in, the default value is `disable`.",
+				Description: "Mode of configuring the certificate, the values are: `disable`: Do not configure the certificate; `eofreecert`: Configure EdgeOne free certificate; `eofreecert_manual`: Deploy a free certificate applied for through DNS delegation validation or file validation; `sslcert`: Configure SSL certificate. If not filled in, the default value is `disable`.",
 			},
 		},
 	}

@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -46,6 +47,83 @@ func calCRC64(fd io.Reader) (uint64, error) {
 	}
 	sum := hash.Sum64()
 	return sum, nil
+}
+
+// CRC64Combine 合并两个 CRC64 值（适用于 CRC64-ECMA 反射算法）
+// crc1 是前一段数据的 CRC64，crc2 是后一段数据的 CRC64，len2 是后一段数据的长度
+func CRC64Combine(crc1, crc2 uint64, len2 int64) uint64 {
+	if len2 == 0 {
+		return crc1
+	}
+	return crc64Combine(crc1, crc2, len2)
+}
+
+func crc64Combine(crc1, crc2 uint64, len2 int64) uint64 {
+	// CRC64-ECMA reflected polynomial (Go's crc64.ECMA uses reflected/LSB-first)
+	const poly uint64 = 0xC96C5795D7870F42
+
+	var even [64]uint64
+	var odd [64]uint64
+
+	if len2 <= 0 {
+		return crc1
+	}
+
+	// put operator for one zero bit in odd (reflected: right-shift based)
+	// For reflected CRC, the operator for appending a zero bit is:
+	// if (crc & 1) then (crc >> 1) ^ poly else (crc >> 1)
+	// This is represented as a matrix where:
+	// - odd[0] = poly (applied when bit 0 is set)
+	// - odd[n] = 1 << (n-1) for n >= 1 (right shift by 1)
+	odd[0] = poly
+	for n := 1; n < 64; n++ {
+		odd[n] = uint64(1) << uint(n-1)
+	}
+
+	// put operator for two zero bits in even
+	gf2MatrixSquare(&even, &odd)
+	// put operator for four zero bits in odd
+	gf2MatrixSquare(&odd, &even)
+
+	// apply len2 zeros to crc1 (first square will put the operator for one
+	// zero byte, eight zero bits, in even)
+	for len2 != 0 {
+		gf2MatrixSquare(&even, &odd)
+		if len2&1 != 0 {
+			crc1 = gf2MatrixTimes(&even, crc1)
+		}
+		len2 >>= 1
+
+		if len2 == 0 {
+			break
+		}
+
+		gf2MatrixSquare(&odd, &even)
+		if len2&1 != 0 {
+			crc1 = gf2MatrixTimes(&odd, crc1)
+		}
+		len2 >>= 1
+	}
+
+	crc1 ^= crc2
+	return crc1
+}
+
+func gf2MatrixTimes(mat *[64]uint64, vec uint64) uint64 {
+	var sum uint64
+	for i := 0; vec != 0; i++ {
+		if vec&1 != 0 {
+			sum ^= mat[i]
+		}
+		vec >>= 1
+	}
+	return sum
+}
+
+func gf2MatrixSquare(square, mat *[64]uint64) {
+	for n := 0; n < 64; n++ {
+		square[n] = gf2MatrixTimes(mat, mat[n])
+	}
 }
 
 // cloneRequest returns a clone of the provided *http.Request. The clone is a
@@ -180,7 +258,7 @@ func IsLenReader(reader io.Reader) bool {
 
 func CheckReaderLen(reader io.Reader) error {
 	nlen, err := GetReaderLen(reader)
-	if err != nil || nlen < singleUploadMaxLength {
+	if err != nil || nlen <= singleUploadMaxLength {
 		return nil
 	}
 	return errors.New("The single object size you upload can not be larger than 5GB")
@@ -233,6 +311,7 @@ func CloneObjectPutOptions(opt *ObjectPutOptions) *ObjectPutOptions {
 	res := &ObjectPutOptions{
 		&ACLHeaderOptions{},
 		&ObjectPutHeaderOptions{},
+		nil,
 	}
 	if opt != nil {
 		if opt.ACLHeaderOptions != nil {
@@ -242,6 +321,9 @@ func CloneObjectPutOptions(opt *ObjectPutOptions) *ObjectPutOptions {
 			*res.ObjectPutHeaderOptions = *opt.ObjectPutHeaderOptions
 			res.XCosMetaXXX = cloneHeader(opt.XCosMetaXXX)
 			res.XOptionHeader = cloneHeader(opt.XOptionHeader)
+		}
+		if opt.innerSwitchURL != nil {
+			res.innerSwitchURL = opt.innerSwitchURL
 		}
 	}
 	return res
@@ -291,6 +373,15 @@ func CloneCompleteMultipartUploadOptions(opt *CompleteMultipartUploadOptions) *C
 			res.Parts = make([]Object, len(opt.Parts))
 			copy(res.Parts, opt.Parts)
 		}
+		res.XOptionHeader = cloneHeader(opt.XOptionHeader)
+	}
+	return &res
+}
+
+func cloneObjectCopyPartOptions(opt *ObjectCopyPartOptions) *ObjectCopyPartOptions {
+	var res ObjectCopyPartOptions
+	if opt != nil {
+		res = *opt
 		res.XOptionHeader = cloneHeader(opt.XOptionHeader)
 	}
 	return &res
@@ -368,7 +459,7 @@ func isDeliverHeader(key string) bool {
 			return true
 		}
 	}
-	return strings.HasPrefix(key, privateHeaderPrefix)
+	return strings.HasPrefix(key, privateHeaderPrefix) || strings.HasPrefix(key, "x-")
 }
 
 func deliverInitOptions(opt *InitiateMultipartUploadOptions) (*http.Header, error) {
@@ -389,4 +480,78 @@ func deliverInitOptions(opt *InitiateMultipartUploadOptions) (*http.Header, erro
 		}
 	}
 	return header, nil
+}
+
+var (
+	bucketReg   = regexp.MustCompile(`<Bucket>([a-z0-9-]+-[0-9]+)</Bucket>`)
+	keyReg      = regexp.MustCompile(`<Key>(.*?)</Key>`)
+	uploadIdReg = regexp.MustCompile(`<UploadId>([a-z0-9]+)</UploadId>`)
+	locationReg = regexp.MustCompile(`<Location>(.*?)</Location>`)
+	etagReg     = regexp.MustCompile(`<ETag>&quot;(.*?)&quot;</ETag>`)
+)
+
+func UnmarshalInitMultiUploadResult(data []byte, res *InitiateMultipartUploadResult) error {
+	match := bucketReg.FindStringSubmatch(string(data))
+	if len(match) > 1 {
+		res.Bucket = match[1]
+	} else {
+		return fmt.Errorf("Unmarshal failed, %v", string(data))
+	}
+	match = keyReg.FindStringSubmatch(string(data))
+	if len(match) > 1 {
+		res.Key = match[1]
+	} else {
+		return fmt.Errorf("Unmarshal failed, %v", string(data))
+	}
+	match = uploadIdReg.FindStringSubmatch(string(data))
+	if len(match) > 1 {
+		res.UploadID = match[1]
+	} else {
+		return fmt.Errorf("Unmarshal failed, %v", string(data))
+	}
+	return nil
+}
+
+func UnmarshalCompleteMultiUploadResult(data []byte, res *CompleteMultipartUploadResult) error {
+	match := locationReg.FindStringSubmatch(string(data))
+	if len(match) > 1 {
+		res.Location = match[1]
+	} else {
+		return fmt.Errorf("Unmarshal Location failed, %v", string(data))
+	}
+	match = bucketReg.FindStringSubmatch(string(data))
+	if len(match) > 1 {
+		res.Bucket = match[1]
+	} else {
+		return fmt.Errorf("Unmarshal Bucket failed, %v", string(data))
+	}
+	match = keyReg.FindStringSubmatch(string(data))
+	if len(match) > 1 {
+		res.Key = match[1]
+	} else {
+		return fmt.Errorf("Unmarshal Key failed, %v", string(data))
+	}
+	match = etagReg.FindStringSubmatch(string(data))
+	if len(match) > 1 {
+		res.ETag = "\"" + match[1] + "\""
+	} else {
+		return fmt.Errorf("Unmarshal Etag failed, %v", string(data))
+	}
+
+	return nil
+}
+
+func GetBucketRegionFromUrl(u *url.URL) (string, string) {
+	if u == nil {
+		return "", ""
+	}
+	vec := strings.Split(u.Host, ".")
+	if len(vec) < 3 {
+		return "", ""
+	}
+	return vec[0], vec[2]
+}
+
+func Bool(v bool) *bool {
+	return &v
 }

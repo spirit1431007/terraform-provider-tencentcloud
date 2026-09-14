@@ -6,7 +6,7 @@ const (
 
 var MYSQL_ALLOW_BACKUP_TIME = []string{"02:00-06:00", "06:00-10:00", "10:00-14:00", "14:00-18:00", "18:00-22:00", "22:00-02:00"}
 
-var MYSQL_ALLOW_BACKUP_MODEL = []string{"logical", "physical"}
+var MYSQL_ALLOW_BACKUP_MODEL = []string{"physical", "snapshot"}
 
 // mysql Status	https://cloud.tencent.com/document/api/236/15872
 const (
@@ -71,7 +71,7 @@ var MysqlDelStates = map[int64]bool{
 // mysql available period value
 var MYSQL_AVAILABLE_PERIOD = []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 24, 36}
 
-var MYSQL_SUPPORTS_ENGINE = []string{"5.5", "5.6", "5.7", "8.0"}
+var MYSQL_SUPPORTS_ENGINE = []string{"5.5", "5.6", "5.7", "8.0", "8.4"}
 
 // automatic renewal status code
 const (

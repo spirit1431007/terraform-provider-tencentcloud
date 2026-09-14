@@ -41,23 +41,46 @@ func main() {
 	filePath := filepath.Dir(filename)
 	message("generating doc from: %s\n", filePath)
 
-	// document for Index
+	// 1) Parse the unified provider.md once. The same product list now
+	//    feeds both the SDKv2 renderer and the framework renderer; which
+	//    pipeline owns each entry is decided by SDKv2 / framework
+	//    registries (see step 2 + step 3).
 	products := genIdx(filePath)
 
+	// 2) sdkv2 phase: emit r/<...> + d/<...> for every entry that the
+	//    SDKv2 provider knows about. Anything that is *not* present in
+	//    provider.ResourcesMap / provider.DataSourcesMap is silently
+	//    skipped here — those are framework references and step 3 will
+	//    pick them up.
 	for _, product := range products {
-		// document for DataSources
 		for _, dataSource := range product.DataSources {
+			if _, ok := provider.DataSourcesMap[dataSource]; !ok {
+				continue
+			}
 			genDoc(product.Name, "data_source", filePath, dataSource, provider.DataSourcesMap[dataSource])
 		}
 
-		// document for Resources
 		for _, resource := range product.Resources {
+			if _, ok := provider.ResourcesMap[resource]; !ok {
+				continue
+			}
 			genDoc(product.Name, "resource", filePath, resource, provider.ResourcesMap[resource])
 		}
 	}
+
+	// 3) framework phase: render r / d / f / e / l / a / ... documents
+	//    for every framework reference type registered in
+	//    tencentcloud/framework/registry.go. The unified product list is
+	//    consulted to derive the sidebar product label for each entry.
+	genFrameworkDocs(filePath, products)
+
+	// 4) Re-render the sidebar .erb from the same unified product list.
+	writeIdxErb(filePath, products)
 }
 
-// genIdx generating index for resource
+// genIdx parses the sdkv2 provider.md "Resources List" section into the
+// per-product Product slice. Writing of the sidebar .erb is deferred to
+// writeIdxErb so the final output can also include the framework stack.
 func genIdx(filePath string) (prods []Product) {
 	filename := "provider.md"
 
@@ -83,14 +106,19 @@ func genIdx(filePath string) (prods []Product) {
 	}
 
 	doc := strings.TrimSpace(description[pos+16:])
-	// description = strings.TrimSpace(description[:pos])
 
 	prods, err = GetIndex(doc)
 	if err != nil {
 		message("[FAIL!]: %s", err)
 		os.Exit(1)
 	}
+	return
+}
 
+// writeIdxErb renders the sidebar .erb from the unified Product list.
+// Both SDKv2 and framework references contribute to the same Product
+// nodes — the rendering is purely a function of the parsed provider.md.
+func writeIdxErb(filePath string, prods []Product) {
 	data := map[string]interface{}{
 		"cloud_mark":  cloudMark,
 		"cloud_title": cloudTitle,
@@ -98,24 +126,25 @@ func genIdx(filePath string) (prods []Product) {
 		"Products":    prods,
 	}
 
-	filename = filepath.Join(docRoot, "..", fmt.Sprintf("%s.erb", cloudMark))
+	filename := filepath.Join(docRoot, "..", fmt.Sprintf("%s.erb", cloudMark))
 	fd, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		message("[FAIL!]open file %s failed: %s", filename, err)
 		os.Exit(1)
 	}
-
-	defer fd.Close()
+	defer func() {
+		if err := fd.Close(); err != nil {
+			message("[WARN]close file %s failed: %s", filename, err)
+		}
+	}()
 
 	tmpl := template.Must(template.New("t").Funcs(template.FuncMap{"replace": replace}).Parse(idxTPL))
-
 	if err := tmpl.Execute(fd, data); err != nil {
 		message("[FAIL!]write file %s failed: %s", filename, err)
 		os.Exit(1)
 	}
-
+	_ = filePath // currently unused; kept for parity with genIdx and for forward extensions.
 	message("[SUCC.]write doc to file success: %s", filename)
-	return
 }
 
 // genDoc generating doc for data source and resource
@@ -130,6 +159,7 @@ func genDoc(product, dtype, fpath, name string, resource *schema.Resource) {
 		"example":           "",
 		"description":       "",
 		"description_short": "",
+		"timeouts":          "",
 		"import":            "",
 	}
 
@@ -164,6 +194,61 @@ func genDoc(product, dtype, fpath, name string, resource *schema.Resource) {
 		description = strings.TrimSpace(description[:importPos])
 	}
 
+	if resource.Timeouts != nil {
+		var timeoutMethods []string
+		if resource.Timeouts.Create != nil {
+			timeoutStr := resource.Timeouts.Create.String()
+			if strings.Contains(timeoutStr, "m") {
+				parts := strings.Split(timeoutStr, "m")
+				if len(parts) > 0 {
+					timeoutStr = parts[0] + "m"
+				}
+			}
+
+			timeoutMethods = append(timeoutMethods, fmt.Sprintf("* `create` - (Defaults to `%s`) Used when creating the resource.", timeoutStr))
+		}
+
+		if resource.Timeouts.Read != nil {
+			timeoutStr := resource.Timeouts.Read.String()
+			if strings.Contains(timeoutStr, "m") {
+				parts := strings.Split(timeoutStr, "m")
+				if len(parts) > 0 {
+					timeoutStr = parts[0] + "m"
+				}
+			}
+
+			timeoutMethods = append(timeoutMethods, fmt.Sprintf("* `read` - (Defaults to `%s`) Used when reading the resource.", timeoutStr))
+		}
+
+		if resource.Timeouts.Update != nil {
+			timeoutStr := resource.Timeouts.Update.String()
+			if strings.Contains(timeoutStr, "m") {
+				parts := strings.Split(timeoutStr, "m")
+				if len(parts) > 0 {
+					timeoutStr = parts[0] + "m"
+				}
+			}
+
+			timeoutMethods = append(timeoutMethods, fmt.Sprintf("* `update` - (Defaults to `%s`) Used when updating the resource.", timeoutStr))
+		}
+
+		if resource.Timeouts.Delete != nil {
+			timeoutStr := resource.Timeouts.Delete.String()
+			if strings.Contains(timeoutStr, "m") {
+				parts := strings.Split(timeoutStr, "m")
+				if len(parts) > 0 {
+					timeoutStr = parts[0] + "m"
+				}
+			}
+
+			timeoutMethods = append(timeoutMethods, fmt.Sprintf("* `delete` - (Defaults to `%s`) Used when deleting the resource.", timeoutStr))
+		}
+
+		if len(timeoutMethods) > 0 {
+			data["timeouts"] = strings.TrimSpace(fmt.Sprintf("The `timeouts` block allows you to specify [timeouts](https://developer.hashicorp.com/terraform/language/resources/syntax#operation-timeouts) for certain actions:\n\n%s", strings.Join(timeoutMethods, "\n")))
+		}
+	}
+
 	pos := strings.Index(description, "\nExample Usage\n")
 	if pos != -1 {
 		data["example"] = formatHCL(description[pos+15:])
@@ -186,6 +271,7 @@ func genDoc(product, dtype, fpath, name string, resource *schema.Resource) {
 		optionalArgs []string
 		attributes   []string
 		subStruct    []string
+		nestedAttrs  []string
 	)
 
 	if _, ok := resource.Schema["result_output_file"]; dtype == "data_source" && !ok {
@@ -216,6 +302,7 @@ func genDoc(product, dtype, fpath, name string, resource *schema.Resource) {
 			opt := "Required"
 			sub := getSubStruct(0, "", k, v)
 			subStruct = append(subStruct, sub...)
+			nestedAttrs = append(nestedAttrs, getSubStructAttrs(0, "", k, v)...)
 			// get type
 			res := parseSubtract(v, sub)
 			valueType := parseType(v)
@@ -236,6 +323,7 @@ func genDoc(product, dtype, fpath, name string, resource *schema.Resource) {
 			opt := "Optional"
 			sub := getSubStruct(0, "", k, v)
 			subStruct = append(subStruct, sub...)
+			nestedAttrs = append(nestedAttrs, getSubStructAttrs(0, "", k, v)...)
 			// get type
 			res := parseSubtract(v, sub)
 			valueType := parseType(v)
@@ -264,6 +352,7 @@ func genDoc(product, dtype, fpath, name string, resource *schema.Resource) {
 	sort.Strings(optionalArgs)
 	sort.Strings(attributes)
 	sort.Strings(subStruct)
+	sort.Strings(nestedAttrs)
 
 	// remove duplicates
 	if len(subStruct) > 0 {
@@ -284,6 +373,12 @@ func genDoc(product, dtype, fpath, name string, resource *schema.Resource) {
 		data["arguments"] += "\n" + strings.Join(subStruct, "\n")
 	}
 	data["attributes"] = strings.Join(attributes, "\n")
+	if len(nestedAttrs) > 0 {
+		if data["attributes"] != "" {
+			data["attributes"] += "\n"
+		}
+		data["attributes"] += strings.Join(nestedAttrs, "\n")
+	}
 	if dtype == "resource" {
 		idAttribute := "* `id` - ID of the resource.\n"
 		data["attributes"] = idAttribute + data["attributes"]
@@ -297,7 +392,11 @@ func genDoc(product, dtype, fpath, name string, resource *schema.Resource) {
 		os.Exit(1)
 	}
 
-	defer fd.Close()
+	defer func() {
+		if err := fd.Close(); err != nil {
+			message("[WARN]close file %s failed: %s", filename, err)
+		}
+	}()
 	t := template.Must(template.New("t").Parse(docTPL))
 	err = t.Execute(fd, data)
 	if err != nil {
@@ -407,6 +506,57 @@ func getSubStruct(step int, parentK, k string, v *schema.Schema) []string {
 	}
 
 	return subStructs
+}
+
+// getSubStructAttrs 收集 Required/Optional 的 List/Set/Map 嵌套对象中
+// Computed 子字段，生成 "The `xxx` object exports the following:" 节，
+// 供 Attributes Reference 使用。它与 getSubStruct（仅收集 Required/Optional
+// 参数）对称，避免嵌套的只读(computed)属性在文档中丢失。
+//
+// 每个返回元素都是一个完整的节块（含标题与缩进后的子字段），由调用方
+// 统一排序后拼接到 Attributes Reference 末尾。
+func getSubStructAttrs(step int, parentK, k string, v *schema.Schema) []string {
+	var blocks []string
+
+	if v.Type != schema.TypeMap && v.Type != schema.TypeList && v.Type != schema.TypeSet {
+		return blocks
+	}
+	res, ok := v.Elem.(*schema.Resource)
+	if !ok {
+		return blocks
+	}
+
+	var computedLines []string
+	for kk, vv := range res.Schema {
+		// 只收集纯 Computed 子字段；Optional/Required(+Computed) 字段
+		// 已经作为参数在 getSubStruct 的 supports 节中列出，避免重复渲染。
+		if !vv.Computed || vv.Optional || vv.Required {
+			continue
+		}
+		computedLines = append(computedLines, getAttributes(0, kk, vv)...)
+	}
+
+	if len(computedLines) > 0 {
+		sort.Strings(computedLines)
+		var title string
+		if step == 0 {
+			title = fmt.Sprintf("\nThe `%s` object exports the following:\n", k)
+		} else {
+			title = fmt.Sprintf("\nThe `%s` object of `%s` exports the following:\n", k, parentK)
+		}
+		blocks = append(blocks, title+"\n"+strings.Join(computedLines, "\n"))
+	}
+
+	// 递归处理更深层嵌套对象中的纯 Computed 子字段。纯 Computed 的
+	// 嵌套对象已由 getAttributes 缩进渲染，这里跳过以避免重复。
+	for kk, vv := range res.Schema {
+		if vv.Computed && !vv.Optional && !vv.Required {
+			continue
+		}
+		blocks = append(blocks, getSubStructAttrs(step+1, k, kk, vv)...)
+	}
+
+	return blocks
 }
 
 // formatHCL format HLC code

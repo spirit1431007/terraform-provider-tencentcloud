@@ -11,6 +11,8 @@ description: |-
 
 Provide a resource to create a VPC.
 
+~> **NOTE:** In accordance with VPC business requirements, the default value for `is_multicast` has been updated to `false`(previously `true`) in version `v1.82.93` of the provider. If you wish to utilize this feature, you must first contact the VPC product team to have your account added to the whitelist, and then set the `is_multicast` field to `true`.
+
 ## Example Usage
 
 ### Create a basic VPC
@@ -23,7 +25,7 @@ resource "tencentcloud_vpc" "vpc" {
   is_multicast = false
 
   tags = {
-    "test" = "test"
+    createBy = "Terraform"
   }
 }
 ```
@@ -38,7 +40,23 @@ resource "tencentcloud_vpc" "vpc" {
   assistant_cidrs = ["172.16.0.0/24"]
 
   tags = {
-    "test" = "test"
+    createBy = "Terraform"
+  }
+}
+```
+
+### Enable route vpc publish
+
+```hcl
+resource "tencentcloud_vpc" "vpc" {
+  name                     = "tf-example"
+  cidr_block               = "10.0.0.0/16"
+  dns_servers              = ["119.29.29.29", "8.8.8.8"]
+  is_multicast             = false
+  enable_route_vpc_publish = true
+
+  tags = {
+    createBy = "Terraform"
   }
 }
 ```
@@ -51,7 +69,9 @@ The following arguments are supported:
 * `name` - (Required, String) The name of the VPC.
 * `assistant_cidrs` - (Optional, Set: [`String`]) List of Assistant CIDR, NOTE: Only `NORMAL` typed CIDRs included, check the Docker CIDR by readonly `assistant_docker_cidrs`.
 * `dns_servers` - (Optional, Set: [`String`]) The DNS server list of the VPC. And you can specify 0 to 5 servers to this list.
-* `is_multicast` - (Optional, Bool) Indicates whether VPC multicast is enabled. The default value is 'true'.
+* `enable_route_vpc_publish_ipv6` - (Optional, Bool) Vpc association with CCN IPV6 route publish policy. true: enables cidr route publishing. false: enables subnet route publishing. default is subnet route publishing when creating a vpc. to select cidr route publishing, submit a ticket for adding to allowlist.
+* `enable_route_vpc_publish` - (Optional, Bool) Vpc association with CCN route publish policy. true: enables cidr route publishing. false: enables subnet route publishing. default is subnet route publishing when creating a vpc. to select cidr route publishing, submit a ticket for adding to allowlist.
+* `is_multicast` - (Optional, Bool) Indicates whether VPC multicast is enabled. The default value is `false`. Multicast are whitelist-restricted. We recommend disabling these features if they are not applicable to your environment.
 * `tags` - (Optional, Map) Tags of the VPC.
 
 ## Attributes Reference
@@ -70,6 +90,6 @@ In addition to all arguments above, the following attributes are exported:
 Vpc instance can be imported, e.g.
 
 ```
-$ terraform import tencentcloud_vpc.test vpc-id
+$ terraform import tencentcloud_vpc.vpc vpc-8vazrwjv
 ```
 

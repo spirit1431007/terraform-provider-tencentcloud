@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	tccommon "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/common"
 	svcssl "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/services/ssl"
@@ -14,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/pkg/errors"
+	clbintl "github.com/tencentcloud/tencentcloud-sdk-go-intl-en/tencentcloud/clb/v20180317"
 	clb "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/clb/v20180317"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
 	sdkErrors "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
@@ -66,9 +68,14 @@ func (me *ClbService) DescribeLoadBalancerById(ctx context.Context, clbId string
 	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
 		logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
 
+	if response == nil || response.Response == nil || response.Response.LoadBalancerSet == nil {
+		return
+	}
+
 	if len(response.Response.LoadBalancerSet) < 1 {
 		return
 	}
+
 	clbInstance = response.Response.LoadBalancerSet[0]
 	return
 }
@@ -102,16 +109,32 @@ func (me *ClbService) DescribeLoadBalancerByFilter(ctx context.Context, params m
 	for {
 		request.Offset = &(offset)
 		request.Limit = &(pageSize)
-		ratelimit.Check(request.GetAction())
-		response, err := me.client.UseClbClient().DescribeLoadBalancers(request)
+
+		var response *clb.DescribeLoadBalancersResponse
+		err := resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
+			ratelimit.Check(request.GetAction())
+			result, e := me.client.UseClbClient().DescribeLoadBalancers(request)
+			if e != nil {
+				return tccommon.RetryError(e)
+			}
+			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
+				logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+
+			if result == nil || result.Response == nil || result.Response.LoadBalancerSet == nil {
+				return resource.NonRetryableError(fmt.Errorf("DescribeLoadBalancers response is nil"))
+			}
+
+			response = result
+			return nil
+		})
+
 		if err != nil {
-			errRet = errors.WithStack(err)
+			log.Printf("[CRITAL]%s DescribeLoadBalancerByFilter failed, reason:%+v", logId, err)
+			errRet = err
 			return
 		}
-		log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
-			logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
 
-		if response == nil || len(response.Response.LoadBalancerSet) < 1 {
+		if len(response.Response.LoadBalancerSet) < 1 {
 			break
 		}
 
@@ -136,7 +159,12 @@ func (me *ClbService) DeleteLoadBalancerById(ctx context.Context, clbId string) 
 			if e.GetCode() == "InvalidParameter.LBIdNotFound" {
 				return nil
 			}
+
+			if e.GetCode() == "FailedOperation.ResourceInOperating" {
+				return err
+			}
 		}
+
 		return errors.WithStack(err)
 	}
 	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
@@ -375,15 +403,7 @@ func (me *ClbService) DescribeRuleByPara(ctx context.Context, clbId string, list
 				findFlag = true
 				break
 			} else if len(domains) > 0 {
-				tmpRef := true
-				for i := range domains {
-					if *domains[i] != *rule.Domains[i] {
-						tmpRef = false
-						break
-					}
-				}
-
-				if tmpRef {
+				if helper.StringPtrSlicesEqual(domains, rule.Domains) {
 					ruleOutput = *rule
 					findFlag = true
 					break
@@ -646,7 +666,20 @@ func (me *ClbService) DeleteAttachmentById(ctx context.Context, clbId string, li
 	return nil
 }
 
-func (me *ClbService) DescribeRedirectionById(ctx context.Context, rewriteId string) (rewriteInfo *map[string]string, errRet error) {
+// RedirectionInfo holds the full information of a CLB redirection rule,
+// including non-string fields RewriteCode (*int64) and TakeUrl (*bool).
+type RedirectionInfo struct {
+	SourceRuleId     string
+	TargetRuleId     string
+	SourceListenerId string
+	TargetListenerId string
+	ClbId            string
+	RewriteCode      *int64
+	TakeUrl          *bool
+	SourceDomain     string
+}
+
+func (me *ClbService) DescribeRedirectionById(ctx context.Context, rewriteId string) (rewriteInfo *RedirectionInfo, errRet error) {
 	logId := tccommon.GetLogId(ctx)
 	items := strings.Split(rewriteId, "#")
 	if len(items) != 5 {
@@ -659,7 +692,6 @@ func (me *ClbService) DescribeRedirectionById(ctx context.Context, rewriteId str
 	sourceListenerId := items[2]
 	targetListenerId := items[3]
 	clbId := items[4]
-	result := make(map[string]string)
 	request := clb.NewDescribeRewriteRequest()
 	request.LoadBalancerId = &clbId
 	request.SourceListenerIds = []*string{&sourceListenerId}
@@ -687,12 +719,16 @@ func (me *ClbService) DescribeRedirectionById(ctx context.Context, rewriteId str
 		//sometimes the response returns all the rules under a certain url, so filter again in the code
 		if v.RewriteTarget != nil {
 			if *v.RewriteTarget.TargetListenerId == targetListenerId && *v.RewriteTarget.TargetLocationId == targetLocId {
-				result["source_rule_id"] = sourceLocId
-				result["target_rule_id"] = targetLocId
-				result["source_listener_id"] = sourceListenerId
-				result["target_listener_id"] = targetListenerId
-				result["clb_id"] = clbId
-				rewriteInfo = &result
+				rewriteInfo = &RedirectionInfo{
+					SourceRuleId:     sourceLocId,
+					TargetRuleId:     targetLocId,
+					SourceListenerId: sourceListenerId,
+					TargetListenerId: targetListenerId,
+					ClbId:            clbId,
+					RewriteCode:      v.RewriteTarget.RewriteCode,
+					TakeUrl:          v.RewriteTarget.TakeUrl,
+					SourceDomain:     *v.Domain,
+				}
 				return
 			}
 		}
@@ -871,27 +907,27 @@ func checkHealthCheckPara(ctx context.Context, d *schema.ResourceData, protocol 
 		healthCheck.HealthSwitch = &healthSwitch
 	}
 	if IsHealthCheckEnable(healthSwitch) {
-		if v, ok := d.GetOk("health_check_time_out"); ok {
+		if v, ok := d.GetOkExists("health_check_time_out"); ok {
 			healthSetFlag = true
 			vv := int64(v.(int))
 			healthCheck.TimeOut = &vv
 		}
-		if v, ok := d.GetOk("health_check_interval_time"); ok {
+		if v, ok := d.GetOkExists("health_check_interval_time"); ok {
 			healthSetFlag = true
 			vv := int64(v.(int))
 			healthCheck.IntervalTime = &vv
 		}
-		if v, ok := d.GetOk("health_check_health_num"); ok {
+		if v, ok := d.GetOkExists("health_check_health_num"); ok {
 			healthSetFlag = true
 			vv := int64(v.(int))
 			healthCheck.HealthNum = &vv
 		}
-		if v, ok := d.GetOk("health_check_unhealth_num"); ok {
+		if v, ok := d.GetOkExists("health_check_unhealth_num"); ok {
 			healthSetFlag = true
 			vv := int64(v.(int))
 			healthCheck.UnHealthNum = &vv
 		}
-		if v, ok := d.GetOk("health_check_port"); ok {
+		if v, ok := d.GetOkExists("health_check_port"); ok {
 			healthSetFlag = true
 			healthCheck.CheckPort = helper.Int64(int64(v.(int)))
 		}
@@ -901,7 +937,7 @@ func checkHealthCheckPara(ctx context.Context, d *schema.ResourceData, protocol 
 			checkType = v.(string)
 			healthCheck.CheckType = &checkType
 		}
-		if v, ok := d.GetOk("health_check_http_code"); ok {
+		if v, ok := d.GetOkExists("health_check_http_code"); ok {
 			if !(protocol == CLB_LISTENER_PROTOCOL_HTTP || protocol == CLB_LISTENER_PROTOCOL_HTTPS ||
 				(protocol == CLB_LISTENER_PROTOCOL_TCP && checkType == HEALTH_CHECK_TYPE_HTTP)) {
 				healthSetFlag = false
@@ -986,7 +1022,181 @@ func checkHealthCheckPara(ctx context.Context, d *schema.ResourceData, protocol 
 			healthCheck.RecvContext = helper.String(v.(string))
 		}
 
-		if v, ok := d.GetOk("health_source_ip_type"); ok {
+		if v, ok := d.GetOkExists("health_source_ip_type"); ok {
+			healthSetFlag = true
+			healthCheck.SourceIpType = helper.Int64(int64(v.(int)))
+		}
+	}
+
+	if healthSetFlag {
+		if IsHealthCheckEnable(healthSwitch) {
+			if !(((protocol == CLB_LISTENER_PROTOCOL_TCP || protocol == CLB_LISTENER_PROTOCOL_UDP ||
+				protocol == CLB_LISTENER_PROTOCOL_TCPSSL || protocol == CLB_LISTENER_PROTOCOL_QUIC) &&
+				applyType == HEALTH_APPLY_TYPE_LISTENER) ||
+				((protocol == CLB_LISTENER_PROTOCOL_HTTP || protocol == CLB_LISTENER_PROTOCOL_HTTPS) &&
+					applyType == HEALTH_APPLY_TYPE_RULE)) {
+				healthSetFlag = false
+				errRet = fmt.Errorf("health para can only be set with TCP/UDP/TCP_SSL listener or rule of HTTP/HTTPS listener")
+				errRet = errors.WithStack(errRet)
+				return
+			}
+			if protocol == CLB_LISTENER_PROTOCOL_TCP {
+				if checkType == HEALTH_CHECK_TYPE_HTTP && healthCheck.HttpCheckDomain == nil {
+					healthCheck.HttpCheckDomain = helper.String("")
+				}
+				if healthCheck.CheckPort == nil {
+					healthCheck.CheckPort = helper.Int64(-1)
+				}
+				if healthCheck.HttpCheckPath == nil {
+					healthCheck.HttpCheckPath = helper.String("")
+				}
+			}
+		}
+
+		healthCheckPara = &healthCheck
+	}
+	return
+
+}
+
+func checkHealthCheckParaForUpdate(ctx context.Context, d *schema.ResourceData, protocol string, applyType string) (healthSetFlag bool, healthCheckPara *clb.HealthCheck, errRet error) {
+	var healthCheck clb.HealthCheck
+	var checkType string
+
+	healthSetFlag = false
+	if v, ok := d.GetOk("target_type"); ok {
+		if v.(string) == CLB_TARGET_TYPE_TARGETGROUP_V2 {
+			return
+		}
+	}
+
+	healthCheckPara = &healthCheck
+	healthSwitch := int64(0)
+	if v, ok := d.GetOkExists("health_check_switch"); ok {
+		healthSetFlag = true
+		vv := v.(bool)
+		if vv {
+			healthSwitch = 1
+		}
+		healthCheck.HealthSwitch = &healthSwitch
+	}
+	if IsHealthCheckEnable(healthSwitch) {
+		if v, ok := d.GetOkExists("health_check_time_out"); ok {
+			healthSetFlag = true
+			vv := int64(v.(int))
+			healthCheck.TimeOut = &vv
+		}
+		if v, ok := d.GetOkExists("health_check_interval_time"); ok {
+			healthSetFlag = true
+			vv := int64(v.(int))
+			healthCheck.IntervalTime = &vv
+		}
+		if v, ok := d.GetOkExists("health_check_health_num"); ok {
+			healthSetFlag = true
+			vv := int64(v.(int))
+			healthCheck.HealthNum = &vv
+		}
+		if v, ok := d.GetOkExists("health_check_unhealth_num"); ok {
+			healthSetFlag = true
+			vv := int64(v.(int))
+			healthCheck.UnHealthNum = &vv
+		}
+		if v, ok := d.GetOkExists("health_check_port"); ok {
+			healthSetFlag = true
+			healthCheck.CheckPort = helper.Int64(int64(v.(int)))
+		}
+
+		if v, ok := d.GetOk("health_check_type"); ok {
+			healthSetFlag = true
+			checkType = v.(string)
+			healthCheck.CheckType = &checkType
+		}
+		if v, ok := d.GetOkExists("health_check_http_code"); ok {
+			if !(protocol == CLB_LISTENER_PROTOCOL_HTTP || protocol == CLB_LISTENER_PROTOCOL_HTTPS ||
+				(protocol == CLB_LISTENER_PROTOCOL_TCP && checkType == HEALTH_CHECK_TYPE_HTTP)) {
+				healthSetFlag = false
+				errRet = fmt.Errorf("health_check_http_code can only be set with protocol HTTP/HTTPS or HTTP of TCP")
+				errRet = errors.WithStack(errRet)
+				return
+			}
+			healthSetFlag = true
+			healthCheck.HttpCode = helper.Int64(int64(v.(int)))
+		}
+		if v, ok := d.GetOk("health_check_http_path"); ok {
+			if !(protocol == CLB_LISTENER_PROTOCOL_HTTP || protocol == CLB_LISTENER_PROTOCOL_HTTPS ||
+				(protocol == CLB_LISTENER_PROTOCOL_TCP && checkType == HEALTH_CHECK_TYPE_HTTP)) {
+				healthSetFlag = false
+				errRet = fmt.Errorf("health_check_http_path can only be set with protocol HTTP/HTTPS or HTTP of TCP")
+				errRet = errors.WithStack(errRet)
+				return
+			}
+			healthSetFlag = true
+			healthCheck.HttpCheckPath = helper.String(v.(string))
+		}
+		if v, ok := d.GetOk("health_check_http_domain"); ok {
+			if !(protocol == CLB_LISTENER_PROTOCOL_HTTP || protocol == CLB_LISTENER_PROTOCOL_HTTPS ||
+				(protocol == CLB_LISTENER_PROTOCOL_TCP && checkType == HEALTH_CHECK_TYPE_HTTP)) {
+				healthSetFlag = false
+				errRet = fmt.Errorf("health_check_http_domain can only be set with protocol HTTP/HTTPS or HTTP of TCP")
+				errRet = errors.WithStack(errRet)
+				return
+			}
+			healthSetFlag = true
+			healthCheck.HttpCheckDomain = helper.String(v.(string))
+		}
+		if v, ok := d.GetOk("health_check_http_method"); ok {
+			if !(protocol == CLB_LISTENER_PROTOCOL_HTTP || protocol == CLB_LISTENER_PROTOCOL_HTTPS ||
+				(protocol == CLB_LISTENER_PROTOCOL_TCP && checkType == HEALTH_CHECK_TYPE_HTTP)) {
+				healthSetFlag = false
+				errRet = fmt.Errorf("health_check_http_method can only be set with protocol HTTP/HTTPS or HTTP of TCP")
+				errRet = errors.WithStack(errRet)
+				return
+			}
+			healthSetFlag = true
+			healthCheck.HttpCheckMethod = helper.String(v.(string))
+		}
+		if v, ok := d.GetOk("health_check_http_version"); ok {
+			if !(protocol == CLB_LISTENER_PROTOCOL_TCP && checkType == HEALTH_CHECK_TYPE_HTTP) {
+				healthSetFlag = false
+				errRet = fmt.Errorf("health_check_http_version can only be set with protocol HTTP of TCP")
+				errRet = errors.WithStack(errRet)
+				return
+			}
+			healthSetFlag = true
+			healthCheck.HttpVersion = helper.String(v.(string))
+		}
+		if v, ok := d.GetOk("health_check_context_type"); ok {
+			if !((protocol == CLB_LISTENER_PROTOCOL_UDP || protocol == CLB_LISTENER_PROTOCOL_TCP) && checkType == HEALTH_CHECK_TYPE_CUSTOM) {
+				healthSetFlag = false
+				errRet = fmt.Errorf("health_check_context_type can only be set with protocol CUSTOM of TCP/UDP")
+				errRet = errors.WithStack(errRet)
+				return
+			}
+			healthSetFlag = true
+			healthCheck.ContextType = helper.String(v.(string))
+		}
+		if v, ok := d.GetOk("health_check_send_context"); ok {
+			if !((protocol == CLB_LISTENER_PROTOCOL_UDP || protocol == CLB_LISTENER_PROTOCOL_TCP) && checkType == HEALTH_CHECK_TYPE_CUSTOM) {
+				healthSetFlag = false
+				errRet = fmt.Errorf("health_check_send_context can only be set with protocol CUSTOM of TCP/UDP")
+				errRet = errors.WithStack(errRet)
+				return
+			}
+			healthSetFlag = true
+			healthCheck.SendContext = helper.String(v.(string))
+		}
+		if v, ok := d.GetOk("health_check_recv_context"); ok {
+			if !((protocol == CLB_LISTENER_PROTOCOL_UDP || protocol == CLB_LISTENER_PROTOCOL_TCP) && checkType == HEALTH_CHECK_TYPE_CUSTOM) {
+				healthSetFlag = false
+				errRet = fmt.Errorf("health_check_recv_context can only be set with protocol CUSTOM of TCP/UDP")
+				errRet = errors.WithStack(errRet)
+				return
+			}
+			healthSetFlag = true
+			healthCheck.RecvContext = helper.String(v.(string))
+		}
+
+		if v, ok := d.GetOkExists("health_source_ip_type"); ok {
 			healthSetFlag = true
 			healthCheck.SourceIpType = helper.Int64(int64(v.(int)))
 		}
@@ -1098,6 +1308,37 @@ func checkCertificateInputPara(ctx context.Context, d *schema.ResourceData, meta
 	}
 	return
 }
+
+func checkMultiCertificateInputPara(ctx context.Context, d *schema.ResourceData, meta interface{}) (multiCertificateSetFlag bool, multiCertPara *clb.MultiCertInfo, errRet error) {
+	multiCertificateSetFlag = false
+	var multiCertInfo clb.MultiCertInfo
+
+	if dMap, ok := helper.InterfacesHeadMap(d, "multi_cert_info"); ok {
+		if tmp, ok := dMap["ssl_mode"].(string); ok {
+			multiCertInfo.SSLMode = helper.String(tmp)
+		}
+
+		if tmp, ok := dMap["cert_id_list"]; ok {
+			tmpList := tmp.(*schema.Set).List()
+			if len(tmpList) < 1 {
+				errRet = fmt.Errorf("`cert_id_list` cannot be empty.")
+				return
+			}
+
+			for _, item := range tmpList {
+				var certInfo clb.CertInfo
+				certInfo.CertId = helper.String(item.(string))
+				multiCertInfo.CertList = append(multiCertInfo.CertList, &certInfo)
+			}
+		}
+
+		multiCertificateSetFlag = true
+		multiCertPara = &multiCertInfo
+	}
+
+	return
+}
+
 func processRetryErrMsg(err error) *resource.RetryError {
 	if e, ok := err.(*sdkErrors.TencentCloudSDKError); ok {
 		for _, msg := range []string{
@@ -1130,6 +1371,100 @@ func waitForTaskFinish(requestId string, meta *clb.Client) (err error) {
 		}
 		return nil
 	})
+	return
+}
+
+func waitForTaskFinishWithTimeout(requestId string, meta *clb.Client, timeout time.Duration) (err error) {
+	taskQueryRequest := clb.NewDescribeTaskStatusRequest()
+	taskQueryRequest.TaskId = &requestId
+	err = resource.Retry(timeout, func() *resource.RetryError {
+		taskResponse, e := meta.DescribeTaskStatus(taskQueryRequest)
+		if e != nil {
+			return resource.NonRetryableError(errors.WithStack(e))
+		}
+		if *taskResponse.Response.Status == int64(CLB_TASK_EXPANDING) {
+			return resource.RetryableError(errors.WithStack(fmt.Errorf("CLB task status is %d(expanding), requestId is %s", *taskResponse.Response.Status, *taskResponse.Response.RequestId)))
+		} else if *taskResponse.Response.Status == int64(CLB_TASK_FAIL) {
+			return resource.NonRetryableError(errors.WithStack(fmt.Errorf("CLB task status is %d(failed), requestId is %s", *taskResponse.Response.Status, *taskResponse.Response.RequestId)))
+		}
+		return nil
+	})
+	return
+}
+
+func waitForTaskFinishIntl(requestId string, meta *clbintl.Client) (err error) {
+	taskQueryRequest := clbintl.NewDescribeTaskStatusRequest()
+	taskQueryRequest.TaskId = &requestId
+	err = resource.Retry(4*tccommon.ReadRetryTimeout, func() *resource.RetryError {
+		taskResponse, e := meta.DescribeTaskStatus(taskQueryRequest)
+		if e != nil {
+			return resource.NonRetryableError(errors.WithStack(e))
+		}
+		if *taskResponse.Response.Status == int64(CLB_TASK_EXPANDING) {
+			return resource.RetryableError(errors.WithStack(fmt.Errorf("CLB task status is %d(expanding), requestId is %s", *taskResponse.Response.Status, *taskResponse.Response.RequestId)))
+		} else if *taskResponse.Response.Status == int64(CLB_TASK_FAIL) {
+			return resource.NonRetryableError(errors.WithStack(fmt.Errorf("CLB task status is %d(failed), requestId is %s", *taskResponse.Response.Status, *taskResponse.Response.RequestId)))
+		}
+		return nil
+	})
+	return
+}
+
+func waitForTaskFinishGetID(requestId string, meta *clb.Client) (clbID string, err error) {
+	request := clb.NewDescribeTaskStatusRequest()
+	request.TaskId = &requestId
+	err = resource.Retry(5*tccommon.ReadRetryTimeout, func() *resource.RetryError {
+		result, e := meta.DescribeTaskStatus(request)
+		if e != nil {
+			return resource.NonRetryableError(errors.WithStack(e))
+		}
+
+		if result == nil || result.Response == nil {
+			return resource.NonRetryableError(fmt.Errorf("Describe task status failed, Response is nil."))
+		}
+
+		if *result.Response.Status == int64(CLB_TASK_EXPANDING) {
+			return resource.RetryableError(errors.WithStack(fmt.Errorf("CLB task status is %d(expanding), requestId is %s", *result.Response.Status, *result.Response.RequestId)))
+		} else if *result.Response.Status == int64(CLB_TASK_FAIL) {
+			return resource.NonRetryableError(errors.WithStack(fmt.Errorf("CLB task status is %d(failed), requestId is %s", *result.Response.Status, *result.Response.RequestId)))
+		}
+
+		if *result.Response.Status == CLB_TASK_SUCCESS && len(result.Response.LoadBalancerIds) == 1 {
+			clbID = *result.Response.LoadBalancerIds[0]
+		}
+
+		return nil
+	})
+
+	return
+}
+
+func waitForTaskFinishGetIDWithTimeout(requestId string, meta *clb.Client, timeout time.Duration) (clbID string, err error) {
+	request := clb.NewDescribeTaskStatusRequest()
+	request.TaskId = &requestId
+	err = resource.Retry(timeout, func() *resource.RetryError {
+		result, e := meta.DescribeTaskStatus(request)
+		if e != nil {
+			return resource.NonRetryableError(errors.WithStack(e))
+		}
+
+		if result == nil || result.Response == nil {
+			return resource.NonRetryableError(fmt.Errorf("Describe task status failed, Response is nil."))
+		}
+
+		if *result.Response.Status == int64(CLB_TASK_EXPANDING) {
+			return resource.RetryableError(errors.WithStack(fmt.Errorf("CLB task status is %d(expanding), requestId is %s", *result.Response.Status, *result.Response.RequestId)))
+		} else if *result.Response.Status == int64(CLB_TASK_FAIL) {
+			return resource.NonRetryableError(errors.WithStack(fmt.Errorf("CLB task status is %d(failed), requestId is %s", *result.Response.Status, *result.Response.RequestId)))
+		}
+
+		if *result.Response.Status == CLB_TASK_SUCCESS && len(result.Response.LoadBalancerIds) == 1 {
+			clbID = *result.Response.LoadBalancerIds[0]
+		}
+
+		return nil
+	})
+
 	return
 }
 
@@ -1170,7 +1505,10 @@ func clbNewTarget(instanceId, eniIp, port, weight interface{}) *clb.Target {
 }
 
 func (me *ClbService) CreateTargetGroup(ctx context.Context, targetGroupName string, vpcId string, port uint64,
-	targetGroupInstances []*clb.TargetGroupInstance) (targetGroupId string, err error) {
+	targetGroupInstances []*clb.TargetGroupInstance, targetGroupType string, protocol string,
+	healthCheck *clb.TargetGroupHealthCheck, scheduleAlgorithm string, tags []*clb.TagInfo,
+	weight *uint64, fullListenSwitch *bool, keepaliveEnable *bool,
+	sessionExpireTime *uint64, ipVersion string, snatEnable *bool) (targetGroupId string, err error) {
 	var response *clb.CreateTargetGroupResponse
 
 	request := clb.NewCreateTargetGroupRequest()
@@ -1179,6 +1517,43 @@ func (me *ClbService) CreateTargetGroup(ctx context.Context, targetGroupName str
 	request.Port = &port
 	if vpcId != "" {
 		request.VpcId = &vpcId
+	}
+
+	if targetGroupType != "" {
+		request.Type = &targetGroupType
+	}
+
+	if protocol != "" {
+		request.Protocol = &protocol
+	}
+
+	// Set new parameters
+	if healthCheck != nil {
+		request.HealthCheck = healthCheck
+	}
+	if scheduleAlgorithm != "" {
+		request.ScheduleAlgorithm = &scheduleAlgorithm
+	}
+	if len(tags) > 0 {
+		request.Tags = tags
+	}
+	if weight != nil {
+		request.Weight = weight
+	}
+	if fullListenSwitch != nil {
+		request.FullListenSwitch = fullListenSwitch
+	}
+	if keepaliveEnable != nil {
+		request.KeepaliveEnable = keepaliveEnable
+	}
+	if sessionExpireTime != nil {
+		request.SessionExpireTime = sessionExpireTime
+	}
+	if ipVersion != "" {
+		request.IpVersion = &ipVersion
+	}
+	if snatEnable != nil {
+		request.SnatEnable = snatEnable
 	}
 
 	err = resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
@@ -1209,6 +1584,22 @@ func (me *ClbService) CreateTopic(ctx context.Context, params map[string]interfa
 
 	if partitionCount, ok := params["partition_count"]; ok {
 		request.PartitionCount = common.Uint64Ptr((uint64)(partitionCount.(int)))
+	}
+
+	if period, ok := params["period"]; ok {
+		request.Period = common.Uint64Ptr((uint64)(period.(int)))
+	}
+
+	if tags, ok := params["tags"].(map[string]interface{}); ok && len(tags) > 0 {
+		tagInfoList := make([]*clb.TagInfo, 0, len(tags))
+		for key, value := range tags {
+			tagInfo := &clb.TagInfo{
+				TagKey:   common.StringPtr(key),
+				TagValue: common.StringPtr(value.(string)),
+			}
+			tagInfoList = append(tagInfoList, tagInfo)
+		}
+		request.Tags = tagInfoList
 	}
 
 	err = resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
@@ -1244,6 +1635,21 @@ func (me *ClbService) ModifyTargetGroup(ctx context.Context, targetGroupId, targ
 	return nil
 }
 
+func (me *ClbService) ModifyTargetGroupAttribute(ctx context.Context, request *clb.ModifyTargetGroupAttributeRequest) (err error) {
+	err = resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+		_, err := me.client.UseClbClient().ModifyTargetGroupAttribute(request)
+		if err != nil {
+			return tccommon.RetryError(err, tccommon.InternalError)
+		}
+		return nil
+	})
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (me *ClbService) RegisterTargetInstances(ctx context.Context, targetGroupId, bindIp string, port, weight uint64) (err error) {
 	request := clb.NewRegisterTargetGroupInstancesRequest()
 	request.TargetGroupId = &targetGroupId
@@ -1254,15 +1660,28 @@ func (me *ClbService) RegisterTargetInstances(ctx context.Context, targetGroupId
 			Weight: &weight,
 		},
 	}
+
+	var requestId string
 	err = resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
-		_, err := me.client.UseClbClient().RegisterTargetGroupInstances(request)
+		result, err := me.client.UseClbClient().RegisterTargetGroupInstances(request)
 		if err != nil {
 			return tccommon.RetryError(err, tccommon.InternalError)
 		}
+
+		if result == nil || result.Response == nil || result.Response.RequestId == nil {
+			return resource.NonRetryableError(fmt.Errorf("Register target group instance failed, Response is nil."))
+		}
+
+		requestId = *result.Response.RequestId
 		return nil
 	})
 	if err != nil {
 		return err
+	}
+
+	retryErr := waitForTaskFinish(requestId, me.client.UseClbClient())
+	if retryErr != nil {
+		return retryErr
 	}
 
 	return nil
@@ -1278,15 +1697,27 @@ func (me *ClbService) DeregisterTargetInstances(ctx context.Context, targetGroup
 		},
 	}
 
+	var requestId string
 	err = resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
-		_, err := me.client.UseClbClient().DeregisterTargetGroupInstances(request)
+		result, err := me.client.UseClbClient().DeregisterTargetGroupInstances(request)
 		if err != nil {
 			return tccommon.RetryError(err, tccommon.InternalError)
 		}
+
+		if result == nil || result.Response == nil || result.Response.RequestId == nil {
+			return resource.NonRetryableError(fmt.Errorf("Deregister target group instance failed, Response is nil."))
+		}
+
+		requestId = *result.Response.RequestId
 		return nil
 	})
 	if err != nil {
 		return err
+	}
+
+	retryErr := waitForTaskFinish(requestId, me.client.UseClbClient())
+	if retryErr != nil {
+		return retryErr
 	}
 
 	return nil
@@ -1330,6 +1761,48 @@ func (me *ClbService) DescribeTargetGroups(ctx context.Context, targetGroupId st
 		request.Limit = &pageSize
 		ratelimit.Check(request.GetAction())
 		response, err := me.client.UseClbClient().DescribeTargetGroups(request)
+		if err != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]",
+				logId, request.GetAction(), request.ToJsonString(), err.Error())
+			errRet = err
+			return
+		}
+		log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]",
+			logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
+
+		if response == nil || response.Response == nil || len(response.Response.TargetGroupSet) < 1 {
+			break
+		}
+		targetGroupInfos = append(targetGroupInfos, response.Response.TargetGroupSet...)
+		if len(response.Response.TargetGroupSet) < int(pageSize) {
+			break
+		}
+		offset += pageSize
+	}
+	return
+}
+
+func (me *ClbService) DescribeTargetGroupList(ctx context.Context, targetGroupId string, filters map[string]string) (targetGroupInfos []*clb.TargetGroupInfo, errRet error) {
+	logId := tccommon.GetLogId(ctx)
+	request := clb.NewDescribeTargetGroupListRequest()
+	if targetGroupId != "" {
+		request.TargetGroupIds = []*string{&targetGroupId}
+	}
+	for k, v := range filters {
+		tmpFilter := clb.Filter{
+			Name:   helper.String(k),
+			Values: []*string{helper.String(v)},
+		}
+		request.Filters = append(request.Filters, &tmpFilter)
+	}
+
+	var offset uint64 = 0
+	var pageSize = uint64(CLB_PAGE_LIMIT)
+	for {
+		request.Offset = &offset
+		request.Limit = &pageSize
+		ratelimit.Check(request.GetAction())
+		response, err := me.client.UseClbClient().DescribeTargetGroupList(request)
 		if err != nil {
 			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]",
 				logId, request.GetAction(), request.ToJsonString(), err.Error())
@@ -1519,18 +1992,37 @@ func (me *ClbService) ModifyTargetGroupInstancesWeight(ctx context.Context, targ
 	request.TargetGroupId = &targetGroupId
 	request.TargetGroupInstances = []*clb.TargetGroupInstance{&instance}
 
+	var requestId string
 	err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
 		ratelimit.Check(request.GetAction())
-		_, err := me.client.UseClbClient().ModifyTargetGroupInstancesWeight(request)
+		result, err := me.client.UseClbClient().ModifyTargetGroupInstancesWeight(request)
 		if err != nil {
+			if e, ok := err.(*sdkErrors.TencentCloudSDKError); ok {
+				if e.GetCode() == "FailedOperation.ResourceInOperating" {
+					return resource.RetryableError(fmt.Errorf("ModifyTargetGroupInstancesWeight is waitting retry..."))
+				}
+			}
+
 			return tccommon.RetryError(err, tccommon.InternalError)
 		}
+
+		if result == nil || result.Response == nil || result.Response.RequestId == nil {
+			return resource.NonRetryableError(fmt.Errorf("Modify target group instance weight failed, Response is nil."))
+		}
+
+		requestId = *result.Response.RequestId
 		return nil
 	})
 
 	if err != nil {
 		return err
 	}
+
+	retryErr := waitForTaskFinish(requestId, me.client.UseClbClient())
+	if retryErr != nil {
+		return retryErr
+	}
+
 	return nil
 }
 
@@ -1674,13 +2166,34 @@ func (me *ClbService) UpdateClsLogSet(ctx context.Context, request *cls.ModifyLo
 	return
 }
 
-func (me *ClbService) DescribeLbCustomizedConfigById(ctx context.Context, configId string) (customizedConfig *clb.ConfigListItem, errRet error) {
+func (me *ClbService) DescribeLbCustomizedConfigById(ctx context.Context, configId, configType string) (customizedConfig *clb.ConfigListItem, errRet error) {
 	logId := tccommon.GetLogId(ctx)
 	request := clb.NewDescribeCustomizedConfigListRequest()
 	request.UconfigIds = []*string{&configId}
-	request.ConfigType = helper.String("CLB")
+	request.ConfigType = helper.String(configType)
 	ratelimit.Check(request.GetAction())
 	response, err := me.client.UseClbClient().DescribeCustomizedConfigList(request)
+	if err != nil {
+		errRet = errors.WithStack(err)
+		return
+	}
+	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
+		logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
+
+	if len(response.Response.ConfigList) < 1 {
+		return
+	}
+	customizedConfig = response.Response.ConfigList[0]
+	return
+}
+
+func (me *ClbService) DescribeLbIntlCustomizedConfigById(ctx context.Context, configId, configType string) (customizedConfig *clbintl.ConfigListItem, errRet error) {
+	logId := tccommon.GetLogId(ctx)
+	request := clbintl.NewDescribeCustomizedConfigListRequest()
+	request.UconfigIds = []*string{&configId}
+	request.ConfigType = helper.String(configType)
+	ratelimit.Check(request.GetAction())
+	response, err := me.client.UseClbIntlClient().DescribeCustomizedConfigList(request)
 	if err != nil {
 		errRet = errors.WithStack(err)
 		return
@@ -1781,6 +2294,11 @@ func (me *ClbService) DeleteLoadBalancerSnatIps(ctx context.Context, id string, 
 
 	if err != nil {
 		errRet = err
+		return
+	}
+
+	if response == nil || response.Response == nil || response.Response.RequestId == nil {
+		errRet = fmt.Errorf("Delete loadBalancer SnatIps failed, Response is nil")
 		return
 	}
 
@@ -2428,4 +2946,125 @@ func (me *ClbService) DescribeClbTargetGroupAttachmentsById(ctx context.Context,
 }
 func IsHealthCheckEnable(healthSwitch int64) bool {
 	return healthSwitch == int64(1)
+}
+
+func waitTaskReady(ctx context.Context, client *clb.Client, reqeustId string) error {
+	logId := tccommon.GetLogId(ctx)
+
+	describeRequest := clb.NewDescribeTaskStatusRequest()
+	describeRequest.TaskId = helper.String(reqeustId)
+
+	err := resource.Retry(2*tccommon.WriteRetryTimeout, func() *resource.RetryError {
+		ratelimit.Check(describeRequest.GetAction())
+		response, err := client.DescribeTaskStatus(describeRequest)
+		if err != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]",
+				logId, describeRequest.GetAction(), describeRequest.ToJsonString(), err)
+			return tccommon.RetryError(err)
+		}
+		// 任务状态：RUNNING，FAIL，SUCCESS
+		status := *response.Response.Status
+		if status == 0 {
+			return nil
+		} else if status == 1 {
+			return resource.NonRetryableError(fmt.Errorf("Task[%s] failed", reqeustId))
+		} else {
+			return resource.RetryableError(fmt.Errorf("Task[%s] status: %d", reqeustId, status))
+		}
+	})
+	if err != nil {
+		log.Printf("[CRITAL]%s task failed, reason: %v", logId, err)
+		return err
+	}
+	return nil
+}
+
+func (me *ClbService) DescribeDescribeCustomizedConfigAssociateListById(ctx context.Context, configId string) (bindList []*clbintl.BindDetailItem, errRet error) {
+	logId := tccommon.GetLogId(ctx)
+	request := clbintl.NewDescribeCustomizedConfigAssociateListRequest()
+	response := clbintl.NewDescribeCustomizedConfigAssociateListResponse()
+	request.UconfigId = helper.String(configId)
+
+	var (
+		offset int64 = 0
+		limit  int64 = 100
+	)
+
+	for {
+		request.Offset = &offset
+		request.Limit = &limit
+		err := resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
+			ratelimit.Check(request.GetAction())
+			result, err := me.client.UseClbIntlClient().DescribeCustomizedConfigAssociateList(request)
+			if err != nil {
+				return tccommon.RetryError(err)
+			} else {
+				log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+			}
+
+			if result == nil || result.Response == nil || result.Response.BindList == nil {
+				return resource.NonRetryableError(fmt.Errorf("Describe customized config associate list failed, Response is nil."))
+			}
+
+			response = result
+			return nil
+		})
+
+		if err != nil {
+			errRet = err
+			return
+		}
+
+		if len(response.Response.BindList) < 1 {
+			break
+		}
+
+		bindList = append(bindList, response.Response.BindList...)
+		if len(response.Response.BindList) < int(limit) {
+			break
+		}
+
+		offset += limit
+	}
+
+	return
+}
+
+func (me *ClbService) DescribeClbClsLogAttachmentById(ctx context.Context, loadBalancerId, logSetId, logTopicId string) (ret *clb.LoadBalancer, errRet error) {
+	logId := tccommon.GetLogId(ctx)
+
+	request := clb.NewDescribeLoadBalancersRequest()
+	response := clb.NewDescribeLoadBalancersResponse()
+	request.LoadBalancerIds = []*string{&loadBalancerId}
+
+	defer func() {
+		if errRet != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n", logId, request.GetAction(), request.ToJsonString(), errRet.Error())
+		}
+	}()
+
+	err := resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
+		ratelimit.Check(request.GetAction())
+		result, e := me.client.UseClbClient().DescribeLoadBalancers(request)
+		if e != nil {
+			return tccommon.RetryError(e)
+		} else {
+			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+		}
+
+		if result == nil || result.Response == nil || result.Response.LoadBalancerSet == nil || len(result.Response.LoadBalancerSet) < 1 {
+			return resource.NonRetryableError(fmt.Errorf("Describe load balancers failed, Response is nil."))
+		}
+
+		response = result
+		return nil
+	})
+
+	if err != nil {
+		errRet = err
+		return
+	}
+
+	ret = response.Response.LoadBalancerSet[0]
+	return
 }

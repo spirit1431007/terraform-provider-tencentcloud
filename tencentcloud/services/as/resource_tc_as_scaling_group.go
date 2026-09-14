@@ -94,8 +94,9 @@ func ResourceTencentCloudAsScalingGroup() *schema.Resource {
 				Description:   "ID list of traditional load balancers.",
 			},
 			"forward_balancer_ids": {
-				Type:          schema.TypeList,
+				Type:          schema.TypeSet,
 				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"load_balancer_ids"},
 				Description:   "List of application load balancers, which can't be specified with `load_balancer_ids` together.",
 				Elem: &schema.Resource{
@@ -158,21 +159,42 @@ func ResourceTencentCloudAsScalingGroup() *schema.Resource {
 				ValidateFunc: tccommon.ValidateAllowedStringValue([]string{SCALING_GROUP_RETRY_POLICY_IMMEDIATE_RETRY,
 					SCALING_GROUP_RETRY_POLICY_INCREMENTAL_INTERVALS}),
 			},
-			"scaling_mode": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Indicates scaling mode which creates and terminates instances (classic method), or method first tries to start stopped instances (wake up stopped) to perform scaling operations. Available values: `CLASSIC_SCALING`, `WAKE_UP_STOPPED_SCALING`. Default: `CLASSIC_SCALING`.",
-			},
 			// Service Settings
 			"replace_monitor_unhealthy": {
 				Type:        schema.TypeBool,
+				Computed:    true,
 				Optional:    true,
 				Description: "Enables unhealthy instance replacement. If set to `true`, AS will replace instances that are flagged as unhealthy by Cloud Monitor.",
 			},
+			"scaling_mode": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Optional:    true,
+				Description: "Indicates scaling mode which creates and terminates instances (classic method), or method first tries to start stopped instances (wake up stopped) to perform scaling operations. Available values: `CLASSIC_SCALING`, `WAKE_UP_STOPPED_SCALING`. Default: `CLASSIC_SCALING`.",
+			},
 			"replace_load_balancer_unhealthy": {
 				Type:        schema.TypeBool,
+				Computed:    true,
 				Optional:    true,
 				Description: "Enable unhealthy instance replacement. If set to `true`, AS will replace instances that are found unhealthy in the CLB health check.",
+			},
+			"replace_mode": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Optional:    true,
+				Description: "Replace mode of unhealthy replacement service. Valid values: RECREATE: Rebuild an instance to replace the original unhealthy instance. RESET: Performing a system reinstallation on unhealthy instances to keep information such as data disks, private IP addresses, and instance IDs unchanged. The instance login settings, HostName, enhanced services, and UserData will remain consistent with the current launch configuration. Default value: RECREATE. Note: This field may return null, indicating that no valid values can be obtained.",
+			},
+			"desired_capacity_sync_with_max_min_size": {
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Optional:    true,
+				Description: "The expected number of instances is synchronized with the maximum and minimum values. The default value is `False`. This parameter is effective only in the scenario where the expected number is not passed in when modifying the scaling group interface. True: When modifying the maximum or minimum value, if there is a conflict with the current expected number, the expected number is adjusted synchronously. For example, when modifying, if the minimum value 2 is passed in and the current expected number is 1, the expected number is adjusted synchronously to 2; False: When modifying the maximum or minimum value, if there is a conflict with the current expected number, an error message is displayed indicating that the modification is not allowed.",
+			},
+			"priority_scale_in_unhealthy": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Whether to enable priority for unhealthy instances during scale-in operations. If set to `true`, unhealthy instances will be removed first when scaling in.",
 			},
 			"health_check_type": {
 				Type:        schema.TypeString,
@@ -191,8 +213,33 @@ func ResourceTencentCloudAsScalingGroup() *schema.Resource {
 				Optional:    true,
 				Description: "Tags of a scaling group.",
 			},
+			"multi_zone_subnet_policy": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ValidateFunc: tccommon.ValidateAllowedStringValue([]string{MultiZoneSubnetPolicyPriority,
+					MultiZoneSubnetPolicyEquality}),
+				Description: "Multi zone or subnet strategy, Valid values: `PRIORITY` and `EQUALITY`.",
+			},
+			"instance_allocation_policy": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Optional:    true,
+				Description: "Instance allocation strategy, with values including `LAUNCH_CONFIGURATION` and `SPOT_MIXED`, defaults to `LAUNCH_CONFIGURATION`.\n`LAUNCH_CONFIGURATION`: Represents the traditional startup configuration mode;\n`SPOT_MIXED`: Representing the bidding mixed mode. At present, only hybrid mode is supported when the startup configuration is set to pay by volume mode. In hybrid mode, the scaling group will expand according to the set pay by volume or bidding models. When using hybrid mode, the billing type of the associated startup configuration cannot be modified.",
+			},
+			"concurrent_scale_out_for_desired_capacity": {
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Optional:    true,
+				Description: "The concurrent expansion function that matches the expected number cannot be set when `instance_allocation_policy` is in bidding `SPOT_MIXED` mode, nor can it be set when `scaling_mode` is in expansion priority boot mode(`WAKE_UP_STOPPED_SCALING`). At present, only two matching expected expansion activities are supported concurrently, and other types of activities such as specified quantity expansion and contraction are not supported. The default value is False, indicating that it is not turned on.",
+			},
 
 			// computed value
+			"auto_scaling_group_id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "ID of a scaling group.",
+			},
 			"status": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -207,13 +254,6 @@ func ResourceTencentCloudAsScalingGroup() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The time when the AS group was created.",
-			},
-			"multi_zone_subnet_policy": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ValidateFunc: tccommon.ValidateAllowedStringValue([]string{MultiZoneSubnetPolicyPriority,
-					MultiZoneSubnetPolicyEquality}),
-				Description: "Multi zone or subnet strategy, Valid values: PRIORITY and EQUALITY.",
 			},
 		},
 	}
@@ -269,7 +309,7 @@ func resourceTencentCloudAsScalingGroupCreate(d *schema.ResourceData, meta inter
 	}
 
 	if v, ok := d.GetOk("forward_balancer_ids"); ok {
-		forwardBalancers := v.([]interface{})
+		forwardBalancers := v.(*schema.Set).List()
 		request.ForwardLoadBalancers = make([]*as.ForwardLoadBalancer, 0, len(forwardBalancers))
 		for _, v := range forwardBalancers {
 			vv := v.(map[string]interface{})
@@ -315,31 +355,51 @@ func resourceTencentCloudAsScalingGroupCreate(d *schema.ResourceData, meta inter
 	}
 
 	var (
-		scalingMode             = d.Get("scaling_mode").(string)
-		replaceMonitorUnhealthy = d.Get("replace_monitor_unhealthy").(bool)
-		replaceLBUnhealthy      = d.Get("replace_load_balancer_unhealthy").(bool)
+		replaceMonitorUnhealthy           = d.Get("replace_monitor_unhealthy").(bool)
+		scalingMode                       = d.Get("scaling_mode").(string)
+		replaceLBUnhealthy                = d.Get("replace_load_balancer_unhealthy").(bool)
+		replaceMode                       = d.Get("replace_mode").(string)
+		desiredCapacitySyncWithMaxMinSize = d.Get("desired_capacity_sync_with_max_min_size").(bool)
+		priorityScaleInUnhealthy          = d.Get("priority_scale_in_unhealthy").(bool)
 	)
 
-	if scalingMode != "" || replaceMonitorUnhealthy || replaceLBUnhealthy {
+	if replaceMonitorUnhealthy || scalingMode != "" || replaceLBUnhealthy || replaceMode != "" || desiredCapacitySyncWithMaxMinSize || priorityScaleInUnhealthy {
 		if scalingMode == "" {
 			scalingMode = SCALING_MODE_CLASSIC
 		}
 
+		if replaceMode == "" {
+			replaceMode = REPLACE_MODE_RECREATE
+		}
+
 		request.ServiceSettings = &as.ServiceSettings{
-			ScalingMode:                  &scalingMode,
-			ReplaceMonitorUnhealthy:      &replaceMonitorUnhealthy,
-			ReplaceLoadBalancerUnhealthy: &replaceLBUnhealthy,
+			ReplaceMonitorUnhealthy:           &replaceMonitorUnhealthy,
+			ScalingMode:                       &scalingMode,
+			ReplaceLoadBalancerUnhealthy:      &replaceLBUnhealthy,
+			ReplaceMode:                       &replaceMode,
+			DesiredCapacitySyncWithMaxMinSize: &desiredCapacitySyncWithMaxMinSize,
+			PriorityScaleInUnhealthy:          &priorityScaleInUnhealthy,
 		}
 	}
 
 	if tags := helper.GetTags(d, "tags"); len(tags) > 0 {
-		for k, v := range tags {
-			request.Tags = append(request.Tags, &as.Tag{
+		for tagKey, tagValue := range tags {
+			tag := as.Tag{
 				ResourceType: helper.String("auto-scaling-group"),
-				Key:          &k,
-				Value:        &v,
-			})
+				Key:          helper.String(tagKey),
+				Value:        helper.String(tagValue),
+			}
+
+			request.Tags = append(request.Tags, &tag)
 		}
+	}
+
+	if v, ok := d.GetOk("instance_allocation_policy"); ok {
+		request.InstanceAllocationPolicy = helper.String(v.(string))
+	}
+
+	if v, ok := d.GetOkExists("concurrent_scale_out_for_desired_capacity"); ok {
+		request.ConcurrentScaleOutForDesiredCapacity = helper.Bool(v.(bool))
 	}
 
 	var id string
@@ -356,8 +416,8 @@ func resourceTencentCloudAsScalingGroupCreate(d *schema.ResourceData, meta inter
 		log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
 			logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
 
-		if response.Response.AutoScalingGroupId == nil {
-			err = fmt.Errorf("Auto scaling group id is nil")
+		if response == nil || response.Response == nil || response.Response.AutoScalingGroupId == nil {
+			err = fmt.Errorf("Create auto scaling group failed, Auto scaling group id is nil.")
 			return resource.NonRetryableError(err)
 		}
 
@@ -378,7 +438,7 @@ func resourceTencentCloudAsScalingGroupCreate(d *schema.ResourceData, meta inter
 		if errRet != nil {
 			return tccommon.RetryError(errRet, tccommon.InternalError)
 		}
-		if scalingGroup != nil && *scalingGroup.InActivityStatus == SCALING_GROUP_NOT_IN_ACTIVITY_STATUS {
+		if scalingGroup != nil && scalingGroup.InActivityStatus != nil && *scalingGroup.InActivityStatus == SCALING_GROUP_NOT_IN_ACTIVITY_STATUS {
 			return nil
 		}
 		return resource.RetryableError(fmt.Errorf("scaling group status is %s, retry...", *scalingGroup.InActivityStatus))
@@ -441,20 +501,15 @@ func resourceTencentCloudAsScalingGroupRead(d *schema.ResourceData, meta interfa
 	_ = d.Set("retry_policy", scalingGroup.RetryPolicy)
 	_ = d.Set("health_check_type", scalingGroup.HealthCheckType)
 	_ = d.Set("lb_health_check_grace_period", scalingGroup.LoadBalancerHealthCheckGracePeriod)
-	if v, ok := d.GetOk("multi_zone_subnet_policy"); ok && v.(string) != "" {
-		_ = d.Set("multi_zone_subnet_policy", scalingGroup.MultiZoneSubnetPolicy)
-	}
+	_ = d.Set("multi_zone_subnet_policy", scalingGroup.MultiZoneSubnetPolicy)
 
-	if v := d.Get("scaling_mode"); v != "" {
-		_ = d.Set("scaling_mode", v.(string))
-	}
-
-	if v, ok := d.GetOk("replace_monitor_unhealthy"); ok {
-		_ = d.Set("replace_monitor_unhealthy", v.(bool))
-	}
-
-	if v, ok := d.GetOk("replace_load_balancer_unhealthy"); ok {
-		_ = d.Set("replace_load_balancer_unhealthy", v.(bool))
+	if scalingGroup.ServiceSettings != nil {
+		_ = d.Set("replace_monitor_unhealthy", scalingGroup.ServiceSettings.ReplaceMonitorUnhealthy)
+		_ = d.Set("scaling_mode", scalingGroup.ServiceSettings.ScalingMode)
+		_ = d.Set("replace_load_balancer_unhealthy", scalingGroup.ServiceSettings.ReplaceLoadBalancerUnhealthy)
+		_ = d.Set("replace_mode", scalingGroup.ServiceSettings.ReplaceMode)
+		_ = d.Set("desired_capacity_sync_with_max_min_size", scalingGroup.ServiceSettings.DesiredCapacitySyncWithMaxMinSize)
+		_ = d.Set("priority_scale_in_unhealthy", scalingGroup.ServiceSettings.PriorityScaleInUnhealthy)
 	}
 
 	if scalingGroup.ForwardLoadBalancerSet != nil && len(scalingGroup.ForwardLoadBalancerSet) > 0 {
@@ -477,6 +532,18 @@ func resourceTencentCloudAsScalingGroupRead(d *schema.ResourceData, meta interfa
 			forwardLoadBalancers = append(forwardLoadBalancers, forwardLoadBalancer)
 		}
 		_ = d.Set("forward_balancer_ids", forwardLoadBalancers)
+	}
+
+	if scalingGroup.InstanceAllocationPolicy != nil {
+		_ = d.Set("instance_allocation_policy", scalingGroup.InstanceAllocationPolicy)
+	}
+
+	if scalingGroup.ConcurrentScaleOutForDesiredCapacity != nil {
+		_ = d.Set("concurrent_scale_out_for_desired_capacity", scalingGroup.ConcurrentScaleOutForDesiredCapacity)
+	}
+
+	if scalingGroup.AutoScalingGroupId != nil {
+		_ = d.Set("auto_scaling_group_id", scalingGroup.AutoScalingGroupId)
 	}
 
 	tcClient := meta.(tccommon.ProviderMeta).GetAPIV3Conn()
@@ -578,50 +645,78 @@ func resourceTencentCloudAsScalingGroupUpdate(d *schema.ResourceData, meta inter
 		request.MultiZoneSubnetPolicy = helper.String(d.Get("multi_zone_subnet_policy").(string))
 	}
 
-	if d.HasChange("scaling_mode") ||
-		d.HasChange("replace_monitor_unhealthy") ||
-		d.HasChange("replace_load_balancer_unhealthy") {
-		updateAttrs = append(updateAttrs, "scaling_mode", "replace_monitor_unhealthy", "replace_load_balancer_unhealthy")
+	if d.HasChange("replace_monitor_unhealthy") ||
+		d.HasChange("scaling_mode") ||
+		d.HasChange("replace_load_balancer_unhealthy") ||
+		d.HasChange("replace_mode") ||
+		d.HasChange("desired_capacity_sync_with_max_min_size") ||
+		d.HasChange("priority_scale_in_unhealthy") {
+		updateAttrs = append(updateAttrs, "replace_monitor_unhealthy", "scaling_mode", "replace_load_balancer_unhealthy", "replace_mode", "desired_capacity_sync_with_max_min_size", "priority_scale_in_unhealthy")
 		scalingMode := d.Get("scaling_mode").(string)
+		replaceMode := d.Get("replace_mode").(string)
 		if scalingMode == "" {
 			scalingMode = SCALING_MODE_CLASSIC
 		}
+		if replaceMode == "" {
+			replaceMode = REPLACE_MODE_RECREATE
+		}
 		replaceMonitor := d.Get("replace_monitor_unhealthy").(bool)
 		replaceLB := d.Get("replace_load_balancer_unhealthy").(bool)
+		desiredCapacitySyncWithMaxMinSize := d.Get("desired_capacity_sync_with_max_min_size").(bool)
+		priorityScaleInUnhealthy := d.Get("priority_scale_in_unhealthy").(bool)
 		request.ServiceSettings = &as.ServiceSettings{
-			ScalingMode:                  &scalingMode,
-			ReplaceMonitorUnhealthy:      &replaceMonitor,
-			ReplaceLoadBalancerUnhealthy: &replaceLB,
+			ReplaceMonitorUnhealthy:           &replaceMonitor,
+			ScalingMode:                       &scalingMode,
+			ReplaceLoadBalancerUnhealthy:      &replaceLB,
+			ReplaceMode:                       &replaceMode,
+			DesiredCapacitySyncWithMaxMinSize: &desiredCapacitySyncWithMaxMinSize,
+			PriorityScaleInUnhealthy:          &priorityScaleInUnhealthy,
 		}
 	}
 
 	if d.HasChange("health_check_type") || d.HasChange("lb_health_check_grace_period") {
+		updateAttrs = append(updateAttrs, "health_check_type", "lb_health_check_grace_period")
 		request.HealthCheckType = helper.String(d.Get("health_check_type").(string))
 		if v, ok := d.GetOkExists("lb_health_check_grace_period"); ok {
 			request.LoadBalancerHealthCheckGracePeriod = helper.IntUint64(v.(int))
 		}
 	}
 
-	if err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
-		ratelimit.Check(request.GetAction())
+	if d.HasChange("instance_allocation_policy") {
+		updateAttrs = append(updateAttrs, "instance_allocation_policy")
+		if v, ok := d.GetOk("instance_allocation_policy"); ok {
+			request.InstanceAllocationPolicy = helper.String(v.(string))
+		}
+	}
 
-		response, err := client.UseAsClient().ModifyAutoScalingGroup(request)
-		if err != nil {
-			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n",
-				logId, request.GetAction(), request.ToJsonString(), err.Error())
-			return tccommon.RetryError(err)
+	if d.HasChange("concurrent_scale_out_for_desired_capacity") {
+		updateAttrs = append(updateAttrs, "concurrent_scale_out_for_desired_capacity")
+		if v, ok := d.GetOkExists("concurrent_scale_out_for_desired_capacity"); ok {
+			request.ConcurrentScaleOutForDesiredCapacity = helper.Bool(v.(bool))
 		}
 
-		log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
-			logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
+	}
 
-		return nil
-	}); err != nil {
-		return err
+	if len(updateAttrs) > 0 {
+		if err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+			ratelimit.Check(request.GetAction())
+			response, err := client.UseAsClient().ModifyAutoScalingGroup(request)
+			if err != nil {
+				log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n",
+					logId, request.GetAction(), request.ToJsonString(), err.Error())
+				return tccommon.RetryError(err)
+			}
+
+			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
+				logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
+
+			return nil
+		}); err != nil {
+			return err
+		}
 	}
 
 	updateAttrs = updateAttrs[:0]
-
 	balancerRequest := as.NewModifyLoadBalancersRequest()
 	balancerRequest.AutoScalingGroupId = &scalingGroupId
 	if d.HasChange("load_balancer_ids") {
@@ -638,7 +733,7 @@ func resourceTencentCloudAsScalingGroupUpdate(d *schema.ResourceData, meta inter
 	if d.HasChange("forward_balancer_ids") {
 		updateAttrs = append(updateAttrs, "forward_balancer_ids")
 
-		forwardBalancers := d.Get("forward_balancer_ids").([]interface{})
+		forwardBalancers := d.Get("forward_balancer_ids").(*schema.Set).List()
 		balancerRequest.ForwardLoadBalancers = make([]*as.ForwardLoadBalancer, 0, len(forwardBalancers))
 		for _, v := range forwardBalancers {
 			vv := v.(map[string]interface{})
@@ -730,7 +825,7 @@ func resourceTencentCloudAsScalingGroupDelete(d *schema.ResourceData, meta inter
 		}
 	}
 
-	err = resource.Retry(d.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
+	err = resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
 		if errRet := asService.DeleteScalingGroup(ctx, scalingGroupId); errRet != nil {
 			if sdkErr, ok := errRet.(*sdkErrors.TencentCloudSDKError); ok {
 				if sdkErr.Code == AsScalingGroupNotFound {

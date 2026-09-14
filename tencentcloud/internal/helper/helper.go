@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/pkg/errors"
 )
@@ -79,6 +80,10 @@ func BuildToken() string {
 	return base64.StdEncoding.EncodeToString(buf)
 }
 
+func BuildUUID() string {
+	return uuid.New().String()
+}
+
 func FormatUnixTime(n uint64) string {
 	return time.Unix(int64(n), 0).UTC().Format("2006-01-02T15:04:05Z")
 }
@@ -134,6 +139,16 @@ func StringsContain(ss []string, str string) bool {
 }
 
 func DiffSupressJSON(k, olds, news string, d *schema.ResourceData) bool {
+	// If both are empty, no diff
+	if olds == "" && news == "" {
+		return true
+	}
+
+	// If only one is empty, there is a diff
+	if olds == "" || news == "" {
+		return false
+	}
+
 	var oldJson interface{}
 	err := json.Unmarshal([]byte(olds), &oldJson)
 	if err != nil {
@@ -296,4 +311,68 @@ func CheckElementsExist(slice1 []string, slice2 []string) (bool, []string) {
 		}
 	}
 	return exist, diff
+}
+
+func StringSlicesEqual(slice1, slice2 []string) bool {
+	if len(slice1) != len(slice2) {
+		return false
+	}
+
+	count := make(map[string]int)
+
+	for _, value := range slice1 {
+		count[value]++
+	}
+
+	for _, value := range slice2 {
+		count[value]--
+		if count[value] < 0 {
+			return false
+		}
+	}
+
+	return true
+}
+
+func StringPtrSlicesEqual(slice1, slice2 []*string) bool {
+	if len(slice1) != len(slice2) {
+		return false
+	}
+
+	count := make(map[string]int)
+
+	for _, value := range slice1 {
+		count[*value]++
+	}
+
+	for _, value := range slice2 {
+		count[*value]--
+		if count[*value] < 0 {
+			return false
+		}
+	}
+
+	return true
+}
+
+// GetStrPtrWithOldFallback retrieves the original value from old state when the API returns a masked
+// sensitive value (e.g., "cc****cc" instead of "cccccccc"). Writing the masked value directly to state
+// would cause plan drift; this function preserves the original value from the old state instead.
+//
+// oldRaw: the old state data obtained via d.Get(key).([]interface{})
+// fieldName: the field to preserve from the old state (e.g., "secret_key")
+// apiValue: the masked value returned by the API
+func GetStrPtrWithOldFallback(oldRaw []interface{}, fieldName string, apiValue *string) *string {
+	if len(oldRaw) == 0 {
+		return apiValue
+	}
+	oldMap, ok := oldRaw[0].(map[string]interface{})
+	if !ok {
+		return apiValue
+	}
+	oldVal, ok := oldMap[fieldName].(string)
+	if !ok || oldVal == "" {
+		return apiValue
+	}
+	return &oldVal
 }

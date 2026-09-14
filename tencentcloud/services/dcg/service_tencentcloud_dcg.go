@@ -23,6 +23,9 @@ type DcgInstanceInfo struct {
 	cnnRouteType      string
 	createTime        string
 	enableBGP         bool
+	modeType          string
+	gatewayAsn        uint64
+	zone              string
 }
 
 // info for direct connect gateway[ ccn type] route.
@@ -132,6 +135,15 @@ getMoreData:
 		basicInfo.networkType = *item.NetworkType
 		basicInfo.networkInstanceId = *item.NetworkInstanceId
 		basicInfo.enableBGP = *item.EnableBGP
+		if item.ModeType != nil {
+			basicInfo.modeType = *item.ModeType
+		}
+		if item.GatewayAsn != nil {
+			basicInfo.gatewayAsn = *item.GatewayAsn
+		}
+		if item.Zone != nil {
+			basicInfo.modeType = *item.Zone
+		}
 
 		if basicInfo.networkType != DCG_NETWORK_TYPE_VPC &&
 			basicInfo.networkType != DCG_NETWORK_TYPE_CCN {
@@ -182,7 +194,7 @@ getMoreData:
 
 func (me *VpcService) GetCcnRouteId(ctx context.Context, dcgId, cidr string, asPaths []string) (routeId string, has int, errRet error) {
 
-	infos, err := me.DescribeDirectConnectGatewayCcnRoutes(ctx, dcgId)
+	infos, err := me.DescribeDirectConnectGatewayCcnRoutes(ctx, dcgId, "", "")
 	if err != nil {
 		errRet = err
 		return
@@ -208,7 +220,7 @@ func (me *VpcService) GetCcnRouteId(ctx context.Context, dcgId, cidr string, asP
 
 func (me *VpcService) DescribeDirectConnectGatewayCcnRoute(ctx context.Context, dcgId, routeId string) (infoRet DcgRouteInfo, has int, errRet error) {
 
-	infos, err := me.DescribeDirectConnectGatewayCcnRoutes(ctx, dcgId)
+	infos, err := me.DescribeDirectConnectGatewayCcnRoutes(ctx, dcgId, "", "")
 	if err != nil {
 		errRet = err
 		return
@@ -232,7 +244,7 @@ func (me *VpcService) DescribeDirectConnectGatewayCcnRoute(ctx context.Context, 
 
 }
 
-func (me *VpcService) DescribeDirectConnectGatewayCcnRoutes(ctx context.Context, dcgId string) (infos []DcgRouteInfo, errRet error) {
+func (me *VpcService) DescribeDirectConnectGatewayCcnRoutes(ctx context.Context, dcgId, ccnRouteType, addressType string) (infos []DcgRouteInfo, errRet error) {
 	logId := tccommon.GetLogId(ctx)
 	request := vpc.NewDescribeDirectConnectGatewayCcnRoutesRequest()
 
@@ -246,6 +258,13 @@ func (me *VpcService) DescribeDirectConnectGatewayCcnRoutes(ctx context.Context,
 	}()
 
 	request.DirectConnectGatewayId = &dcgId
+	if ccnRouteType != "" {
+		request.CcnRouteType = &ccnRouteType
+	}
+
+	if addressType != "" {
+		request.AddressType = &addressType
+	}
 
 	infos = make([]DcgRouteInfo, 0, 100)
 	var offset uint64 = 0

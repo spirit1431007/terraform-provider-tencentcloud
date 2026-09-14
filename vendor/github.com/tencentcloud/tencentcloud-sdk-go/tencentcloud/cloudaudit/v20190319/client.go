@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+// Copyright (c) 2017-2025 Tencent. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -45,114 +45,6 @@ func NewClient(credential common.CredentialIface, region string, clientProfile *
 }
 
 
-func NewCreateAuditRequest() (request *CreateAuditRequest) {
-    request = &CreateAuditRequest{
-        BaseRequest: &tchttp.BaseRequest{},
-    }
-    
-    request.Init().WithApiInfo("cloudaudit", APIVersion, "CreateAudit")
-    
-    
-    return
-}
-
-func NewCreateAuditResponse() (response *CreateAuditResponse) {
-    response = &CreateAuditResponse{
-        BaseResponse: &tchttp.BaseResponse{},
-    }
-    return
-}
-
-// CreateAudit
-// 参数要求：
-//
-// 1、如果IsCreateNewBucket的值存在的话，cosRegion和cosBucketName都是必填参数。
-//
-// 2、如果IsEnableCmqNotify的值是1的话，IsCreateNewQueue、CmqRegion和CmqQueueName都是必填参数。
-//
-// 3、如果IsEnableCmqNotify的值是0的话，IsCreateNewQueue、CmqRegion和CmqQueueName都不能传。
-//
-// 4、如果IsEnableKmsEncry的值是1的话，KmsRegion和KeyId属于必填项
-//
-// 可能返回的错误码:
-//  FAILEDOPERATION_CREATEBUCKETFAIL = "FailedOperation.CreateBucketFail"
-//  INTERNALERROR_CMQERROR = "InternalError.CmqError"
-//  INTERNALERROR_CREATEAUDITERROR = "InternalError.CreateAuditError"
-//  INVALIDPARAMETERVALUE_AUDITNAMEERROR = "InvalidParameterValue.AuditNameError"
-//  INVALIDPARAMETERVALUE_CMQREGIONERROR = "InvalidParameterValue.CmqRegionError"
-//  INVALIDPARAMETERVALUE_COSNAMEERROR = "InvalidParameterValue.CosNameError"
-//  INVALIDPARAMETERVALUE_COSREGIONERROR = "InvalidParameterValue.CosRegionError"
-//  INVALIDPARAMETERVALUE_ISCREATENEWBUCKETERROR = "InvalidParameterValue.IsCreateNewBucketError"
-//  INVALIDPARAMETERVALUE_ISCREATENEWQUEUEERROR = "InvalidParameterValue.IsCreateNewQueueError"
-//  INVALIDPARAMETERVALUE_ISENABLECMQNOTIFYERROR = "InvalidParameterValue.IsEnableCmqNotifyError"
-//  INVALIDPARAMETERVALUE_LOGFILEPREFIXERROR = "InvalidParameterValue.LogFilePrefixError"
-//  INVALIDPARAMETERVALUE_QUEUENAMEERROR = "InvalidParameterValue.QueueNameError"
-//  INVALIDPARAMETERVALUE_READWRITEATTRIBUTEERROR = "InvalidParameterValue.ReadWriteAttributeError"
-//  LIMITEXCEEDED_OVERAMOUNT = "LimitExceeded.OverAmount"
-//  MISSINGPARAMETER_MISSAUDITNAME = "MissingParameter.MissAuditName"
-//  MISSINGPARAMETER_MISSCOSBUCKETNAME = "MissingParameter.MissCosBucketName"
-//  MISSINGPARAMETER_MISSCOSREGION = "MissingParameter.MissCosRegion"
-//  MISSINGPARAMETER_CMQ = "MissingParameter.cmq"
-//  RESOURCEINUSE_ALREADYEXISTSSAMEAUDIT = "ResourceInUse.AlreadyExistsSameAudit"
-//  RESOURCEINUSE_ALREADYEXISTSSAMEAUDITCMQCONFIG = "ResourceInUse.AlreadyExistsSameAuditCmqConfig"
-//  RESOURCEINUSE_ALREADYEXISTSSAMEAUDITCOSCONFIG = "ResourceInUse.AlreadyExistsSameAuditCosConfig"
-//  RESOURCEINUSE_COSBUCKETEXISTS = "ResourceInUse.CosBucketExists"
-//  RESOURCENOTFOUND_ROLENOTEXIST = "ResourceNotFound.RoleNotExist"
-func (c *Client) CreateAudit(request *CreateAuditRequest) (response *CreateAuditResponse, err error) {
-    return c.CreateAuditWithContext(context.Background(), request)
-}
-
-// CreateAudit
-// 参数要求：
-//
-// 1、如果IsCreateNewBucket的值存在的话，cosRegion和cosBucketName都是必填参数。
-//
-// 2、如果IsEnableCmqNotify的值是1的话，IsCreateNewQueue、CmqRegion和CmqQueueName都是必填参数。
-//
-// 3、如果IsEnableCmqNotify的值是0的话，IsCreateNewQueue、CmqRegion和CmqQueueName都不能传。
-//
-// 4、如果IsEnableKmsEncry的值是1的话，KmsRegion和KeyId属于必填项
-//
-// 可能返回的错误码:
-//  FAILEDOPERATION_CREATEBUCKETFAIL = "FailedOperation.CreateBucketFail"
-//  INTERNALERROR_CMQERROR = "InternalError.CmqError"
-//  INTERNALERROR_CREATEAUDITERROR = "InternalError.CreateAuditError"
-//  INVALIDPARAMETERVALUE_AUDITNAMEERROR = "InvalidParameterValue.AuditNameError"
-//  INVALIDPARAMETERVALUE_CMQREGIONERROR = "InvalidParameterValue.CmqRegionError"
-//  INVALIDPARAMETERVALUE_COSNAMEERROR = "InvalidParameterValue.CosNameError"
-//  INVALIDPARAMETERVALUE_COSREGIONERROR = "InvalidParameterValue.CosRegionError"
-//  INVALIDPARAMETERVALUE_ISCREATENEWBUCKETERROR = "InvalidParameterValue.IsCreateNewBucketError"
-//  INVALIDPARAMETERVALUE_ISCREATENEWQUEUEERROR = "InvalidParameterValue.IsCreateNewQueueError"
-//  INVALIDPARAMETERVALUE_ISENABLECMQNOTIFYERROR = "InvalidParameterValue.IsEnableCmqNotifyError"
-//  INVALIDPARAMETERVALUE_LOGFILEPREFIXERROR = "InvalidParameterValue.LogFilePrefixError"
-//  INVALIDPARAMETERVALUE_QUEUENAMEERROR = "InvalidParameterValue.QueueNameError"
-//  INVALIDPARAMETERVALUE_READWRITEATTRIBUTEERROR = "InvalidParameterValue.ReadWriteAttributeError"
-//  LIMITEXCEEDED_OVERAMOUNT = "LimitExceeded.OverAmount"
-//  MISSINGPARAMETER_MISSAUDITNAME = "MissingParameter.MissAuditName"
-//  MISSINGPARAMETER_MISSCOSBUCKETNAME = "MissingParameter.MissCosBucketName"
-//  MISSINGPARAMETER_MISSCOSREGION = "MissingParameter.MissCosRegion"
-//  MISSINGPARAMETER_CMQ = "MissingParameter.cmq"
-//  RESOURCEINUSE_ALREADYEXISTSSAMEAUDIT = "ResourceInUse.AlreadyExistsSameAudit"
-//  RESOURCEINUSE_ALREADYEXISTSSAMEAUDITCMQCONFIG = "ResourceInUse.AlreadyExistsSameAuditCmqConfig"
-//  RESOURCEINUSE_ALREADYEXISTSSAMEAUDITCOSCONFIG = "ResourceInUse.AlreadyExistsSameAuditCosConfig"
-//  RESOURCEINUSE_COSBUCKETEXISTS = "ResourceInUse.CosBucketExists"
-//  RESOURCENOTFOUND_ROLENOTEXIST = "ResourceNotFound.RoleNotExist"
-func (c *Client) CreateAuditWithContext(ctx context.Context, request *CreateAuditRequest) (response *CreateAuditResponse, err error) {
-    if request == nil {
-        request = NewCreateAuditRequest()
-    }
-    
-    if c.GetCredential() == nil {
-        return nil, errors.New("CreateAudit require credential")
-    }
-
-    request.SetContext(ctx)
-    
-    response = NewCreateAuditResponse()
-    err = c.Send(request, response)
-    return
-}
-
 func NewCreateAuditTrackRequest() (request *CreateAuditTrackRequest) {
     request = &CreateAuditTrackRequest{
         BaseRequest: &tchttp.BaseRequest{},
@@ -167,14 +59,16 @@ func NewCreateAuditTrackRequest() (request *CreateAuditTrackRequest) {
 func NewCreateAuditTrackResponse() (response *CreateAuditTrackResponse) {
     response = &CreateAuditTrackResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // CreateAuditTrack
-// 创建跟踪集
+// 创建操作审计跟踪集
 //
 // 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
 //  FAILEDOPERATION_CHECKCLSTOPICISEXISTFAILED = "FailedOperation.CheckClsTopicIsExistFailed"
 //  FAILEDOPERATION_CHECKCOSBUCKETISEXISTFAILED = "FailedOperation.CheckCosBucketIsExistFailed"
 //  FAILEDOPERATION_GETCLSTOPICFAILED = "FailedOperation.GetClsTopicFailed"
@@ -186,14 +80,16 @@ func NewCreateAuditTrackResponse() (response *CreateAuditTrackResponse) {
 //  INVALIDPARAMETERVALUE_COSREGIONERROR = "InvalidParameterValue.CosRegionError"
 //  LIMITEXCEEDED_OVERAMOUNT = "LimitExceeded.OverAmount"
 //  RESOURCENOTFOUND = "ResourceNotFound"
+//  RESOURCENOTFOUND_COSNOTEXIST = "ResourceNotFound.CosNotExist"
 func (c *Client) CreateAuditTrack(request *CreateAuditTrackRequest) (response *CreateAuditTrackResponse, err error) {
     return c.CreateAuditTrackWithContext(context.Background(), request)
 }
 
 // CreateAuditTrack
-// 创建跟踪集
+// 创建操作审计跟踪集
 //
 // 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
 //  FAILEDOPERATION_CHECKCLSTOPICISEXISTFAILED = "FailedOperation.CheckClsTopicIsExistFailed"
 //  FAILEDOPERATION_CHECKCOSBUCKETISEXISTFAILED = "FailedOperation.CheckCosBucketIsExistFailed"
 //  FAILEDOPERATION_GETCLSTOPICFAILED = "FailedOperation.GetClsTopicFailed"
@@ -205,10 +101,12 @@ func (c *Client) CreateAuditTrack(request *CreateAuditTrackRequest) (response *C
 //  INVALIDPARAMETERVALUE_COSREGIONERROR = "InvalidParameterValue.CosRegionError"
 //  LIMITEXCEEDED_OVERAMOUNT = "LimitExceeded.OverAmount"
 //  RESOURCENOTFOUND = "ResourceNotFound"
+//  RESOURCENOTFOUND_COSNOTEXIST = "ResourceNotFound.CosNotExist"
 func (c *Client) CreateAuditTrackWithContext(ctx context.Context, request *CreateAuditTrackRequest) (response *CreateAuditTrackResponse, err error) {
     if request == nil {
         request = NewCreateAuditTrackRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "cloudaudit", APIVersion, "CreateAuditTrack")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateAuditTrack require credential")
@@ -221,52 +119,76 @@ func (c *Client) CreateAuditTrackWithContext(ctx context.Context, request *Creat
     return
 }
 
-func NewDeleteAuditRequest() (request *DeleteAuditRequest) {
-    request = &DeleteAuditRequest{
+func NewCreateEventsAuditTrackRequest() (request *CreateEventsAuditTrackRequest) {
+    request = &CreateEventsAuditTrackRequest{
         BaseRequest: &tchttp.BaseRequest{},
     }
     
-    request.Init().WithApiInfo("cloudaudit", APIVersion, "DeleteAudit")
+    request.Init().WithApiInfo("cloudaudit", APIVersion, "CreateEventsAuditTrack")
     
     
     return
 }
 
-func NewDeleteAuditResponse() (response *DeleteAuditResponse) {
-    response = &DeleteAuditResponse{
+func NewCreateEventsAuditTrackResponse() (response *CreateEventsAuditTrackResponse) {
+    response = &CreateEventsAuditTrackResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
-// DeleteAudit
-// 删除跟踪集
+// CreateEventsAuditTrack
+// 创建操作审计跟踪集
 //
 // 可能返回的错误码:
-//  INTERNALERROR_DELETEAUDITERROR = "InternalError.DeleteAuditError"
-//  RESOURCENOTFOUND_AUDITNOTEXIST = "ResourceNotFound.AuditNotExist"
-func (c *Client) DeleteAudit(request *DeleteAuditRequest) (response *DeleteAuditResponse, err error) {
-    return c.DeleteAuditWithContext(context.Background(), request)
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_CHECKCLSTOPICISEXISTFAILED = "FailedOperation.CheckClsTopicIsExistFailed"
+//  FAILEDOPERATION_CHECKCOSBUCKETISEXISTFAILED = "FailedOperation.CheckCosBucketIsExistFailed"
+//  FAILEDOPERATION_GETCLSTOPICFAILED = "FailedOperation.GetClsTopicFailed"
+//  FAILEDOPERATION_GETCOSBUCKETLISTFAILED = "FailedOperation.GetCosBucketListFailed"
+//  INTERNALERROR = "InternalError"
+//  INTERNALERROR_SEARCHERROR = "InternalError.SearchError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE_ALIASALREADYEXISTS = "InvalidParameterValue.AliasAlreadyExists"
+//  INVALIDPARAMETERVALUE_COSREGIONERROR = "InvalidParameterValue.CosRegionError"
+//  LIMITEXCEEDED_OVERAMOUNT = "LimitExceeded.OverAmount"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  RESOURCENOTFOUND_COSNOTEXIST = "ResourceNotFound.CosNotExist"
+func (c *Client) CreateEventsAuditTrack(request *CreateEventsAuditTrackRequest) (response *CreateEventsAuditTrackResponse, err error) {
+    return c.CreateEventsAuditTrackWithContext(context.Background(), request)
 }
 
-// DeleteAudit
-// 删除跟踪集
+// CreateEventsAuditTrack
+// 创建操作审计跟踪集
 //
 // 可能返回的错误码:
-//  INTERNALERROR_DELETEAUDITERROR = "InternalError.DeleteAuditError"
-//  RESOURCENOTFOUND_AUDITNOTEXIST = "ResourceNotFound.AuditNotExist"
-func (c *Client) DeleteAuditWithContext(ctx context.Context, request *DeleteAuditRequest) (response *DeleteAuditResponse, err error) {
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_CHECKCLSTOPICISEXISTFAILED = "FailedOperation.CheckClsTopicIsExistFailed"
+//  FAILEDOPERATION_CHECKCOSBUCKETISEXISTFAILED = "FailedOperation.CheckCosBucketIsExistFailed"
+//  FAILEDOPERATION_GETCLSTOPICFAILED = "FailedOperation.GetClsTopicFailed"
+//  FAILEDOPERATION_GETCOSBUCKETLISTFAILED = "FailedOperation.GetCosBucketListFailed"
+//  INTERNALERROR = "InternalError"
+//  INTERNALERROR_SEARCHERROR = "InternalError.SearchError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE_ALIASALREADYEXISTS = "InvalidParameterValue.AliasAlreadyExists"
+//  INVALIDPARAMETERVALUE_COSREGIONERROR = "InvalidParameterValue.CosRegionError"
+//  LIMITEXCEEDED_OVERAMOUNT = "LimitExceeded.OverAmount"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  RESOURCENOTFOUND_COSNOTEXIST = "ResourceNotFound.CosNotExist"
+func (c *Client) CreateEventsAuditTrackWithContext(ctx context.Context, request *CreateEventsAuditTrackRequest) (response *CreateEventsAuditTrackResponse, err error) {
     if request == nil {
-        request = NewDeleteAuditRequest()
+        request = NewCreateEventsAuditTrackRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "cloudaudit", APIVersion, "CreateEventsAuditTrack")
     
     if c.GetCredential() == nil {
-        return nil, errors.New("DeleteAudit require credential")
+        return nil, errors.New("CreateEventsAuditTrack require credential")
     }
 
     request.SetContext(ctx)
     
-    response = NewDeleteAuditResponse()
+    response = NewCreateEventsAuditTrackResponse()
     err = c.Send(request, response)
     return
 }
@@ -285,12 +207,13 @@ func NewDeleteAuditTrackRequest() (request *DeleteAuditTrackRequest) {
 func NewDeleteAuditTrackResponse() (response *DeleteAuditTrackResponse) {
     response = &DeleteAuditTrackResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // DeleteAuditTrack
-// 删除云审计跟踪集
+// 删除操作审计跟踪集
 //
 // 可能返回的错误码:
 //  INTERNALERROR = "InternalError"
@@ -303,7 +226,7 @@ func (c *Client) DeleteAuditTrack(request *DeleteAuditTrackRequest) (response *D
 }
 
 // DeleteAuditTrack
-// 删除云审计跟踪集
+// 删除操作审计跟踪集
 //
 // 可能返回的错误码:
 //  INTERNALERROR = "InternalError"
@@ -315,6 +238,7 @@ func (c *Client) DeleteAuditTrackWithContext(ctx context.Context, request *Delet
     if request == nil {
         request = NewDeleteAuditTrackRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "cloudaudit", APIVersion, "DeleteAuditTrack")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteAuditTrack require credential")
@@ -341,8 +265,9 @@ func NewDescribeAuditRequest() (request *DescribeAuditRequest) {
 func NewDescribeAuditResponse() (response *DescribeAuditResponse) {
     response = &DescribeAuditResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // DescribeAudit
@@ -365,6 +290,7 @@ func (c *Client) DescribeAuditWithContext(ctx context.Context, request *Describe
     if request == nil {
         request = NewDescribeAuditRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "cloudaudit", APIVersion, "DescribeAudit")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeAudit require credential")
@@ -391,12 +317,13 @@ func NewDescribeAuditTrackRequest() (request *DescribeAuditTrackRequest) {
 func NewDescribeAuditTrackResponse() (response *DescribeAuditTrackResponse) {
     response = &DescribeAuditTrackResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // DescribeAuditTrack
-// 查询云审计跟踪集详情
+// 查询操作审计跟踪集详情
 //
 // 可能返回的错误码:
 //  INTERNALERROR = "InternalError"
@@ -409,7 +336,7 @@ func (c *Client) DescribeAuditTrack(request *DescribeAuditTrackRequest) (respons
 }
 
 // DescribeAuditTrack
-// 查询云审计跟踪集详情
+// 查询操作审计跟踪集详情
 //
 // 可能返回的错误码:
 //  INTERNALERROR = "InternalError"
@@ -421,6 +348,7 @@ func (c *Client) DescribeAuditTrackWithContext(ctx context.Context, request *Des
     if request == nil {
         request = NewDescribeAuditTrackRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "cloudaudit", APIVersion, "DescribeAuditTrack")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeAuditTrack require credential")
@@ -447,12 +375,13 @@ func NewDescribeAuditTracksRequest() (request *DescribeAuditTracksRequest) {
 func NewDescribeAuditTracksResponse() (response *DescribeAuditTracksResponse) {
     response = &DescribeAuditTracksResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // DescribeAuditTracks
-// 查询云审计跟踪集列表
+// 查询操作审计跟踪集列表
 //
 // 可能返回的错误码:
 //  INTERNALERROR = "InternalError"
@@ -464,7 +393,7 @@ func (c *Client) DescribeAuditTracks(request *DescribeAuditTracksRequest) (respo
 }
 
 // DescribeAuditTracks
-// 查询云审计跟踪集列表
+// 查询操作审计跟踪集列表
 //
 // 可能返回的错误码:
 //  INTERNALERROR = "InternalError"
@@ -475,6 +404,7 @@ func (c *Client) DescribeAuditTracksWithContext(ctx context.Context, request *De
     if request == nil {
         request = NewDescribeAuditTracksRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "cloudaudit", APIVersion, "DescribeAuditTracks")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeAuditTracks require credential")
@@ -501,34 +431,42 @@ func NewDescribeEventsRequest() (request *DescribeEventsRequest) {
 func NewDescribeEventsResponse() (response *DescribeEventsResponse) {
     response = &DescribeEventsResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // DescribeEvents
-// 查询云审计日志
+// 查询操作审计日志
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_MEMBERNOTAUDITROLE = "FailedOperation.MemberNotAuditRole"
+//  FAILEDOPERATION_MEMBERNOTINORGANIZATION = "FailedOperation.MemberNotInOrganization"
 //  INTERNALERROR = "InternalError"
 //  INVALIDPARAMETER = "InvalidParameter"
 //  LIMITEXCEEDED_OVERAMOUNT = "LimitExceeded.OverAmount"
+//  UNAUTHORIZEDOPERATION = "UnauthorizedOperation"
 func (c *Client) DescribeEvents(request *DescribeEventsRequest) (response *DescribeEventsResponse, err error) {
     return c.DescribeEventsWithContext(context.Background(), request)
 }
 
 // DescribeEvents
-// 查询云审计日志
+// 查询操作审计日志
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_MEMBERNOTAUDITROLE = "FailedOperation.MemberNotAuditRole"
+//  FAILEDOPERATION_MEMBERNOTINORGANIZATION = "FailedOperation.MemberNotInOrganization"
 //  INTERNALERROR = "InternalError"
 //  INVALIDPARAMETER = "InvalidParameter"
 //  LIMITEXCEEDED_OVERAMOUNT = "LimitExceeded.OverAmount"
+//  UNAUTHORIZEDOPERATION = "UnauthorizedOperation"
 func (c *Client) DescribeEventsWithContext(ctx context.Context, request *DescribeEventsRequest) (response *DescribeEventsResponse, err error) {
     if request == nil {
         request = NewDescribeEventsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "cloudaudit", APIVersion, "DescribeEvents")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeEvents require credential")
@@ -555,8 +493,9 @@ func NewGetAttributeKeyRequest() (request *GetAttributeKeyRequest) {
 func NewGetAttributeKeyResponse() (response *GetAttributeKeyResponse) {
     response = &GetAttributeKeyResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // GetAttributeKey
@@ -577,6 +516,7 @@ func (c *Client) GetAttributeKeyWithContext(ctx context.Context, request *GetAtt
     if request == nil {
         request = NewGetAttributeKeyRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "cloudaudit", APIVersion, "GetAttributeKey")
     
     if c.GetCredential() == nil {
         return nil, errors.New("GetAttributeKey require credential")
@@ -603,8 +543,9 @@ func NewInquireAuditCreditRequest() (request *InquireAuditCreditRequest) {
 func NewInquireAuditCreditResponse() (response *InquireAuditCreditResponse) {
     response = &InquireAuditCreditResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // InquireAuditCredit
@@ -625,6 +566,7 @@ func (c *Client) InquireAuditCreditWithContext(ctx context.Context, request *Inq
     if request == nil {
         request = NewInquireAuditCreditRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "cloudaudit", APIVersion, "InquireAuditCredit")
     
     if c.GetCredential() == nil {
         return nil, errors.New("InquireAuditCredit require credential")
@@ -651,8 +593,9 @@ func NewListAuditsRequest() (request *ListAuditsRequest) {
 func NewListAuditsResponse() (response *ListAuditsResponse) {
     response = &ListAuditsResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // ListAudits
@@ -673,6 +616,7 @@ func (c *Client) ListAuditsWithContext(ctx context.Context, request *ListAuditsR
     if request == nil {
         request = NewListAuditsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "cloudaudit", APIVersion, "ListAudits")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ListAudits require credential")
@@ -699,12 +643,13 @@ func NewListCmqEnableRegionRequest() (request *ListCmqEnableRegionRequest) {
 func NewListCmqEnableRegionResponse() (response *ListCmqEnableRegionResponse) {
     response = &ListCmqEnableRegionResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // ListCmqEnableRegion
-// 查询云审计支持的cmq的可用区
+// 查询操作审计支持的cmq的可用区
 //
 // 可能返回的错误码:
 //  INTERNALERROR_LISTCMQENABLEREGIONERROR = "InternalError.ListCmqEnableRegionError"
@@ -713,7 +658,7 @@ func (c *Client) ListCmqEnableRegion(request *ListCmqEnableRegionRequest) (respo
 }
 
 // ListCmqEnableRegion
-// 查询云审计支持的cmq的可用区
+// 查询操作审计支持的cmq的可用区
 //
 // 可能返回的错误码:
 //  INTERNALERROR_LISTCMQENABLEREGIONERROR = "InternalError.ListCmqEnableRegionError"
@@ -721,6 +666,7 @@ func (c *Client) ListCmqEnableRegionWithContext(ctx context.Context, request *Li
     if request == nil {
         request = NewListCmqEnableRegionRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "cloudaudit", APIVersion, "ListCmqEnableRegion")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ListCmqEnableRegion require credential")
@@ -747,12 +693,13 @@ func NewListCosEnableRegionRequest() (request *ListCosEnableRegionRequest) {
 func NewListCosEnableRegionResponse() (response *ListCosEnableRegionResponse) {
     response = &ListCosEnableRegionResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // ListCosEnableRegion
-// 查询云审计支持的cos可用区
+// 查询操作审计支持的cos可用区
 //
 // 可能返回的错误码:
 //  INTERNALERROR_LISTCOSENABLEREGIONERROR = "InternalError.ListCosEnableRegionError"
@@ -761,7 +708,7 @@ func (c *Client) ListCosEnableRegion(request *ListCosEnableRegionRequest) (respo
 }
 
 // ListCosEnableRegion
-// 查询云审计支持的cos可用区
+// 查询操作审计支持的cos可用区
 //
 // 可能返回的错误码:
 //  INTERNALERROR_LISTCOSENABLEREGIONERROR = "InternalError.ListCosEnableRegionError"
@@ -769,6 +716,7 @@ func (c *Client) ListCosEnableRegionWithContext(ctx context.Context, request *Li
     if request == nil {
         request = NewListCosEnableRegionRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "cloudaudit", APIVersion, "ListCosEnableRegion")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ListCosEnableRegion require credential")
@@ -795,8 +743,9 @@ func NewListKeyAliasByRegionRequest() (request *ListKeyAliasByRegionRequest) {
 func NewListKeyAliasByRegionResponse() (response *ListKeyAliasByRegionResponse) {
     response = &ListKeyAliasByRegionResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // ListKeyAliasByRegion
@@ -821,6 +770,7 @@ func (c *Client) ListKeyAliasByRegionWithContext(ctx context.Context, request *L
     if request == nil {
         request = NewListKeyAliasByRegionRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "cloudaudit", APIVersion, "ListKeyAliasByRegion")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ListKeyAliasByRegion require credential")
@@ -847,8 +797,9 @@ func NewLookUpEventsRequest() (request *LookUpEventsRequest) {
 func NewLookUpEventsResponse() (response *LookUpEventsResponse) {
     response = &LookUpEventsResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // LookUpEvents
@@ -879,6 +830,7 @@ func (c *Client) LookUpEventsWithContext(ctx context.Context, request *LookUpEve
     if request == nil {
         request = NewLookUpEventsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "cloudaudit", APIVersion, "LookUpEvents")
     
     if c.GetCredential() == nil {
         return nil, errors.New("LookUpEvents require credential")
@@ -905,12 +857,13 @@ func NewModifyAuditTrackRequest() (request *ModifyAuditTrackRequest) {
 func NewModifyAuditTrackResponse() (response *ModifyAuditTrackResponse) {
     response = &ModifyAuditTrackResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // ModifyAuditTrack
-// 修改云审计跟踪
+// 修改操作审计跟踪集
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION_CHECKCLSTOPICISEXISTFAILED = "FailedOperation.CheckClsTopicIsExistFailed"
@@ -926,12 +879,13 @@ func NewModifyAuditTrackResponse() (response *ModifyAuditTrackResponse) {
 //  LIMITEXCEEDED_OVERAMOUNT = "LimitExceeded.OverAmount"
 //  RESOURCENOTFOUND = "ResourceNotFound"
 //  RESOURCENOTFOUND_AUDITNOTEXIST = "ResourceNotFound.AuditNotExist"
+//  RESOURCENOTFOUND_COSNOTEXIST = "ResourceNotFound.CosNotExist"
 func (c *Client) ModifyAuditTrack(request *ModifyAuditTrackRequest) (response *ModifyAuditTrackResponse, err error) {
     return c.ModifyAuditTrackWithContext(context.Background(), request)
 }
 
 // ModifyAuditTrack
-// 修改云审计跟踪
+// 修改操作审计跟踪集
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION_CHECKCLSTOPICISEXISTFAILED = "FailedOperation.CheckClsTopicIsExistFailed"
@@ -947,10 +901,12 @@ func (c *Client) ModifyAuditTrack(request *ModifyAuditTrackRequest) (response *M
 //  LIMITEXCEEDED_OVERAMOUNT = "LimitExceeded.OverAmount"
 //  RESOURCENOTFOUND = "ResourceNotFound"
 //  RESOURCENOTFOUND_AUDITNOTEXIST = "ResourceNotFound.AuditNotExist"
+//  RESOURCENOTFOUND_COSNOTEXIST = "ResourceNotFound.CosNotExist"
 func (c *Client) ModifyAuditTrackWithContext(ctx context.Context, request *ModifyAuditTrackRequest) (response *ModifyAuditTrackResponse, err error) {
     if request == nil {
         request = NewModifyAuditTrackRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "cloudaudit", APIVersion, "ModifyAuditTrack")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyAuditTrack require credential")
@@ -959,6 +915,82 @@ func (c *Client) ModifyAuditTrackWithContext(ctx context.Context, request *Modif
     request.SetContext(ctx)
     
     response = NewModifyAuditTrackResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyEventsAuditTrackRequest() (request *ModifyEventsAuditTrackRequest) {
+    request = &ModifyEventsAuditTrackRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("cloudaudit", APIVersion, "ModifyEventsAuditTrack")
+    
+    
+    return
+}
+
+func NewModifyEventsAuditTrackResponse() (response *ModifyEventsAuditTrackResponse) {
+    response = &ModifyEventsAuditTrackResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyEventsAuditTrack
+// 修改操作审计跟踪集
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_CHECKCLSTOPICISEXISTFAILED = "FailedOperation.CheckClsTopicIsExistFailed"
+//  FAILEDOPERATION_CHECKCOSBUCKETISEXISTFAILED = "FailedOperation.CheckCosBucketIsExistFailed"
+//  FAILEDOPERATION_GETCLSTOPICFAILED = "FailedOperation.GetClsTopicFailed"
+//  FAILEDOPERATION_GETCOSBUCKETLISTFAILED = "FailedOperation.GetCosBucketListFailed"
+//  INTERNALERROR = "InternalError"
+//  INTERNALERROR_SEARCHERROR = "InternalError.SearchError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE_ALIASALREADYEXISTS = "InvalidParameterValue.AliasAlreadyExists"
+//  INVALIDPARAMETERVALUE_AUDITTRACKNAMENOTSUPPORTMODIFY = "InvalidParameterValue.AuditTrackNameNotSupportModify"
+//  INVALIDPARAMETERVALUE_COSREGIONERROR = "InvalidParameterValue.CosRegionError"
+//  LIMITEXCEEDED_OVERAMOUNT = "LimitExceeded.OverAmount"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  RESOURCENOTFOUND_AUDITNOTEXIST = "ResourceNotFound.AuditNotExist"
+//  RESOURCENOTFOUND_COSNOTEXIST = "ResourceNotFound.CosNotExist"
+func (c *Client) ModifyEventsAuditTrack(request *ModifyEventsAuditTrackRequest) (response *ModifyEventsAuditTrackResponse, err error) {
+    return c.ModifyEventsAuditTrackWithContext(context.Background(), request)
+}
+
+// ModifyEventsAuditTrack
+// 修改操作审计跟踪集
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_CHECKCLSTOPICISEXISTFAILED = "FailedOperation.CheckClsTopicIsExistFailed"
+//  FAILEDOPERATION_CHECKCOSBUCKETISEXISTFAILED = "FailedOperation.CheckCosBucketIsExistFailed"
+//  FAILEDOPERATION_GETCLSTOPICFAILED = "FailedOperation.GetClsTopicFailed"
+//  FAILEDOPERATION_GETCOSBUCKETLISTFAILED = "FailedOperation.GetCosBucketListFailed"
+//  INTERNALERROR = "InternalError"
+//  INTERNALERROR_SEARCHERROR = "InternalError.SearchError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE_ALIASALREADYEXISTS = "InvalidParameterValue.AliasAlreadyExists"
+//  INVALIDPARAMETERVALUE_AUDITTRACKNAMENOTSUPPORTMODIFY = "InvalidParameterValue.AuditTrackNameNotSupportModify"
+//  INVALIDPARAMETERVALUE_COSREGIONERROR = "InvalidParameterValue.CosRegionError"
+//  LIMITEXCEEDED_OVERAMOUNT = "LimitExceeded.OverAmount"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  RESOURCENOTFOUND_AUDITNOTEXIST = "ResourceNotFound.AuditNotExist"
+//  RESOURCENOTFOUND_COSNOTEXIST = "ResourceNotFound.CosNotExist"
+func (c *Client) ModifyEventsAuditTrackWithContext(ctx context.Context, request *ModifyEventsAuditTrackRequest) (response *ModifyEventsAuditTrackResponse, err error) {
+    if request == nil {
+        request = NewModifyEventsAuditTrackRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "cloudaudit", APIVersion, "ModifyEventsAuditTrack")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyEventsAuditTrack require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyEventsAuditTrackResponse()
     err = c.Send(request, response)
     return
 }
@@ -977,8 +1009,9 @@ func NewStartLoggingRequest() (request *StartLoggingRequest) {
 func NewStartLoggingResponse() (response *StartLoggingResponse) {
     response = &StartLoggingResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // StartLogging
@@ -1001,6 +1034,7 @@ func (c *Client) StartLoggingWithContext(ctx context.Context, request *StartLogg
     if request == nil {
         request = NewStartLoggingRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "cloudaudit", APIVersion, "StartLogging")
     
     if c.GetCredential() == nil {
         return nil, errors.New("StartLogging require credential")
@@ -1027,8 +1061,9 @@ func NewStopLoggingRequest() (request *StopLoggingRequest) {
 func NewStopLoggingResponse() (response *StopLoggingResponse) {
     response = &StopLoggingResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // StopLogging
@@ -1051,6 +1086,7 @@ func (c *Client) StopLoggingWithContext(ctx context.Context, request *StopLoggin
     if request == nil {
         request = NewStopLoggingRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "cloudaudit", APIVersion, "StopLogging")
     
     if c.GetCredential() == nil {
         return nil, errors.New("StopLogging require credential")
@@ -1077,8 +1113,9 @@ func NewUpdateAuditRequest() (request *UpdateAuditRequest) {
 func NewUpdateAuditResponse() (response *UpdateAuditResponse) {
     response = &UpdateAuditResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // UpdateAudit
@@ -1135,6 +1172,7 @@ func (c *Client) UpdateAuditWithContext(ctx context.Context, request *UpdateAudi
     if request == nil {
         request = NewUpdateAuditRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "cloudaudit", APIVersion, "UpdateAudit")
     
     if c.GetCredential() == nil {
         return nil, errors.New("UpdateAudit require credential")

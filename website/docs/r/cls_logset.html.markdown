@@ -4,20 +4,21 @@ layout: "tencentcloud"
 page_title: "TencentCloud: tencentcloud_cls_logset"
 sidebar_current: "docs-tencentcloud-resource-cls_logset"
 description: |-
-  Provides a resource to create a cls logset
+  Provides a resource to create a CLS logset
 ---
 
 # tencentcloud_cls_logset
 
-Provides a resource to create a cls logset
+Provides a resource to create a CLS logset
 
 ## Example Usage
 
 ```hcl
-resource "tencentcloud_cls_logset" "logset" {
-  logset_name = "demo"
-  tags = {
-    "createdBy" = "terraform"
+resource "tencentcloud_cls_logset" "example" {
+  logset_name = "tf-example"
+  tag_list {
+    key   = "createdBy"
+    value = "Terraform"
   }
 }
 ```
@@ -27,7 +28,13 @@ resource "tencentcloud_cls_logset" "logset" {
 The following arguments are supported:
 
 * `logset_name` - (Required, String) Logset name, which must be unique.
-* `tags` - (Optional, Map) Tag description list.
+* `tag_list` - (Optional, List) Tag description list. The CLS API supports up to 10 tag key-value pairs, and duplicate keys are not allowed.
+* `tags` - (Optional, Map, **Deprecated**) It is recommended to use `tag_list` because the current `tags` field is binding resources by calling the tag API. Tag description list.
+
+The `tag_list` object supports the following:
+
+* `key` - (Required, String) Tag key.
+* `value` - (Required, String) Tag value.
 
 ## Attributes Reference
 
@@ -41,8 +48,8 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-cls logset can be imported using the id, e.g.
+CLS logset can be imported using the id, e.g.
 ```
-$ terraform import tencentcloud_cls_logset.logset logset_id
+$ terraform import tencentcloud_cls_logset.example 698902ff-8b5a-4c65-824b-d8956f366351
 ```
 

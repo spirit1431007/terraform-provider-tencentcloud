@@ -1,8 +1,8 @@
-Provides a resource to create a cdwdoris instance
+Provides a resource to create a CDWDoris instance
 
 Example Usage
 
-Create a POSTPAID instance
+Create a POSTPAID instance(SSC)
 
 ```hcl
 # availability zone
@@ -40,13 +40,15 @@ resource "tencentcloud_cdwdoris_instance" "example" {
   zone                  = var.availability_zone
   user_vpc_id           = tencentcloud_vpc.vpc.id
   user_subnet_id        = tencentcloud_subnet.subnet.id
-  product_version       = "2.1"
+  product_version       = "3.1"
   instance_name         = "tf-example"
-  doris_user_pwd        = "Password@test"
+  doris_user_pwd        = "Password@2026"
   ha_flag               = false
+  ha_type               = 0
   case_sensitive        = 0
   enable_multi_zones    = false
-  workload_group_status = "open"
+  is_ssc                = true
+  workload_group_status = "close"
 
   security_group_ids = [
     tencentcloud_security_group.example.id
@@ -57,15 +59,15 @@ resource "tencentcloud_cdwdoris_instance" "example" {
   }
 
   fe_spec {
-    spec_name = "S_4_16_P"
-    count     = 3
+    spec_name = "S_8_32_H"
+    count     = 5
     disk_size = 200
   }
 
   be_spec {
-    spec_name = "S_4_16_P"
+    spec_name = "S_8_32_H"
     count     = 3
-    disk_size = 200
+    disk_size = 400
   }
 
   tags {
@@ -75,7 +77,7 @@ resource "tencentcloud_cdwdoris_instance" "example" {
 }
 ```
 
-Create a POSTPAID instance
+Create a PREPAID instance(Without SSC)
 
 ```hcl
 # availability zone
@@ -115,10 +117,12 @@ resource "tencentcloud_cdwdoris_instance" "example" {
   user_subnet_id        = tencentcloud_subnet.subnet.id
   product_version       = "2.1"
   instance_name         = "tf-example"
-  doris_user_pwd        = "Password@test"
+  doris_user_pwd        = "Password@2026"
   ha_flag               = false
+  ha_type               = 0
   case_sensitive        = 0
   enable_multi_zones    = false
+  is_ssc                = false
   workload_group_status = "close"
 
   security_group_ids = [

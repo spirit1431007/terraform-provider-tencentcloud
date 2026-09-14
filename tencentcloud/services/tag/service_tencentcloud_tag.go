@@ -2,6 +2,7 @@ package tag
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	tccommon "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/common"
@@ -300,6 +301,7 @@ func (me *TagService) DescribeTagResourceById(ctx context.Context, tagKey string
 	logId := tccommon.GetLogId(ctx)
 
 	request := tag.NewGetTagsRequest()
+	response := tag.NewGetTagsResponse()
 	request.TagKeys = []*string{&tagKey}
 
 	defer func() {
@@ -308,23 +310,37 @@ func (me *TagService) DescribeTagResourceById(ctx context.Context, tagKey string
 		}
 	}()
 
-	ratelimit.Check(request.GetAction())
+	err := resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
+		ratelimit.Check(request.GetAction())
+		result, e := me.client.UseTagClient().GetTags(request)
+		if e != nil {
+			return tccommon.RetryError(e)
+		} else {
+			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+		}
 
-	response, err := me.client.UseTagClient().GetTags(request)
+		if result == nil || result.Response == nil || result.Response.Tags == nil || len(result.Response.Tags) == 0 {
+			return resource.NonRetryableError(fmt.Errorf("Describe tags failed, Response is nil."))
+		}
+
+		response = result
+		return nil
+	})
+
 	if err != nil {
 		errRet = err
 		return
 	}
-	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
 
-	if response == nil || response.Response == nil || len(response.Response.Tags) < 1 {
-		return
-	}
 	for _, v := range response.Response.Tags {
-		if *v.TagKey == tagKey && *v.TagValue == tagValue {
-			tagRes = v
+		if v != nil && v.TagKey != nil && v.TagValue != nil {
+			if *v.TagKey == tagKey && *v.TagValue == tagValue {
+				tagRes = v
+				break
+			}
 		}
 	}
+
 	return
 }
 
@@ -341,14 +357,22 @@ func (me *TagService) DeleteTagResourceById(ctx context.Context, tagKey string, 
 		}
 	}()
 
-	ratelimit.Check(request.GetAction())
+	err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+		ratelimit.Check(request.GetAction())
+		result, e := me.client.UseTagClient().DeleteTag(request)
+		if e != nil {
+			return tccommon.RetryError(e)
+		} else {
+			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+		}
 
-	response, err := me.client.UseTagClient().DeleteTag(request)
+		return nil
+	})
+
 	if err != nil {
 		errRet = err
 		return
 	}
-	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
 
 	return
 }
@@ -414,6 +438,107 @@ func (me *TagService) DeleteTagTagAttachmentById(ctx context.Context, tagKey str
 		return
 	}
 	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
+
+	return
+}
+
+func (me *TagService) DescribeTagKeysByFilter(ctx context.Context, param map[string]interface{}) (ret []*string, errRet error) {
+	var (
+		logId   = tccommon.GetLogId(ctx)
+		request = tag.NewDescribeTagKeysRequest()
+	)
+
+	defer func() {
+		if errRet != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n", logId, request.GetAction(), request.ToJsonString(), errRet.Error())
+		}
+	}()
+
+	for k, v := range param {
+		if k == "CreateUin" {
+			request.CreateUin = v.(*uint64)
+		}
+
+		if k == "ShowProject" {
+			request.ShowProject = v.(*uint64)
+		}
+
+		if k == "Category" {
+			request.Category = v.(*string)
+		}
+	}
+
+	var (
+		offset uint64 = 0
+		limit  uint64 = 1000
+	)
+
+	for {
+		request.Offset = &offset
+		request.Limit = &limit
+		ratelimit.Check(request.GetAction())
+		response, err := me.client.UseTagClient().DescribeTagKeys(request)
+		if err != nil {
+			errRet = err
+			return
+		}
+
+		log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
+		if response == nil || len(response.Response.Tags) < 1 {
+			break
+		}
+
+		ret = append(ret, response.Response.Tags...)
+		if len(response.Response.Tags) < int(limit) {
+			break
+		}
+
+		offset += limit
+	}
+
+	return
+}
+
+// DescribeTagAttachmentV2ById queries the tag binding of a single tag key on a single resource
+// via GetResources, the same query path used by tag_attachment. The resource six-segment is
+// passed to GetResources as-is, so no field decomposition is needed. It returns the *tag.Tag
+// whose TagKey equals tagKey, or nil if the resource or the tag key is not found.
+func (me *TagService) DescribeTagAttachmentV2ById(ctx context.Context, tagKey string, resourceName string) (tagRes *tag.Tag, errRet error) {
+	logId := tccommon.GetLogId(ctx)
+
+	request := tag.NewGetResourcesRequest()
+	request.ResourceList = []*string{&resourceName}
+
+	defer func() {
+		if errRet != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n", logId, request.GetAction(), request.ToJsonString(), errRet.Error())
+		}
+	}()
+
+	ratelimit.Check(request.GetAction())
+
+	response, err := me.client.UseTagClient().GetResources(request)
+	if err != nil {
+		errRet = err
+		return
+	}
+	log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
+
+	if response == nil || response.Response == nil || len(response.Response.ResourceTagMappingList) < 1 {
+		return
+	}
+
+	for _, resourceTagMap := range response.Response.ResourceTagMappingList {
+		if resourceTagMap == nil || resourceTagMap.Resource == nil || *resourceTagMap.Resource != resourceName {
+			continue
+		}
+		for _, v := range resourceTagMap.Tags {
+			if v != nil && v.TagKey != nil && *v.TagKey == tagKey {
+				tagRes = v
+				return
+			}
+		}
+	}
 
 	return
 }

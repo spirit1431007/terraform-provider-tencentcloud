@@ -11,11 +11,13 @@ description: |-
 
 Provides a resource to create a redis param
 
+~> **NOTE:** This resource is applicable to modifying the parameters of Tencent Cloud Distributed Cache instances across three engine types(`Redis Edition`, `Valkey Edition`, `Memcached Edition`). For details on the engines, please refer to [Storage Engine](https://www.tencentcloud.com/document/product/239/31957)
+
 ## Example Usage
 
 ```hcl
-resource "tencentcloud_redis_param" "param" {
-  instance_id = "crs-c1nl9rpv"
+resource "tencentcloud_redis_param" "example" {
+  instance_id = "crs-cqdfdzvt"
   instance_params = {
     "cluster-node-timeout"          = "15000"
     "disable-command-list"          = "\"\""
@@ -28,7 +30,6 @@ resource "tencentcloud_redis_param" "param" {
     "maxmemory-policy"              = "noeviction"
     "notify-keyspace-events"        = "\"\""
     "proxy-slowlog-log-slower-than" = "500"
-    "replica-lazy-flush"            = "yes"
     "sentineauth"                   = "no"
     "set-max-intset-entries"        = "512"
     "slowlog-log-slower-than"       = "10"
@@ -59,6 +60,6 @@ In addition to all arguments above, the following attributes are exported:
 redis param can be imported using the instanceId, e.g.
 
 ```
-terraform import tencentcloud_redis_param.param crs-c1nl9rpv
+terraform import tencentcloud_redis_param.example crs-cqdfdzvt
 ```
 

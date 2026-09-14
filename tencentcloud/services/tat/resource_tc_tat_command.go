@@ -10,14 +10,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	tat "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/tat/v20201028"
+	svctag "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/services/tag"
 
 	"github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/internal/helper"
 )
 
 func ResourceTencentCloudTatCommand() *schema.Resource {
 	return &schema.Resource{
-		Read:   resourceTencentCloudTatCommandRead,
 		Create: resourceTencentCloudTatCommandCreate,
+		Read:   resourceTencentCloudTatCommandRead,
 		Update: resourceTencentCloudTatCommandUpdate,
 		Delete: resourceTencentCloudTatCommandDelete,
 		Importer: &schema.ResourceImporter{
@@ -33,7 +34,7 @@ func ResourceTencentCloudTatCommand() *schema.Resource {
 			"content": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Command. The maximum length of Base64 encoding is 64KB.",
+				Description: "Command content. The maximum length is 64 KB.",
 			},
 
 			"description": {
@@ -45,7 +46,7 @@ func ResourceTencentCloudTatCommand() *schema.Resource {
 			"command_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Command type. `SHELL` and `POWERSHELL` are supported. The default value is `SHELL`.",
+				Description: "Command type. `SHELL`, `POWERSHELL` and `BAT` are supported. The default value is `SHELL`.",
 			},
 
 			"working_directory": {
@@ -69,7 +70,7 @@ func ResourceTencentCloudTatCommand() *schema.Resource {
 			"default_parameters": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The default value of the custom parameter value when it is enabled. The field type is JSON encoded string. For example, {&amp;#39;varA&amp;#39;: &amp;#39;222&amp;#39;}.`key` is the name of the custom parameter and value is the default value. Both `key` and `value` are strings.If no parameter value is provided in the `InvokeCommand` API, the default value is used.Up to 20 custom parameters are supported.The name of the custom parameter cannot exceed 64 characters and can contain [a-z], [A-Z], [0-9] and [-_].",
+				Description: "The default value of the custom parameter value when it is enabled. The field type is JSON encoded string. For example, {\"varA\": \"222\"}.`key` is the name of the custom parameter and value is the default value. Both `key` and `value` are strings.If no parameter value is provided in the `InvokeCommand` API, the default value is used.Up to 20 custom parameters are supported.The name of the custom parameter cannot exceed 64 characters and can contain [a-z], [A-Z], [0-9] and [-_].",
 			},
 
 			"tags": {
@@ -141,9 +142,8 @@ func resourceTencentCloudTatCommandCreate(d *schema.ResourceData, meta interface
 	defer tccommon.LogElapsed("resource.tencentcloud_tat_command.create")()
 	defer tccommon.InconsistentCheck(d, meta)()
 
-	logId := tccommon.GetLogId(tccommon.ContextNil)
-
 	var (
+		logId     = tccommon.GetLogId(tccommon.ContextNil)
 		request   = tat.NewCreateCommandRequest()
 		response  *tat.CreateCommandResponse
 		commandId string
@@ -169,11 +169,11 @@ func resourceTencentCloudTatCommandCreate(d *schema.ResourceData, meta interface
 		request.WorkingDirectory = helper.String(v.(string))
 	}
 
-	if v, ok := d.GetOk("timeout"); ok {
+	if v, ok := d.GetOkExists("timeout"); ok {
 		request.Timeout = helper.IntUint64(v.(int))
 	}
 
-	if v, _ := d.GetOk("enable_parameter"); v != nil {
+	if v, ok := d.GetOkExists("enable_parameter"); ok {
 		request.EnableParameter = helper.Bool(v.(bool))
 	}
 
@@ -183,16 +183,17 @@ func resourceTencentCloudTatCommandCreate(d *schema.ResourceData, meta interface
 
 	if v, ok := d.GetOk("tags"); ok {
 		for _, item := range v.([]interface{}) {
-			dMap := item.(map[string]interface{})
-			tag := tat.Tag{}
-			if v, ok := dMap["key"]; ok {
-				tag.Key = helper.String(v.(string))
-			}
-			if v, ok := dMap["value"]; ok {
-				tag.Value = helper.String(v.(string))
-			}
+			if dMap, ok := item.(map[string]interface{}); ok && dMap != nil {
+				tag := tat.Tag{}
+				if v, ok := dMap["key"]; ok {
+					tag.Key = helper.String(v.(string))
+				}
+				if v, ok := dMap["value"]; ok {
+					tag.Value = helper.String(v.(string))
+				}
 
-			request.Tags = append(request.Tags, &tag)
+				request.Tags = append(request.Tags, &tag)
+			}
 		}
 	}
 
@@ -216,6 +217,11 @@ func resourceTencentCloudTatCommandCreate(d *schema.ResourceData, meta interface
 			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
 				logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
 		}
+
+		if result == nil || result.Response == nil {
+			return resource.NonRetryableError(fmt.Errorf("Create tat command failed, Response is nil."))
+		}
+
 		response = result
 		return nil
 	})
@@ -223,6 +229,10 @@ func resourceTencentCloudTatCommandCreate(d *schema.ResourceData, meta interface
 	if err != nil {
 		log.Printf("[CRITAL]%s create tat command failed, reason:%+v", logId, err)
 		return err
+	}
+
+	if response.Response.CommandId == nil {
+		return fmt.Errorf("CommandId is nil.")
 	}
 
 	commandId = *response.Response.CommandId
@@ -250,7 +260,7 @@ func resourceTencentCloudTatCommandRead(d *schema.ResourceData, meta interface{}
 
 	if command == nil {
 		d.SetId("")
-		return fmt.Errorf("resource `command` %s does not exist", commandId)
+		return fmt.Errorf("resource `tencentcloud_tat_command` %s does not exist", commandId)
 	}
 
 	if command.CommandName != nil {
@@ -341,94 +351,128 @@ func resourceTencentCloudTatCommandUpdate(d *schema.ResourceData, meta interface
 	defer tccommon.InconsistentCheck(d, meta)()
 
 	logId := tccommon.GetLogId(tccommon.ContextNil)
-
 	request := tat.NewModifyCommandRequest()
 
+	if d.HasChange("enable_parameter") {
+		return fmt.Errorf("`enable_parameter` do not support change now.")
+	}
+
+	var modifyCommand bool
 	commandId := d.Id()
-	request.CommandId = &commandId
 
 	if d.HasChange("command_name") {
 		if v, ok := d.GetOk("command_name"); ok {
 			request.CommandName = helper.String(v.(string))
 		}
+
+		modifyCommand = true
 	}
 
 	if d.HasChange("content") {
 		if v, ok := d.GetOk("content"); ok {
 			request.Content = helper.String(tccommon.StringToBase64(v.(string)))
 		}
+
+		modifyCommand = true
 	}
 
 	if d.HasChange("description") {
 		if v, ok := d.GetOk("description"); ok {
 			request.Description = helper.String(v.(string))
 		}
+
+		modifyCommand = true
 	}
 
 	if d.HasChange("command_type") {
 		if v, ok := d.GetOk("command_type"); ok {
 			request.CommandType = helper.String(v.(string))
 		}
+
+		modifyCommand = true
 	}
 
 	if d.HasChange("working_directory") {
 		if v, ok := d.GetOk("working_directory"); ok {
 			request.WorkingDirectory = helper.String(v.(string))
 		}
+
+		modifyCommand = true
 	}
 
 	if d.HasChange("timeout") {
 		if v, ok := d.GetOk("timeout"); ok {
 			request.Timeout = helper.IntUint64(v.(int))
 		}
-	}
 
-	if d.HasChange("enable_parameter") {
-		return fmt.Errorf("`enable_parameter` do not support change now.")
+		modifyCommand = true
 	}
 
 	if d.HasChange("default_parameters") {
 		if v, ok := d.GetOk("default_parameters"); ok {
 			request.DefaultParameters = helper.String(v.(string))
 		}
-	}
 
-	if d.HasChange("tags") {
-		return fmt.Errorf("`tags` do not support change now.")
+		modifyCommand = true
 	}
 
 	if d.HasChange("username") {
 		if v, ok := d.GetOk("username"); ok {
 			request.Username = helper.String(v.(string))
 		}
+
+		modifyCommand = true
 	}
 
 	if d.HasChange("output_cos_bucket_url") {
 		if v, ok := d.GetOk("output_cos_bucket_url"); ok {
 			request.OutputCOSBucketUrl = helper.String(v.(string))
 		}
+
+		modifyCommand = true
 	}
 
 	if d.HasChange("output_cos_key_prefix") {
 		if v, ok := d.GetOk("output_cos_key_prefix"); ok {
 			request.OutputCOSKeyPrefix = helper.String(v.(string))
 		}
+
+		modifyCommand = true
 	}
 
-	err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
-		result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseTatClient().ModifyCommand(request)
-		if e != nil {
-			return tccommon.RetryError(e)
-		} else {
-			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
-				logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
-		}
-		return nil
-	})
+	if modifyCommand {
+		request.CommandId = &commandId
+		err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+			result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseTatClient().ModifyCommand(request)
+			if e != nil {
+				return tccommon.RetryError(e)
+			} else {
+				log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
+					logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+			}
+			return nil
+		})
 
-	if err != nil {
-		log.Printf("[CRITAL]%s create tat command failed, reason:%+v", logId, err)
-		return err
+		if err != nil {
+			log.Printf("[CRITAL]%s create tat command failed, reason:%+v", logId, err)
+			return err
+		}
+	}
+
+	if d.HasChange("tags") {
+		ctx := context.WithValue(context.TODO(), tccommon.LogIdKey, logId)
+		tcClient := meta.(tccommon.ProviderMeta).GetAPIV3Conn()
+		tagService := svctag.NewTagService(tcClient)
+		oldTags, newTags := d.GetChange("tags")
+		// `tags` is defined as TypeList (list of {key, value} objects) in schema,
+		// convert it to map[string]interface{} which DiffTags expects.
+		oldTagsMap := helper.TagsListToMap(oldTags.([]interface{}))
+		newTagsMap := helper.TagsListToMap(newTags.([]interface{}))
+		replaceTags, deleteTags := svctag.DiffTags(oldTagsMap, newTagsMap)
+		resourceName := tccommon.BuildTagResourceName("tat", "command", tcClient.Region, d.Id())
+		if err := tagService.ModifyTags(ctx, resourceName, replaceTags, deleteTags); err != nil {
+			return err
+		}
 	}
 
 	return resourceTencentCloudTatCommandRead(d, meta)

@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+// Copyright (c) 2017-2025 Tencent. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -59,8 +59,9 @@ func NewCreateStreamLiveChannelRequest() (request *CreateStreamLiveChannelReques
 func NewCreateStreamLiveChannelResponse() (response *CreateStreamLiveChannelResponse) {
     response = &CreateStreamLiveChannelResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // CreateStreamLiveChannel
@@ -73,6 +74,7 @@ func NewCreateStreamLiveChannelResponse() (response *CreateStreamLiveChannelResp
 //  INVALIDPARAMETER_ATTACHEDINPUTS = "InvalidParameter.AttachedInputs"
 //  INVALIDPARAMETER_AUDIOTEMPLATES = "InvalidParameter.AudioTemplates"
 //  INVALIDPARAMETER_EXCEEDEDQUANTITYLIMIT = "InvalidParameter.ExceededQuantityLimit"
+//  INVALIDPARAMETER_FRAMECAPTURETEMPLATES = "InvalidParameter.FrameCaptureTemplates"
 //  INVALIDPARAMETER_ID = "InvalidParameter.Id"
 //  INVALIDPARAMETER_NAME = "InvalidParameter.Name"
 //  INVALIDPARAMETER_NOTFOUND = "InvalidParameter.NotFound"
@@ -94,6 +96,7 @@ func (c *Client) CreateStreamLiveChannel(request *CreateStreamLiveChannelRequest
 //  INVALIDPARAMETER_ATTACHEDINPUTS = "InvalidParameter.AttachedInputs"
 //  INVALIDPARAMETER_AUDIOTEMPLATES = "InvalidParameter.AudioTemplates"
 //  INVALIDPARAMETER_EXCEEDEDQUANTITYLIMIT = "InvalidParameter.ExceededQuantityLimit"
+//  INVALIDPARAMETER_FRAMECAPTURETEMPLATES = "InvalidParameter.FrameCaptureTemplates"
 //  INVALIDPARAMETER_ID = "InvalidParameter.Id"
 //  INVALIDPARAMETER_NAME = "InvalidParameter.Name"
 //  INVALIDPARAMETER_NOTFOUND = "InvalidParameter.NotFound"
@@ -105,6 +108,7 @@ func (c *Client) CreateStreamLiveChannelWithContext(ctx context.Context, request
     if request == nil {
         request = NewCreateStreamLiveChannelRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "CreateStreamLiveChannel")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateStreamLiveChannel require credential")
@@ -131,8 +135,9 @@ func NewCreateStreamLiveInputRequest() (request *CreateStreamLiveInputRequest) {
 func NewCreateStreamLiveInputResponse() (response *CreateStreamLiveInputResponse) {
     response = &CreateStreamLiveInputResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // CreateStreamLiveInput
@@ -167,6 +172,7 @@ func (c *Client) CreateStreamLiveInputWithContext(ctx context.Context, request *
     if request == nil {
         request = NewCreateStreamLiveInputRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "CreateStreamLiveInput")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateStreamLiveInput require credential")
@@ -193,8 +199,9 @@ func NewCreateStreamLiveInputSecurityGroupRequest() (request *CreateStreamLiveIn
 func NewCreateStreamLiveInputSecurityGroupResponse() (response *CreateStreamLiveInputSecurityGroupResponse) {
     response = &CreateStreamLiveInputSecurityGroupResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // CreateStreamLiveInputSecurityGroup
@@ -223,6 +230,7 @@ func (c *Client) CreateStreamLiveInputSecurityGroupWithContext(ctx context.Conte
     if request == nil {
         request = NewCreateStreamLiveInputSecurityGroupRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "CreateStreamLiveInputSecurityGroup")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateStreamLiveInputSecurityGroup require credential")
@@ -249,8 +257,9 @@ func NewCreateStreamLivePlanRequest() (request *CreateStreamLivePlanRequest) {
 func NewCreateStreamLivePlanResponse() (response *CreateStreamLivePlanResponse) {
     response = &CreateStreamLivePlanResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // CreateStreamLivePlan
@@ -275,6 +284,7 @@ func (c *Client) CreateStreamLivePlanWithContext(ctx context.Context, request *C
     if request == nil {
         request = NewCreateStreamLivePlanRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "CreateStreamLivePlan")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateStreamLivePlan require credential")
@@ -301,8 +311,9 @@ func NewCreateStreamLiveWatermarkRequest() (request *CreateStreamLiveWatermarkRe
 func NewCreateStreamLiveWatermarkResponse() (response *CreateStreamLiveWatermarkResponse) {
     response = &CreateStreamLiveWatermarkResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // CreateStreamLiveWatermark
@@ -333,6 +344,7 @@ func (c *Client) CreateStreamLiveWatermarkWithContext(ctx context.Context, reque
     if request == nil {
         request = NewCreateStreamLiveWatermarkRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "CreateStreamLiveWatermark")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateStreamLiveWatermark require credential")
@@ -341,6 +353,66 @@ func (c *Client) CreateStreamLiveWatermarkWithContext(ctx context.Context, reque
     request.SetContext(ctx)
     
     response = NewCreateStreamLiveWatermarkResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateWatermarkDetectionRequest() (request *CreateWatermarkDetectionRequest) {
+    request = &CreateWatermarkDetectionRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("mdl", APIVersion, "CreateWatermarkDetection")
+    
+    
+    return
+}
+
+func NewCreateWatermarkDetectionResponse() (response *CreateWatermarkDetectionResponse) {
+    response = &CreateWatermarkDetectionResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateWatermarkDetection
+// Create a watermark detection task
+//
+// error code that may be returned:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER_EXCEEDEDQUANTITYLIMIT = "InvalidParameter.ExceededQuantityLimit"
+//  INVALIDPARAMETER_IMAGESETTINGS = "InvalidParameter.ImageSettings"
+//  INVALIDPARAMETER_NAME = "InvalidParameter.Name"
+//  INVALIDPARAMETER_TEXTSETTINGS = "InvalidParameter.TextSettings"
+//  INVALIDPARAMETER_TYPE = "InvalidParameter.Type"
+func (c *Client) CreateWatermarkDetection(request *CreateWatermarkDetectionRequest) (response *CreateWatermarkDetectionResponse, err error) {
+    return c.CreateWatermarkDetectionWithContext(context.Background(), request)
+}
+
+// CreateWatermarkDetection
+// Create a watermark detection task
+//
+// error code that may be returned:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER_EXCEEDEDQUANTITYLIMIT = "InvalidParameter.ExceededQuantityLimit"
+//  INVALIDPARAMETER_IMAGESETTINGS = "InvalidParameter.ImageSettings"
+//  INVALIDPARAMETER_NAME = "InvalidParameter.Name"
+//  INVALIDPARAMETER_TEXTSETTINGS = "InvalidParameter.TextSettings"
+//  INVALIDPARAMETER_TYPE = "InvalidParameter.Type"
+func (c *Client) CreateWatermarkDetectionWithContext(ctx context.Context, request *CreateWatermarkDetectionRequest) (response *CreateWatermarkDetectionResponse, err error) {
+    if request == nil {
+        request = NewCreateWatermarkDetectionRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "CreateWatermarkDetection")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateWatermarkDetection require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateWatermarkDetectionResponse()
     err = c.Send(request, response)
     return
 }
@@ -359,8 +431,9 @@ func NewDeleteStreamLiveChannelRequest() (request *DeleteStreamLiveChannelReques
 func NewDeleteStreamLiveChannelResponse() (response *DeleteStreamLiveChannelResponse) {
     response = &DeleteStreamLiveChannelResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // DeleteStreamLiveChannel
@@ -391,6 +464,7 @@ func (c *Client) DeleteStreamLiveChannelWithContext(ctx context.Context, request
     if request == nil {
         request = NewDeleteStreamLiveChannelRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "DeleteStreamLiveChannel")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteStreamLiveChannel require credential")
@@ -417,8 +491,9 @@ func NewDeleteStreamLiveInputRequest() (request *DeleteStreamLiveInputRequest) {
 func NewDeleteStreamLiveInputResponse() (response *DeleteStreamLiveInputResponse) {
     response = &DeleteStreamLiveInputResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // DeleteStreamLiveInput
@@ -447,6 +522,7 @@ func (c *Client) DeleteStreamLiveInputWithContext(ctx context.Context, request *
     if request == nil {
         request = NewDeleteStreamLiveInputRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "DeleteStreamLiveInput")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteStreamLiveInput require credential")
@@ -473,8 +549,9 @@ func NewDeleteStreamLiveInputSecurityGroupRequest() (request *DeleteStreamLiveIn
 func NewDeleteStreamLiveInputSecurityGroupResponse() (response *DeleteStreamLiveInputSecurityGroupResponse) {
     response = &DeleteStreamLiveInputSecurityGroupResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // DeleteStreamLiveInputSecurityGroup
@@ -503,6 +580,7 @@ func (c *Client) DeleteStreamLiveInputSecurityGroupWithContext(ctx context.Conte
     if request == nil {
         request = NewDeleteStreamLiveInputSecurityGroupRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "DeleteStreamLiveInputSecurityGroup")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteStreamLiveInputSecurityGroup require credential")
@@ -529,8 +607,9 @@ func NewDeleteStreamLivePlanRequest() (request *DeleteStreamLivePlanRequest) {
 func NewDeleteStreamLivePlanResponse() (response *DeleteStreamLivePlanResponse) {
     response = &DeleteStreamLivePlanResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // DeleteStreamLivePlan
@@ -555,6 +634,7 @@ func (c *Client) DeleteStreamLivePlanWithContext(ctx context.Context, request *D
     if request == nil {
         request = NewDeleteStreamLivePlanRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "DeleteStreamLivePlan")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteStreamLivePlan require credential")
@@ -581,8 +661,9 @@ func NewDeleteStreamLiveWatermarkRequest() (request *DeleteStreamLiveWatermarkRe
 func NewDeleteStreamLiveWatermarkResponse() (response *DeleteStreamLiveWatermarkResponse) {
     response = &DeleteStreamLiveWatermarkResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // DeleteStreamLiveWatermark
@@ -609,6 +690,7 @@ func (c *Client) DeleteStreamLiveWatermarkWithContext(ctx context.Context, reque
     if request == nil {
         request = NewDeleteStreamLiveWatermarkRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "DeleteStreamLiveWatermark")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteStreamLiveWatermark require credential")
@@ -635,8 +717,9 @@ func NewDescribeStreamLiveChannelRequest() (request *DescribeStreamLiveChannelRe
 func NewDescribeStreamLiveChannelResponse() (response *DescribeStreamLiveChannelResponse) {
     response = &DescribeStreamLiveChannelResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // DescribeStreamLiveChannel
@@ -659,6 +742,7 @@ func (c *Client) DescribeStreamLiveChannelWithContext(ctx context.Context, reque
     if request == nil {
         request = NewDescribeStreamLiveChannelRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "DescribeStreamLiveChannel")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeStreamLiveChannel require credential")
@@ -685,8 +769,9 @@ func NewDescribeStreamLiveChannelAlertsRequest() (request *DescribeStreamLiveCha
 func NewDescribeStreamLiveChannelAlertsResponse() (response *DescribeStreamLiveChannelAlertsResponse) {
     response = &DescribeStreamLiveChannelAlertsResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // DescribeStreamLiveChannelAlerts
@@ -709,6 +794,7 @@ func (c *Client) DescribeStreamLiveChannelAlertsWithContext(ctx context.Context,
     if request == nil {
         request = NewDescribeStreamLiveChannelAlertsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "DescribeStreamLiveChannelAlerts")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeStreamLiveChannelAlerts require credential")
@@ -735,8 +821,9 @@ func NewDescribeStreamLiveChannelInputStatisticsRequest() (request *DescribeStre
 func NewDescribeStreamLiveChannelInputStatisticsResponse() (response *DescribeStreamLiveChannelInputStatisticsResponse) {
     response = &DescribeStreamLiveChannelInputStatisticsResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // DescribeStreamLiveChannelInputStatistics
@@ -746,6 +833,7 @@ func NewDescribeStreamLiveChannelInputStatisticsResponse() (response *DescribeSt
 //  INTERNALERROR = "InternalError"
 //  INVALIDPARAMETER_ID = "InvalidParameter.Id"
 //  INVALIDPARAMETER_NOTFOUND = "InvalidParameter.NotFound"
+//  INVALIDPARAMETER_PERIOD = "InvalidParameter.Period"
 //  INVALIDPARAMETER_STARTTIME = "InvalidParameter.StartTime"
 func (c *Client) DescribeStreamLiveChannelInputStatistics(request *DescribeStreamLiveChannelInputStatisticsRequest) (response *DescribeStreamLiveChannelInputStatisticsResponse, err error) {
     return c.DescribeStreamLiveChannelInputStatisticsWithContext(context.Background(), request)
@@ -758,11 +846,13 @@ func (c *Client) DescribeStreamLiveChannelInputStatistics(request *DescribeStrea
 //  INTERNALERROR = "InternalError"
 //  INVALIDPARAMETER_ID = "InvalidParameter.Id"
 //  INVALIDPARAMETER_NOTFOUND = "InvalidParameter.NotFound"
+//  INVALIDPARAMETER_PERIOD = "InvalidParameter.Period"
 //  INVALIDPARAMETER_STARTTIME = "InvalidParameter.StartTime"
 func (c *Client) DescribeStreamLiveChannelInputStatisticsWithContext(ctx context.Context, request *DescribeStreamLiveChannelInputStatisticsRequest) (response *DescribeStreamLiveChannelInputStatisticsResponse, err error) {
     if request == nil {
         request = NewDescribeStreamLiveChannelInputStatisticsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "DescribeStreamLiveChannelInputStatistics")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeStreamLiveChannelInputStatistics require credential")
@@ -789,8 +879,9 @@ func NewDescribeStreamLiveChannelLogsRequest() (request *DescribeStreamLiveChann
 func NewDescribeStreamLiveChannelLogsResponse() (response *DescribeStreamLiveChannelLogsResponse) {
     response = &DescribeStreamLiveChannelLogsResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // DescribeStreamLiveChannelLogs
@@ -817,6 +908,7 @@ func (c *Client) DescribeStreamLiveChannelLogsWithContext(ctx context.Context, r
     if request == nil {
         request = NewDescribeStreamLiveChannelLogsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "DescribeStreamLiveChannelLogs")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeStreamLiveChannelLogs require credential")
@@ -843,8 +935,9 @@ func NewDescribeStreamLiveChannelOutputStatisticsRequest() (request *DescribeStr
 func NewDescribeStreamLiveChannelOutputStatisticsResponse() (response *DescribeStreamLiveChannelOutputStatisticsResponse) {
     response = &DescribeStreamLiveChannelOutputStatisticsResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // DescribeStreamLiveChannelOutputStatistics
@@ -855,6 +948,7 @@ func NewDescribeStreamLiveChannelOutputStatisticsResponse() (response *DescribeS
 //  INVALIDPARAMETER_ENDTIME = "InvalidParameter.EndTime"
 //  INVALIDPARAMETER_ID = "InvalidParameter.Id"
 //  INVALIDPARAMETER_NOTFOUND = "InvalidParameter.NotFound"
+//  INVALIDPARAMETER_PERIOD = "InvalidParameter.Period"
 //  INVALIDPARAMETER_STARTTIME = "InvalidParameter.StartTime"
 func (c *Client) DescribeStreamLiveChannelOutputStatistics(request *DescribeStreamLiveChannelOutputStatisticsRequest) (response *DescribeStreamLiveChannelOutputStatisticsResponse, err error) {
     return c.DescribeStreamLiveChannelOutputStatisticsWithContext(context.Background(), request)
@@ -868,11 +962,13 @@ func (c *Client) DescribeStreamLiveChannelOutputStatistics(request *DescribeStre
 //  INVALIDPARAMETER_ENDTIME = "InvalidParameter.EndTime"
 //  INVALIDPARAMETER_ID = "InvalidParameter.Id"
 //  INVALIDPARAMETER_NOTFOUND = "InvalidParameter.NotFound"
+//  INVALIDPARAMETER_PERIOD = "InvalidParameter.Period"
 //  INVALIDPARAMETER_STARTTIME = "InvalidParameter.StartTime"
 func (c *Client) DescribeStreamLiveChannelOutputStatisticsWithContext(ctx context.Context, request *DescribeStreamLiveChannelOutputStatisticsRequest) (response *DescribeStreamLiveChannelOutputStatisticsResponse, err error) {
     if request == nil {
         request = NewDescribeStreamLiveChannelOutputStatisticsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "DescribeStreamLiveChannelOutputStatistics")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeStreamLiveChannelOutputStatistics require credential")
@@ -899,8 +995,9 @@ func NewDescribeStreamLiveChannelsRequest() (request *DescribeStreamLiveChannels
 func NewDescribeStreamLiveChannelsResponse() (response *DescribeStreamLiveChannelsResponse) {
     response = &DescribeStreamLiveChannelsResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // DescribeStreamLiveChannels
@@ -921,6 +1018,7 @@ func (c *Client) DescribeStreamLiveChannelsWithContext(ctx context.Context, requ
     if request == nil {
         request = NewDescribeStreamLiveChannelsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "DescribeStreamLiveChannels")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeStreamLiveChannels require credential")
@@ -947,8 +1045,9 @@ func NewDescribeStreamLiveInputRequest() (request *DescribeStreamLiveInputReques
 func NewDescribeStreamLiveInputResponse() (response *DescribeStreamLiveInputResponse) {
     response = &DescribeStreamLiveInputResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // DescribeStreamLiveInput
@@ -975,6 +1074,7 @@ func (c *Client) DescribeStreamLiveInputWithContext(ctx context.Context, request
     if request == nil {
         request = NewDescribeStreamLiveInputRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "DescribeStreamLiveInput")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeStreamLiveInput require credential")
@@ -1001,8 +1101,9 @@ func NewDescribeStreamLiveInputSecurityGroupRequest() (request *DescribeStreamLi
 func NewDescribeStreamLiveInputSecurityGroupResponse() (response *DescribeStreamLiveInputSecurityGroupResponse) {
     response = &DescribeStreamLiveInputSecurityGroupResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // DescribeStreamLiveInputSecurityGroup
@@ -1029,6 +1130,7 @@ func (c *Client) DescribeStreamLiveInputSecurityGroupWithContext(ctx context.Con
     if request == nil {
         request = NewDescribeStreamLiveInputSecurityGroupRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "DescribeStreamLiveInputSecurityGroup")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeStreamLiveInputSecurityGroup require credential")
@@ -1055,8 +1157,9 @@ func NewDescribeStreamLiveInputSecurityGroupsRequest() (request *DescribeStreamL
 func NewDescribeStreamLiveInputSecurityGroupsResponse() (response *DescribeStreamLiveInputSecurityGroupsResponse) {
     response = &DescribeStreamLiveInputSecurityGroupsResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // DescribeStreamLiveInputSecurityGroups
@@ -1077,6 +1180,7 @@ func (c *Client) DescribeStreamLiveInputSecurityGroupsWithContext(ctx context.Co
     if request == nil {
         request = NewDescribeStreamLiveInputSecurityGroupsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "DescribeStreamLiveInputSecurityGroups")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeStreamLiveInputSecurityGroups require credential")
@@ -1103,8 +1207,9 @@ func NewDescribeStreamLiveInputsRequest() (request *DescribeStreamLiveInputsRequ
 func NewDescribeStreamLiveInputsResponse() (response *DescribeStreamLiveInputsResponse) {
     response = &DescribeStreamLiveInputsResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // DescribeStreamLiveInputs
@@ -1125,6 +1230,7 @@ func (c *Client) DescribeStreamLiveInputsWithContext(ctx context.Context, reques
     if request == nil {
         request = NewDescribeStreamLiveInputsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "DescribeStreamLiveInputs")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeStreamLiveInputs require credential")
@@ -1151,8 +1257,9 @@ func NewDescribeStreamLivePlansRequest() (request *DescribeStreamLivePlansReques
 func NewDescribeStreamLivePlansResponse() (response *DescribeStreamLivePlansResponse) {
     response = &DescribeStreamLivePlansResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // DescribeStreamLivePlans
@@ -1175,6 +1282,7 @@ func (c *Client) DescribeStreamLivePlansWithContext(ctx context.Context, request
     if request == nil {
         request = NewDescribeStreamLivePlansRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "DescribeStreamLivePlans")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeStreamLivePlans require credential")
@@ -1201,8 +1309,9 @@ func NewDescribeStreamLiveRegionsRequest() (request *DescribeStreamLiveRegionsRe
 func NewDescribeStreamLiveRegionsResponse() (response *DescribeStreamLiveRegionsResponse) {
     response = &DescribeStreamLiveRegionsResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // DescribeStreamLiveRegions
@@ -1223,6 +1332,7 @@ func (c *Client) DescribeStreamLiveRegionsWithContext(ctx context.Context, reque
     if request == nil {
         request = NewDescribeStreamLiveRegionsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "DescribeStreamLiveRegions")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeStreamLiveRegions require credential")
@@ -1249,8 +1359,9 @@ func NewDescribeStreamLiveTranscodeDetailRequest() (request *DescribeStreamLiveT
 func NewDescribeStreamLiveTranscodeDetailResponse() (response *DescribeStreamLiveTranscodeDetailResponse) {
     response = &DescribeStreamLiveTranscodeDetailResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // DescribeStreamLiveTranscodeDetail
@@ -1281,6 +1392,7 @@ func (c *Client) DescribeStreamLiveTranscodeDetailWithContext(ctx context.Contex
     if request == nil {
         request = NewDescribeStreamLiveTranscodeDetailRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "DescribeStreamLiveTranscodeDetail")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeStreamLiveTranscodeDetail require credential")
@@ -1307,8 +1419,9 @@ func NewDescribeStreamLiveWatermarkRequest() (request *DescribeStreamLiveWaterma
 func NewDescribeStreamLiveWatermarkResponse() (response *DescribeStreamLiveWatermarkResponse) {
     response = &DescribeStreamLiveWatermarkResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // DescribeStreamLiveWatermark
@@ -1333,6 +1446,7 @@ func (c *Client) DescribeStreamLiveWatermarkWithContext(ctx context.Context, req
     if request == nil {
         request = NewDescribeStreamLiveWatermarkRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "DescribeStreamLiveWatermark")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeStreamLiveWatermark require credential")
@@ -1359,8 +1473,9 @@ func NewDescribeStreamLiveWatermarksRequest() (request *DescribeStreamLiveWaterm
 func NewDescribeStreamLiveWatermarksResponse() (response *DescribeStreamLiveWatermarksResponse) {
     response = &DescribeStreamLiveWatermarksResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // DescribeStreamLiveWatermarks
@@ -1385,6 +1500,7 @@ func (c *Client) DescribeStreamLiveWatermarksWithContext(ctx context.Context, re
     if request == nil {
         request = NewDescribeStreamLiveWatermarksRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "DescribeStreamLiveWatermarks")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeStreamLiveWatermarks require credential")
@@ -1393,6 +1509,164 @@ func (c *Client) DescribeStreamLiveWatermarksWithContext(ctx context.Context, re
     request.SetContext(ctx)
     
     response = NewDescribeStreamLiveWatermarksResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeWatermarkDetectionRequest() (request *DescribeWatermarkDetectionRequest) {
+    request = &DescribeWatermarkDetectionRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("mdl", APIVersion, "DescribeWatermarkDetection")
+    
+    
+    return
+}
+
+func NewDescribeWatermarkDetectionResponse() (response *DescribeWatermarkDetectionResponse) {
+    response = &DescribeWatermarkDetectionResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeWatermarkDetection
+// Describe watermark detection task
+//
+// error code that may be returned:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER_ID = "InvalidParameter.Id"
+//  INVALIDPARAMETER_NOTFOUND = "InvalidParameter.NotFound"
+func (c *Client) DescribeWatermarkDetection(request *DescribeWatermarkDetectionRequest) (response *DescribeWatermarkDetectionResponse, err error) {
+    return c.DescribeWatermarkDetectionWithContext(context.Background(), request)
+}
+
+// DescribeWatermarkDetection
+// Describe watermark detection task
+//
+// error code that may be returned:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER_ID = "InvalidParameter.Id"
+//  INVALIDPARAMETER_NOTFOUND = "InvalidParameter.NotFound"
+func (c *Client) DescribeWatermarkDetectionWithContext(ctx context.Context, request *DescribeWatermarkDetectionRequest) (response *DescribeWatermarkDetectionResponse, err error) {
+    if request == nil {
+        request = NewDescribeWatermarkDetectionRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "DescribeWatermarkDetection")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeWatermarkDetection require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeWatermarkDetectionResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeWatermarkDetectionsRequest() (request *DescribeWatermarkDetectionsRequest) {
+    request = &DescribeWatermarkDetectionsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("mdl", APIVersion, "DescribeWatermarkDetections")
+    
+    
+    return
+}
+
+func NewDescribeWatermarkDetectionsResponse() (response *DescribeWatermarkDetectionsResponse) {
+    response = &DescribeWatermarkDetectionsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeWatermarkDetections
+// Batch Describe watermark detection task
+//
+// error code that may be returned:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER_ID = "InvalidParameter.Id"
+//  INVALIDPARAMETER_NOTFOUND = "InvalidParameter.NotFound"
+func (c *Client) DescribeWatermarkDetections(request *DescribeWatermarkDetectionsRequest) (response *DescribeWatermarkDetectionsResponse, err error) {
+    return c.DescribeWatermarkDetectionsWithContext(context.Background(), request)
+}
+
+// DescribeWatermarkDetections
+// Batch Describe watermark detection task
+//
+// error code that may be returned:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER_ID = "InvalidParameter.Id"
+//  INVALIDPARAMETER_NOTFOUND = "InvalidParameter.NotFound"
+func (c *Client) DescribeWatermarkDetectionsWithContext(ctx context.Context, request *DescribeWatermarkDetectionsRequest) (response *DescribeWatermarkDetectionsResponse, err error) {
+    if request == nil {
+        request = NewDescribeWatermarkDetectionsRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "DescribeWatermarkDetections")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeWatermarkDetections require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeWatermarkDetectionsResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewGetAbWatermarkPlayUrlRequest() (request *GetAbWatermarkPlayUrlRequest) {
+    request = &GetAbWatermarkPlayUrlRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("mdl", APIVersion, "GetAbWatermarkPlayUrl")
+    
+    
+    return
+}
+
+func NewGetAbWatermarkPlayUrlResponse() (response *GetAbWatermarkPlayUrlResponse) {
+    response = &GetAbWatermarkPlayUrlResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// GetAbWatermarkPlayUrl
+// Get AB watermark play url.
+//
+// error code that may be returned:
+//  INVALIDPARAMETER = "InvalidParameter"
+func (c *Client) GetAbWatermarkPlayUrl(request *GetAbWatermarkPlayUrlRequest) (response *GetAbWatermarkPlayUrlResponse, err error) {
+    return c.GetAbWatermarkPlayUrlWithContext(context.Background(), request)
+}
+
+// GetAbWatermarkPlayUrl
+// Get AB watermark play url.
+//
+// error code that may be returned:
+//  INVALIDPARAMETER = "InvalidParameter"
+func (c *Client) GetAbWatermarkPlayUrlWithContext(ctx context.Context, request *GetAbWatermarkPlayUrlRequest) (response *GetAbWatermarkPlayUrlResponse, err error) {
+    if request == nil {
+        request = NewGetAbWatermarkPlayUrlRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "GetAbWatermarkPlayUrl")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("GetAbWatermarkPlayUrl require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewGetAbWatermarkPlayUrlResponse()
     err = c.Send(request, response)
     return
 }
@@ -1411,8 +1685,9 @@ func NewModifyStreamLiveChannelRequest() (request *ModifyStreamLiveChannelReques
 func NewModifyStreamLiveChannelResponse() (response *ModifyStreamLiveChannelResponse) {
     response = &ModifyStreamLiveChannelResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // ModifyStreamLiveChannel
@@ -1425,6 +1700,7 @@ func NewModifyStreamLiveChannelResponse() (response *ModifyStreamLiveChannelResp
 //  INVALIDPARAMETER_ALREADYASSOCIATEDCHANNEL = "InvalidParameter.AlreadyAssociatedChannel"
 //  INVALIDPARAMETER_ATTACHEDINPUTS = "InvalidParameter.AttachedInputs"
 //  INVALIDPARAMETER_AUDIOTEMPLATES = "InvalidParameter.AudioTemplates"
+//  INVALIDPARAMETER_FRAMECAPTURETEMPLATES = "InvalidParameter.FrameCaptureTemplates"
 //  INVALIDPARAMETER_ID = "InvalidParameter.Id"
 //  INVALIDPARAMETER_NAME = "InvalidParameter.Name"
 //  INVALIDPARAMETER_NOTFOUND = "InvalidParameter.NotFound"
@@ -1444,6 +1720,7 @@ func (c *Client) ModifyStreamLiveChannel(request *ModifyStreamLiveChannelRequest
 //  INVALIDPARAMETER_ALREADYASSOCIATEDCHANNEL = "InvalidParameter.AlreadyAssociatedChannel"
 //  INVALIDPARAMETER_ATTACHEDINPUTS = "InvalidParameter.AttachedInputs"
 //  INVALIDPARAMETER_AUDIOTEMPLATES = "InvalidParameter.AudioTemplates"
+//  INVALIDPARAMETER_FRAMECAPTURETEMPLATES = "InvalidParameter.FrameCaptureTemplates"
 //  INVALIDPARAMETER_ID = "InvalidParameter.Id"
 //  INVALIDPARAMETER_NAME = "InvalidParameter.Name"
 //  INVALIDPARAMETER_NOTFOUND = "InvalidParameter.NotFound"
@@ -1453,6 +1730,7 @@ func (c *Client) ModifyStreamLiveChannelWithContext(ctx context.Context, request
     if request == nil {
         request = NewModifyStreamLiveChannelRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "ModifyStreamLiveChannel")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyStreamLiveChannel require credential")
@@ -1479,8 +1757,9 @@ func NewModifyStreamLiveInputRequest() (request *ModifyStreamLiveInputRequest) {
 func NewModifyStreamLiveInputResponse() (response *ModifyStreamLiveInputResponse) {
     response = &ModifyStreamLiveInputResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // ModifyStreamLiveInput
@@ -1515,6 +1794,7 @@ func (c *Client) ModifyStreamLiveInputWithContext(ctx context.Context, request *
     if request == nil {
         request = NewModifyStreamLiveInputRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "ModifyStreamLiveInput")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyStreamLiveInput require credential")
@@ -1541,8 +1821,9 @@ func NewModifyStreamLiveInputSecurityGroupRequest() (request *ModifyStreamLiveIn
 func NewModifyStreamLiveInputSecurityGroupResponse() (response *ModifyStreamLiveInputSecurityGroupResponse) {
     response = &ModifyStreamLiveInputSecurityGroupResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // ModifyStreamLiveInputSecurityGroup
@@ -1573,6 +1854,7 @@ func (c *Client) ModifyStreamLiveInputSecurityGroupWithContext(ctx context.Conte
     if request == nil {
         request = NewModifyStreamLiveInputSecurityGroupRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "ModifyStreamLiveInputSecurityGroup")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyStreamLiveInputSecurityGroup require credential")
@@ -1599,8 +1881,9 @@ func NewModifyStreamLiveWatermarkRequest() (request *ModifyStreamLiveWatermarkRe
 func NewModifyStreamLiveWatermarkResponse() (response *ModifyStreamLiveWatermarkResponse) {
     response = &ModifyStreamLiveWatermarkResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // ModifyStreamLiveWatermark
@@ -1631,6 +1914,7 @@ func (c *Client) ModifyStreamLiveWatermarkWithContext(ctx context.Context, reque
     if request == nil {
         request = NewModifyStreamLiveWatermarkRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "ModifyStreamLiveWatermark")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyStreamLiveWatermark require credential")
@@ -1657,8 +1941,9 @@ func NewQueryInputStreamStateRequest() (request *QueryInputStreamStateRequest) {
 func NewQueryInputStreamStateResponse() (response *QueryInputStreamStateResponse) {
     response = &QueryInputStreamStateResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // QueryInputStreamState
@@ -1685,6 +1970,7 @@ func (c *Client) QueryInputStreamStateWithContext(ctx context.Context, request *
     if request == nil {
         request = NewQueryInputStreamStateRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "QueryInputStreamState")
     
     if c.GetCredential() == nil {
         return nil, errors.New("QueryInputStreamState require credential")
@@ -1711,8 +1997,9 @@ func NewStartStreamLiveChannelRequest() (request *StartStreamLiveChannelRequest)
 func NewStartStreamLiveChannelResponse() (response *StartStreamLiveChannelResponse) {
     response = &StartStreamLiveChannelResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // StartStreamLiveChannel
@@ -1741,6 +2028,7 @@ func (c *Client) StartStreamLiveChannelWithContext(ctx context.Context, request 
     if request == nil {
         request = NewStartStreamLiveChannelRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "StartStreamLiveChannel")
     
     if c.GetCredential() == nil {
         return nil, errors.New("StartStreamLiveChannel require credential")
@@ -1767,8 +2055,9 @@ func NewStopStreamLiveChannelRequest() (request *StopStreamLiveChannelRequest) {
 func NewStopStreamLiveChannelResponse() (response *StopStreamLiveChannelResponse) {
     response = &StopStreamLiveChannelResponse{
         BaseResponse: &tchttp.BaseResponse{},
-    }
+    } 
     return
+
 }
 
 // StopStreamLiveChannel
@@ -1797,6 +2086,7 @@ func (c *Client) StopStreamLiveChannelWithContext(ctx context.Context, request *
     if request == nil {
         request = NewStopStreamLiveChannelRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "mdl", APIVersion, "StopStreamLiveChannel")
     
     if c.GetCredential() == nil {
         return nil, errors.New("StopStreamLiveChannel require credential")

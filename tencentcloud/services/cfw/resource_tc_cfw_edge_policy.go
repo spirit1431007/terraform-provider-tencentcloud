@@ -68,11 +68,6 @@ func ResourceTencentCloudCfwEdgePolicy() *schema.Resource {
 				Required:    true,
 				Description: "Rule direction: 1, inbound; 0, outbound.",
 			},
-			"uuid": {
-				Type:        schema.TypeInt,
-				Computed:    true,
-				Description: "The unique id corresponding to the rule, no need to fill in when creating the rule.",
-			},
 			"enable": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -88,14 +83,26 @@ func ResourceTencentCloudCfwEdgePolicy() *schema.Resource {
 			"scope": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Default:      POLICY_SCOPE_ALL,
+				Computed:     true,
 				ValidateFunc: tccommon.ValidateAllowedStringValue(POLICY_SCOPE),
 				Description:  "Effective range. serial: serial; side: bypass; all: global, Default is all.",
 			},
 			"param_template_id": {
 				Type:        schema.TypeString,
+				Optional:    true,
 				Computed:    true,
 				Description: "Parameter template id.",
+			},
+			// computed
+			"uuid": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "The unique id corresponding to the rule, no need to fill in when creating the rule.",
+			},
+			"order_index": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "Execution order.",
 			},
 		},
 	}
@@ -157,14 +164,21 @@ func resourceTencentCloudCfwEdgePolicyCreate(d *schema.ResourceData, meta interf
 		createRuleItem.Scope = helper.String(v.(string))
 	}
 
-	request.Rules = append(request.Rules, &createRuleItem)
+	if v, ok := d.GetOk("param_template_id"); ok {
+		createRuleItem.ParamTemplateId = helper.String(v.(string))
+	}
 
+	request.Rules = append(request.Rules, &createRuleItem)
 	err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
 		result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseCfwClient().AddAclRule(request)
 		if e != nil {
 			return tccommon.RetryError(e)
 		} else {
 			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+		}
+
+		if result == nil || result.Response == nil {
+			return tccommon.RetryError(fmt.Errorf("Create cfw edgePolicy failed, Response is nil."))
 		}
 
 		response = result
@@ -174,6 +188,10 @@ func resourceTencentCloudCfwEdgePolicyCreate(d *schema.ResourceData, meta interf
 	if err != nil {
 		log.Printf("[CRITAL]%s create cfw edgePolicy failed, reason:%+v", logId, err)
 		return err
+	}
+
+	if len(response.Response.RuleUuid) == 0 {
+		return fmt.Errorf("RuleUuid is nil.")
 	}
 
 	ruleUuid := *response.Response.RuleUuid[0]
@@ -202,8 +220,8 @@ func resourceTencentCloudCfwEdgePolicyRead(d *schema.ResourceData, meta interfac
 	}
 
 	if edgePolicy == nil {
+		log.Printf("[WARN]%s resource `tencentcloud_cfw_edge_policy` [%s] not found, please check if it has been deleted.\n", logId, d.Id())
 		d.SetId("")
-		log.Printf("[WARN]%s resource `CfwEdgePolicy` [%s] not found, please check if it has been deleted.\n", logId, d.Id())
 		return nil
 	}
 
@@ -251,6 +269,10 @@ func resourceTencentCloudCfwEdgePolicyRead(d *schema.ResourceData, meta interfac
 		_ = d.Set("protocol", edgePolicy.Protocol)
 	}
 
+	if edgePolicy.RuleAction != nil {
+		_ = d.Set("rule_action", edgePolicy.RuleAction)
+	}
+
 	if edgePolicy.Port != nil {
 		_ = d.Set("port", edgePolicy.Port)
 	}
@@ -279,6 +301,10 @@ func resourceTencentCloudCfwEdgePolicyRead(d *schema.ResourceData, meta interfac
 		_ = d.Set("param_template_id", edgePolicy.ParamTemplateId)
 	}
 
+	if edgePolicy.OrderIndex != nil {
+		_ = d.Set("order_index", edgePolicy.OrderIndex)
+	}
+
 	return nil
 }
 
@@ -294,7 +320,6 @@ func resourceTencentCloudCfwEdgePolicyUpdate(d *schema.ResourceData, meta interf
 	)
 
 	immutableArgs := []string{"uuid", "direction"}
-
 	for _, v := range immutableArgs {
 		if d.HasChange(v) {
 			return fmt.Errorf("argument `%s` cannot be changed", v)
@@ -332,7 +357,7 @@ func resourceTencentCloudCfwEdgePolicyUpdate(d *schema.ResourceData, meta interf
 		modifyRuleItem.Port = helper.String(v.(string))
 	}
 
-	if v, ok := d.GetOk("direction"); ok {
+	if v, ok := d.GetOkExists("direction"); ok {
 		modifyRuleItem.Direction = helper.IntUint64(v.(int))
 	}
 
@@ -346,6 +371,14 @@ func resourceTencentCloudCfwEdgePolicyUpdate(d *schema.ResourceData, meta interf
 
 	if v, ok := d.GetOk("scope"); ok {
 		modifyRuleItem.Scope = helper.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("param_template_id"); ok {
+		modifyRuleItem.ParamTemplateId = helper.String(v.(string))
+	}
+
+	if v, ok := d.GetOkExists("order_index"); ok {
+		modifyRuleItem.OrderIndex = helper.IntInt64(v.(int))
 	}
 
 	request.Rules = append(request.Rules, &modifyRuleItem)

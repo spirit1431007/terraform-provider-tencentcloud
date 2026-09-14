@@ -136,12 +136,14 @@ func ResourceTencentCloudVpnConnection() *schema.Resource {
 			"ike_local_fqdn_name": {
 				Type:          schema.TypeString,
 				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"ike_local_address"},
 				Description:   "Local FQDN name of the IKE operation specification.",
 			},
 			"ike_remote_fqdn_name": {
 				Type:          schema.TypeString,
 				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"ike_remote_address"},
 				Description:   "Remote FQDN name of the IKE operation specification.",
 			},
@@ -243,7 +245,92 @@ func ResourceTencentCloudVpnConnection() *schema.Resource {
 				Computed:     true,
 				ForceNew:     true,
 				ValidateFunc: tccommon.ValidateAllowedStringValue(svcvpc.VPN_CONNECTION_ROUTE_TYPE),
-				Description:  "Route type of the VPN connection. Valid value: `STATIC`, `StaticRoute`, `Policy`.",
+				Description:  "Route type of the VPN connection. Valid value: `STATIC`, `StaticRoute`, `Policy`, `Bgp`.",
+			},
+			"negotiation_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The default negotiation type is `active`. Optional values: `active` (active negotiation), `passive` (passive negotiation), `flowTrigger` (traffic negotiation).",
+			},
+			// "route": {
+			// 	Type:        schema.TypeList,
+			// 	Optional:    true,
+			// 	ForceNew:    true,
+			// 	MaxItems:    1,
+			// 	Description: "Create channel routing information.",
+			// 	Elem: &schema.Resource{
+			// 		Schema: map[string]*schema.Schema{
+			// 			"destination_cidr_block": {
+			// 				Type:        schema.TypeString,
+			// 				Required:    true,
+			// 				Description: "Destination IDC network segment.",
+			// 			},
+			// 			"priority": {
+			// 				Type:        schema.TypeInt,
+			// 				Optional:    true,
+			// 				Description: "Priority. Optional value [0, 100].",
+			// 			},
+			// 		},
+			// 	},
+			// },
+			"bgp_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
+				MaxItems:    1,
+				Description: "BGP config.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"tunnel_cidr": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "BGP tunnel segment.",
+						},
+						"local_bgp_ip": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Cloud BGP address. It must be allocated from within the BGP tunnel network segment.",
+						},
+						"remote_bgp_ip": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "User side BGP address. It must be allocated from within the BGP tunnel network segment.",
+						},
+					},
+				},
+			},
+			"health_check_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				Description: "VPN channel health check configuration.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"probe_type": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "Detection mode, default is `NQA`, cannot be modified.",
+						},
+						"probe_interval": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Detection interval, Tencent Cloud's interval between two health checks, range [1000-5000], Unit: ms.",
+						},
+						"probe_threshold": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Detection times, perform route switching after N consecutive health check failures, range [3-8], Unit: times.",
+						},
+						"probe_timeout": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Detection timeout, range [10-5000], Unit: ms.",
+						},
+					},
+				},
 			},
 			"state": {
 				Type:        schema.TypeString,
@@ -291,6 +378,7 @@ func resourceTencentCloudVpnConnectionCreate(d *schema.ResourceData, meta interf
 	if err != nil {
 		return err
 	}
+
 	if !has {
 		return fmt.Errorf("[CRITAL] vpn_gateway_id %s doesn't exist", d.Get("vpn_gateway_id").(string))
 	}
@@ -309,6 +397,7 @@ func resourceTencentCloudVpnConnectionCreate(d *schema.ResourceData, meta interf
 		}
 		request.VpcId = helper.String("")
 	}
+
 	request.VpnGatewayId = helper.String(d.Get("vpn_gateway_id").(string))
 	request.CustomerGatewayId = helper.String(d.Get("customer_gateway_id").(string))
 	request.PreShareKey = helper.String(d.Get("pre_share_key").(string))
@@ -316,9 +405,11 @@ func resourceTencentCloudVpnConnectionCreate(d *schema.ResourceData, meta interf
 		dpdEnable := v.(int)
 		request.DpdEnable = helper.IntInt64(dpdEnable)
 	}
+
 	if v, ok := d.GetOk("dpd_action"); ok {
 		request.DpdAction = helper.String(v.(string))
 	}
+
 	if v, ok := d.GetOk("dpd_timeout"); ok {
 		request.DpdTimeout = helper.String(strconv.Itoa(v.(int)))
 	}
@@ -327,22 +418,30 @@ func resourceTencentCloudVpnConnectionCreate(d *schema.ResourceData, meta interf
 		request.RouteType = helper.String(v.(string))
 	}
 
-	//set up  SecurityPolicyDatabases
+	if v, ok := d.GetOk("negotiation_type"); ok {
+		request.NegotiationType = helper.String(v.(string))
+	}
+
+	//set up SecurityPolicyDatabases
 	if v, ok := d.GetOk("security_group_policy"); ok {
-		sgps := v.(*schema.Set).List()
-		request.SecurityPolicyDatabases = make([]*vpc.SecurityPolicyDatabase, 0, len(sgps))
-		for _, v := range sgps {
-			m := v.(map[string]interface{})
-			var sgp vpc.SecurityPolicyDatabase
-			local := m["local_cidr_block"].(string)
-			sgp.LocalCidrBlock = &local
-			// list
-			remoteCidrBlocks := m["remote_cidr_block"].(*schema.Set).List()
-			for _, vv := range remoteCidrBlocks {
-				remoteCidrBlock := vv.(string)
-				sgp.RemoteCidrBlock = append(sgp.RemoteCidrBlock, &remoteCidrBlock)
+		for _, item := range v.(*schema.Set).List() {
+			if dMap, ok := item.(map[string]interface{}); ok && dMap != nil {
+				var sgp vpc.SecurityPolicyDatabase
+				if v, ok := dMap["local_cidr_block"].(string); ok && v != "" {
+					sgp.LocalCidrBlock = &v
+				}
+
+				if v, ok := dMap["remote_cidr_block"].(*schema.Set); ok {
+					remoteCidrBlocks := v.List()
+					for _, rcb := range remoteCidrBlocks {
+						if v, ok := rcb.(string); ok && v != "" {
+							sgp.RemoteCidrBlock = append(sgp.RemoteCidrBlock, &v)
+						}
+					}
+				}
+
+				request.SecurityPolicyDatabases = append(request.SecurityPolicyDatabases, &sgp)
 			}
-			request.SecurityPolicyDatabases = append(request.SecurityPolicyDatabases, &sgp)
 		}
 	}
 
@@ -366,6 +465,7 @@ func resourceTencentCloudVpnConnectionCreate(d *schema.ResourceData, meta interf
 			return fmt.Errorf("ike_local_fqdn_name need to be set when ike_local_identity is `FQDN`")
 		}
 	}
+
 	if *ikeOptionsSpecification.LocalIdentity == svcvpc.VPN_IKE_IDENTITY_ADDRESS {
 		if v, ok := d.GetOk("ike_remote_address"); ok {
 			ikeOptionsSpecification.RemoteAddress = helper.String(v.(string))
@@ -402,31 +502,100 @@ func resourceTencentCloudVpnConnectionCreate(d *schema.ResourceData, meta interf
 	if v, ok := d.GetOk("enable_health_check"); ok {
 		request.EnableHealthCheck = helper.Bool(v.(bool))
 	}
+
 	if v, ok := d.GetOk("health_check_local_ip"); ok {
 		request.HealthCheckLocalIp = helper.String(v.(string))
 	}
+
 	if v, ok := d.GetOk("health_check_remote_ip"); ok {
 		request.HealthCheckRemoteIp = helper.String(v.(string))
+	}
+
+	// if v, ok := d.GetOk("route"); ok {
+	// 	for _, item := range v.([]interface{}) {
+	// 		dMap := item.(map[string]interface{})
+	// 		route := vpc.CreateVpnConnRoute{}
+	// 		if v, ok := dMap["destination_cidr_block"]; ok {
+	// 			route.DestinationCidrBlock = helper.String(v.(string))
+	// 		}
+
+	// 		if v, ok := dMap["priority"]; ok {
+	// 			route.Priority = helper.IntUint64(v.(int))
+	// 		}
+
+	// 		request.Route = &route
+	// 	}
+	// }
+
+	if v, ok := d.GetOk("bgp_config"); ok {
+		for _, item := range v.([]interface{}) {
+			dMap := item.(map[string]interface{})
+			bgpConfig := vpc.BgpConfig{}
+			if v, ok := dMap["tunnel_cidr"]; ok {
+				bgpConfig.TunnelCidr = helper.String(v.(string))
+			}
+
+			if v, ok := dMap["local_bgp_ip"]; ok {
+				bgpConfig.LocalBgpIp = helper.String(v.(string))
+			}
+
+			if v, ok := dMap["remote_bgp_ip"]; ok {
+				bgpConfig.RemoteBgpIp = helper.String(v.(string))
+			}
+
+			request.BgpConfig = &bgpConfig
+		}
+	}
+
+	if v, ok := d.GetOk("health_check_config"); ok {
+		for _, item := range v.([]interface{}) {
+			dMap := item.(map[string]interface{})
+			healthCheckConfig := vpc.HealthCheckConfig{}
+			if v, ok := dMap["probe_type"]; ok {
+				healthCheckConfig.ProbeType = helper.String(v.(string))
+			}
+
+			if v, ok := dMap["probe_interval"]; ok {
+				healthCheckConfig.ProbeInterval = helper.IntInt64(v.(int))
+			}
+
+			if v, ok := dMap["probe_threshold"]; ok {
+				healthCheckConfig.ProbeThreshold = helper.IntInt64(v.(int))
+			}
+
+			if v, ok := dMap["probe_timeout"]; ok {
+				healthCheckConfig.ProbeTimeout = helper.IntInt64(v.(int))
+			}
+
+			request.HealthCheckConfig = &healthCheckConfig
+		}
 	}
 
 	var response *vpc.CreateVpnConnectionResponse
 	err = resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
 		result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseVpcClient().CreateVpnConnection(request)
 		if e != nil {
-			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n",
-				logId, request.GetAction(), request.ToJsonString(), e.Error())
+			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n", logId, request.GetAction(), request.ToJsonString(), e.Error())
 			return tccommon.RetryError(e)
+		} else {
+			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
 		}
+
+		if result == nil || result.Response == nil {
+			return resource.NonRetryableError(fmt.Errorf("Create VPN connection failed, Response is nil."))
+		}
+
 		response = result
 		return nil
 	})
+
 	if err != nil {
 		log.Printf("[CRITAL]%s create VPN connection failed, reason:%s\n", logId, err.Error())
 		return err
 	}
 
 	if response.Response.VpnConnection == nil {
-		return fmt.Errorf("VPN connection id is nil")
+		return fmt.Errorf("VpnConnection is nil.")
 	}
 
 	vpnConnectionId := ""
@@ -438,28 +607,31 @@ func resourceTencentCloudVpnConnectionCreate(d *schema.ResourceData, meta interf
 		if v, ok := d.GetOk("vpn_gateway_id"); ok {
 			params["vpn-gateway-id"] = v.(string)
 		}
+
 		if v, ok := d.GetOk("vpc_id"); ok && *gateway.Type != "CCN" {
 			params["vpc-id"] = v.(string)
 		}
+
 		if v, ok := d.GetOk("customer_gateway_id"); ok {
 			params["customer-gateway-id"] = v.(string)
 		}
+
 		for k, v := range params {
 			filter := &vpc.Filter{
 				Name:   helper.String(k),
 				Values: []*string{helper.String(v)},
 			}
+
 			idRequest.Filters = append(idRequest.Filters, filter)
 		}
+
 		offset := uint64(0)
 		idRequest.Offset = &offset
 
 		err = resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
 			result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseVpcClient().DescribeVpnConnections(idRequest)
-
 			if e != nil {
-				log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n",
-					logId, idRequest.GetAction(), idRequest.ToJsonString(), e.Error())
+				log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n", logId, idRequest.GetAction(), idRequest.ToJsonString(), e.Error())
 				return tccommon.RetryError(e, tccommon.InternalError)
 			} else {
 				if len(result.Response.VpnConnectionSet) == 0 || *result.Response.VpnConnectionSet[0].VpnConnectionId == "" {
@@ -475,10 +647,8 @@ func resourceTencentCloudVpnConnectionCreate(d *schema.ResourceData, meta interf
 			log.Printf("[CRITAL]%s create VPN connection failed, reason:%s\n", logId, err.Error())
 			return err
 		}
-	}
-
-	if vpnConnectionId == "" {
-		return fmt.Errorf("VPN connection id is nil")
+	} else {
+		vpnConnectionId = *response.Response.VpnConnection.VpnConnectionId
 	}
 
 	d.SetId(vpnConnectionId)
@@ -585,7 +755,7 @@ func resourceTencentCloudVpnConnectionRead(d *schema.ResourceData, meta interfac
 	_ = d.Set("customer_gateway_id", *connection.CustomerGatewayId)
 	_ = d.Set("pre_share_key", *connection.PreShareKey)
 	//set up SPD
-	if *connection.RouteType != svcvpc.ROUTE_TYPE_STATIC_ROUTE {
+	if *connection.RouteType != svcvpc.ROUTE_TYPE_STATIC_ROUTE && *connection.RouteType != svcvpc.ROUTE_TYPE_BGP {
 		_ = d.Set("security_group_policy", svcvpc.FlattenVpnSPDList(connection.SecurityPolicyDatabaseSet))
 	}
 
@@ -638,7 +808,53 @@ func resourceTencentCloudVpnConnectionRead(d *schema.ResourceData, meta interfac
 		_ = d.Set("dpd_timeout", dpdTimeoutInt)
 	}
 
+	if connection.NegotiationType != nil {
+		_ = d.Set("negotiation_type", *connection.NegotiationType)
+	}
+
 	_ = d.Set("dpd_action", *connection.DpdAction)
+
+	if connection.BgpConfig != nil {
+		tmpList := make([]map[string]interface{}, 0)
+		dMap := make(map[string]interface{})
+		if connection.BgpConfig.TunnelCidr != nil {
+			dMap["tunnel_cidr"] = *connection.BgpConfig.TunnelCidr
+		}
+
+		if connection.BgpConfig.LocalBgpIp != nil {
+			dMap["local_bgp_ip"] = *connection.BgpConfig.LocalBgpIp
+		}
+
+		if connection.BgpConfig.RemoteBgpIp != nil {
+			dMap["remote_bgp_ip"] = *connection.BgpConfig.RemoteBgpIp
+		}
+
+		tmpList = append(tmpList, dMap)
+		_ = d.Set("bgp_config", tmpList)
+	}
+
+	if connection.HealthCheckConfig != nil {
+		tmpList := make([]map[string]interface{}, 0)
+		dMap := make(map[string]interface{})
+		if connection.HealthCheckConfig.ProbeType != nil {
+			dMap["probe_type"] = *connection.HealthCheckConfig.ProbeType
+		}
+
+		if connection.HealthCheckConfig.ProbeInterval != nil {
+			dMap["probe_interval"] = *connection.HealthCheckConfig.ProbeInterval
+		}
+
+		if connection.HealthCheckConfig.ProbeThreshold != nil {
+			dMap["probe_threshold"] = *connection.HealthCheckConfig.ProbeThreshold
+		}
+
+		if connection.HealthCheckConfig.ProbeTimeout != nil {
+			dMap["probe_timeout"] = *connection.HealthCheckConfig.ProbeTimeout
+		}
+
+		tmpList = append(tmpList, dMap)
+		_ = d.Set("health_check_config", tmpList)
+	}
 
 	//tags
 	tagService := svctag.NewTagService(meta.(tccommon.ProviderMeta).GetAPIV3Conn())
@@ -816,6 +1032,41 @@ func resourceTencentCloudVpnConnectionUpdate(d *schema.ResourceData, meta interf
 		request.IPSECOptionsSpecification = &ipsecOptionsSpecification
 		changeFlag = true
 	}
+
+	if d.HasChange("negotiation_type") {
+		if v, ok := d.GetOk("negotiation_type"); ok {
+			request.NegotiationType = helper.String(v.(string))
+		}
+	}
+
+	if d.HasChange("health_check_config") {
+		if v, ok := d.GetOk("health_check_config"); ok {
+			for _, item := range v.([]interface{}) {
+				dMap := item.(map[string]interface{})
+				healthCheckConfig := vpc.HealthCheckConfig{}
+				if v, ok := dMap["probe_type"]; ok {
+					healthCheckConfig.ProbeType = helper.String(v.(string))
+				}
+
+				if v, ok := dMap["probe_interval"]; ok {
+					healthCheckConfig.ProbeInterval = helper.IntInt64(v.(int))
+				}
+
+				if v, ok := dMap["probe_threshold"]; ok {
+					healthCheckConfig.ProbeThreshold = helper.IntInt64(v.(int))
+				}
+
+				if v, ok := dMap["probe_timeout"]; ok {
+					healthCheckConfig.ProbeTimeout = helper.IntInt64(v.(int))
+				}
+
+				request.HealthCheckConfig = &healthCheckConfig
+			}
+
+			changeFlag = true
+		}
+	}
+
 	if changeFlag {
 		err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
 			_, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseVpcClient().ModifyVpnConnectionAttribute(request)

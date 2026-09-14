@@ -52,6 +52,7 @@ var monitorReceiveLanguages = []string{
 }
 
 /*regions in monitor*/
+// https://tapd.woa.com/qcloud_api/markdown_wikis/show/#1210161711000430909
 var MonitorRegionMap = map[string]string{
 	"ap-guangzhou":       "gz",
 	"ap-shenzhen-fsi":    "szjr",
@@ -83,4 +84,48 @@ var MonitorRegionMap = map[string]string{
 	"na-toronto":         "ca",
 	"eu-frankfurt":       "de",
 	"eu-moscow":          "ru",
+	"ap-qingyuan":        "qy",
+	"ap-xibei-ec":        "xbec",
+	"ap-hefei-ec":        "hfeec",
+	"ap-jakarta":         "jkt",
+	"sa-saopaulo":        "sao",
+}
+
+var MonitorRegionMapName = map[string]string{
+	"-":      "ap-guangzhou",
+	"gz":     "ap-guangzhou",
+	"szjr":   "ap-shenzhen-fsi",
+	"gzopen": "ap-guangzhou-open",
+	"szx":    "ap-shenzhen",
+	"sh":     "ap-shanghai",
+	"shjr":   "ap-shanghai-fsi",
+	"nj":     "ap-nanjing",
+	"jnec":   "ap-jinan-ec",
+	"hzec":   "ap-hangzhou-ec",
+	"fzec":   "ap-fuzhou-ec",
+	"bj":     "ap-beijing",
+	"tsn":    "ap-tianjin",
+	"sjwec":  "ap-shijiazhuang-ec",
+	"bjjr":   "ap-beijing-fsi",
+	"whec":   "ap-wuhan-ec",
+	"csec":   "ap-changsha-ec",
+	"cd":     "ap-chengdu",
+	"cq":     "ap-chongqing",
+	"tpe":    "ap-taipei",
+	"hk":     "ap-hongkong",
+	"sg":     "ap-singapore",
+	"th":     "ap-bangkok",
+	"in":     "ap-mumbai",
+	"kr":     "ap-seoul",
+	"jp":     "ap-tokyo",
+	"usw":    "na-siliconvalley",
+	"use":    "na-ashburn",
+	"ca":     "na-toronto",
+	"de":     "eu-frankfurt",
+	"ru":     "eu-moscow",
+	"qy":     "ap-qingyuan",
+	"xbec":   "ap-xibei-ec",
+	"hfeec":  "ap-hefei-ec",
+	"jkt":    "ap-jakarta",
+	"sao":    "sa-saopaulo",
 }

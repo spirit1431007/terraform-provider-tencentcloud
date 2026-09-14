@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -19,6 +20,10 @@ func ResourceTencentCloudAsStartInstanceRefresh() *schema.Resource {
 		Create: resourceTencentCloudAsStartInstanceRefreshCreate,
 		Read:   resourceTencentCloudAsStartInstanceRefreshRead,
 		Delete: resourceTencentCloudAsStartInstanceRefreshDelete,
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(5 * time.Minute),
+		},
+
 		Schema: map[string]*schema.Schema{
 			"auto_scaling_group_id": {
 				Type:        schema.TypeString,
@@ -56,8 +61,23 @@ func ResourceTencentCloudAsStartInstanceRefresh() *schema.Resource {
 										Optional:    true,
 										Description: "Pause policy between batches. Default value: Automatic. Valid values: <br><li>FIRST_BATCH_PAUSE: Pause after the first batch update completes.</li> <li>BATCH_INTERVAL_PAUSE: Pause between each batch update.</li> <li>AUTOMATIC: No pauses.",
 									},
+									"max_surge": {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										Description: "Maximum Extra Quantity. After setting this parameter, a batch of pay-as-you-go extra instances will be created according to the launch configuration before the rolling update starts, and the extra instances will be destroyed after the rolling update is completed.",
+									},
+									"fail_process": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "Failure Handling Policy. The default value is `AUTO_PAUSE`. The values are as follows, `AUTO_PAUSE`: Pause after refresh fails; `AUTO_ROLLBACK`: Roll back after refresh fails; `AUTO_CANCEL`: Cancel after refresh fails.",
+									},
 								},
 							},
+						},
+						"check_instance_target_health_timeout": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "The timeout period for backend service health status checks, in seconds. The valid range is [60, 7200], with a default value of 1800 seconds. This takes effect only when the CheckInstanceTargetHealth parameter is enabled. If the instance health check times out, it will be marked as a refresh failure.",
 						},
 					},
 				},
@@ -66,7 +86,7 @@ func ResourceTencentCloudAsStartInstanceRefresh() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    true,
-				Description: "Refresh mode, currently, only rolling updates are supported, with the default value being ROLLING_UPDATE_RESET.",
+				Description: "Refresh mode. Value range: ROLLING_UPDATE_RESET: Reinstall the system for rolling update; ROLLING_UPDATE_REPLACE: Create a new instance for rolling update. This mode does not support the rollback interface yet.",
 			},
 		},
 	}
@@ -101,11 +121,23 @@ func resourceTencentCloudAsStartInstanceRefreshCreate(d *schema.ResourceData, me
 				rollingUpdateSettings.BatchNumber = helper.IntUint64(v.(int))
 			}
 
-			if v, ok := rollingUpdateSettingsMap["batch_pause"]; ok {
+			if v, ok := rollingUpdateSettingsMap["batch_pause"]; ok && v != "" {
 				rollingUpdateSettings.BatchPause = helper.String(v.(string))
 			}
 
+			if v, ok := rollingUpdateSettingsMap["max_surge"]; ok {
+				rollingUpdateSettings.MaxSurge = helper.IntInt64(v.(int))
+			}
+
+			if v, ok := rollingUpdateSettingsMap["fail_process"]; ok && v != "" {
+				rollingUpdateSettings.FailProcess = helper.String(v.(string))
+			}
+
 			refreshSettings.RollingUpdateSettings = &rollingUpdateSettings
+		}
+
+		if v, ok := refreshSettingsMap["check_instance_target_health_timeout"]; ok && v != 0 {
+			refreshSettings.CheckInstanceTargetHealthTimeout = helper.IntUint64(v.(int))
 		}
 
 		request.RefreshSettings = &refreshSettings
@@ -142,7 +174,7 @@ func resourceTencentCloudAsStartInstanceRefreshCreate(d *schema.ResourceData, me
 
 	// wait
 	waitRequest.RefreshActivityIds = helper.Strings([]string{refreshActivityId})
-	err = resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+	err = resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 		result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseAsClient().DescribeRefreshActivitiesWithContext(ctx, waitRequest)
 		if e != nil {
 			return tccommon.RetryError(e)
@@ -151,15 +183,20 @@ func resourceTencentCloudAsStartInstanceRefreshCreate(d *schema.ResourceData, me
 		}
 
 		if result == nil || result.Response == nil || len(result.Response.RefreshActivitySet) != 1 {
-			e = fmt.Errorf("create as start instance refresh failed.")
-			return resource.NonRetryableError(e)
+			return resource.NonRetryableError(fmt.Errorf("Create as start instance refresh failed."))
 		}
 
-		if *result.Response.RefreshActivitySet[0].Status == REFRESH_ACTIVITIES_SUCCESSFUL {
+		refreshStatus := result.Response.RefreshActivitySet[0].Status
+		refreshActivityId := result.Response.RefreshActivitySet[0].RefreshActivityId
+		if refreshStatus == nil || refreshActivityId == nil {
+			return resource.NonRetryableError(fmt.Errorf("Status or RefreshActivityId is nil."))
+		}
+
+		if *refreshStatus == REFRESH_ACTIVITIES_SUCCESSFUL {
 			return nil
 		}
 
-		return resource.RetryableError(fmt.Errorf("start instance refresh is still in running, state %s", *result.Response.RefreshActivitySet[0].Status))
+		return resource.RetryableError(fmt.Errorf("Start instance refresh is still in running. Status: %s, RefreshActivityId: %s.", *refreshStatus, *refreshActivityId))
 	})
 
 	if err != nil {

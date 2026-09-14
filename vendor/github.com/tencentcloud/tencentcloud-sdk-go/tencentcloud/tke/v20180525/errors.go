@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+// Copyright (c) 2017-2025 Tencent. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -53,6 +53,9 @@ const (
 	// 集群节点版本过低。
 	FAILEDOPERATION_CLUSTERUPGRADENODEVERSION = "FailedOperation.ClusterUpgradeNodeVersion"
 
+	// 集群版本不支持该操作
+	FAILEDOPERATION_CLUSTERVERSIONNOTSUPPORT = "FailedOperation.ClusterVersionNotSupport"
+
 	// 内部Client错误。
 	FAILEDOPERATION_COMPONENTCLIENTCOMMON = "FailedOperation.ComponentClientCommon"
 
@@ -101,6 +104,9 @@ const (
 	// 记录未找到。
 	FAILEDOPERATION_DBRECORDNOTFOUND = "FailedOperation.DbRecordNotFound"
 
+	// 接口已被废弃，请使用其他接口
+	FAILEDOPERATION_DEPRECATEDAPI = "FailedOperation.DeprecatedAPI"
+
 	// 获得安全组配额失败。
 	FAILEDOPERATION_DFWGETUSGQUOTA = "FailedOperation.DfwGetUSGQuota"
 
@@ -131,6 +137,9 @@ const (
 	// 获取CLS日志主题失败。
 	FAILEDOPERATION_GETCLSTOPIC = "FailedOperation.GetClsTopic"
 
+	// 获取集群失败
+	FAILEDOPERATION_GETCLUSTERFAILED = "FailedOperation.GetClusterFailed"
+
 	// Kubernetes client建立失败。
 	FAILEDOPERATION_K8SCLIENTBUILDERROR = "FailedOperation.K8sClientBuildError"
 
@@ -139,6 +148,9 @@ const (
 
 	// 连接用户Kubernetes集群失败。
 	FAILEDOPERATION_KUBECLIENTCONNECTION = "FailedOperation.KubeClientConnection"
+
+	// 创建kube client失败
+	FAILEDOPERATION_KUBECLIENTCREATE = "FailedOperation.KubeClientCreate"
 
 	// KubernetesAPI错误。
 	FAILEDOPERATION_KUBECOMMON = "FailedOperation.KubeCommon"
@@ -163,6 +175,9 @@ const (
 
 	// Kubernetes patch 操作失败。
 	FAILEDOPERATION_KUBERNETESPATCHOPERATIONERROR = "FailedOperation.KubernetesPatchOperationError"
+
+	// k8s 资源不存在
+	FAILEDOPERATION_KUBERNETESRESOURCEEXISTED = "FailedOperation.KubernetesResourceExisted"
 
 	// Kubernetes没有找到。
 	FAILEDOPERATION_KUBERNETESRESOURCENOTFOUND = "FailedOperation.KubernetesResourceNotFound"
@@ -191,6 +206,12 @@ const (
 	// 节点存在辅助网卡
 	FAILEDOPERATION_NODEEXISTSSECONDARYNETWORKINTERFACE = "FailedOperation.NodeExistsSecondaryNetworkInterface"
 
+	// 节点池查询失败
+	FAILEDOPERATION_NODEPOOLQUERYFAILED = "FailedOperation.NodePoolQueryFailed"
+
+	// 您提交的操作被拒绝，请检查您的操作是否正确
+	FAILEDOPERATION_OPERATIONFORBIDDEN = "FailedOperation.OperationForbidden"
+
 	// 镜像OS不支持。
 	FAILEDOPERATION_OSNOTSUPPORT = "FailedOperation.OsNotSupport"
 
@@ -215,6 +236,9 @@ const (
 	// 记录没有发现。
 	FAILEDOPERATION_RECORDNOTFOUND = "FailedOperation.RecordNotFound"
 
+	// 切换内网直连失败
+	FAILEDOPERATION_SWITCHCLUSTERENDPOINT = "FailedOperation.SwitchClusterEndpoint"
+
 	// tag错误
 	FAILEDOPERATION_TAGCOMMON = "FailedOperation.TagCommon"
 
@@ -224,8 +248,14 @@ const (
 	// 任务当前所处状态不支持此操作。
 	FAILEDOPERATION_TASKLIFESTATEERROR = "FailedOperation.TaskLifeStateError"
 
+	// 任务未找到。
+	FAILEDOPERATION_TASKNOTFOUND = "FailedOperation.TaskNotFound"
+
 	// 询价错误。
 	FAILEDOPERATION_TRADECOMMON = "FailedOperation.TradeCommon"
+
+	// 账户余额不足
+	FAILEDOPERATION_TRADEINSUFFICIENTBALANCE = "FailedOperation.TradeInsufficientBalance"
 
 	// 不可预知的错误。
 	FAILEDOPERATION_UNEXPECTEDERROR = "FailedOperation.UnexpectedError"
@@ -398,7 +428,7 @@ const (
 	// 镜像OS不支持。
 	INTERNALERROR_OSNOTSUPPORT = "InternalError.OsNotSupport"
 
-	// Param。
+	// 参数错误。
 	INTERNALERROR_PARAM = "InternalError.Param"
 
 	// Pod未找到。
@@ -527,6 +557,12 @@ const (
 	// 路由表非空。
 	INVALIDPARAMETER_ROUTETABLENOTEMPTY = "InvalidParameter.RouteTableNotEmpty"
 
+	// SubnetAllocationPolicy 与 SubnetIds/VirtualNodes 互斥，不可同时传入。
+	INVALIDPARAMETER_SUBNETALLOCATIONPOLICYCONFLICT = "InvalidParameter.SubnetAllocationPolicyConflict"
+
+	// SubnetAllocationPolicy 参数校验失败，请确保 Allocations 非空、SubnetId 不重复、Ratio 为正整数且总和等于 100。
+	INVALIDPARAMETER_SUBNETALLOCATIONPOLICYINVALID = "InvalidParameter.SubnetAllocationPolicyInvalid"
+
 	// 子网不合法。
 	INVALIDPARAMETER_SUBNETINVALIDERROR = "InvalidParameter.SubnetInvalidError"
 
@@ -536,8 +572,20 @@ const (
 	// 客户创建参数中，k8s 版本、运行时版本或 tke-eni-agent 版本不支持客户选择的操作系统中的CgroupV2。
 	INVALIDPARAMETER_VERSIONNOTSUPPORTCGROUPV2 = "InvalidParameter.VersionNotSupportCgroupV2"
 
+	// 镜像未找到
+	INVALIDPARAMETERVALUE_IMAGENOTFOUND = "InvalidParameterValue.ImageNotFound"
+
+	// 超出配额
+	INVALIDPARAMETERVALUE_LIMITEXCEEDED = "InvalidParameterValue.LimitExceeded"
+
+	// 参数值中数量错误。
+	INVALIDPARAMETERVALUE_SIZE = "InvalidParameterValue.Size"
+
 	// 超过配额限制。
 	LIMITEXCEEDED = "LimitExceeded"
+
+	// 超过配额限制
+	LIMITEXCEEDED_QUOTAMAXNODLIMIT = "LimitExceeded.QuotaMaxNodLimit"
 
 	// 缺少参数错误。
 	MISSINGPARAMETER = "MissingParameter"
@@ -560,6 +608,9 @@ const (
 	// 所选子网已存在。
 	RESOURCEINUSE_SUBNETALREADYEXIST = "ResourceInUse.SubnetAlreadyExist"
 
+	// 获取 tke apiserver 失败
+	RESOURCEINUSE_TKEAPISERVERGETERROR = "ResourceInUse.TKEAPIServerGetError"
+
 	// 资源不足。
 	RESOURCEINSUFFICIENT = "ResourceInsufficient"
 
@@ -580,6 +631,9 @@ const (
 
 	// 未找到该kubernetes资源。
 	RESOURCENOTFOUND_KUBERNETESRESOURCENOTFOUND = "ResourceNotFound.KubernetesResourceNotFound"
+
+	// CLS日志主题不存在。
+	RESOURCENOTFOUND_LOGCOLLECTORCLSLOGTOPICNOTEXISTS = "ResourceNotFound.LogCollectorClsLogTopicNotExists"
 
 	// 资源未找到。
 	RESOURCENOTFOUND_NOTFOUND = "ResourceNotFound.NotFound"
@@ -611,11 +665,17 @@ const (
 	// 无该接口CAM权限。
 	UNAUTHORIZEDOPERATION_CAMNOAUTH = "UnauthorizedOperation.CamNoAuth"
 
+	// 没有RBAC权限
+	UNAUTHORIZEDOPERATION_NORBACPERMISSIONS = "UnauthorizedOperation.NoRBACPermissions"
+
 	// 未知参数错误。
 	UNKNOWNPARAMETER = "UnknownParameter"
 
 	// 操作不支持。
 	UNSUPPORTEDOPERATION = "UnsupportedOperation"
+
+	// 已第三方节点功能。
+	UNSUPPORTEDOPERATION_ALREADYENABLED = "UnsupportedOperation.AlreadyEnabled"
 
 	// AS伸缩关闭导致无法开启CA。
 	UNSUPPORTEDOPERATION_CAENABLEFAILED = "UnsupportedOperation.CaEnableFailed"
@@ -631,4 +691,7 @@ const (
 
 	// 不支持安装虚拟节点。
 	UNSUPPORTEDOPERATION_NOTSUPPORTINSTALLVIRTUALKUBELET = "UnsupportedOperation.NotSupportInstallVirtualKubelet"
+
+	// 网络类型不支持。
+	UNSUPPORTEDOPERATION_UNSUPPORTEDNETWORKTYPE = "UnsupportedOperation.UnsupportedNetworkType"
 )

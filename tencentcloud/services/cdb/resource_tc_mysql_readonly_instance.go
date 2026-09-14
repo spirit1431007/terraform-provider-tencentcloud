@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	tccommon "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/common"
 	svctag "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/services/tag"
@@ -12,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	cdb "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cdb/v20170320"
 	sdkError "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
+	sdkErrors "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/errors"
 
 	"github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/internal/helper"
 )
@@ -33,7 +35,7 @@ func ResourceTencentCloudMysqlReadonlyInstance() *schema.Resource {
 			Type:        schema.TypeString,
 			Computed:    true,
 			Optional:    true,
-			Description: "The zone information of the primary instance is required when you purchase a disaster recovery instance.",
+			Description: "The region information of the master instance. This field is required when purchasing a cross-region subscription.",
 		},
 		"slave_deploy_mode": {
 			Type:         schema.TypeInt,
@@ -46,7 +48,17 @@ func ResourceTencentCloudMysqlReadonlyInstance() *schema.Resource {
 			Type:        schema.TypeString,
 			Optional:    true,
 			Computed:    true,
-			Description: "Read only group id. If rogroupId is empty, a new ro group is created by default. If it is not empty, the existing ro group is used.",
+			Description: "Read only group id. If rogroupId is empty, a new ro group is created by default. If it is not empty, the existing ro group is used. Cross-region query requires master instance permission.",
+		},
+		"ro_vip": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "VIP-only read access.",
+		},
+		"ro_vport": {
+			Type:        schema.TypeInt,
+			Computed:    true,
+			Description: "VIP port number (read-only).",
 		},
 	}
 
@@ -64,8 +76,9 @@ func ResourceTencentCloudMysqlReadonlyInstance() *schema.Resource {
 
 		Importer: &schema.ResourceImporter{
 			State: helper.ImportWithDefaultValue(map[string]interface{}{
-				"prepaid_period": 1,
-				"force_delete":   false,
+				"prepaid_period":    1,
+				"force_delete":      false,
+				"slave_deploy_mode": 0,
 			}),
 		},
 		Schema: readonlyInstanceInfo,
@@ -216,13 +229,18 @@ func resourceTencentCloudMysqlReadonlyInstanceCreate(d *schema.ResourceData, met
 	logId := tccommon.GetLogId(tccommon.ContextNil)
 	ctx := context.WithValue(context.TODO(), tccommon.LogIdKey, logId)
 
-	mysqlService := MysqlService{client: meta.(tccommon.ProviderMeta).GetAPIV3Conn()}
+	client := meta.(tccommon.ProviderMeta).GetAPIV3Conn()
+	mysqlService := MysqlService{client: client}
 
 	// the mysql master instance must have a backup before creating a read-only instance
 	masterInstanceId := d.Get("master_instance_id").(string)
+	masterRegion := ""
+	if v, ok := d.GetOk("master_region"); ok {
+		masterRegion = v.(string)
+	}
 
 	err := resource.Retry(2*tccommon.ReadRetryTimeout, func() *resource.RetryError {
-		backups, err := mysqlService.DescribeBackupsByMysqlId(ctx, masterInstanceId, 10)
+		backups, err := mysqlService.DescribeBackupsByMysqlIdRegion(ctx, masterInstanceId, 10, masterRegion)
 		if err != nil {
 			return resource.NonRetryableError(err)
 		}
@@ -282,7 +300,20 @@ func resourceTencentCloudMysqlReadonlyInstanceCreate(d *schema.ResourceData, met
 		tagService := svctag.NewTagService(tcClient)
 		resourceName := tccommon.BuildTagResourceName("cdb", "instanceId", tcClient.Region, d.Id())
 		log.Printf("[DEBUG]Mysql instance create, resourceName:%s\n", resourceName)
-		if err := tagService.ModifyTags(ctx, resourceName, tags, nil); err != nil {
+		err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+			if err := tagService.ModifyTags(ctx, resourceName, tags, nil); err != nil {
+				if sdkErr, ok := err.(*sdkErrors.TencentCloudSDKError); ok {
+					if sdkErr.Code == "FailedOperation" && strings.Contains(sdkErr.Message, "repeat commit: lock:resourceTag") {
+						return resource.RetryableError(err)
+					}
+					return resource.NonRetryableError(err)
+				}
+				return resource.NonRetryableError(err)
+			}
+			return nil
+		})
+		if err != nil {
+			log.Printf("[CRITAL]%s create mysql  tag fail, reason:%s\n ", logId, err.Error())
 			return err
 		}
 	}
@@ -297,6 +328,7 @@ func resourceTencentCloudMysqlReadonlyInstanceRead(d *schema.ResourceData, meta 
 	logId := tccommon.GetLogId(tccommon.ContextNil)
 	ctx := context.WithValue(context.TODO(), tccommon.LogIdKey, logId)
 	mysqlService := MysqlService{client: meta.(tccommon.ProviderMeta).GetAPIV3Conn()}
+	masterRegion := ""
 	err := resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
 		mysqlInfo, e := tencentMsyqlBasicInfoRead(ctx, d, meta, false)
 		if e != nil {
@@ -313,6 +345,7 @@ func resourceTencentCloudMysqlReadonlyInstanceRead(d *schema.ResourceData, meta 
 		_ = d.Set("master_instance_id", *mysqlInfo.MasterInfo.InstanceId)
 		_ = d.Set("zone", *mysqlInfo.Zone)
 		_ = d.Set("master_region", *mysqlInfo.MasterInfo.Region)
+		masterRegion = *mysqlInfo.MasterInfo.Region
 
 		return nil
 	})
@@ -356,6 +389,9 @@ func resourceTencentCloudMysqlReadonlyInstanceRead(d *schema.ResourceData, meta 
 	_ = d.Set("vpc_id", mysqlInfo.UniqVpcId)
 	_ = d.Set("subnet_id", mysqlInfo.UniqSubnetId)
 	_ = d.Set("device_type", mysqlInfo.DeviceType)
+	if mysqlInfo.DiskType != nil {
+		_ = d.Set("disk_type", mysqlInfo.DiskType)
+	}
 
 	securityGroups, err := mysqlService.DescribeDBSecurityGroups(ctx, d.Id())
 	if err != nil {
@@ -394,7 +430,7 @@ func resourceTencentCloudMysqlReadonlyInstanceRead(d *schema.ResourceData, meta 
 	_ = d.Set("status", mysqlInfo.Status)
 	_ = d.Set("task_status", mysqlInfo.TaskStatus)
 
-	roGroup, err := mysqlService.DescribeRoGroupByIdAndRoId(ctx, *mysqlInfo.MasterInfo.InstanceId, d.Id())
+	roGroup, err := mysqlService.DescribeRoGroupByIdAndRoId(ctx, masterRegion, *mysqlInfo.MasterInfo.InstanceId, d.Id())
 	if err != nil {
 		return err
 	}
@@ -402,6 +438,17 @@ func resourceTencentCloudMysqlReadonlyInstanceRead(d *schema.ResourceData, meta 
 	if roGroup != nil && roGroup.RoGroupId != nil {
 		_ = d.Set("ro_group_id", *roGroup.RoGroupId)
 	}
+
+	if mysqlInfo.RoVipInfo != nil && mysqlInfo.RoVipInfo.RoVip != nil {
+		_ = d.Set("ro_vip", *mysqlInfo.RoVipInfo.RoVip)
+	}
+
+	if mysqlInfo.RoVipInfo != nil && mysqlInfo.RoVipInfo.RoVport != nil {
+		_ = d.Set("ro_vport", *mysqlInfo.RoVipInfo.RoVport)
+	}
+
+	// set no used fields to default value to fix diff
+	_ = d.Set("slave_deploy_mode", 0)
 
 	return nil
 }

@@ -42,7 +42,7 @@ func ResourceTencentCloudWafCc() *schema.Resource {
 			"advance": {
 				Required:    true,
 				Type:        schema.TypeString,
-				Description: "Session match mode, 0 use session, 1 use ip.",
+				Description: "Advanced mode (whether to use session detection). 0(disabled) 1(enabled).",
 			},
 			"limit": {
 				Required:    true,
@@ -52,22 +52,22 @@ func ResourceTencentCloudWafCc() *schema.Resource {
 			"interval": {
 				Required:    true,
 				Type:        schema.TypeString,
-				Description: "Interval.",
+				Description: "CC detection cycle.",
 			},
 			"url": {
 				Required:    true,
 				Type:        schema.TypeString,
-				Description: "Check URL.",
+				Description: "Detection URL.",
 			},
 			"match_func": {
 				Required:    true,
 				Type:        schema.TypeInt,
-				Description: "Match method, 0 equal, 1 contains, 2 prefix.",
+				Description: "Match method, 0(equal), 1(prefix), 2(contains), 3(not equal), 6(suffix), 7(not contains).",
 			},
 			"action_type": {
 				Required:    true,
 				Type:        schema.TypeString,
-				Description: "Rule Action, 20 log, 21 captcha, 22 deny, 23 accurate deny.",
+				Description: "Rule Action, 20 means observation, 21 means human-machine identification, 22 means interception, 23 means precise interception, 26 means precise human-machine identification, and 27 means JS verification.",
 			},
 			"priority": {
 				Required:    true,
@@ -79,11 +79,29 @@ func ResourceTencentCloudWafCc() *schema.Resource {
 				Type:        schema.TypeInt,
 				Description: "Action ValidTime, minute unit. Min: 60, Max: 604800.",
 			},
-			//"options_arr": {
-			//	Optional:    true,
-			//	Type:        schema.TypeString,
-			//	Description: "Option param.",
-			//},
+			"options_arr": {
+				Optional: true,
+				Type:     schema.TypeString,
+				Description: "CC matching conditions JSON serialized string. " +
+					"Example: [{\"key\":\"Method\",\"args\":[\"=R0VU\"],\"match\":\"0\",\"encodeflag\":true}]. " +
+					"\n\nSupported key types: URL, Method, Post, Referer, Cookie, User-Agent, CustomHeader, IPLocation, CaptchaRisk, CaptchaDeviceRisk, CaptchaScore. " +
+					"\n\nMatch operators by key type:\n" +
+					"- When Key is URL: 0 (equal), 3 (not equal), 1 (prefix), 6 (suffix), 2 (contains), 7 (not contains)\n" +
+					"- When Key is Method: 0 (equal), 3 (not equal)\n" +
+					"- When Key is Post: 0 (equal), 3 (not equal), 2 (contains), 7 (not contains)\n" +
+					"- When Key is Cookie: 0 (equal), 3 (not equal), 2 (contains), 7 (not contains)\n" +
+					"- When Key is Referer: 0 (equal), 3 (not equal), 1 (prefix), 6 (suffix), 2 (contains), 7 (not contains), 12 (exists), 5 (not exists), 4 (empty)\n" +
+					"- When Key is User-Agent: 0 (equal), 3 (not equal), 1 (prefix), 6 (suffix), 2 (contains), 7 (not contains), 12 (exists), 5 (not exists), 4 (empty)\n" +
+					"- When Key is CustomHeader: 0 (equal), 3 (not equal), 2 (contains), 7 (not contains), 4 (empty), 5 (not exists)\n" +
+					"- When Key is IPLocation: 13 (belongs to), 14 (not belongs to)\n" +
+					"- When Key is CaptchaRisk: 15 (numerically equal), 16 (numerically not equal), 13 (belongs to), 14 (not belongs to), 12 (exists), 5 (not exists)\n" +
+					"- When Key is CaptchaDeviceRisk: 13 (belongs to), 14 (not belongs to), 12 (exists), 5 (not exists)\n" +
+					"- When Key is CaptchaScore: 15 (numerically equal), 17 (numerically greater than), 18 (numerically less than), 19 (numerically greater than or equal), 20 (numerically less than or equal), 12 (exists), 5 (not exists)\n" +
+					"\n" +
+					"Encoding rules: The args parameter requires encodeflag to be set to true. " +
+					"For Post, Cookie, or CustomHeader keys, Base64 encode both parameter name and value (remove trailing =), then concatenate with = sign (e.g., Base64(name)=Base64(value)). " +
+					"For Referer or User-Agent keys, Base64 encode the value (remove trailing =) and prefix with = sign (e.g., =Base64(value)).",
+			},
 			"edition": {
 				Required:     true,
 				Type:         schema.TypeString,
@@ -104,7 +122,24 @@ func ResourceTencentCloudWafCc() *schema.Resource {
 				Optional:    true,
 				Type:        schema.TypeSet,
 				Elem:        &schema.Schema{Type: schema.TypeInt},
-				Description: "Advance mode use session id.",
+				Description: "Session ID that needs to be enabled for the rule.",
+			},
+			"limit_method": {
+				Optional:    true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Frequency limiting method.",
+			},
+			"cel_rule": {
+				Optional:    true,
+				Type:        schema.TypeString,
+				Description: "Cel expression.",
+			},
+			"logical_op": {
+				Optional:    true,
+				Computed:    true,
+				Type:        schema.TypeString,
+				Description: "Logical operator of configuration mode, and/or.",
 			},
 			"rule_id": {
 				Computed:    true,
@@ -174,9 +209,9 @@ func resourceTencentCloudWafCcCreate(d *schema.ResourceData, meta interface{}) e
 		request.ValidTime = helper.IntInt64(v.(int))
 	}
 
-	//if v, ok := d.GetOk("options_arr"); ok {
-	//	request.OptionsArr = helper.String(v.(string))
-	//}
+	if v, ok := d.GetOk("options_arr"); ok {
+		request.OptionsArr = helper.String(v.(string))
+	}
 
 	if v, ok := d.GetOk("edition"); ok {
 		request.Edition = helper.String(v.(string))
@@ -193,9 +228,23 @@ func resourceTencentCloudWafCcCreate(d *schema.ResourceData, meta interface{}) e
 	if v, ok := d.GetOk("session_applied"); ok {
 		sessionAppliedSet := v.(*schema.Set).List()
 		for i := range sessionAppliedSet {
-			sessionApplied := sessionAppliedSet[i].(int)
-			request.SessionApplied = append(request.SessionApplied, helper.IntInt64(sessionApplied))
+			if sessionAppliedSet[i] != nil {
+				sessionApplied := sessionAppliedSet[i].(int)
+				request.SessionApplied = append(request.SessionApplied, helper.IntInt64(sessionApplied))
+			}
 		}
+	}
+
+	if v, ok := d.GetOk("limit_method"); ok {
+		request.LimitMethod = helper.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("cel_rule"); ok {
+		request.CelRule = helper.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("logical_op"); ok {
+		request.LogicalOp = helper.String(v.(string))
 	}
 
 	request.RuleId = helper.IntInt64(0)
@@ -207,9 +256,8 @@ func resourceTencentCloudWafCcCreate(d *schema.ResourceData, meta interface{}) e
 			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
 		}
 
-		if result == nil || result.Response.RuleId == nil {
-			e = fmt.Errorf("waf cc failed not exists")
-			return resource.NonRetryableError(e)
+		if result == nil || result.Response == nil || result.Response.RuleId == nil {
+			return resource.NonRetryableError(fmt.Errorf("Create waf cc failed, Response is nil."))
 		}
 
 		response = result
@@ -302,17 +350,9 @@ func resourceTencentCloudWafCcRead(d *schema.ResourceData, meta interface{}) err
 		_ = d.Set("valid_time", cc.ValidTime)
 	}
 
-	//if cc.Options != nil {
-	//	_ = d.Set("options_arr", cc.Options)
-	//}
-	//
-	//if cc.Edition != nil {
-	//	_ = d.Set("edition", cc.Edition)
-	//}
-	//
-	//if cc.Type != nil {
-	//	_ = d.Set("type", cc.Type)
-	//}
+	if cc.Options != nil {
+		_ = d.Set("options_arr", cc.Options)
+	}
 
 	if cc.EventId != nil {
 		_ = d.Set("event_id", cc.EventId)
@@ -320,6 +360,18 @@ func resourceTencentCloudWafCcRead(d *schema.ResourceData, meta interface{}) err
 
 	if cc.SessionApplied != nil {
 		_ = d.Set("session_applied", cc.SessionApplied)
+	}
+
+	if cc.LimitMethod != nil {
+		_ = d.Set("limit_method", cc.LimitMethod)
+	}
+
+	if cc.CelRule != nil {
+		_ = d.Set("cel_rule", cc.CelRule)
+	}
+
+	if cc.LogicalOp != nil {
+		_ = d.Set("logical_op", cc.LogicalOp)
 	}
 
 	if cc.RuleId != nil {
@@ -340,7 +392,6 @@ func resourceTencentCloudWafCcUpdate(d *schema.ResourceData, meta interface{}) e
 	)
 
 	immutableArgs := []string{"domain", "name"}
-
 	for _, v := range immutableArgs {
 		if d.HasChange(v) {
 			return fmt.Errorf("argument `%s` cannot be changed", v)
@@ -396,9 +447,9 @@ func resourceTencentCloudWafCcUpdate(d *schema.ResourceData, meta interface{}) e
 		request.ValidTime = helper.IntInt64(v.(int))
 	}
 
-	//if v, ok := d.GetOk("options_arr"); ok {
-	//	request.OptionsArr = helper.String(v.(string))
-	//}
+	if v, ok := d.GetOk("options_arr"); ok {
+		request.OptionsArr = helper.String(v.(string))
+	}
 
 	if v, ok := d.GetOk("edition"); ok {
 		request.Edition = helper.String(v.(string))
@@ -418,6 +469,18 @@ func resourceTencentCloudWafCcUpdate(d *schema.ResourceData, meta interface{}) e
 			sessionApplied := sessionAppliedSet[i].(int)
 			request.SessionApplied = append(request.SessionApplied, helper.IntInt64(sessionApplied))
 		}
+	}
+
+	if v, ok := d.GetOk("limit_method"); ok {
+		request.LimitMethod = helper.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("cel_rule"); ok {
+		request.CelRule = helper.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("logical_op"); ok {
+		request.LogicalOp = helper.String(v.(string))
 	}
 
 	err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {

@@ -11,16 +11,18 @@ description: |-
 
 Provide a resource to create a SCF function.
 
+~> **NOTE:** The use of `trigger` is no longer recommended; `tencentcloud_scf_trigger` is recommended instead.
+
 ## Example Usage
 
 ```hcl
-resource "tencentcloud_scf_function" "foo" {
+resource "tencentcloud_scf_function" "example" {
   name    = "ci-test-function"
   handler = "main.do_it"
   runtime = "Python3.6"
 
   cos_bucket_name   = "scf-code-1234567890"
-  cos_object_name   = "code.zip"
+  cos_object_name   = "/path/to/code.zip"
   cos_bucket_region = "ap-guangzhou"
 }
 ```
@@ -28,19 +30,19 @@ resource "tencentcloud_scf_function" "foo" {
 ### Using Zip file
 
 ```hcl
-resource "tencentcloud_scf_function" "foo" {
+resource "tencentcloud_scf_function" "example" {
   name              = "ci-test-function"
   handler           = "first.do_it_first"
   runtime           = "Python3.6"
   enable_public_net = true
   dns_cache         = true
+  vpc_id            = "vpc-391sv4w3"
+  subnet_id         = "subnet-ljyn7h30"
+  zip_file          = "/scf/first.zip"
+
   intranet_config {
     ip_fixed = "ENABLE"
   }
-  vpc_id    = "vpc-391sv4w3"
-  subnet_id = "subnet-ljyn7h30"
-
-  zip_file = "/scf/first.zip"
 
   tags = {
     "env" = "test"
@@ -51,7 +53,7 @@ resource "tencentcloud_scf_function" "foo" {
 ### Using CFS config
 
 ```hcl
-resource "tencentcloud_scf_function" "foo" {
+resource "tencentcloud_scf_function" "example" {
   name    = "ci-test-function"
   handler = "main.do_it"
   runtime = "Python3.6"
@@ -70,13 +72,12 @@ resource "tencentcloud_scf_function" "foo" {
 ### Using triggers
 
 ```hcl
-resource "tencentcloud_scf_function" "foo" {
+resource "tencentcloud_scf_function" "example" {
   name              = "ci-test-function"
   handler           = "first.do_it_first"
   runtime           = "Python3.6"
   enable_public_net = true
-
-  zip_file = "/scf/first.zip"
+  zip_file          = "/scf/first.zip"
 
   triggers {
     name         = "tf-test-fn-trigger"
@@ -89,6 +90,18 @@ resource "tencentcloud_scf_function" "foo" {
     cos_region   = "ap-guangzhou"
     type         = "cos"
     trigger_desc = "{\"event\":\"cos:ObjectCreated:Put\",\"filter\":{\"Prefix\":\"\",\"Suffix\":\"\"}}"
+  }
+
+  triggers {
+    name = "tf-test-fn-trigger"
+    type = "http"
+    trigger_desc = jsonencode({
+      "AuthType" : "NONE",
+      "NetConfig" : {
+        "EnableIntranet" : true,
+        "EnableExtranet" : false,
+      }
+    })
   }
 }
 ```
@@ -113,6 +126,7 @@ The following arguments are supported:
 * `func_type` - (Optional, String) Function type. The default value is Event. Enter Event if you need to create a trigger function. Enter HTTP if you need to create an HTTP function service.
 * `handler` - (Optional, String) Handler of the SCF function. The format of name is `<filename>.<method_name>`, and it supports 26 English letters, numbers, connectors, and underscores, it should start with a letter. The last character cannot be `-` or `_`. Available length is 2-60.
 * `image_config` - (Optional, List) Image of the SCF function, conflict with `cos_bucket_name`, `cos_object_name`, `cos_bucket_region`, `zip_file`.
+* `instance_concurrency_config` - (Optional, List) Instance concurrency configuration for the function.
 * `intranet_config` - (Optional, List) Intranet access configuration.
 * `l5_enable` - (Optional, Bool) Enable L5 for SCF function, default is `false`.
 * `layers` - (Optional, List) The list of association layers.
@@ -139,13 +153,25 @@ The `cfs_config` object supports the following:
 The `image_config` object supports the following:
 
 * `image_type` - (Required, String) The image type. personal or enterprise.
-* `image_uri` - (Required, String) The uri of image.
+* `image_uri` - (Required, String) The uri of image. Supports three formats:
+  - Format A: registry/repo:tag
+  - Format B: registry/repo@sha256:digest
+  - Format C: registry/repo:tag@sha256:digest.
 * `args` - (Optional, String) the parameters of command.
 * `command` - (Optional, String) The command of entrypoint.
 * `container_image_accelerate` - (Optional, Bool) Image accelerate switch.
 * `entry_point` - (Optional, String) The entrypoint of app.
 * `image_port` - (Optional, Int) Image function port setting. Default is `9000`, -1 indicates no port mirroring function. Other value ranges 0 ~ 65535.
 * `registry_id` - (Optional, String) The registry id of TCR. When image type is enterprise, it must be set.
+
+The `instance_concurrency_config` object supports the following:
+
+* `dynamic_enabled` - (Optional, String) Whether to enable intelligent dynamic concurrency. Valid values: 'TRUE', 'FALSE'. 'FALSE' means static concurrency.
+* `instance_isolation_enabled` - (Optional, String) Security isolation switch. Valid values: 'TRUE', 'FALSE'.
+* `max_concurrency` - (Optional, Int) Maximum single-instance concurrency, range: 1-100.
+* `mix_node_config` - (Optional, List) Dynamic concurrency configuration parameters.
+* `session_config` - (Optional, List) Session configuration parameters.
+* `type` - (Optional, String) Concurrency mode, valid values: 'Session-Based' or 'Request-Based'.
 
 The `intranet_config` object supports the following:
 
@@ -156,11 +182,26 @@ The `layers` object supports the following:
 * `layer_name` - (Required, String) The name of Layer.
 * `layer_version` - (Required, Int) The version of layer.
 
+The `mix_node_config` object of `instance_concurrency_config` supports the following:
+
+* `node_spec` - (Optional, String) GPU model name.
+* `num` - (Optional, Int) Number of concurrent instances.
+
+The `session_config` object of `instance_concurrency_config` supports the following:
+
+* `idle_timeout_strategy` - (Optional, String) Idle timeout strategy. Valid values: 'FATAL' for auto destroy, 'PAUSE' for auto pause. Only available when security isolation is enabled.
+* `maximum_concurrency_session_per_instance` - (Optional, Int) Maximum number of concurrent sessions per instance.
+* `maximum_idle_time_in_seconds` - (Optional, Int) Session idle timeout in seconds.
+* `maximum_ttl_in_seconds` - (Optional, Int) Session lifecycle in seconds.
+* `session_name` - (Optional, String) Session name, starts with a letter, length 5-40 characters, can contain letters, digits, underscores, and hyphens.
+* `session_path` - (Optional, String) Session path information.
+* `session_source` - (Optional, String) Session source. Valid values: 'HEADER', 'COOKIE', 'QUERY_STRING'.
+
 The `triggers` object supports the following:
 
 * `name` - (Required, String) Name of the SCF function trigger, if `type` is `ckafka`, the format of name must be `<ckafkaInstanceId>-<topicId>`; if `type` is `cos`, the name is cos bucket id, other In any case, it can be combined arbitrarily. It can only contain English letters, numbers, connectors and underscores. The maximum length is 100.
 * `trigger_desc` - (Required, String) TriggerDesc of the SCF function trigger, parameter format of `timer` is linux cron expression; parameter of `cos` type is json string `{"bucketUrl":"<name-appid>.cos.<region>.myqcloud.com","event":"cos:ObjectCreated:*","filter":{"Prefix":"","Suffix":""}}`, where `bucketUrl` is cos bucket (optional), `event` is the cos event trigger, `Prefix` is the corresponding file prefix filter condition, `Suffix` is the suffix filter condition, if not need filter condition can not pass; `cmq` type does not pass this parameter; `ckafka` type parameter format is json string `{"maxMsgNum":"1","offset":"latest"}`; `apigw` type parameter format is json string `{"api":{"authRequired":"FALSE","requestConfig":{"method":"ANY"},"isIntegratedResponse":"FALSE"},"service":{"serviceId":"service-dqzh68sg"},"release":{"environmentName":"test"}}`.
-* `type` - (Required, String) Type of the SCF function trigger, support `cos`, `cmq`, `timer`, `ckafka`, `apigw`.
+* `type` - (Required, String) Type of the SCF function trigger, support `timer`, `ckafka`, `custom_kafka`, `apigw`, `cmq`, `cos`, `mqtt`, `cls`, `clb`, `mps`, `vod`, `cm`, `eb`, `http`.
 * `cos_region` - (Optional, String) Region of cos bucket. if `type` is `cos`, `cos_region` is required.
 
 ## Attributes Reference
@@ -190,6 +231,16 @@ In addition to all arguments above, the following attributes are exported:
   * `type` - Type of SCF function trigger.
 * `vip` - SCF function vip.
 
+The `cfs_config` object exports the following:
+
+* `ip_address` - (Readonly) File system ip address.
+* `mount_subnet_id` - (Readonly) File system subnet ID.
+* `mount_vpc_id` - (Readonly) File system virtual private network ID.
+
+The `intranet_config` object exports the following:
+
+* `ip_address` - If fixed intranet IP is enabled, this field returns the IP list used.
+
 
 ## Import
 
@@ -198,6 +249,6 @@ SCF function can be imported, e.g.
 -> **NOTE:** function id is `<function namespace>+<function name>`
 
 ```
-$ terraform import tencentcloud_scf_function.test default+test
+$ terraform import tencentcloud_scf_function.example default+test
 ```
 

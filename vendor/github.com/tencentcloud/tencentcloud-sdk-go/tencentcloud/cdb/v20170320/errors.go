@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+// Copyright (c) 2017-2025 Tencent. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ const (
 	FAILEDOPERATION_NOTDELAYRO = "FailedOperation.NotDelayRo"
 
 	// 实例正在执行其他操作，请稍后重试。
-	FAILEDOPERATION_OPERATIONINCONFLICTERR = "FailedOperation.OperationInConflictErr"
+	FAILEDOPERATION_OPERATIONINCONFLICTERROR = "FailedOperation.OperationInConflictError"
 
 	// 执行的权限修改操作非法。您可以参照产品文档，了解当前实例支持哪些权限修改操作，如有疑问，请您咨询客服进行处理。
 	FAILEDOPERATION_PRIVILEGEDATAILLEGAL = "FailedOperation.PrivilegeDataIllegal"
@@ -112,6 +112,9 @@ const (
 
 	// 查询审计任务失败。
 	FAILEDOPERATION_QUERYAUDITTASKFAILERROR = "FailedOperation.QueryAuditTaskFailError"
+
+	// 查询实例{{1}}失败
+	FAILEDOPERATION_QUERYINSTANCEERROR = "FailedOperation.QueryInstanceError"
 
 	// 查询日志失败。
 	FAILEDOPERATION_QUERYLOGERROR = "FailedOperation.QueryLogError"
@@ -128,6 +131,9 @@ const (
 	// 查询日志结果集超出限制，请缩小查询范围。
 	FAILEDOPERATION_RESULTSETOVERLIMIT = "FailedOperation.ResultSetOverLimit"
 
+	// 日志查询失败，请稍后重试或缩小查询范围。如果持续不成功，请联系客服进行处理。
+	FAILEDOPERATION_SERVICEACCESSERROR = "FailedOperation.ServiceAccessError"
+
 	// 操作发起失败，请稍后重试。如果操作持续不成功，请您联系客服进行处理。
 	FAILEDOPERATION_STARTFLOWERROR = "FailedOperation.StartFlowError"
 
@@ -136,6 +142,9 @@ const (
 
 	// 提交任务失败，请稍后重试。如果持续提交失败，请您联系客服进行处理。
 	FAILEDOPERATION_SUBMITASYNCTASKERROR = "FailedOperation.SubmitAsyncTaskError"
+
+	// 任务冲突
+	FAILEDOPERATION_TASKCONFLICTERROR = "FailedOperation.TaskConflictError"
 
 	// 查询超时。
 	FAILEDOPERATION_TIMEOUTERROR = "FailedOperation.TimeoutError"
@@ -200,7 +209,7 @@ const (
 	// 数据库操作失败。
 	INTERNALERROR_DBOPERATIONERROR = "InternalError.DBOperationError"
 
-	// 数据库记录不存在。
+	// 数据库实例不存在。
 	INTERNALERROR_DBRECORDNOTEXISTERROR = "InternalError.DBRecordNotExistError"
 
 	// 数据库内部错误。
@@ -241,6 +250,9 @@ const (
 
 	// 请求执行异常。
 	INTERNALERROR_INTERNALHTTPSERVERERROR = "InternalError.InternalHttpServerError"
+
+	// 内部服务异常，请稍后重试
+	INTERNALERROR_INTERNALINNERSERVICEERROR = "InternalError.InternalInnerServiceError"
 
 	// 后台请求服务失败，请稍后重试。
 	INTERNALERROR_INTERNALREQUESTERROR = "InternalError.InternalRequestError"
@@ -295,6 +307,9 @@ const (
 
 	// 交易系统错误。
 	INTERNALERROR_TRADEERROR = "InternalError.TradeError"
+
+	// 开启事务失败
+	INTERNALERROR_TRANSACTIOBEGINERROR = "InternalError.TransactioBeginError"
 
 	// 操作失败。
 	INTERNALERROR_TRANSACTIONBEGINERROR = "InternalError.TransactionBeginError"
@@ -470,6 +485,9 @@ const (
 	// root账号禁止被删除。
 	OPERATIONDENIED_DELETEROOTACCOUNTERROR = "OperationDenied.DeleteRootAccountError"
 
+	// 流程冲突，请稍后重试。
+	OPERATIONDENIED_FLOWCONFLICT = "OperationDenied.FlowConflict"
+
 	// 该实例无此功能权限。
 	OPERATIONDENIED_FUNCTIONDENIED = "OperationDenied.FunctionDenied"
 
@@ -478,6 +496,9 @@ const (
 
 	// 实例锁冲突，请稍后重试。
 	OPERATIONDENIED_INSTANCELOCKERCONFLICT = "OperationDenied.InstanceLockerConflict"
+
+	// 实例日志状态异常,稍后重试
+	OPERATIONDENIED_INSTANCELOGSTATUSERROR = "OperationDenied.InstanceLogStatusError"
 
 	// 实例状态异常。
 	OPERATIONDENIED_INSTANCESTATUSERROR = "OperationDenied.InstanceStatusError"
@@ -569,7 +590,7 @@ const (
 	// 未找到数据库实例，请确认您的实例状态是否正常。
 	RESOURCENOTFOUND_CDBINSTANCENOTFOUNDERROR = "ResourceNotFound.CdbInstanceNotFoundError"
 
-	// 高可用版实例不存在。
+	// 该实例不存在。
 	RESOURCENOTFOUND_INSTANCENOTFOUNDERROR = "ResourceNotFound.InstanceNotFoundError"
 
 	// 该实例不存在。

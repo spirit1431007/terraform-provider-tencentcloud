@@ -35,13 +35,65 @@ resource "tencentcloud_subnet" "subnet" {
   is_multicast      = false
 }
 
-// create clb
-resource "tencentcloud_clb_instance" "example" {
+// create INTERNAL clb
+resource "tencentcloud_clb_instance" "example1" {
   network_type = "INTERNAL"
   clb_name     = "tf-example"
   project_id   = 0
   vpc_id       = tencentcloud_vpc.vpc.id
   subnet_id    = tencentcloud_subnet.subnet.id
+
+  tags = {
+    tagKey = "tagValue"
+  }
+}
+
+// create INTERNAL clb by sla_type and internet_bandwidth_max_out
+resource "tencentcloud_clb_instance" "example2" {
+  network_type               = "INTERNAL"
+  clb_name                   = "tf-example"
+  project_id                 = 0
+  vpc_id                     = tencentcloud_vpc.vpc.id
+  subnet_id                  = tencentcloud_subnet.subnet.id
+  sla_type                   = "clb.c2.medium"
+  internet_bandwidth_max_out = 100
+
+  tags = {
+    tagKey = "tagValue"
+  }
+}
+```
+
+### Create CLB with eip_address_id, Only support INTERNAL CLB
+
+```hcl
+variable "availability_zone" {
+  default = "ap-guangzhou-4"
+}
+
+// create vpc
+resource "tencentcloud_vpc" "vpc" {
+  cidr_block = "10.0.0.0/16"
+  name       = "vpc"
+}
+
+// create subnet
+resource "tencentcloud_subnet" "subnet" {
+  vpc_id            = tencentcloud_vpc.vpc.id
+  availability_zone = var.availability_zone
+  name              = "subnet"
+  cidr_block        = "10.0.1.0/24"
+  is_multicast      = false
+}
+
+// create clb
+resource "tencentcloud_clb_instance" "example" {
+  network_type   = "INTERNAL"
+  clb_name       = "tf-example"
+  project_id     = 0
+  vpc_id         = tencentcloud_vpc.vpc.id
+  subnet_id      = tencentcloud_subnet.subnet.id
+  eip_address_id = "eip-lt0w6jhq"
 
   tags = {
     tagKey = "tagValue"
@@ -115,6 +167,44 @@ resource "tencentcloud_clb_instance" "example" {
   clb_name     = "tf-example"
   project_id   = 0
   sla_type     = "clb.c3.medium"
+  vpc_id       = tencentcloud_vpc.vpc.id
+  subnet_id    = tencentcloud_subnet.subnet.id
+
+  tags = {
+    tagKey = "tagValue"
+  }
+}
+```
+
+### changes.
+
+```hcl
+variable "availability_zone" {
+  default = "ap-guangzhou-4"
+}
+
+// create vpc
+resource "tencentcloud_vpc" "vpc" {
+  cidr_block = "10.0.0.0/16"
+  name       = "vpc"
+}
+
+// create subnet
+resource "tencentcloud_subnet" "subnet" {
+  vpc_id            = tencentcloud_vpc.vpc.id
+  availability_zone = var.availability_zone
+  name              = "subnet"
+  cidr_block        = "10.0.1.0/24"
+  is_multicast      = false
+}
+
+// create clb and forcibly upgrade sla_type
+resource "tencentcloud_clb_instance" "example" {
+  network_type = "INTERNAL"
+  clb_name     = "tf-example"
+  project_id   = 0
+  sla_type     = "clb.c3.medium"
+  force        = true
   vpc_id       = tencentcloud_vpc.vpc.id
   subnet_id    = tencentcloud_subnet.subnet.id
 
@@ -475,18 +565,40 @@ resource "tencentcloud_clb_instance" "example" {
 }
 ```
 
+### Create instance with associate endpoint
+
+```hcl
+resource "tencentcloud_clb_instance" "example" {
+  network_type       = "OPEN"
+  clb_name           = "tf-example"
+  project_id         = 0
+  vpc_id             = "vpc-e51ilko8"
+  associate_endpoint = "vpce-du9ssd3z"
+  tags = {
+    createBy = "Terraform"
+  }
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
 
 * `clb_name` - (Required, String) Name of the CLB. The name can only contain Chinese characters, English letters, numbers, underscore and hyphen '-'.
 * `network_type` - (Required, String, ForceNew) Type of CLB instance. Valid values: `OPEN` and `INTERNAL`.
-* `address_ip_version` - (Optional, String) IP version, only applicable to open CLB. Valid values are `ipv4`, `ipv6` and `IPv6FullChain`.
+* `address_ip_version` - (Optional, String) It's only applicable to public network CLB instances. IP version. Values: `IPV4`, `IPV6` and `IPv6FullChain` (case-insensitive). Default: `IPV4`. Note: IPV6 indicates IPv6 NAT64, while IPv6FullChain indicates IPv6.
+* `associate_endpoint` - (Optional, String) The associated terminal node ID; passing an empty string indicates unassociating the node.
 * `bandwidth_package_id` - (Optional, String) Bandwidth package id. If set, the `internet_charge_type` must be `BANDWIDTH_PACKAGE`.
 * `cluster_id` - (Optional, String, ForceNew) Cluster ID.
 * `delete_protect` - (Optional, Bool) Whether to enable delete protection.
 * `dynamic_vip` - (Optional, Bool) If create dynamic vip CLB instance, `true` or `false`.
-* `internet_bandwidth_max_out` - (Optional, Int) Max bandwidth out, only applicable to open CLB. Valid value ranges is [1, 2048]. Unit is MB.
+* `eip_address_id` - (Optional, String) The unique ID of the EIP, such as eip-1v2rmbwk, is only applicable to the intranet load balancing binding EIP. During the EIP change, there may be a brief network interruption.
+* `exclusive_cluster` - (Optional, List, ForceNew) Information about the dedicated CLB instance. You must specify this parameter when you create a dedicated CLB instance in a private network.
+* `force` - (Optional, Bool) Whether to forcibly upgrade the CLB instance, default is `false`. This parameter only takes effect when `sla_type` changes.
+* `internet_bandwidth_max_out` - (Optional, Int) Maximum outbound bandwidth, in Mbps. This parameter is valid only for public network shared, LCU-supported, and exclusive CLB instances and private network LCU-supported CLB instances.
+- The range of the maximum outbound bandwidth for public network shared and exclusive CLB instances is 1-2,048 Mbps.
+- The range of the maximum outbound bandwidth for public network and private network LCU-supported CLB instances is 1-61,440 Mbps.
+(Default to 10Mbps when CreateLoadBalancer is call.).
 * `internet_charge_type` - (Optional, String) Internet charge type, only applicable to open CLB. Valid values are `TRAFFIC_POSTPAID_BY_HOUR`, `BANDWIDTH_POSTPAID_BY_HOUR` and `BANDWIDTH_PACKAGE`.
 * `load_balancer_pass_to_target` - (Optional, Bool) Whether the target allow flow come from clb. If value is true, only check security group of clb, or check both clb and backend instance security group.
 * `log_set_id` - (Optional, String) The id of log set.
@@ -507,6 +619,36 @@ The following arguments are supported:
 * `vpc_id` - (Optional, String, ForceNew) VPC ID of the CLB.
 * `zone_id` - (Optional, String) Available zone id, only applicable to open CLB.
 
+The `classical_cluster` object of `exclusive_cluster` supports the following:
+
+* `cluster_id` - (Required, String, ForceNew) Unique cluster ID.
+* `cluster_name` - (Optional, String, ForceNew) Cluster name.
+* `zone` - (Optional, String, ForceNew) Cluster AZ, such as ap-guangzhou-1
+Note: this field may return null, indicating that no valid values can be obtained.
+
+The `exclusive_cluster` object supports the following:
+
+* `classical_cluster` - (Optional, List, ForceNew) vpcgw cluster
+Note: this field may return null, indicating that no valid values can be obtained.
+* `l4_clusters` - (Optional, Set, ForceNew) Layer-4 dedicated cluster list
+Note: this field may return null, indicating that no valid values can be obtained.
+* `l7_clusters` - (Optional, Set, ForceNew) Layer-7 dedicated cluster list
+Note: this field may return null, indicating that no valid values can be obtained.
+
+The `l4_clusters` object of `exclusive_cluster` supports the following:
+
+* `cluster_id` - (Required, String, ForceNew) Unique cluster ID.
+* `cluster_name` - (Optional, String, ForceNew) Cluster name.
+* `zone` - (Optional, String, ForceNew) Cluster AZ, such as ap-guangzhou-1
+Note: this field may return null, indicating that no valid values can be obtained.
+
+The `l7_clusters` object of `exclusive_cluster` supports the following:
+
+* `cluster_id` - (Required, String, ForceNew) Unique cluster ID.
+* `cluster_name` - (Optional, String, ForceNew) Cluster name.
+* `zone` - (Optional, String, ForceNew) Cluster AZ, such as ap-guangzhou-1
+Note: this field may return null, indicating that no valid values can be obtained.
+
 The `snat_ips` object supports the following:
 
 * `subnet_id` - (Required, String) Snat subnet ID.
@@ -522,12 +664,18 @@ In addition to all arguments above, the following attributes are exported:
 * `domain` - Domain name of the CLB instance.
 * `ipv6_mode` - This field is meaningful when the IP address version is ipv6, `IPv6Nat64` | `IPv6FullChain`.
 
+## Timeouts
+
+The `timeouts` block allows you to specify [timeouts](https://developer.hashicorp.com/terraform/language/resources/syntax#operation-timeouts) for certain actions:
+
+* `create` - (Defaults to `10m`) Used when creating the resource.
+* `update` - (Defaults to `10m`) Used when updating the resource.
 
 ## Import
 
 CLB instance can be imported using the id, e.g.
 
 ```
-$ terraform import tencentcloud_clb_instance.example lb-7a0t6zqb
+terraform import tencentcloud_clb_instance.example lb-7a0t6zqb
 ```
 

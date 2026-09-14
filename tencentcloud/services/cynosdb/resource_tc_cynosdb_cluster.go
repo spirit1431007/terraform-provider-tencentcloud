@@ -7,7 +7,6 @@ import (
 	"time"
 
 	tccommon "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/common"
-	svccdb "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/services/cdb"
 	svctag "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/services/tag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -95,6 +94,18 @@ func resourceTencentCloudCynosdbClusterCreate(d *schema.ResourceData, meta inter
 		request.SlaveZone = helper.String(v.(string))
 	}
 
+	if v, ok := d.GetOk("sync_way"); ok {
+		request.SyncWay = helper.String(v.(string))
+	}
+
+	if v, ok := d.GetOkExists("semi_sync_timeout"); ok {
+		request.SemiSyncTimeout = helper.IntInt64(v.(int))
+	}
+
+	if v, ok := d.GetOkExists("instance_count"); ok {
+		request.InstanceCount = helper.IntInt64(v.(int))
+	}
+
 	// set params
 	if v, ok := d.GetOk("param_items"); ok {
 		paramItems := v.([]interface{})
@@ -119,6 +130,50 @@ func resourceTencentCloudCynosdbClusterCreate(d *schema.ResourceData, meta inter
 
 	if v, ok := d.GetOk("param_template_id"); ok {
 		request.ParamTemplateId = helper.IntInt64(v.(int))
+	}
+
+	if v, ok := d.GetOk("instance_init_infos"); ok {
+		for _, item := range v.([]interface{}) {
+			value := item.(map[string]interface{})
+			tmpInitInfo := cynosdb.InstanceInitInfo{}
+			if v, ok := value["cpu"]; ok {
+				tmpInitInfo.Cpu = helper.IntInt64(v.(int))
+			}
+
+			if v, ok := value["memory"]; ok {
+				tmpInitInfo.Memory = helper.IntInt64(v.(int))
+			}
+
+			if v, ok := value["instance_type"]; ok {
+				tmpInitInfo.InstanceType = helper.String(v.(string))
+			}
+
+			if v, ok := value["instance_count"]; ok {
+				tmpInitInfo.InstanceCount = helper.IntInt64(v.(int))
+			}
+
+			if v, ok := value["min_ro_count"].(int); ok && v != 0 {
+				tmpInitInfo.MinRoCount = helper.IntInt64(v)
+			}
+
+			if v, ok := value["max_ro_count"].(int); ok && v != 0 {
+				tmpInitInfo.MaxRoCount = helper.IntInt64(v)
+			}
+
+			if v, ok := value["min_ro_cpu"].(float64); ok && v != 0 {
+				tmpInitInfo.MinRoCpu = helper.Float64(v)
+			}
+
+			if v, ok := value["max_ro_cpu"].(float64); ok && v != 0 {
+				tmpInitInfo.MaxRoCpu = helper.Float64(v)
+			}
+
+			if v, ok := value["device_type"].(string); ok && v != "" {
+				tmpInitInfo.DeviceType = helper.String(v)
+			}
+
+			request.InstanceInitInfos = append(request.InstanceInitInfos, &tmpInitInfo)
+		}
 	}
 
 	isServerless := d.Get("db_mode").(string) == CYNOSDB_SERVERLESS
@@ -157,9 +212,11 @@ func resourceTencentCloudCynosdbClusterCreate(d *schema.ResourceData, meta inter
 		}
 	}
 
-	request.PayMode = &chargeType
-	request.InstanceCount = helper.Int64(1)
+	if v, ok := d.GetOk("cynos_version"); ok && v != "" {
+		request.CynosVersion = helper.String(v.(string))
+	}
 
+	request.PayMode = &chargeType
 	var response *cynosdb.CreateClustersResponse
 	var err error
 	err = resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
@@ -295,7 +352,7 @@ func resourceTencentCloudCynosdbClusterCreate(d *schema.ResourceData, meta inter
 	for _, insGrp := range insGrps.Response.InstanceGrpInfoList {
 		if *insGrp.Type == CYNOSDB_INSGRP_HA {
 			rwGroupId = *insGrp.InstanceGrpId
-		} else if *insGrp.Type == CYNOSDB_INSGRP_RO {
+		} else if *insGrp.Type == CYNOSDB_INSGRP_RO || *insGrp.Type == CYNOSDB_INSGRP_SINGLERO {
 			roGroupIds = append(roGroupIds, *insGrp.InstanceGrpId)
 		}
 	}
@@ -381,13 +438,27 @@ func resourceTencentCloudCynosdbClusterRead(d *schema.ResourceData, meta interfa
 		_ = d.Set("slave_zone", cluster.SlaveZones[0])
 	}
 
+	if cluster.SlaveZoneAttr != nil && len(cluster.SlaveZoneAttr) > 0 {
+		if cluster.SlaveZoneAttr[0].BinlogSyncWay != nil {
+			_ = d.Set("sync_way", cluster.SlaveZoneAttr[0].BinlogSyncWay)
+		}
+
+		if cluster.SlaveZoneAttr[0].SemiSyncTimeout != nil {
+			_ = d.Set("semi_sync_timeout", cluster.SlaveZoneAttr[0].SemiSyncTimeout)
+		}
+	}
+
 	if _, ok := d.GetOk("serverless_status_flag"); ok && *item.DbMode == CYNOSDB_SERVERLESS {
 		status := *item.ServerlessStatus
 		_ = d.Set("serverless_status_flag", status)
 	}
 
-	if _, ok := d.GetOk("db_mode"); ok || *item.DbMode == CYNOSDB_SERVERLESS {
+	if _, ok := d.GetOk("db_mode"); ok || *item.DbMode == CYNOSDB_SERVERLESS || *item.DbMode == CYNOSDB_NORMAL {
 		_ = d.Set("db_mode", item.DbMode)
+	}
+
+	if item.InstanceNum != nil {
+		_ = d.Set("instance_count", item.InstanceNum)
 	}
 
 	//tag
@@ -457,7 +528,7 @@ func resourceTencentCloudCynosdbClusterRead(d *schema.ResourceData, meta interfa
 				"ip":   *insGrp.Vip,
 				"port": *insGrp.Vport,
 			})
-		} else if *insGrp.Type == CYNOSDB_INSGRP_RO {
+		} else if *insGrp.Type == CYNOSDB_INSGRP_RO || *insGrp.Type == CYNOSDB_INSGRP_SINGLERO {
 			roGroupId = *insGrp.InstanceGrpId
 			_ = d.Set("ro_group_id", roGroupId)
 			for _, roIns := range insGrp.InstanceSet {
@@ -546,6 +617,16 @@ func resourceTencentCloudCynosdbClusterRead(d *schema.ResourceData, meta interfa
 		_ = d.Set("param_items", resultParamItems)
 	}
 
+	if v, ok := d.GetOkExists("force_delete"); ok {
+		_ = d.Set("force_delete", v)
+	} else {
+		_ = d.Set("force_delete", false)
+	}
+
+	if cluster.CynosVersion != nil {
+		_ = d.Set("cynos_version", cluster.CynosVersion)
+	}
+
 	return nil
 }
 
@@ -572,6 +653,8 @@ func resourceTencentCloudCynosdbClusterUpdate(d *schema.ResourceData, meta inter
 		"storage_pay_mode",
 		"prarm_template_id",
 		"param_template_id",
+		"sync_way",
+		"semi_sync_timeout",
 	}
 
 	for _, a := range immutableArgs {
@@ -648,6 +731,18 @@ func resourceTencentCloudCynosdbClusterUpdate(d *schema.ResourceData, meta inter
 			return fmt.Errorf("`param_items` dosen't support remove for now")
 		}
 
+		currentChangeParamMap := make(map[string]*cynosdb.ParamInfo)
+		params, err := cynosdbService.DescribeClusterParams(ctx, clusterId)
+		if err != nil {
+			return err
+		}
+
+		for _, param := range params {
+			if param.ModifiableInfo != nil && param.ModifiableInfo.IsModifiable != nil && *param.ModifiableInfo.IsModifiable == 1 {
+				currentChangeParamMap[*param.ParamName] = param
+			}
+		}
+
 		request := cynosdb.NewModifyClusterParamRequest()
 		request.ClusterId = &clusterId
 		request.IsInMaintainPeriod = helper.String("no")
@@ -655,14 +750,17 @@ func resourceTencentCloudCynosdbClusterUpdate(d *schema.ResourceData, meta inter
 		for i := range newParams {
 			item := newParams[i].(map[string]interface{})
 			name := item["name"].(string)
-			oldVal, ok := item["old_value"].(string)
+			if currentChangeParamMap[name] == nil {
+				continue
+			}
+
 			currVal := item["current_value"].(string)
 			param := &cynosdb.ParamItem{
 				ParamName:    &name,
 				CurrentValue: &currVal,
 			}
 
-			if ok {
+			if oldVal, ok := item["old_value"].(string); ok {
 				param.OldValue = &oldVal
 			}
 
@@ -670,7 +768,7 @@ func resourceTencentCloudCynosdbClusterUpdate(d *schema.ResourceData, meta inter
 		}
 
 		var asyncRequestId string
-		err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+		err = resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
 			aReqId, modifyErr := cynosdbService.ModifyClusterParam(ctx, request)
 			if modifyErr != nil {
 				err := modifyErr.(*sdkErrors.TencentCloudSDKError)
@@ -689,24 +787,82 @@ func resourceTencentCloudCynosdbClusterUpdate(d *schema.ResourceData, meta inter
 			return err
 		}
 
-		mysqlService := svccdb.NewMysqlService(client)
-		_ = resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
-			taskStatus, message, err := mysqlService.DescribeAsyncRequestInfo(ctx, asyncRequestId)
-			if err != nil {
-				return resource.NonRetryableError(err)
+		// wait
+		asyncRequestIdInt := helper.StrToInt64(asyncRequestId)
+		err = resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
+			resp, e := cynosdbService.DescribeFlow(ctx, asyncRequestIdInt)
+			if e != nil {
+				return resource.NonRetryableError(e)
 			}
 
-			if taskStatus == svccdb.MYSQL_TASK_STATUS_SUCCESS {
+			if resp {
 				return nil
 			}
 
-			if taskStatus == svccdb.MYSQL_TASK_STATUS_INITIAL || taskStatus == svccdb.MYSQL_TASK_STATUS_RUNNING {
-				return resource.RetryableError(fmt.Errorf("%s modify params task  status is %s", clusterId, taskStatus))
+			return resource.RetryableError(fmt.Errorf("waiting for cynosdb cluster param updating"))
+		})
+
+		if err != nil {
+			return err
+		}
+	}
+
+	if d.HasChange("sync_way") || d.HasChange("semi_sync_timeout") {
+		request := cynosdb.NewModifyClusterSlaveZoneRequest()
+		if v, ok := d.GetOk("slave_zone"); ok {
+			request.OldSlaveZone = helper.String(v.(string))
+			request.NewSlaveZone = helper.String(v.(string))
+		}
+
+		if v, ok := d.GetOk("sync_way"); ok {
+			request.BinlogSyncWay = helper.String(v.(string))
+		}
+
+		if v, ok := d.GetOkExists("semi_sync_timeout"); ok {
+			request.SemiSyncTimeout = helper.IntInt64(v.(int))
+		}
+
+		var flowId int64
+		request.ClusterId = helper.String(clusterId)
+		err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+			response, err := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseCynosdbClient().ModifyClusterSlaveZone(request)
+			if err != nil {
+				return tccommon.RetryError(err)
 			}
 
-			err = fmt.Errorf("%s create account task status is %s,we won't wait for it finish ,it show message:%s", clusterId, taskStatus, message)
-			return resource.NonRetryableError(err)
+			if response == nil || response.Response == nil || response.Response.FlowId == nil {
+				return resource.NonRetryableError(fmt.Errorf("Modify cluster slave zone failed, response is nil."))
+			}
+
+			flowId = *response.Response.FlowId
+			return nil
 		})
+
+		if err != nil {
+			return err
+		}
+
+		service := CynosdbService{client: meta.(tccommon.ProviderMeta).GetAPIV3Conn()}
+		err = resource.Retry(6*tccommon.ReadRetryTimeout, func() *resource.RetryError {
+			ok, err := service.DescribeFlow(ctx, flowId)
+			if err != nil {
+				if _, ok := err.(*sdkErrors.TencentCloudSDKError); !ok {
+					return resource.RetryableError(err)
+				} else {
+					return resource.NonRetryableError(err)
+				}
+			}
+
+			if ok {
+				return nil
+			} else {
+				return resource.RetryableError(fmt.Errorf("update cynosdb slave_zone is processing"))
+			}
+		})
+
+		if err != nil {
+			return err
+		}
 	}
 
 	// update slave_zone
@@ -795,6 +951,26 @@ func resourceTencentCloudCynosdbClusterUpdate(d *schema.ResourceData, meta inter
 		}
 	}
 
+	// update root pwd
+	if d.HasChange("password") {
+		request := cynosdb.NewResetAccountPasswordRequest()
+		request.ClusterId = helper.String(clusterId)
+		request.AccountName = helper.String("root")
+		request.AccountPassword = helper.String(d.Get("password").(string))
+		err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+			_, err := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseCynosdbClient().ResetAccountPassword(request)
+			if err != nil {
+				return tccommon.RetryError(err)
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			return err
+		}
+	}
+
 	// update tags
 	if d.HasChange("tags") {
 		oldTags, newTags := d.GetChange("tags")
@@ -862,6 +1038,15 @@ func resourceTencentCloudCynosdbClusterUpdate(d *schema.ResourceData, meta inter
 		}
 	}
 
+	// update instance_name
+	if d.HasChange("instance_name") {
+		instanceName := d.Get("instance_name").(string)
+		err := cynosdbService.ModifyInstanceName(ctx, instanceId, instanceName)
+		if err != nil {
+			return err
+		}
+	}
+
 	// update storage_limit
 	if d.HasChange("storage_limit") {
 		oldStorageLimit, newStorageLimit := d.GetChange("storage_limit")
@@ -877,6 +1062,36 @@ func resourceTencentCloudCynosdbClusterUpdate(d *schema.ResourceData, meta inter
 		subnetId := d.Get("subnet_id").(string)
 		oldIpReserveHours := int64(d.Get("old_ip_reserve_hours").(int))
 		err := cynosdbService.SwitchClusterVpc(ctx, clusterId, vpcId, subnetId, oldIpReserveHours)
+		if err != nil {
+			return err
+		}
+	}
+
+	if d.HasChange("cynos_version") {
+		cynosVersion := d.Get("cynos_version").(string)
+		flowId, err := cynosdbService.UpgradeClusterVersion(ctx, clusterId, cynosVersion)
+		if err != nil {
+			return err
+		}
+
+		service := CynosdbService{client: meta.(tccommon.ProviderMeta).GetAPIV3Conn()}
+		err = resource.Retry(6*tccommon.ReadRetryTimeout, func() *resource.RetryError {
+			ok, err := service.DescribeFlow(ctx, flowId)
+			if err != nil {
+				if _, ok := err.(*sdkErrors.TencentCloudSDKError); !ok {
+					return resource.RetryableError(err)
+				} else {
+					return resource.NonRetryableError(err)
+				}
+			}
+
+			if ok {
+				return nil
+			} else {
+				return resource.RetryableError(fmt.Errorf("update cynosdb cynos_version is processing"))
+			}
+		})
+
 		if err != nil {
 			return err
 		}

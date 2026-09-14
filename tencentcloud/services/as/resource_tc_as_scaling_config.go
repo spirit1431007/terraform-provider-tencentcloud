@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 
+	svctag "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/services/tag"
+
 	tccommon "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/common"
 	svccvm "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/services/cvm"
 
@@ -33,9 +35,16 @@ func ResourceTencentCloudAsScalingConfig() *schema.Resource {
 				Description:  "Name of a launch configuration.",
 			},
 			"image_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "An available image ID for a cvm instance.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				AtLeastOneOf: []string{"image_id", "image_family"},
+				Description:  "An available image ID for a cvm instance.",
+			},
+			"image_family": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				AtLeastOneOf: []string{"image_id", "image_family"},
+				Description:  "Image Family Name. Either Image ID or Image Family Name must be provided, but not both.",
 			},
 			"project_id": {
 				Type:        schema.TypeInt,
@@ -47,7 +56,7 @@ func ResourceTencentCloudAsScalingConfig() *schema.Resource {
 				Type:        schema.TypeList,
 				Required:    true,
 				MinItems:    1,
-				MaxItems:    5,
+				MaxItems:    10,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: "Specified types of CVM instances.",
 			},
@@ -59,11 +68,10 @@ func ResourceTencentCloudAsScalingConfig() *schema.Resource {
 				Description:  "Type of a CVM disk. Valid values: `CLOUD_PREMIUM` and `CLOUD_SSD`. Default is `CLOUD_PREMIUM`. valid when disk_type_policy is ORIGINAL.",
 			},
 			"system_disk_size": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				Default:      50,
-				ValidateFunc: tccommon.ValidateIntegerInRange(50, 500),
-				Description:  "Volume of system disk in GB. Default is `50`.",
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     50,
+				Description: "Volume of system disk in GB. Default is `50`.",
 			},
 			"data_disk": {
 				Type:        schema.TypeList,
@@ -102,7 +110,7 @@ func ResourceTencentCloudAsScalingConfig() *schema.Resource {
 			"instance_charge_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Charge type of instance. Valid values are `PREPAID`, `POSTPAID_BY_HOUR`, `SPOTPAID`. The default is `POSTPAID_BY_HOUR`. NOTE: `SPOTPAID` instance must set `spot_instance_type` and `spot_max_price` at the same time.",
+				Description: "Charge type of instance. Valid values are `PREPAID`, `POSTPAID_BY_HOUR`, `SPOTPAID`, `CDCPAID`. The default is `POSTPAID_BY_HOUR`. NOTE: `SPOTPAID` instance must set `spot_instance_type` and `spot_max_price` at the same time.",
 			},
 			"instance_charge_type_prepaid_period": {
 				Type:         schema.TypeInt,
@@ -147,6 +155,29 @@ func ResourceTencentCloudAsScalingConfig() *schema.Resource {
 				Optional:    true,
 				Description: "Specify whether to assign an Internet IP address.",
 			},
+			"bandwidth_package_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Bandwidth package ID.",
+			},
+			"ipv4_address_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: tccommon.ValidateAllowedStringValue([]string{"WanIP", "HighQualityEIP", "AntiDDoSEIP"}),
+				Description:  "AddressType. Default value: WanIP. For beta users of dedicated IP. the value can be: HighQualityEIP: Dedicated IP. Note that dedicated IPs are only available in partial regions. For beta users of Anti-DDoS IP, the value can be: AntiDDoSEIP: Anti-DDoS EIP. Note that Anti-DDoS IPs are only available in partial regions.",
+			},
+			"anti_ddos_package_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Anti-DDoS service package ID. This is required when you want to request an AntiDDoS IP.",
+			},
+			"is_keep_eip": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Whether to delete the bound EIP when the instance is destroyed. Range of values: True: retain the EIP; False: not retain the EIP. Note that when the IPv4AddressType field specifies the EIP type, the default behavior is not to retain the EIP. WanIP is unaffected by this field and will always be deleted with the instance. Changing this field configuration will take effect immediately for resources already bound to a scaling group.",
+			},
 			"password": {
 				Type:          schema.TypeString,
 				Optional:      true,
@@ -185,6 +216,11 @@ func ResourceTencentCloudAsScalingConfig() *schema.Resource {
 				Optional:    true,
 				Default:     true,
 				Description: "To specify whether to enable cloud monitor service. Default is `TRUE`.",
+			},
+			"enhanced_automation_tools_service": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "To specify whether to enable cloud automation tools service.",
 			},
 			"user_data": {
 				Type:        schema.TypeString,
@@ -250,6 +286,27 @@ func ResourceTencentCloudAsScalingConfig() *schema.Resource {
 					},
 				},
 			},
+
+			"disaster_recover_group_ids": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				Description: "Placement group ID. Only one is allowed.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+
+			"dedicated_cluster_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Dedicated Cluster ID.",
+			},
+			"tags": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: "Tags of launch configuration.",
+			},
 			// Computed values
 			"status": {
 				Type:        schema.TypeString,
@@ -274,8 +331,13 @@ func resourceTencentCloudAsScalingConfigCreate(d *schema.ResourceData, meta inte
 	v := d.Get("configuration_name")
 	request.LaunchConfigurationName = helper.String(v.(string))
 
-	v = d.Get("image_id")
-	request.ImageId = helper.String(v.(string))
+	if v, ok := d.GetOk("image_id"); ok {
+		request.ImageId = helper.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("image_family"); ok {
+		request.ImageFamily = helper.String(v.(string))
+	}
 
 	if v, ok := d.GetOk("project_id"); ok {
 		request.ProjectId = helper.IntUint64(v.(int))
@@ -330,6 +392,18 @@ func resourceTencentCloudAsScalingConfigCreate(d *schema.ResourceData, meta inte
 		publicIpAssigned := v.(bool)
 		request.InternetAccessible.PublicIpAssigned = &publicIpAssigned
 	}
+	if v, ok := d.GetOk("bandwidth_package_id"); ok {
+		request.InternetAccessible.BandwidthPackageId = helper.String(v.(string))
+	}
+	if v, ok := d.GetOk("ipv4_address_type"); ok {
+		request.InternetAccessible.IPv4AddressType = helper.String(v.(string))
+	}
+	if v, ok := d.GetOk("anti_ddos_package_id"); ok {
+		request.InternetAccessible.AntiDDoSPackageId = helper.String(v.(string))
+	}
+	if v, ok := d.GetOkExists("is_keep_eip"); ok {
+		request.InternetAccessible.IsKeepEIP = helper.Bool(v.(bool))
+	}
 
 	request.LoginSettings = &as.LoginSettings{}
 	if v, ok := d.GetOk("password"); ok {
@@ -369,6 +443,12 @@ func resourceTencentCloudAsScalingConfigCreate(d *schema.ResourceData, meta inte
 		monitorService := v.(bool)
 		request.EnhancedService.MonitorService = &as.RunMonitorServiceEnabled{
 			Enabled: &monitorService,
+		}
+	}
+	if v, ok := d.GetOkExists("enhanced_automation_tools_service"); ok {
+		automationToolsService := v.(bool)
+		request.EnhancedService.AutomationToolsService = &as.RunAutomationServiceEnabled{
+			Enabled: &automationToolsService,
 		}
 	}
 
@@ -462,19 +542,54 @@ func resourceTencentCloudAsScalingConfigCreate(d *schema.ResourceData, meta inte
 		request.InstanceNameSettings = settings[0]
 	}
 
-	response, err := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseAsClient().CreateLaunchConfiguration(request)
+	if v, ok := d.GetOk("disaster_recover_group_ids"); ok {
+		disasterRecoverGroupIds := v.([]interface{})
+		request.DisasterRecoverGroupIds = make([]*string, 0, len(disasterRecoverGroupIds))
+		for i := range disasterRecoverGroupIds {
+			subnetId := disasterRecoverGroupIds[i].(string)
+			request.DisasterRecoverGroupIds = append(request.DisasterRecoverGroupIds, &subnetId)
+		}
+	}
+
+	if v, ok := d.GetOk("dedicated_cluster_id"); ok {
+		request.DedicatedClusterId = helper.String(v.(string))
+	}
+
+	if tags := helper.GetTags(d, "tags"); len(tags) > 0 {
+		for tagKey, tagValue := range tags {
+			tag := as.Tag{
+				ResourceType: helper.String("launch-configuration"),
+				Key:          helper.String(tagKey),
+				Value:        helper.String(tagValue),
+			}
+
+			request.Tags = append(request.Tags, &tag)
+		}
+	}
+
+	var launchConfigurationId string
+	err := resource.Retry(4*tccommon.WriteRetryTimeout, func() *resource.RetryError {
+		response, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseAsClient().CreateLaunchConfiguration(request)
+		if e != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n",
+				logId, request.GetAction(), request.ToJsonString(), e.Error())
+			return tccommon.RetryError(e)
+		} else {
+			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
+				logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
+		}
+
+		if response.Response.LaunchConfigurationId == nil {
+			return resource.NonRetryableError(fmt.Errorf("Launch configuration id is nil"))
+		}
+		launchConfigurationId = *response.Response.LaunchConfigurationId
+		return nil
+	})
 	if err != nil {
-		log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n",
-			logId, request.GetAction(), request.ToJsonString(), err.Error())
 		return err
-	} else {
-		log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
-			logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
 	}
-	if response.Response.LaunchConfigurationId == nil {
-		return fmt.Errorf("Launch configuration id is nil")
-	}
-	d.SetId(*response.Response.LaunchConfigurationId)
+
+	d.SetId(launchConfigurationId)
 
 	return resourceTencentCloudAsScalingConfigRead(d, meta)
 }
@@ -501,7 +616,14 @@ func resourceTencentCloudAsScalingConfigRead(d *schema.ResourceData, meta interf
 		}
 		_ = d.Set("configuration_name", *config.LaunchConfigurationName)
 		_ = d.Set("status", *config.LaunchConfigurationStatus)
-		_ = d.Set("image_id", *config.ImageId)
+
+		if config.ImageId != nil {
+			_ = d.Set("image_id", *config.ImageId)
+		}
+		if config.ImageFamily != nil {
+			_ = d.Set("image_family", *config.ImageFamily)
+		}
+
 		_ = d.Set("project_id", *config.ProjectId)
 		_ = d.Set("instance_types", helper.StringsInterfaces(config.InstanceTypes))
 		_ = d.Set("system_disk_size", *config.SystemDisk.DiskSize)
@@ -513,11 +635,32 @@ func resourceTencentCloudAsScalingConfigRead(d *schema.ResourceData, meta interf
 		_ = d.Set("security_group_ids", helper.StringsInterfaces(config.SecurityGroupIds))
 		_ = d.Set("enhanced_security_service", *config.EnhancedService.SecurityService.Enabled)
 		_ = d.Set("enhanced_monitor_service", *config.EnhancedService.MonitorService.Enabled)
+		if config.EnhancedService.AutomationToolsService.Enabled != nil {
+			_ = d.Set("enhanced_automation_tools_service", *config.EnhancedService.AutomationToolsService.Enabled)
+		}
 		_ = d.Set("user_data", helper.PString(config.UserData))
 		_ = d.Set("instance_tags", flattenInstanceTagsMapping(config.InstanceTags))
 		_ = d.Set("disk_type_policy", *config.DiskTypePolicy)
 
 		_ = d.Set("cam_role_name", *config.CamRoleName)
+
+		if config.InternetAccessible != nil {
+			if config.InternetAccessible.BandwidthPackageId != nil {
+				_ = d.Set("bandwidth_package_id", config.InternetAccessible.BandwidthPackageId)
+			}
+
+			if config.InternetAccessible.IPv4AddressType != nil {
+				_ = d.Set("ipv4_address_type", config.InternetAccessible.IPv4AddressType)
+			}
+
+			if config.InternetAccessible.AntiDDoSPackageId != nil {
+				_ = d.Set("anti_ddos_package_id", config.InternetAccessible.AntiDDoSPackageId)
+			}
+
+			if config.InternetAccessible.IsKeepEIP != nil {
+				_ = d.Set("is_keep_eip", config.InternetAccessible.IsKeepEIP)
+			}
+		}
 
 		if config.HostNameSettings != nil {
 			isEmptySettings := true
@@ -565,6 +708,21 @@ func resourceTencentCloudAsScalingConfigRead(d *schema.ResourceData, meta interf
 		if config.InstanceChargePrepaid != nil {
 			_ = d.Set("instance_charge_type_prepaid_renew_flag", config.InstanceChargePrepaid.RenewFlag)
 		}
+
+		if len(config.DisasterRecoverGroupIds) > 0 {
+			_ = d.Set("disaster_recover_group_ids", helper.StringsInterfaces(config.DisasterRecoverGroupIds))
+		} else {
+			_ = d.Set("disaster_recover_group_ids", []string{})
+		}
+
+		if config.DedicatedClusterId != nil {
+			_ = d.Set("dedicated_cluster_id", config.DedicatedClusterId)
+		}
+
+		if config.Tags != nil && len(config.Tags) > 0 {
+			_ = d.Set("tags", flattenTagsMapping(config.Tags))
+		}
+
 		return nil
 	})
 	if err != nil {
@@ -577,225 +735,316 @@ func resourceTencentCloudAsScalingConfigUpdate(d *schema.ResourceData, meta inte
 	defer tccommon.LogElapsed("resource.tencentcloud_as_scaling_config.update")()
 
 	logId := tccommon.GetLogId(tccommon.ContextNil)
-	request := as.NewUpgradeLaunchConfigurationRequest()
+	request := as.NewModifyLaunchConfigurationAttributesRequest()
 
 	configurationId := d.Id()
 	request.LaunchConfigurationId = &configurationId
 
-	v := d.Get("configuration_name")
-	request.LaunchConfigurationName = helper.String(v.(string))
-
-	v = d.Get("image_id")
-	request.ImageId = helper.String(v.(string))
-
-	if v, ok := d.GetOk("project_id"); ok {
-		projectId := int64(v.(int))
-		request.ProjectId = &projectId
+	if d.HasChange("configuration_name") {
+		if v, ok := d.GetOk("configuration_name"); ok {
+			request.LaunchConfigurationName = helper.String(v.(string))
+		}
 	}
 
-	v = d.Get("instance_types")
-	instanceTypes := v.([]interface{})
-	request.InstanceTypes = make([]*string, 0, len(instanceTypes))
-	for i := range instanceTypes {
-		instanceType := instanceTypes[i].(string)
-		request.InstanceTypes = append(request.InstanceTypes, &instanceType)
+	if d.HasChange("image_id") {
+		if v, ok := d.GetOk("image_id"); ok {
+			request.ImageId = helper.String(v.(string))
+		}
 	}
 
-	request.SystemDisk = &as.SystemDisk{}
-	if v, ok := d.GetOk("system_disk_type"); ok {
-		request.SystemDisk.DiskType = helper.String(v.(string))
+	if d.HasChange("project_id") {
+		return fmt.Errorf("`project_id` do not support change now.")
 	}
 
-	if v, ok := d.GetOk("system_disk_size"); ok {
-		request.SystemDisk.DiskSize = helper.IntUint64(v.(int))
-	}
-
-	if v, ok := d.GetOk("data_disk"); ok {
-		dataDisks := v.([]interface{})
-		request.DataDisks = make([]*as.DataDisk, 0, len(dataDisks))
-		for _, d := range dataDisks {
-			value := d.(map[string]interface{})
-			diskType := value["disk_type"].(string)
-			diskSize := uint64(value["disk_size"].(int))
-			snapshotId := value["snapshot_id"].(string)
-			deleteWithInstance := value["delete_with_instance"].(bool)
-			dataDisk := as.DataDisk{
-				DiskType:           &diskType,
-				DiskSize:           &diskSize,
-				DeleteWithInstance: &deleteWithInstance,
+	if d.HasChange("instance_types") {
+		if v, ok := d.GetOk("instance_types"); ok {
+			instanceTypes := v.([]interface{})
+			request.InstanceTypes = make([]*string, 0, len(instanceTypes))
+			for i := range instanceTypes {
+				instanceType := instanceTypes[i].(string)
+				request.InstanceTypes = append(request.InstanceTypes, &instanceType)
 			}
-			if snapshotId != "" {
-				dataDisk.SnapshotId = &snapshotId
+		}
+	}
+
+	if d.HasChange("system_disk_type") || d.HasChange("system_disk_size") {
+		request.SystemDisk = &as.SystemDisk{}
+		if v, ok := d.GetOk("system_disk_type"); ok {
+			request.SystemDisk.DiskType = helper.String(v.(string))
+		}
+
+		if v, ok := d.GetOk("system_disk_size"); ok {
+			request.SystemDisk.DiskSize = helper.IntUint64(v.(int))
+		}
+	}
+
+	if d.HasChange("data_disk") {
+		if v, ok := d.GetOk("data_disk"); ok {
+			dataDisks := v.([]interface{})
+			request.DataDisks = make([]*as.DataDisk, 0, len(dataDisks))
+			for _, d := range dataDisks {
+				value := d.(map[string]interface{})
+				diskType := value["disk_type"].(string)
+				diskSize := uint64(value["disk_size"].(int))
+				snapshotId := value["snapshot_id"].(string)
+				deleteWithInstance := value["delete_with_instance"].(bool)
+				dataDisk := as.DataDisk{
+					DiskType:           &diskType,
+					DiskSize:           &diskSize,
+					DeleteWithInstance: &deleteWithInstance,
+				}
+				if snapshotId != "" {
+					dataDisk.SnapshotId = &snapshotId
+				}
+				request.DataDisks = append(request.DataDisks, &dataDisk)
 			}
-			request.DataDisks = append(request.DataDisks, &dataDisk)
 		}
 	}
 
-	request.InternetAccessible = &as.InternetAccessible{}
-	if v, ok := d.GetOk("internet_charge_type"); ok {
-		request.InternetAccessible.InternetChargeType = helper.String(v.(string))
-	}
-	if v, ok := d.GetOk("internet_max_bandwidth_out"); ok {
-		request.InternetAccessible.InternetMaxBandwidthOut = helper.IntUint64(v.(int))
-	}
-	if v, ok := d.GetOkExists("public_ip_assigned"); ok {
-		publicIpAssigned := v.(bool)
-		request.InternetAccessible.PublicIpAssigned = &publicIpAssigned
-	}
-
-	if v, ok := d.GetOk("security_group_ids"); ok {
-		securityGroups := v.([]interface{})
-		request.SecurityGroupIds = make([]*string, 0, len(securityGroups))
-		for i := range securityGroups {
-			securityGroup := securityGroups[i].(string)
-			request.SecurityGroupIds = append(request.SecurityGroupIds, &securityGroup)
+	if d.HasChange("internet_charge_type") || d.HasChange("internet_max_bandwidth_out") || d.HasChange("public_ip_assigned") ||
+		d.HasChange("bandwidth_package_id") || d.HasChange("ipv4_address_type") || d.HasChange("anti_ddos_package_id") || d.HasChange("is_keep_eip") {
+		request.InternetAccessible = &as.InternetAccessible{}
+		if v, ok := d.GetOk("internet_charge_type"); ok {
+			request.InternetAccessible.InternetChargeType = helper.String(v.(string))
+		}
+		if v, ok := d.GetOk("internet_max_bandwidth_out"); ok {
+			request.InternetAccessible.InternetMaxBandwidthOut = helper.IntUint64(v.(int))
+		}
+		if v, ok := d.GetOkExists("public_ip_assigned"); ok {
+			publicIpAssigned := v.(bool)
+			request.InternetAccessible.PublicIpAssigned = &publicIpAssigned
+		}
+		if v, ok := d.GetOk("bandwidth_package_id"); ok {
+			request.InternetAccessible.BandwidthPackageId = helper.String(v.(string))
+		}
+		if v, ok := d.GetOk("ipv4_address_type"); ok {
+			request.InternetAccessible.IPv4AddressType = helper.String(v.(string))
+		}
+		if v, ok := d.GetOk("anti_ddos_package_id"); ok {
+			request.InternetAccessible.AntiDDoSPackageId = helper.String(v.(string))
+		}
+		if v, ok := d.GetOkExists("is_keep_eip"); ok {
+			request.InternetAccessible.IsKeepEIP = helper.Bool(v.(bool))
 		}
 	}
 
-	request.EnhancedService = &as.EnhancedService{}
-
-	if v, ok := d.GetOkExists("enhanced_security_service"); ok {
-		securityService := v.(bool)
-		request.EnhancedService.SecurityService = &as.RunSecurityServiceEnabled{
-			Enabled: &securityService,
-		}
-	}
-	if v, ok := d.GetOkExists("enhanced_monitor_service"); ok {
-		monitorService := v.(bool)
-		request.EnhancedService.MonitorService = &as.RunMonitorServiceEnabled{
-			Enabled: &monitorService,
-		}
-	}
-
-	if v, ok := d.GetOk("user_data"); ok {
-		request.UserData = helper.String(v.(string))
-	}
-
-	chargeType, ok := d.Get("instance_charge_type").(string)
-	if !ok || chargeType == "" {
-		chargeType = INSTANCE_CHARGE_TYPE_POSTPAID
-	}
-
-	if chargeType == INSTANCE_CHARGE_TYPE_SPOTPAID {
-		spotMaxPrice := d.Get("spot_max_price").(string)
-		spotInstanceType := d.Get("spot_instance_type").(string)
-		request.InstanceMarketOptions = &as.InstanceMarketOptionsRequest{
-			MarketType: helper.String("spot"),
-			SpotOptions: &as.SpotMarketOptions{
-				MaxPrice:         &spotMaxPrice,
-				SpotInstanceType: &spotInstanceType,
-			},
-		}
-	}
-
-	if chargeType == INSTANCE_CHARGE_TYPE_PREPAID {
-		period := d.Get("instance_charge_type_prepaid_period").(int)
-		renewFlag := d.Get("instance_charge_type_prepaid_renew_flag").(string)
-		request.InstanceChargePrepaid = &as.InstanceChargePrepaid{
-			Period:    helper.IntInt64(period),
-			RenewFlag: &renewFlag,
-		}
-	}
-
-	request.InstanceChargeType = &chargeType
-
-	if v, ok := d.GetOk("instance_types_check_policy"); ok {
-		request.InstanceTypesCheckPolicy = helper.String(v.(string))
-	}
-
-	if v, ok := d.GetOk("instance_tags"); ok {
-		tags := v.(map[string]interface{})
-		request.InstanceTags = make([]*as.InstanceTag, 0, len(tags))
-		for k, t := range tags {
-			key := k
-			value := t.(string)
-			tag := as.InstanceTag{
-				Key:   &key,
-				Value: &value,
+	if d.HasChange("security_group_ids") {
+		if v, ok := d.GetOk("security_group_ids"); ok {
+			securityGroups := v.([]interface{})
+			request.SecurityGroupIds = make([]*string, 0, len(securityGroups))
+			for i := range securityGroups {
+				securityGroup := securityGroups[i].(string)
+				request.SecurityGroupIds = append(request.SecurityGroupIds, &securityGroup)
 			}
-			request.InstanceTags = append(request.InstanceTags, &tag)
 		}
 	}
 
-	if v, ok := d.GetOk("disk_type_policy"); ok {
-		request.DiskTypePolicy = helper.String(v.(string))
-	}
+	if d.HasChange("enhanced_security_service") || d.HasChange("enhanced_monitor_service") || d.HasChange("enhanced_automation_tools_service") {
+		request.EnhancedService = &as.EnhancedService{}
 
-	if v, ok := d.GetOk("cam_role_name"); ok {
-		request.CamRoleName = helper.String(v.(string))
-	}
-
-	if v, ok := d.GetOk("host_name_settings"); ok {
-		settings := make([]*as.HostNameSettings, 0, 10)
-		for _, item := range v.([]interface{}) {
-			dMap := item.(map[string]interface{})
-			settingsInfo := as.HostNameSettings{}
-			if hostName, ok := dMap["host_name"]; ok {
-				settingsInfo.HostName = helper.String(hostName.(string))
+		if v, ok := d.GetOkExists("enhanced_security_service"); ok {
+			securityService := v.(bool)
+			request.EnhancedService.SecurityService = &as.RunSecurityServiceEnabled{
+				Enabled: &securityService,
 			}
-			if hostNameStyle, ok := dMap["host_name_style"]; ok {
-				settingsInfo.HostNameStyle = helper.String(hostNameStyle.(string))
-			}
-			settings = append(settings, &settingsInfo)
 		}
-		request.HostNameSettings = settings[0]
-	}
-
-	if v, ok := d.GetOk("instance_name_settings"); ok {
-		settings := make([]*as.InstanceNameSettings, 0, 10)
-		for _, item := range v.([]interface{}) {
-			dMap := item.(map[string]interface{})
-			settingsInfo := as.InstanceNameSettings{}
-			if instanceName, ok := dMap["instance_name"]; ok {
-				settingsInfo.InstanceName = helper.String(instanceName.(string))
+		if v, ok := d.GetOkExists("enhanced_monitor_service"); ok {
+			monitorService := v.(bool)
+			request.EnhancedService.MonitorService = &as.RunMonitorServiceEnabled{
+				Enabled: &monitorService,
 			}
-			if instanceNameStyle, ok := dMap["instance_name_style"]; ok {
-				settingsInfo.InstanceNameStyle = helper.String(instanceNameStyle.(string))
-			}
-			settings = append(settings, &settingsInfo)
 		}
-		request.InstanceNameSettings = settings[0]
+		if v, ok := d.GetOkExists("enhanced_automation_tools_service"); ok {
+			automationToolsService := v.(bool)
+			request.EnhancedService.AutomationToolsService = &as.RunAutomationServiceEnabled{
+				Enabled: &automationToolsService,
+			}
+		}
 	}
 
-	response, err := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseAsClient().UpgradeLaunchConfiguration(request)
+	if d.HasChange("user_data") {
+		if v, ok := d.GetOk("user_data"); ok {
+			request.UserData = helper.String(v.(string))
+		}
+	}
+
+	if d.HasChange("instance_charge_type") {
+		chargeType, ok := d.Get("instance_charge_type").(string)
+		if !ok || chargeType == "" {
+			chargeType = INSTANCE_CHARGE_TYPE_POSTPAID
+		}
+
+		if chargeType == INSTANCE_CHARGE_TYPE_SPOTPAID {
+			spotMaxPrice := d.Get("spot_max_price").(string)
+			spotInstanceType := d.Get("spot_instance_type").(string)
+			request.InstanceMarketOptions = &as.InstanceMarketOptionsRequest{
+				MarketType: helper.String("spot"),
+				SpotOptions: &as.SpotMarketOptions{
+					MaxPrice:         &spotMaxPrice,
+					SpotInstanceType: &spotInstanceType,
+				},
+			}
+		}
+
+		if chargeType == INSTANCE_CHARGE_TYPE_PREPAID {
+			period := d.Get("instance_charge_type_prepaid_period").(int)
+			renewFlag := d.Get("instance_charge_type_prepaid_renew_flag").(string)
+			request.InstanceChargePrepaid = &as.InstanceChargePrepaid{
+				Period:    helper.IntInt64(period),
+				RenewFlag: &renewFlag,
+			}
+		}
+
+		request.InstanceChargeType = &chargeType
+	}
+
+	if d.HasChange("instance_types_check_policy") {
+		if v, ok := d.GetOk("instance_types_check_policy"); ok {
+			request.InstanceTypesCheckPolicy = helper.String(v.(string))
+		}
+	}
+
+	if d.HasChange("instance_tags") {
+		if v, ok := d.GetOk("instance_tags"); ok {
+			tags := v.(map[string]interface{})
+			request.InstanceTags = make([]*as.InstanceTag, 0, len(tags))
+			for k, t := range tags {
+				key := k
+				value := t.(string)
+				tag := as.InstanceTag{
+					Key:   &key,
+					Value: &value,
+				}
+				request.InstanceTags = append(request.InstanceTags, &tag)
+			}
+		}
+	}
+
+	if d.HasChange("disk_type_policy") {
+		if v, ok := d.GetOk("disk_type_policy"); ok {
+			request.DiskTypePolicy = helper.String(v.(string))
+		}
+	}
+
+	if d.HasChange("cam_role_name") {
+		if v, ok := d.GetOk("cam_role_name"); ok {
+			request.CamRoleName = helper.String(v.(string))
+		}
+	}
+
+	if d.HasChange("host_name_settings") {
+		if v, ok := d.GetOk("host_name_settings"); ok {
+			settings := make([]*as.HostNameSettings, 0, 10)
+			for _, item := range v.([]interface{}) {
+				dMap := item.(map[string]interface{})
+				settingsInfo := as.HostNameSettings{}
+				if hostName, ok := dMap["host_name"]; ok {
+					settingsInfo.HostName = helper.String(hostName.(string))
+				}
+				if hostNameStyle, ok := dMap["host_name_style"]; ok {
+					settingsInfo.HostNameStyle = helper.String(hostNameStyle.(string))
+				}
+				settings = append(settings, &settingsInfo)
+			}
+			request.HostNameSettings = settings[0]
+		}
+	}
+
+	if d.HasChange("instance_name_settings") {
+		if v, ok := d.GetOk("instance_name_settings"); ok {
+			settings := make([]*as.InstanceNameSettings, 0, 10)
+			for _, item := range v.([]interface{}) {
+				dMap := item.(map[string]interface{})
+				settingsInfo := as.InstanceNameSettings{}
+				if instanceName, ok := dMap["instance_name"]; ok {
+					settingsInfo.InstanceName = helper.String(instanceName.(string))
+				}
+				if instanceNameStyle, ok := dMap["instance_name_style"]; ok {
+					settingsInfo.InstanceNameStyle = helper.String(instanceNameStyle.(string))
+				}
+				settings = append(settings, &settingsInfo)
+			}
+			request.InstanceNameSettings = settings[0]
+		}
+	}
+
+	if d.HasChange("image_family") {
+		if v, ok := d.GetOk("image_family"); ok {
+			request.ImageFamily = helper.String(v.(string))
+		}
+	}
+
+	if d.HasChange("password") || d.HasChange("key_ids") || d.HasChange("keep_image_login") {
+		request.LoginSettings = &as.LoginSettings{}
+		if v, ok := d.GetOk("password"); ok {
+			request.LoginSettings.Password = helper.String(v.(string))
+		}
+		if v, ok := d.GetOk("key_ids"); ok {
+			keyIds := v.([]interface{})
+			request.LoginSettings.KeyIds = make([]*string, 0, len(keyIds))
+			for i := range keyIds {
+				keyId := keyIds[i].(string)
+				request.LoginSettings.KeyIds = append(request.LoginSettings.KeyIds, &keyId)
+			}
+		}
+		if v, ok := d.GetOk("keep_image_login"); ok {
+			keepImageLogin := v.(bool)
+			request.LoginSettings.KeepImageLogin = &keepImageLogin
+		}
+	}
+
+	if d.HasChange("disaster_recover_group_ids") {
+		if v, ok := d.GetOk("disaster_recover_group_ids"); ok {
+			disasterRecoverGroupIds := v.([]interface{})
+			request.DisasterRecoverGroupIds = make([]*string, 0, len(disasterRecoverGroupIds))
+			for i := range disasterRecoverGroupIds {
+				subnetId := disasterRecoverGroupIds[i].(string)
+				request.DisasterRecoverGroupIds = append(request.DisasterRecoverGroupIds, &subnetId)
+			}
+		}
+	}
+
+	if d.HasChange("dedicated_cluster_id") {
+		if v, ok := d.GetOk("dedicated_cluster_id"); ok {
+			request.DedicatedClusterId = helper.String(v.(string))
+		}
+	}
+
+	if d.HasChange("tags") {
+		ctx := context.WithValue(context.TODO(), tccommon.LogIdKey, logId)
+
+		client := meta.(tccommon.ProviderMeta).GetAPIV3Conn()
+		tagService := svctag.NewTagService(client)
+		region := client.Region
+
+		oldValue, newValue := d.GetChange("tags")
+		replaceTags, deleteTags := svctag.DiffTags(oldValue.(map[string]interface{}), newValue.(map[string]interface{}))
+
+		resourceName := tccommon.BuildTagResourceName("as", "launch-configuration", region, d.Id())
+		err := tagService.ModifyTags(ctx, resourceName, replaceTags, deleteTags)
+		if err != nil {
+			return err
+		}
+	}
+
+	err := resource.Retry(4*tccommon.WriteRetryTimeout, func() *resource.RetryError {
+		response, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseAsClient().ModifyLaunchConfigurationAttributes(request)
+		if e != nil {
+			log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n",
+				logId, request.GetAction(), request.ToJsonString(), e.Error())
+			return tccommon.RetryError(e)
+		} else {
+			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
+				logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
+		}
+
+		return nil
+	})
 	if err != nil {
-		log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n",
-			logId, request.GetAction(), request.ToJsonString(), err.Error())
 		return err
-	} else {
-		log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
-			logId, request.GetAction(), request.ToJsonString(), response.ToJsonString())
 	}
 
-	loginSettingRequest := as.NewModifyLaunchConfigurationAttributesRequest()
-	loginSettingRequest.LaunchConfigurationId = &configurationId
-	loginSettingRequest.LoginSettings = &as.LoginSettings{}
-	if v, ok := d.GetOk("password"); ok {
-		loginSettingRequest.LoginSettings.Password = helper.String(v.(string))
-	}
-	if v, ok := d.GetOk("key_ids"); ok {
-		keyIds := v.([]interface{})
-		loginSettingRequest.LoginSettings.KeyIds = make([]*string, 0, len(keyIds))
-		for i := range keyIds {
-			keyId := keyIds[i].(string)
-			loginSettingRequest.LoginSettings.KeyIds = append(loginSettingRequest.LoginSettings.KeyIds, &keyId)
-		}
-	}
-	if v, ok := d.GetOk("keep_image_login"); ok {
-		keepImageLogin := v.(bool)
-		loginSettingRequest.LoginSettings.KeepImageLogin = &keepImageLogin
-	}
-	loginSettingResponse, err := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseAsClient().ModifyLaunchConfigurationAttributes(loginSettingRequest)
-	if err != nil {
-		log.Printf("[CRITAL]%s api[%s] fail, request body [%s], reason[%s]\n",
-			logId, loginSettingRequest.GetAction(), loginSettingRequest.ToJsonString(), err.Error())
-		return err
-	} else {
-		log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
-			logId, loginSettingRequest.GetAction(), loginSettingRequest.ToJsonString(), loginSettingResponse.ToJsonString())
-	}
-
-	return nil
+	return resourceTencentCloudAsScalingConfigRead(d, meta)
 }
 
 func resourceTencentCloudAsScalingConfigDelete(d *schema.ResourceData, meta interface{}) error {

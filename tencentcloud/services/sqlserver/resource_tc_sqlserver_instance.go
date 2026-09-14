@@ -87,6 +87,12 @@ func TencentSqlServerBasicInfo(isROInstance bool) map[string]*schema.Schema {
 			},
 			Description: "Security group bound to the instance.",
 		},
+		"time_zone": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Optional:    true,
+			Description: "System time zone, default: `China Standard Time`.",
+		},
 		//Computed values
 		"ro_flag": {
 			Type:        schema.TypeString,
@@ -124,6 +130,16 @@ func TencentSqlServerBasicInfo(isROInstance bool) map[string]*schema.Schema {
 			Deprecated:  "It has been deprecated from version 1.81.2.",
 			Description: "The way to execute the allocation. Supported values include: 0 - execute immediately, 1 - execute in maintenance window.",
 		},
+		"dns_pod_domain": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "Internet address domain name.",
+		},
+		"tgw_wan_vport": {
+			Type:        schema.TypeInt,
+			Computed:    true,
+			Description: "External port number.",
+		},
 	}
 
 	if !isROInstance {
@@ -143,7 +159,7 @@ func ResourceTencentCloudSqlserverInstance() *schema.Resource {
 			Type:        schema.TypeBool,
 			ForceNew:    true,
 			Optional:    true,
-			Default:     false,
+			Computed:    true,
 			Description: "Indicate whether to deploy across availability zones.",
 		},
 		//RO computed values
@@ -160,6 +176,7 @@ func ResourceTencentCloudSqlserverInstance() *schema.Resource {
 			Optional:    true,
 			Default:     "DUAL",
 			Description: "Instance type. `DUAL` (dual-server high availability), `CLUSTER` (cluster). Default is `DUAL`.",
+			Deprecated:  "It has been deprecated from version 1.81.136.",
 		},
 		"maintenance_week_set": {
 			Type:        schema.TypeSet,
@@ -228,10 +245,13 @@ func resourceTencentCloudSqlserverInstanceCreate(d *schema.ResourceData, meta in
 		weekSet        = make([]int, 0)
 		startTime      = d.Get("maintenance_start_time").(string)
 		timeSpan       = d.Get("maintenance_time_span").(int)
-		multiZones     = d.Get("multi_zones").(bool)
-		haType         = d.Get("ha_type").(string)
 		securityGroups = make([]string, 0)
 	)
+
+	var multiZones bool
+	if v, ok := d.GetOkExists("multi_zones"); ok {
+		multiZones = v.(bool)
+	}
 
 	if v, ok := d.GetOk("maintenance_week_set"); ok {
 		mWeekSet := v.(*schema.Set).List()
@@ -256,7 +276,6 @@ func resourceTencentCloudSqlserverInstanceCreate(d *schema.ResourceData, meta in
 	request.Storage = helper.IntInt64(storage)
 	request.SubnetId = &subnetId
 	request.VpcId = &vpcId
-	request.HAType = &haType
 	request.MultiZones = &multiZones
 
 	if payType == svcpostgresql.COMMON_PAYTYPE_POSTPAID {
@@ -302,6 +321,10 @@ func resourceTencentCloudSqlserverInstanceCreate(d *schema.ResourceData, meta in
 	request.SecurityGroupList = make([]*string, 0, len(securityGroups))
 	for _, v := range securityGroups {
 		request.SecurityGroupList = append(request.SecurityGroupList, &v)
+	}
+
+	if v, ok := d.GetOk("time_zone"); ok {
+		request.TimeZone = helper.String(v.(string))
 	}
 
 	request.GoodsNum = helper.IntInt64(1)
@@ -498,6 +521,13 @@ func resourceTencentCloudSqlserverInstanceUpdate(d *schema.ResourceData, meta in
 	ctx := context.WithValue(context.TODO(), tccommon.LogIdKey, logId)
 	d.Partial(true)
 
+	immutableArgs := []string{"time_zone"}
+	for _, v := range immutableArgs {
+		if d.HasChange(v) {
+			return fmt.Errorf("argument `%s` cannot be changed", v)
+		}
+	}
+
 	//basic info update
 	if err := sqlServerAllInstanceRoleUpdate(ctx, d, meta); err != nil {
 		return err
@@ -613,6 +643,14 @@ func tencentSqlServerBasicInfoRead(ctx context.Context, d *schema.ResourceData, 
 		_ = d.Set("charge_type", svcpostgresql.COMMON_PAYTYPE_POSTPAID)
 	}
 
+	if instance.DnsPodDomain != nil {
+		_ = d.Set("dns_pod_domain", instance.DnsPodDomain)
+	}
+
+	if instance.TgwWanVPort != nil {
+		_ = d.Set("tgw_wan_vport", instance.TgwWanVPort)
+	}
+
 	var securityGroup []string
 	outErr = resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
 		securityGroup, inErr = sqlserverService.DescribeInstanceSecurityGroups(ctx, instanceId)
@@ -634,6 +672,10 @@ func tencentSqlServerBasicInfoRead(ctx context.Context, d *schema.ResourceData, 
 	_ = d.Set("vip", instance.Vip)
 	_ = d.Set("vport", instance.Vport)
 	_ = d.Set("security_groups", securityGroup)
+
+	if instance.TimeZone != nil {
+		_ = d.Set("time_zone", instance.TimeZone)
+	}
 	return
 }
 
@@ -657,7 +699,7 @@ func resourceTencentCloudSqlserverInstanceRead(d *schema.ResourceData, meta inte
 	}
 	_ = d.Set("project_id", instance.ProjectId)
 	_ = d.Set("engine_version", instance.Version)
-	_ = d.Set("ha_type", SQLSERVER_HA_TYPE_FLAGS[*instance.HAFlag])
+	_ = d.Set("multi_zones", instance.IsDrZone)
 
 	//maintanence
 	weekSet, startTime, timeSpan, outErr := sqlserverService.DescribeMaintenanceSpan(ctx, instanceId)
@@ -730,6 +772,42 @@ func resourceTencentCLoudSqlserverInstanceDelete(d *schema.ResourceData, meta in
 	}
 
 	if outErr != nil {
+		return outErr
+	}
+
+	// Wait for instance to be isolated (status = 4)
+	outErr = resource.Retry(tccommon.ReadRetryTimeout*10, func() *resource.RetryError {
+		// Query instance status using DescribeDBInstances API
+		instance, inErr := sqlserverService.DescribeSqlserverRestartDBInstanceById(ctx, instanceId)
+		if inErr != nil {
+			return tccommon.RetryError(inErr)
+		}
+
+		// Check if instance exists
+		if instance == nil {
+			return resource.NonRetryableError(fmt.Errorf("instance %s not found", instanceId))
+		}
+
+		// Check instance status
+		if instance.Status != nil {
+			status := *instance.Status
+			log.Printf("[DEBUG]%s instance %s current status: %d", logId, instanceId, status)
+
+			if status == 4 {
+				// Instance is isolated, ready to delete
+				log.Printf("[INFO]%s instance %s is isolated (status=4), ready to delete", logId, instanceId)
+				return nil
+			}
+
+			// Continue waiting for other statuses
+			return resource.RetryableError(fmt.Errorf("waiting for instance %s to be isolated, current status: %d", instanceId, status))
+		}
+
+		return resource.RetryableError(fmt.Errorf("instance %s status is nil", instanceId))
+	})
+
+	if outErr != nil {
+		log.Printf("[CRITAL]%s wait for instance %s isolation failed, reason: %+v", logId, instanceId, outErr)
 		return outErr
 	}
 

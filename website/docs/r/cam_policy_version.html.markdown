@@ -4,20 +4,21 @@ layout: "tencentcloud"
 page_title: "TencentCloud: tencentcloud_cam_policy_version"
 sidebar_current: "docs-tencentcloud-resource-cam_policy_version"
 description: |-
-  Provides a resource to create a cam policy_version
+  Provides a resource to create a CAM policy version
 ---
 
 # tencentcloud_cam_policy_version
 
-Provides a resource to create a cam policy_version
+Provides a resource to create a CAM policy version
 
 ## Example Usage
 
 ```hcl
-resource "tencentcloud_cam_policy_version" "policy_version" {
-  policy_id = 171173780
+resource "tencentcloud_cam_policy_version" "example" {
+  policy_id      = 171173780
+  set_as_default = "false"
   policy_document = jsonencode({
-    "version" : "2.0",
+    "version" : "3.0",
     "statement" : [
       {
         "effect" : "allow",
@@ -57,7 +58,6 @@ resource "tencentcloud_cam_policy_version" "policy_version" {
       }
     ]
   })
-  set_as_default = "false"
 }
 ```
 
@@ -79,13 +79,19 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - ID of the resource.
 
+The `policy_version` object exports the following:
+
+* `create_date` - Strategic version creation timeNote: This field may return NULL, indicating that the valid value cannot be obtained.
+* `document` - Strategic grammar textNote: This field may return NULL, indicating that the valid value cannot be obtained.
+* `is_default_version` - Whether it is an effective version.0 means not, 1 means yesNote: This field may return NULL, indicating that the valid value cannot be obtained.
+* `version_id` - Strategic version numberNote: This field may return NULL, indicating that the valid value cannot be obtained.
 
 
 ## Import
 
-cam policy_version can be imported using the id, e.g.
+CAM policy version can be imported using the id, e.g.
 
 ```
-terraform import tencentcloud_cam_policy_version.policy_version policy_version_id
+terraform import tencentcloud_cam_policy_version.example 234290251#3
 ```
 

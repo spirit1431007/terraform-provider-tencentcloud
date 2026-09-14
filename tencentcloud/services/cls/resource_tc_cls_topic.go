@@ -4,15 +4,32 @@ import (
 	"context"
 	"fmt"
 	"log"
-
-	tccommon "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/common"
+	"strconv"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	cls "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/cls/v20201016"
+	tccommon "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/common"
+	svctag "github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/services/tag"
 
 	"github.com/tencentcloudstack/terraform-provider-tencentcloud/tencentcloud/internal/helper"
 )
+
+func parseClsTopicId(id string) (topicId string, bizType int, err error) {
+	if strings.Contains(id, tccommon.FILED_SP) {
+		parts := strings.Split(id, tccommon.FILED_SP)
+		if len(parts) != 2 {
+			return "", 0, fmt.Errorf("invalid CLS topic ID format: %s", id)
+		}
+		bizType, err = strconv.Atoi(parts[1])
+		if err != nil {
+			return "", 0, fmt.Errorf("invalid CLS topic biz_type: %s", parts[1])
+		}
+		return parts[0], bizType, nil
+	}
+	return id, 0, nil
+}
 
 func ResourceTencentCloudClsTopic() *schema.Resource {
 	return &schema.Resource{
@@ -27,72 +44,79 @@ func ResourceTencentCloudClsTopic() *schema.Resource {
 			"logset_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Logset ID.",
+				Description: "Logset ID. Get the logset ID via `DescribeLogsets` API.",
 			},
 			"topic_name": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Log topic name.",
+				Type:     schema.TypeString,
+				Required: true,
+				Description: "Log topic name. Constraints: cannot be an empty string, cannot contain the `|` character, " +
+					"and cannot use the following reserved names: `cls_service_log`, `loglistener_status`, " +
+					"`loglistener_alarm`, `loglistener_business`, `cls_service_metric`.",
 			},
 			"partition_count": {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Computed:    true,
-				Description: "Number of log topic partitions. Default value: 1. Maximum value: 10.",
+				Description: "Number of log topic partitions. Default: 1, maximum: 10.",
 			},
 			"tags": {
 				Type:        schema.TypeMap,
 				Optional:    true,
-				Description: "Tag description list. Up to 10 tag key-value pairs are supported and must be unique.",
+				Description: "Tag description list. Up to 10 tag key-value pairs are supported, and the same resource can only be bound to the same tag key.",
 			},
 			"auto_split": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Computed:    true,
-				Description: "Whether to enable automatic split. Default value: true.",
+				Description: "Whether to enable automatic split. Default value: `true`.",
 			},
 			"max_split_partitions": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Computed: true,
-				Description: "Maximum number of partitions to split into for this topic if" +
-					" automatic split is enabled. Default value: 50.",
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Computed:    true,
+				Description: "Maximum number of partitions allowed for the topic if automatic split is enabled. Default value: `50`.",
 			},
 			"storage_type": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				Description: "Log topic storage class. Valid values: hot: real-time storage; cold: offline storage. Default value: hot. If cold is passed in, " +
-					"please contact the customer service to add the log topic to the allowlist first.",
+				Description: "Log topic storage type. Valid values: `hot`: standard storage; `cold`: infrequent storage. " +
+					"Default value: `hot`. Not supported for metric topics.",
 			},
 			"period": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Computed:    true,
-				Description: "Lifecycle in days. Value range: 1~366. Default value: 30.",
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+				Description: "Retention period, unit: days. Log topic (standard storage): 1 to 3600 days, value `3640` " +
+					"means permanent retention. Log topic (infrequent storage): 7 to 3600 days, value `3640` means " +
+					"permanent retention. Metric topic: 1 to 3600 days, value `3640` means permanent retention.",
 			},
 			"hot_period": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Computed:    true,
-				Description: "0: Turn off log sinking. Non 0: The number of days of standard storage after enabling log settling. HotPeriod needs to be greater than or equal to 7 and less than Period. Only effective when StorageType is hot.",
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+				Description: "`0`: turn off log settling. Non-`0`: the number of days of standard storage after enabling " +
+					"log settling. HotPeriod must be greater than or equal to 7 and less than Period. Only effective " +
+					"when `storage_type` is `hot`. Not supported for metric topics.",
 			},
 			"describes": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Log Topic Description.",
+				Description: "Log topic description.",
 			},
 			"is_web_tracking": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Computed:    true,
-				Description: "No authentication switch. False: closed; True: Enable. The default is false. After activation, anonymous access to the log topic will be supported for specified operations.",
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+				Description: "Free authentication switch. `false`: closed (default); `true`: enabled. When enabled, " +
+					"anonymous access to the log topic will be supported for specified operations. " +
+					"Not supported for metric topics.",
 			},
 			"extends": {
 				Type:        schema.TypeList,
 				Optional:    true,
 				MaxItems:    1,
-				Description: "Log Subject Extension Information.",
+				Description: "Topic extension information.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"anonymous_access": {
@@ -134,6 +158,46 @@ func ResourceTencentCloudClsTopic() *schema.Resource {
 									},
 								},
 							},
+						},
+					},
+				},
+			},
+			"biz_type": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				Description:  "Topic type. `0`: log topic (default), `1`: metric topic.",
+				ValidateFunc: tccommon.ValidateAllowedIntValue([]int{0, 1}),
+			},
+			"encryption": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+				Description: "Encryption-related parameters. Supported for encryption-enabled regions and " +
+					"allowlisted users; cannot be passed in other scenarios. `0` or not passed: no encryption; " +
+					"`1`: kms-cls cloud product key encryption. Once enabled, it cannot be disabled. " +
+					"Supported regions: ap-beijing, ap-guangzhou, ap-shanghai, ap-singapore, ap-bangkok, " +
+					"ap-jakarta, eu-frankfurt, ap-seoul, ap-tokyo.",
+			},
+			"custom_kms_info": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				MaxItems: 1,
+				Description: "User-defined KMS key information. If empty, the default key (alias `KMS-CLS`) " +
+					"is used.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"kms_region": {
+							Type:     schema.TypeString,
+							Required: true,
+							Description: "KMS region. Refer to Tencent Cloud KMS documentation for supported regions. " +
+								"Format: `ap-guangzhou`.",
+						},
+						"kms_key_id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "KMS key ID.",
 						},
 					},
 				},
@@ -244,11 +308,32 @@ func resourceTencentCloudClsTopicCreate(d *schema.ResourceData, meta interface{}
 			}
 
 			request.Extends = &topicExtendInfo
+		} else {
+			return fmt.Errorf("If `is_web_tracking` is true, Must set `extends` params.\n.")
 		}
 	} else {
 		if _, ok := helper.InterfacesHeadMap(d, "extends"); ok {
 			return fmt.Errorf("If `is_web_tracking` is false, Not support set `extends`.\n.")
 		}
+	}
+
+	if v, ok := d.GetOkExists("biz_type"); ok {
+		request.BizType = helper.IntUint64(v.(int))
+	}
+
+	if v, ok := d.GetOkExists("encryption"); ok {
+		request.Encryption = helper.IntUint64(v.(int))
+	}
+
+	if customKmsInfoMap, ok := helper.InterfacesHeadMap(d, "custom_kms_info"); ok {
+		customKmsInfo := &cls.CustomKmsInfo{}
+		if v, ok := customKmsInfoMap["kms_region"]; ok {
+			customKmsInfo.KmsRegion = helper.String(v.(string))
+		}
+		if v, ok := customKmsInfoMap["kms_key_id"]; ok {
+			customKmsInfo.KmsKeyId = helper.String(v.(string))
+		}
+		request.CustomKmsInfo = customKmsInfo
 	}
 
 	err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
@@ -260,9 +345,8 @@ func resourceTencentCloudClsTopicCreate(d *schema.ResourceData, meta interface{}
 				logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
 		}
 
-		if result == nil {
-			e = fmt.Errorf("create cls topic failed")
-			return resource.NonRetryableError(e)
+		if result == nil || result.Response == nil {
+			return resource.NonRetryableError(fmt.Errorf("Create cls topic failed, Response is nil"))
 		}
 
 		response = result
@@ -274,8 +358,16 @@ func resourceTencentCloudClsTopicCreate(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	id := *response.Response.TopicId
-	d.SetId(id)
+	if response.Response.TopicId == nil {
+		return fmt.Errorf("TopicId is nil.")
+	}
+
+	topicId := *response.Response.TopicId
+	if v, ok := d.GetOkExists("biz_type"); ok && v.(int) == 1 {
+		d.SetId(topicId + tccommon.FILED_SP + fmt.Sprintf("%d", v.(int)))
+	} else {
+		d.SetId(topicId)
+	}
 	return resourceTencentCloudClsTopicRead(d, meta)
 }
 
@@ -290,14 +382,23 @@ func resourceTencentCloudClsTopicRead(d *schema.ResourceData, meta interface{}) 
 		id      = d.Id()
 	)
 
-	topic, err := service.DescribeClsTopicById(ctx, id)
+	topicId, bizType, err := parseClsTopicId(id)
+	if err != nil {
+		return err
+	}
+
+	var bizTypeParam *uint64
+	if bizType > 0 {
+		bizTypeParam = helper.IntUint64(bizType)
+	}
+	topic, err := service.DescribeClsTopicById(ctx, topicId, bizTypeParam)
 	if err != nil {
 		return err
 	}
 
 	if topic == nil {
 		d.SetId("")
-		return fmt.Errorf("resource `Topic` %s does not exist", id)
+		return fmt.Errorf("resource `tencentcloud_cls_topic` %s does not exist", id)
 	}
 
 	_ = d.Set("logset_id", topic.LogsetId)
@@ -317,6 +418,10 @@ func resourceTencentCloudClsTopicRead(d *schema.ResourceData, meta interface{}) 
 	_ = d.Set("hot_period", topic.HotPeriod)
 	_ = d.Set("describes", topic.Describes)
 	_ = d.Set("is_web_tracking", topic.IsWebTracking)
+
+	if topic.BizType != nil {
+		_ = d.Set("biz_type", topic.BizType)
+	}
 
 	if *topic.IsWebTracking {
 		if topic.Extends != nil {
@@ -361,6 +466,24 @@ func resourceTencentCloudClsTopicRead(d *schema.ResourceData, meta interface{}) 
 		}
 	}
 
+	_ = d.Set("encryption", 0)
+	if topic.KeyId != nil && *topic.KeyId != "" {
+		_ = d.Set("encryption", 1)
+	}
+
+	if topic.CustomKmsInfo != nil {
+		customKmsInfoMap := map[string]interface{}{}
+		if topic.CustomKmsInfo.KmsRegion != nil {
+			customKmsInfoMap["kms_region"] = *topic.CustomKmsInfo.KmsRegion
+		}
+		if topic.CustomKmsInfo.KmsKeyId != nil {
+			customKmsInfoMap["kms_key_id"] = *topic.CustomKmsInfo.KmsKeyId
+		}
+		_ = d.Set("custom_kms_info", []interface{}{customKmsInfoMap})
+	} else {
+		_ = d.Set("custom_kms_info", []interface{}{})
+	}
+
 	return nil
 }
 
@@ -372,9 +495,15 @@ func resourceTencentCloudClsTopicUpdate(d *schema.ResourceData, meta interface{}
 		request       = cls.NewModifyTopicRequest()
 		id            = d.Id()
 		isWebTracking bool
+		ctx           = context.WithValue(context.TODO(), tccommon.LogIdKey, logId)
 	)
 
-	immutableArgs := []string{"partition_count", "storage_type"}
+	topicId, _, err := parseClsTopicId(id)
+	if err != nil {
+		return err
+	}
+
+	immutableArgs := []string{"partition_count", "storage_type", "biz_type"}
 
 	for _, v := range immutableArgs {
 		if d.HasChange(v) {
@@ -382,110 +511,144 @@ func resourceTencentCloudClsTopicUpdate(d *schema.ResourceData, meta interface{}
 		}
 	}
 
-	request.TopicId = helper.String(id)
+	if d.HasChange("tags") {
+		tcClient := meta.(tccommon.ProviderMeta).GetAPIV3Conn()
+		tagService := svctag.NewTagService(tcClient)
+		oldTags, newTags := d.GetChange("tags")
+		replaceTags, deleteTags := svctag.DiffTags(oldTags.(map[string]interface{}), newTags.(map[string]interface{}))
+		resourceName := tccommon.BuildTagResourceName("cls", "topic", tcClient.Region, id)
+		if err := tagService.ModifyTags(ctx, resourceName, replaceTags, deleteTags); err != nil {
+			return err
+		}
+	}
+
+	var hasChange bool
+	request.TopicId = helper.String(topicId)
 
 	if d.HasChange("topic_name") {
 		request.TopicName = helper.String(d.Get("topic_name").(string))
-	}
-
-	if d.HasChange("tags") {
-		tags := d.Get("tags").(map[string]interface{})
-		request.Tags = make([]*cls.Tag, 0, len(tags))
-		for k, v := range tags {
-			key := k
-			value := v
-			request.Tags = append(request.Tags, &cls.Tag{
-				Key:   &key,
-				Value: helper.String(value.(string)),
-			})
-		}
+		hasChange = true
 	}
 
 	if d.HasChange("auto_split") {
 		request.AutoSplit = helper.Bool(d.Get("auto_split").(bool))
+		hasChange = true
 	}
 
 	if d.HasChange("max_split_partitions") {
 		request.MaxSplitPartitions = helper.IntInt64(d.Get("max_split_partitions").(int))
+		hasChange = true
 	}
 
 	if d.HasChange("period") {
 		request.Period = helper.IntInt64(d.Get("period").(int))
+		hasChange = true
 	}
 
 	if d.HasChange("hot_period") {
 		request.HotPeriod = helper.IntUint64(d.Get("hot_period").(int))
+		hasChange = true
 	}
 
 	if d.HasChange("describes") {
 		request.Describes = helper.String(d.Get("describes").(string))
+		hasChange = true
 	}
 
-	if v, ok := d.GetOkExists("is_web_tracking"); ok {
-		request.IsWebTracking = helper.Bool(v.(bool))
-		isWebTracking = v.(bool)
+	if d.HasChange("is_web_tracking") {
+		if v, ok := d.GetOkExists("is_web_tracking"); ok {
+			request.IsWebTracking = helper.Bool(v.(bool))
+			isWebTracking = v.(bool)
+			hasChange = true
+		}
 	}
+	if d.HasChange("extends") {
+		if isWebTracking {
+			if dMap, ok := helper.InterfacesHeadMap(d, "extends"); ok {
+				if anonymousAccessMap, ok := helper.InterfaceToMap(dMap, "anonymous_access"); ok {
+					topicExtendInfo := cls.TopicExtendInfo{}
+					anonymousInfo := cls.AnonymousInfo{}
+					if v, ok := anonymousAccessMap["operations"]; ok {
+						tmpList := make([]*string, 0)
+						for _, operation := range v.([]interface{}) {
+							tmpList = append(tmpList, helper.String(operation.(string)))
+						}
 
-	if isWebTracking {
-		if dMap, ok := helper.InterfacesHeadMap(d, "extends"); ok {
-			if anonymousAccessMap, ok := helper.InterfaceToMap(dMap, "anonymous_access"); ok {
-				topicExtendInfo := cls.TopicExtendInfo{}
-				anonymousInfo := cls.AnonymousInfo{}
-				if v, ok := anonymousAccessMap["operations"]; ok {
-					tmpList := make([]*string, 0)
-					for _, operation := range v.([]interface{}) {
-						tmpList = append(tmpList, helper.String(operation.(string)))
+						anonymousInfo.Operations = tmpList
 					}
 
-					anonymousInfo.Operations = tmpList
-				}
+					if v, ok := anonymousAccessMap["conditions"]; ok {
+						for _, condition := range v.([]interface{}) {
+							conditionMap := condition.(map[string]interface{})
+							conditionInfo := cls.ConditionInfo{}
+							if v, ok := conditionMap["attributes"]; ok {
+								conditionInfo.Attributes = helper.String(v.(string))
+							}
 
-				if v, ok := anonymousAccessMap["conditions"]; ok {
-					for _, condition := range v.([]interface{}) {
-						conditionMap := condition.(map[string]interface{})
-						conditionInfo := cls.ConditionInfo{}
-						if v, ok := conditionMap["attributes"]; ok {
-							conditionInfo.Attributes = helper.String(v.(string))
+							if v, ok := conditionMap["rule"]; ok {
+								conditionInfo.Rule = helper.IntUint64(v.(int))
+							}
+
+							if v, ok := conditionMap["condition_value"]; ok {
+								conditionInfo.ConditionValue = helper.String(v.(string))
+							}
+
+							anonymousInfo.Conditions = append(anonymousInfo.Conditions, &conditionInfo)
 						}
-
-						if v, ok := conditionMap["rule"]; ok {
-							conditionInfo.Rule = helper.IntUint64(v.(int))
-						}
-
-						if v, ok := conditionMap["condition_value"]; ok {
-							conditionInfo.ConditionValue = helper.String(v.(string))
-						}
-
-						anonymousInfo.Conditions = append(anonymousInfo.Conditions, &conditionInfo)
 					}
-				}
 
-				topicExtendInfo.AnonymousAccess = &anonymousInfo
-				request.Extends = &topicExtendInfo
+					topicExtendInfo.AnonymousAccess = &anonymousInfo
+					request.Extends = &topicExtendInfo
+				}
+			} else {
+				return fmt.Errorf("If `is_web_tracking` is true, Must set `extends` params.\n.")
 			}
 		} else {
-			return fmt.Errorf("If `is_web_tracking` is true, Must set `extends` params.\n.")
+			if _, ok := helper.InterfacesHeadMap(d, "extends"); ok {
+				return fmt.Errorf("If `is_web_tracking` is false, Not support set `extends` params.\n.")
+			}
 		}
-	} else {
-		if _, ok := helper.InterfacesHeadMap(d, "extends"); ok {
-			return fmt.Errorf("If `is_web_tracking` is false, Not support set `extends` params.\n.")
-		}
+		hasChange = true
 	}
 
-	err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
-		result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseClsClient().ModifyTopic(request)
-		if e != nil {
-			return tccommon.RetryError(e)
-		} else {
-			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
-				logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+	if d.HasChange("encryption") {
+		if v, ok := d.GetOkExists("encryption"); ok {
+			request.Encryption = helper.IntUint64(v.(int))
 		}
 
-		return nil
-	})
+		hasChange = true
+	}
 
-	if err != nil {
-		return err
+	if d.HasChange("custom_kms_info") {
+		if customKmsInfoMap, ok := helper.InterfacesHeadMap(d, "custom_kms_info"); ok {
+			customKmsInfo := &cls.CustomKmsInfo{}
+			if v, ok := customKmsInfoMap["kms_region"]; ok {
+				customKmsInfo.KmsRegion = helper.String(v.(string))
+			}
+			if v, ok := customKmsInfoMap["kms_key_id"]; ok {
+				customKmsInfo.KmsKeyId = helper.String(v.(string))
+			}
+			request.CustomKmsInfo = customKmsInfo
+		}
+		hasChange = true
+	}
+
+	if hasChange {
+		err := resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
+			result, e := meta.(tccommon.ProviderMeta).GetAPIV3Conn().UseClsClient().ModifyTopic(request)
+			if e != nil {
+				return tccommon.RetryError(e)
+			} else {
+				log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n",
+					logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			return err
+		}
 	}
 
 	return resourceTencentCloudClsTopicRead(d, meta)
@@ -501,7 +664,12 @@ func resourceTencentCloudClsTopicDelete(d *schema.ResourceData, meta interface{}
 		id      = d.Id()
 	)
 
-	if err := service.DeleteClsTopic(ctx, id); err != nil {
+	topicId, _, err := parseClsTopicId(id)
+	if err != nil {
+		return err
+	}
+
+	if err := service.DeleteClsTopic(ctx, topicId); err != nil {
 		return err
 	}
 

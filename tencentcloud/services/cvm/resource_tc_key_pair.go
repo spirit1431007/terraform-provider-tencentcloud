@@ -66,11 +66,27 @@ func ResourceTencentCloudKeyPair() *schema.Resource {
 				Optional:    true,
 				Description: "Tags of the key pair.",
 			},
+			"force_stop": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Whether to forcibly shut down a running instance. Default is false. Forcing a shutdown is equivalent to switching off the power button on a physical computer. Forcing a shutdown may result in data loss or file system corruption; therefore, please use this option only when the server cannot be shut down normally.",
+			},
+			"private_key": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Content of private key in a key pair. Tencent Cloud do not keep private keys. Please keep it properly.",
+			},
+			"created_time": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Creation time, which follows the `ISO8601` standard and uses `UTC` time in the format of `YYYY-MM-DDThh:mm:ssZ`.",
+			},
 		},
 	}
 }
 
-func cvmCreateKeyPair(ctx context.Context, d *schema.ResourceData, meta interface{}) (keyId string, err error) {
+func cvmCreateKeyPair(ctx context.Context, d *schema.ResourceData, meta interface{}) (keyId, privateKey string, err error) {
 	logId := tccommon.GetLogId(ctx)
 	request := cvm.NewCreateKeyPairRequest()
 	response := cvm.NewCreateKeyPairResponse()
@@ -98,6 +114,9 @@ func cvmCreateKeyPair(ctx context.Context, d *schema.ResourceData, meta interfac
 	}
 
 	keyId = *response.Response.KeyPair.KeyId
+	if response.Response.KeyPair.PrivateKey != nil {
+		privateKey = *response.Response.KeyPair.PrivateKey
+	}
 	return
 }
 
@@ -139,19 +158,23 @@ func resourceTencentCloudKeyPairCreate(d *schema.ResourceData, meta interface{})
 	logId := tccommon.GetLogId(tccommon.ContextNil)
 	ctx := context.WithValue(context.TODO(), tccommon.LogIdKey, logId)
 	var (
-		keyId string
-		err   error
+		keyId, privateKey string
+		err               error
 	)
 
 	if _, ok := d.GetOk("public_key"); ok {
 		keyId, err = cvmCreateKeyPairByImportPublicKey(ctx, d, meta)
 	} else {
-		keyId, err = cvmCreateKeyPair(ctx, d, meta)
+		keyId, privateKey, err = cvmCreateKeyPair(ctx, d, meta)
 	}
 	if err != nil {
 		return err
 	}
 	d.SetId(keyId)
+
+	if privateKey != "" {
+		_ = d.Set("private_key", privateKey)
+	}
 
 	if tags := helper.GetTags(d, "tags"); len(tags) > 0 {
 		tcClient := meta.(tccommon.ProviderMeta).GetAPIV3Conn()
@@ -202,6 +225,14 @@ func resourceTencentCloudKeyPairRead(d *schema.ResourceData, meta interface{}) e
 			publicKey = strings.Join(split[0:2], " ")
 		}
 		_ = d.Set("public_key", publicKey)
+	}
+
+	if keyPair.PrivateKey != nil {
+		_ = d.Set("private_key", keyPair.PrivateKey)
+	}
+
+	if keyPair.CreatedTime != nil {
+		_ = d.Set("created_time", keyPair.CreatedTime)
 	}
 
 	client := meta.(tccommon.ProviderMeta).GetAPIV3Conn()
@@ -279,8 +310,13 @@ func resourceTencentCloudKeyPairDelete(d *schema.ResourceData, meta interface{})
 	}
 
 	if len(keyPair.AssociatedInstanceIds) > 0 {
+		var forceStop bool
+		if v, ok := d.GetOkExists("force_stop"); ok {
+			forceStop = v.(bool)
+		}
+
 		err = resource.Retry(tccommon.WriteRetryTimeout, func() *resource.RetryError {
-			errRet := cvmService.UnbindKeyPair(ctx, []*string{&keyId}, keyPair.AssociatedInstanceIds)
+			errRet := cvmService.UnbindKeyPair(ctx, []*string{&keyId}, keyPair.AssociatedInstanceIds, forceStop)
 			if errRet != nil {
 				if sdkErr, ok := errRet.(*errors.TencentCloudSDKError); ok {
 					if sdkErr.Code == CVM_NOT_FOUND_ERROR {

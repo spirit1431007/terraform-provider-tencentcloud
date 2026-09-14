@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+// Copyright (c) 2017-2025 Tencent. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,6 +44,90 @@ func NewClient(credential common.CredentialIface, region string, clientProfile *
     return
 }
 
+
+func NewApplyFreeCertificateRequest() (request *ApplyFreeCertificateRequest) {
+    request = &ApplyFreeCertificateRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ApplyFreeCertificate")
+    
+    
+    return
+}
+
+func NewApplyFreeCertificateResponse() (response *ApplyFreeCertificateResponse) {
+    response = &ApplyFreeCertificateResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ApplyFreeCertificate
+// 申请免费证书时，如果您需要通过使用 DNS 委派验证或者文件验证进行申请，您可以调用该接口来进行发起证书申请并根据申请方式来获取对应的验证内容。调用接口的顺序如下：
+//
+// 第一步：调用 ApplyFreeCertificate，指定申请免费证书的校验方式，获取验证内容；
+//
+// 第二步：为相应域名按照验证内容配置；
+//
+// 第三步：调用CheckFreeCertificateVerification 验证，验证通过后即完成免费证书申请；
+//
+// 第四步：调用ModifyHostsCertificate，下发域名证书为使用 EdgeOne 免费证书配置。
+//
+// 
+//
+// 申请方式的介绍可参考文档：[免费证书申请说明](https://cloud.tencent.com/document/product/1552/90437) 
+//
+// 说明：
+//
+// - 仅 CNAME 接入模式可调用该接口来指定免费证书申请方式。NS/DNSPod 托管接入模式都是使用自动验证来申请免费证书，无需调用该接口。
+//
+// - 如果您需要切换免费证书验证方式，您可以重新调用本接口通过修改 VerificationMethod 字段来进行变更。
+//
+// - 同个域名只能申请一本免费证书，在调用本接口后，后台会触发申请免费证书相关任务，您需要在2 天内，完成域名验证信息的相关配置，然后完成证书验证。
+func (c *Client) ApplyFreeCertificate(request *ApplyFreeCertificateRequest) (response *ApplyFreeCertificateResponse, err error) {
+    return c.ApplyFreeCertificateWithContext(context.Background(), request)
+}
+
+// ApplyFreeCertificate
+// 申请免费证书时，如果您需要通过使用 DNS 委派验证或者文件验证进行申请，您可以调用该接口来进行发起证书申请并根据申请方式来获取对应的验证内容。调用接口的顺序如下：
+//
+// 第一步：调用 ApplyFreeCertificate，指定申请免费证书的校验方式，获取验证内容；
+//
+// 第二步：为相应域名按照验证内容配置；
+//
+// 第三步：调用CheckFreeCertificateVerification 验证，验证通过后即完成免费证书申请；
+//
+// 第四步：调用ModifyHostsCertificate，下发域名证书为使用 EdgeOne 免费证书配置。
+//
+// 
+//
+// 申请方式的介绍可参考文档：[免费证书申请说明](https://cloud.tencent.com/document/product/1552/90437) 
+//
+// 说明：
+//
+// - 仅 CNAME 接入模式可调用该接口来指定免费证书申请方式。NS/DNSPod 托管接入模式都是使用自动验证来申请免费证书，无需调用该接口。
+//
+// - 如果您需要切换免费证书验证方式，您可以重新调用本接口通过修改 VerificationMethod 字段来进行变更。
+//
+// - 同个域名只能申请一本免费证书，在调用本接口后，后台会触发申请免费证书相关任务，您需要在2 天内，完成域名验证信息的相关配置，然后完成证书验证。
+func (c *Client) ApplyFreeCertificateWithContext(ctx context.Context, request *ApplyFreeCertificateRequest) (response *ApplyFreeCertificateResponse, err error) {
+    if request == nil {
+        request = NewApplyFreeCertificateRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ApplyFreeCertificate")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ApplyFreeCertificate require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewApplyFreeCertificateResponse()
+    err = c.Send(request, response)
+    return
+}
 
 func NewBindSecurityTemplateToEntityRequest() (request *BindSecurityTemplateToEntityRequest) {
     request = &BindSecurityTemplateToEntityRequest{
@@ -94,6 +178,7 @@ func (c *Client) BindSecurityTemplateToEntityWithContext(ctx context.Context, re
     if request == nil {
         request = NewBindSecurityTemplateToEntityRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "BindSecurityTemplateToEntity")
     
     if c.GetCredential() == nil {
         return nil, errors.New("BindSecurityTemplateToEntity require credential")
@@ -145,6 +230,7 @@ func (c *Client) BindSharedCNAMEWithContext(ctx context.Context, request *BindSh
     if request == nil {
         request = NewBindSharedCNAMERequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "BindSharedCNAME")
     
     if c.GetCredential() == nil {
         return nil, errors.New("BindSharedCNAME require credential")
@@ -208,6 +294,7 @@ func (c *Client) BindZoneToPlanWithContext(ctx context.Context, request *BindZon
     if request == nil {
         request = NewBindZoneToPlanRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "BindZoneToPlan")
     
     if c.GetCredential() == nil {
         return nil, errors.New("BindZoneToPlan require credential")
@@ -240,7 +327,9 @@ func NewCheckCnameStatusResponse() (response *CheckCnameStatusResponse) {
 }
 
 // CheckCnameStatus
-// 校验域名 CNAME 状态
+// 当站点接入类型为 CNAME 接入类型时，要求该站点下的所有接入域名必须按照 EdgeOne 分配的指定 CNAME 域名完成 CNAME 记录配置。
+//
+// 您可以通过本接口获取 EdgeOne 为接入域名分配的指定 CNAME 域名，并且可以通过本接口完成对接入域名的 CNAME 配置状态的校验。
 //
 // 可能返回的错误码:
 //  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
@@ -252,7 +341,9 @@ func (c *Client) CheckCnameStatus(request *CheckCnameStatusRequest) (response *C
 }
 
 // CheckCnameStatus
-// 校验域名 CNAME 状态
+// 当站点接入类型为 CNAME 接入类型时，要求该站点下的所有接入域名必须按照 EdgeOne 分配的指定 CNAME 域名完成 CNAME 记录配置。
+//
+// 您可以通过本接口获取 EdgeOne 为接入域名分配的指定 CNAME 域名，并且可以通过本接口完成对接入域名的 CNAME 配置状态的校验。
 //
 // 可能返回的错误码:
 //  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
@@ -263,6 +354,7 @@ func (c *Client) CheckCnameStatusWithContext(ctx context.Context, request *Check
     if request == nil {
         request = NewCheckCnameStatusRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CheckCnameStatus")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CheckCnameStatus require credential")
@@ -271,6 +363,182 @@ func (c *Client) CheckCnameStatusWithContext(ctx context.Context, request *Check
     request.SetContext(ctx)
     
     response = NewCheckCnameStatusResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCheckFreeCertificateVerificationRequest() (request *CheckFreeCertificateVerificationRequest) {
+    request = &CheckFreeCertificateVerificationRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "CheckFreeCertificateVerification")
+    
+    
+    return
+}
+
+func NewCheckFreeCertificateVerificationResponse() (response *CheckFreeCertificateVerificationResponse) {
+    response = &CheckFreeCertificateVerificationResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CheckFreeCertificateVerification
+// 该接口用于验证免费证书并获取免费证书申请结果。如果验证通过，可通过该接口查询到对应域名申请的免费证书信息，如果申请失败，该接口将返回对应的验证失败信息。
+//
+// 在触发[申请免费证书接口](https://cloud.tencent.com/document/product/1552/90437)后，您可以通过本接口检查免费证书申请结果。在免费证书申请成功后， 还需要通过[配置域名证书](https://cloud.tencent.com/document/product/1552/80764)接口配置，才能将免费证书部署至加速域上。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) CheckFreeCertificateVerification(request *CheckFreeCertificateVerificationRequest) (response *CheckFreeCertificateVerificationResponse, err error) {
+    return c.CheckFreeCertificateVerificationWithContext(context.Background(), request)
+}
+
+// CheckFreeCertificateVerification
+// 该接口用于验证免费证书并获取免费证书申请结果。如果验证通过，可通过该接口查询到对应域名申请的免费证书信息，如果申请失败，该接口将返回对应的验证失败信息。
+//
+// 在触发[申请免费证书接口](https://cloud.tencent.com/document/product/1552/90437)后，您可以通过本接口检查免费证书申请结果。在免费证书申请成功后， 还需要通过[配置域名证书](https://cloud.tencent.com/document/product/1552/80764)接口配置，才能将免费证书部署至加速域上。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) CheckFreeCertificateVerificationWithContext(ctx context.Context, request *CheckFreeCertificateVerificationRequest) (response *CheckFreeCertificateVerificationResponse, err error) {
+    if request == nil {
+        request = NewCheckFreeCertificateVerificationRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CheckFreeCertificateVerification")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CheckFreeCertificateVerification require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCheckFreeCertificateVerificationResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewConfirmMultiPathGatewayOriginACLRequest() (request *ConfirmMultiPathGatewayOriginACLRequest) {
+    request = &ConfirmMultiPathGatewayOriginACLRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ConfirmMultiPathGatewayOriginACL")
+    
+    
+    return
+}
+
+func NewConfirmMultiPathGatewayOriginACLResponse() (response *ConfirmMultiPathGatewayOriginACLResponse) {
+    response = &ConfirmMultiPathGatewayOriginACLResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ConfirmMultiPathGatewayOriginACL
+// 本接口用于多通道安全加速网关回源 IP 网段发生变更时，确认已将最新回源 IP 网段更新至源站防火墙。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) ConfirmMultiPathGatewayOriginACL(request *ConfirmMultiPathGatewayOriginACLRequest) (response *ConfirmMultiPathGatewayOriginACLResponse, err error) {
+    return c.ConfirmMultiPathGatewayOriginACLWithContext(context.Background(), request)
+}
+
+// ConfirmMultiPathGatewayOriginACL
+// 本接口用于多通道安全加速网关回源 IP 网段发生变更时，确认已将最新回源 IP 网段更新至源站防火墙。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) ConfirmMultiPathGatewayOriginACLWithContext(ctx context.Context, request *ConfirmMultiPathGatewayOriginACLRequest) (response *ConfirmMultiPathGatewayOriginACLResponse, err error) {
+    if request == nil {
+        request = NewConfirmMultiPathGatewayOriginACLRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ConfirmMultiPathGatewayOriginACL")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ConfirmMultiPathGatewayOriginACL require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewConfirmMultiPathGatewayOriginACLResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewConfirmOriginACLUpdateRequest() (request *ConfirmOriginACLUpdateRequest) {
+    request = &ConfirmOriginACLUpdateRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ConfirmOriginACLUpdate")
+    
+    
+    return
+}
+
+func NewConfirmOriginACLUpdateResponse() (response *ConfirmOriginACLUpdateResponse) {
+    response = &ConfirmOriginACLUpdateResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ConfirmOriginACLUpdate
+// 本接口用于回源 IP 网段发生变更时，确认已将最新回源 IP 网段更新至源站防火墙。确认已更新至最新的回源 IP 网段后，相关变更通知将会停止推送。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_LATESTVERSIONNOW = "OperationDenied.LatestVersionNow"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+func (c *Client) ConfirmOriginACLUpdate(request *ConfirmOriginACLUpdateRequest) (response *ConfirmOriginACLUpdateResponse, err error) {
+    return c.ConfirmOriginACLUpdateWithContext(context.Background(), request)
+}
+
+// ConfirmOriginACLUpdate
+// 本接口用于回源 IP 网段发生变更时，确认已将最新回源 IP 网段更新至源站防火墙。确认已更新至最新的回源 IP 网段后，相关变更通知将会停止推送。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_LATESTVERSIONNOW = "OperationDenied.LatestVersionNow"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+func (c *Client) ConfirmOriginACLUpdateWithContext(ctx context.Context, request *ConfirmOriginACLUpdateRequest) (response *ConfirmOriginACLUpdateResponse, err error) {
+    if request == nil {
+        request = NewConfirmOriginACLUpdateRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ConfirmOriginACLUpdate")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ConfirmOriginACLUpdate require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewConfirmOriginACLUpdateResponse()
     err = c.Send(request, response)
     return
 }
@@ -304,6 +572,7 @@ func NewCreateAccelerationDomainResponse() (response *CreateAccelerationDomainRe
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
 //  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INVALIDPARAMETER_ADVANCEDORIGINROUTINGNOTSUPPORTNEWLYADDEDHOST = "InvalidParameter.AdvancedOriginRoutingNotSupportNewlyAddedHost"
 //  INVALIDPARAMETER_CONFLICTHOSTORIGIN = "InvalidParameter.ConflictHostOrigin"
 //  INVALIDPARAMETER_ERRINVALIDACTIONPARAM = "InvalidParameter.ErrInvalidActionParam"
 //  INVALIDPARAMETER_INVALIDACCELERATETYPE = "InvalidParameter.InvalidAccelerateType"
@@ -324,6 +593,7 @@ func NewCreateAccelerationDomainResponse() (response *CreateAccelerationDomainRe
 //  INVALIDPARAMETER_ZONEISGRAYPUBLISHING = "InvalidParameter.ZoneIsGrayPublishing"
 //  INVALIDPARAMETERVALUE_CONFLICTRECORD = "InvalidParameterValue.ConflictRecord"
 //  INVALIDPARAMETERVALUE_CONFLICTWITHDNSSEC = "InvalidParameterValue.ConflictWithDNSSEC"
+//  INVALIDPARAMETERVALUE_CONFLICTWITHDOMAIN = "InvalidParameterValue.ConflictWithDomain"
 //  INVALIDPARAMETERVALUE_CONFLICTWITHNSRECORD = "InvalidParameterValue.ConflictWithNSRecord"
 //  INVALIDPARAMETERVALUE_CONTENTSAMEASNAME = "InvalidParameterValue.ContentSameAsName"
 //  INVALIDPARAMETERVALUE_DOMAINNOTMATCHZONE = "InvalidParameterValue.DomainNotMatchZone"
@@ -331,7 +601,9 @@ func NewCreateAccelerationDomainResponse() (response *CreateAccelerationDomainRe
 //  INVALIDPARAMETERVALUE_INVALIDDNSNAME = "InvalidParameterValue.InvalidDNSName"
 //  INVALIDPARAMETERVALUE_INVALIDDOMAINNAME = "InvalidParameterValue.InvalidDomainName"
 //  INVALIDPARAMETERVALUE_INVALIDPROXYORIGIN = "InvalidParameterValue.InvalidProxyOrigin"
+//  INVALIDPARAMETERVALUE_INVALIDSITEFAILOVERUNSUPPORTED = "InvalidParameterValue.InvalidSiteFailoverUnsupported"
 //  INVALIDPARAMETERVALUE_ORIGINGROUPNOTEXISTS = "InvalidParameterValue.OriginGroupNotExists"
+//  INVALIDPARAMETERVALUE_SITEFAILOVERNOTSUPPORTHOSTORIGINTYPEVOD = "InvalidParameterValue.SiteFailoverNotSupportHostOriginTypeVod"
 //  OPERATIONDENIED = "OperationDenied"
 //  OPERATIONDENIED_ACCELERATEMAINLANDDISABLE = "OperationDenied.AccelerateMainlandDisable"
 //  OPERATIONDENIED_CONFIGLOCKED = "OperationDenied.ConfigLocked"
@@ -365,6 +637,7 @@ func (c *Client) CreateAccelerationDomain(request *CreateAccelerationDomainReque
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
 //  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INVALIDPARAMETER_ADVANCEDORIGINROUTINGNOTSUPPORTNEWLYADDEDHOST = "InvalidParameter.AdvancedOriginRoutingNotSupportNewlyAddedHost"
 //  INVALIDPARAMETER_CONFLICTHOSTORIGIN = "InvalidParameter.ConflictHostOrigin"
 //  INVALIDPARAMETER_ERRINVALIDACTIONPARAM = "InvalidParameter.ErrInvalidActionParam"
 //  INVALIDPARAMETER_INVALIDACCELERATETYPE = "InvalidParameter.InvalidAccelerateType"
@@ -385,6 +658,7 @@ func (c *Client) CreateAccelerationDomain(request *CreateAccelerationDomainReque
 //  INVALIDPARAMETER_ZONEISGRAYPUBLISHING = "InvalidParameter.ZoneIsGrayPublishing"
 //  INVALIDPARAMETERVALUE_CONFLICTRECORD = "InvalidParameterValue.ConflictRecord"
 //  INVALIDPARAMETERVALUE_CONFLICTWITHDNSSEC = "InvalidParameterValue.ConflictWithDNSSEC"
+//  INVALIDPARAMETERVALUE_CONFLICTWITHDOMAIN = "InvalidParameterValue.ConflictWithDomain"
 //  INVALIDPARAMETERVALUE_CONFLICTWITHNSRECORD = "InvalidParameterValue.ConflictWithNSRecord"
 //  INVALIDPARAMETERVALUE_CONTENTSAMEASNAME = "InvalidParameterValue.ContentSameAsName"
 //  INVALIDPARAMETERVALUE_DOMAINNOTMATCHZONE = "InvalidParameterValue.DomainNotMatchZone"
@@ -392,7 +666,9 @@ func (c *Client) CreateAccelerationDomain(request *CreateAccelerationDomainReque
 //  INVALIDPARAMETERVALUE_INVALIDDNSNAME = "InvalidParameterValue.InvalidDNSName"
 //  INVALIDPARAMETERVALUE_INVALIDDOMAINNAME = "InvalidParameterValue.InvalidDomainName"
 //  INVALIDPARAMETERVALUE_INVALIDPROXYORIGIN = "InvalidParameterValue.InvalidProxyOrigin"
+//  INVALIDPARAMETERVALUE_INVALIDSITEFAILOVERUNSUPPORTED = "InvalidParameterValue.InvalidSiteFailoverUnsupported"
 //  INVALIDPARAMETERVALUE_ORIGINGROUPNOTEXISTS = "InvalidParameterValue.OriginGroupNotExists"
+//  INVALIDPARAMETERVALUE_SITEFAILOVERNOTSUPPORTHOSTORIGINTYPEVOD = "InvalidParameterValue.SiteFailoverNotSupportHostOriginTypeVod"
 //  OPERATIONDENIED = "OperationDenied"
 //  OPERATIONDENIED_ACCELERATEMAINLANDDISABLE = "OperationDenied.AccelerateMainlandDisable"
 //  OPERATIONDENIED_CONFIGLOCKED = "OperationDenied.ConfigLocked"
@@ -416,6 +692,7 @@ func (c *Client) CreateAccelerationDomainWithContext(ctx context.Context, reques
     if request == nil {
         request = NewCreateAccelerationDomainRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateAccelerationDomain")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateAccelerationDomain require credential")
@@ -450,39 +727,7 @@ func NewCreateAliasDomainResponse() (response *CreateAliasDomainResponse) {
 // CreateAliasDomain
 // 创建别称域名。
 //
-// 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-//  FAILEDOPERATION_CERTIFICATENOTFOUND = "FailedOperation.CertificateNotFound"
-//  INTERNALERROR = "InternalError"
-//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
-//  INVALIDPARAMETER_ALIASDOMAINNOTSUPPORTSMCERT = "InvalidParameter.AliasDomainNotSupportSMCert"
-//  INVALIDPARAMETER_CERTNOTMATCHDOMAIN = "InvalidParameter.CertNotMatchDomain"
-//  INVALIDPARAMETER_INVALIDHTTPSCERTINFO = "InvalidParameter.InvalidHttpsCertInfo"
-//  INVALIDPARAMETER_INVALIDPARAMETER = "InvalidParameter.InvalidParameter"
-//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAME = "InvalidParameter.InvalidRequestHeaderName"
-//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
-//  INVALIDPARAMETERVALUE_INVALIDALIASDOMAINNAME = "InvalidParameterValue.InvalidAliasDomainName"
-//  INVALIDPARAMETERVALUE_INVALIDALIASNAMESUFFIX = "InvalidParameterValue.InvalidAliasNameSuffix"
-//  LIMITEXCEEDED = "LimitExceeded"
-//  OPERATIONDENIED = "OperationDenied"
-//  OPERATIONDENIED_CONFIGLOCKED = "OperationDenied.ConfigLocked"
-//  OPERATIONDENIED_DOMAINISBLOCKED = "OperationDenied.DomainIsBlocked"
-//  OPERATIONDENIED_DOMAINNOICP = "OperationDenied.DomainNoICP"
-//  OPERATIONDENIED_VERSIONCONTROLLOCKED = "OperationDenied.VersionControlLocked"
-//  RESOURCEINUSE_ALIASNAME = "ResourceInUse.AliasName"
-//  RESOURCEINUSE_DUPLICATENAME = "ResourceInUse.DuplicateName"
-//  RESOURCEINUSE_ZONE = "ResourceInUse.Zone"
-//  RESOURCENOTFOUND = "ResourceNotFound"
-//  RESOURCEUNAVAILABLE_DOMAINALREADYEXISTS = "ResourceUnavailable.DomainAlreadyExists"
-//  UNAUTHORIZEDOPERATION = "UnauthorizedOperation"
-//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
-//  UNSUPPORTEDOPERATION_TARGETNAMEORIGINTYPECOS = "UnsupportedOperation.TargetNameOriginTypeCos"
-func (c *Client) CreateAliasDomain(request *CreateAliasDomainRequest) (response *CreateAliasDomainResponse, err error) {
-    return c.CreateAliasDomainWithContext(context.Background(), request)
-}
-
-// CreateAliasDomain
-// 创建别称域名。
+// 该功能仅企业版套餐支持，并且该功能当前仍在内测中，如需使用，请[联系我们](https://cloud.tencent.com/online-service?from=connect-us)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -504,6 +749,44 @@ func (c *Client) CreateAliasDomain(request *CreateAliasDomainRequest) (response 
 //  OPERATIONDENIED_DOMAINNOICP = "OperationDenied.DomainNoICP"
 //  OPERATIONDENIED_VERSIONCONTROLLOCKED = "OperationDenied.VersionControlLocked"
 //  RESOURCEINUSE_ALIASNAME = "ResourceInUse.AliasName"
+//  RESOURCEINUSE_ALREADYEXISTSASANACCELERATIONDOMAIN = "ResourceInUse.AlreadyExistsAsAnAccelerationDomain"
+//  RESOURCEINUSE_DUPLICATENAME = "ResourceInUse.DuplicateName"
+//  RESOURCEINUSE_ZONE = "ResourceInUse.Zone"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  RESOURCEUNAVAILABLE_DOMAINALREADYEXISTS = "ResourceUnavailable.DomainAlreadyExists"
+//  UNAUTHORIZEDOPERATION = "UnauthorizedOperation"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNSUPPORTEDOPERATION_TARGETNAMEORIGINTYPECOS = "UnsupportedOperation.TargetNameOriginTypeCos"
+func (c *Client) CreateAliasDomain(request *CreateAliasDomainRequest) (response *CreateAliasDomainResponse, err error) {
+    return c.CreateAliasDomainWithContext(context.Background(), request)
+}
+
+// CreateAliasDomain
+// 创建别称域名。
+//
+// 该功能仅企业版套餐支持，并且该功能当前仍在内测中，如需使用，请[联系我们](https://cloud.tencent.com/online-service?from=connect-us)。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_CERTIFICATENOTFOUND = "FailedOperation.CertificateNotFound"
+//  INTERNALERROR = "InternalError"
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INVALIDPARAMETER_ALIASDOMAINNOTSUPPORTSMCERT = "InvalidParameter.AliasDomainNotSupportSMCert"
+//  INVALIDPARAMETER_CERTNOTMATCHDOMAIN = "InvalidParameter.CertNotMatchDomain"
+//  INVALIDPARAMETER_INVALIDHTTPSCERTINFO = "InvalidParameter.InvalidHttpsCertInfo"
+//  INVALIDPARAMETER_INVALIDPARAMETER = "InvalidParameter.InvalidParameter"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAME = "InvalidParameter.InvalidRequestHeaderName"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  INVALIDPARAMETERVALUE_INVALIDALIASDOMAINNAME = "InvalidParameterValue.InvalidAliasDomainName"
+//  INVALIDPARAMETERVALUE_INVALIDALIASNAMESUFFIX = "InvalidParameterValue.InvalidAliasNameSuffix"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_CONFIGLOCKED = "OperationDenied.ConfigLocked"
+//  OPERATIONDENIED_DOMAINISBLOCKED = "OperationDenied.DomainIsBlocked"
+//  OPERATIONDENIED_DOMAINNOICP = "OperationDenied.DomainNoICP"
+//  OPERATIONDENIED_VERSIONCONTROLLOCKED = "OperationDenied.VersionControlLocked"
+//  RESOURCEINUSE_ALIASNAME = "ResourceInUse.AliasName"
+//  RESOURCEINUSE_ALREADYEXISTSASANACCELERATIONDOMAIN = "ResourceInUse.AlreadyExistsAsAnAccelerationDomain"
 //  RESOURCEINUSE_DUPLICATENAME = "ResourceInUse.DuplicateName"
 //  RESOURCEINUSE_ZONE = "ResourceInUse.Zone"
 //  RESOURCENOTFOUND = "ResourceNotFound"
@@ -515,6 +798,7 @@ func (c *Client) CreateAliasDomainWithContext(ctx context.Context, request *Crea
     if request == nil {
         request = NewCreateAliasDomainRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateAliasDomain")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateAliasDomain require credential")
@@ -588,6 +872,7 @@ func (c *Client) CreateApplicationProxyWithContext(ctx context.Context, request 
     if request == nil {
         request = NewCreateApplicationProxyRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateApplicationProxy")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateApplicationProxy require credential")
@@ -669,6 +954,7 @@ func (c *Client) CreateApplicationProxyRuleWithContext(ctx context.Context, requ
     if request == nil {
         request = NewCreateApplicationProxyRuleRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateApplicationProxyRule")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateApplicationProxyRule require credential")
@@ -720,6 +1006,7 @@ func (c *Client) CreateCLSIndexWithContext(ctx context.Context, request *CreateC
     if request == nil {
         request = NewCreateCLSIndexRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateCLSIndex")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateCLSIndex require credential")
@@ -752,18 +1039,22 @@ func NewCreateConfigGroupVersionResponse() (response *CreateConfigGroupVersionRe
 }
 
 // CreateConfigGroupVersion
-// 在版本管理模式下，用于创建指定配置组的新版本。版本管理功能内测中，当前仅白名单开放。
+// 在版本管理模式下，用于创建指定配置组的新版本。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
 //  FAILEDOPERATION_CONFIGCONDITIONSYNTAXERROR = "FailedOperation.ConfigConditionSyntaxError"
 //  FAILEDOPERATION_CONFIGCONDITIONUNKNOWNTARGET = "FailedOperation.ConfigConditionUnknownTarget"
 //  FAILEDOPERATION_CONFIGCONDITIONVALUEEMPTYERROR = "FailedOperation.ConfigConditionValueEmptyError"
+//  FAILEDOPERATION_CONFIGDUPLICATEKEYERROR = "FailedOperation.ConfigDuplicateKeyError"
 //  FAILEDOPERATION_CONFIGFIELDTYPEERROR = "FailedOperation.ConfigFieldTypeError"
 //  FAILEDOPERATION_CONFIGFORMATERROR = "FailedOperation.ConfigFormatError"
+//  FAILEDOPERATION_CONFIGJSONFORMATERROR = "FailedOperation.ConfigJSONFormatError"
 //  FAILEDOPERATION_CONFIGMALFORMEDCONTENT = "FailedOperation.ConfigMalformedContent"
 //  FAILEDOPERATION_CONFIGPARAMVALIDATEERRORS = "FailedOperation.ConfigParamValidateErrors"
+//  FAILEDOPERATION_CONFIGTIMEPARSINGERROR = "FailedOperation.ConfigTimeParsingError"
 //  FAILEDOPERATION_CONFIGUNKNOWNFIELD = "FailedOperation.ConfigUnknownField"
+//  FAILEDOPERATION_CONFIGUNSUPPORTEDACTION = "FailedOperation.ConfigUnsupportedAction"
 //  FAILEDOPERATION_CONFIGUNSUPPORTEDFORMATVERSION = "FailedOperation.ConfigUnsupportedFormatVersion"
 //  FAILEDOPERATION_MISSINGCONFIGCHUNK = "FailedOperation.MissingConfigChunk"
 //  FAILEDOPERATION_UNKNOWNCONFIGGROUPTYPE = "FailedOperation.UnknownConfigGroupType"
@@ -796,18 +1087,22 @@ func (c *Client) CreateConfigGroupVersion(request *CreateConfigGroupVersionReque
 }
 
 // CreateConfigGroupVersion
-// 在版本管理模式下，用于创建指定配置组的新版本。版本管理功能内测中，当前仅白名单开放。
+// 在版本管理模式下，用于创建指定配置组的新版本。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
 //  FAILEDOPERATION_CONFIGCONDITIONSYNTAXERROR = "FailedOperation.ConfigConditionSyntaxError"
 //  FAILEDOPERATION_CONFIGCONDITIONUNKNOWNTARGET = "FailedOperation.ConfigConditionUnknownTarget"
 //  FAILEDOPERATION_CONFIGCONDITIONVALUEEMPTYERROR = "FailedOperation.ConfigConditionValueEmptyError"
+//  FAILEDOPERATION_CONFIGDUPLICATEKEYERROR = "FailedOperation.ConfigDuplicateKeyError"
 //  FAILEDOPERATION_CONFIGFIELDTYPEERROR = "FailedOperation.ConfigFieldTypeError"
 //  FAILEDOPERATION_CONFIGFORMATERROR = "FailedOperation.ConfigFormatError"
+//  FAILEDOPERATION_CONFIGJSONFORMATERROR = "FailedOperation.ConfigJSONFormatError"
 //  FAILEDOPERATION_CONFIGMALFORMEDCONTENT = "FailedOperation.ConfigMalformedContent"
 //  FAILEDOPERATION_CONFIGPARAMVALIDATEERRORS = "FailedOperation.ConfigParamValidateErrors"
+//  FAILEDOPERATION_CONFIGTIMEPARSINGERROR = "FailedOperation.ConfigTimeParsingError"
 //  FAILEDOPERATION_CONFIGUNKNOWNFIELD = "FailedOperation.ConfigUnknownField"
+//  FAILEDOPERATION_CONFIGUNSUPPORTEDACTION = "FailedOperation.ConfigUnsupportedAction"
 //  FAILEDOPERATION_CONFIGUNSUPPORTEDFORMATVERSION = "FailedOperation.ConfigUnsupportedFormatVersion"
 //  FAILEDOPERATION_MISSINGCONFIGCHUNK = "FailedOperation.MissingConfigChunk"
 //  FAILEDOPERATION_UNKNOWNCONFIGGROUPTYPE = "FailedOperation.UnknownConfigGroupType"
@@ -839,6 +1134,7 @@ func (c *Client) CreateConfigGroupVersionWithContext(ctx context.Context, reques
     if request == nil {
         request = NewCreateConfigGroupVersionRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateConfigGroupVersion")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateConfigGroupVersion require credential")
@@ -847,6 +1143,692 @@ func (c *Client) CreateConfigGroupVersionWithContext(ctx context.Context, reques
     request.SetContext(ctx)
     
     response = NewCreateConfigGroupVersionResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateContentIdentifierRequest() (request *CreateContentIdentifierRequest) {
+    request = &CreateContentIdentifierRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "CreateContentIdentifier")
+    
+    
+    return
+}
+
+func NewCreateContentIdentifierResponse() (response *CreateContentIdentifierResponse) {
+    response = &CreateContentIdentifierResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateContentIdentifier
+// 创建内容标识符，可以设置描述、标签等信息，同时需要绑定企业版套餐用于统计计费数据；一个内容标识符只能绑定一个计费套餐，一个计费套餐可以绑定多个内容标识符。该功能仅限白名单开放。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_CONFIGCONDITIONSYNTAXERROR = "FailedOperation.ConfigConditionSyntaxError"
+//  FAILEDOPERATION_CONFIGCONDITIONUNKNOWNTARGET = "FailedOperation.ConfigConditionUnknownTarget"
+//  FAILEDOPERATION_CONFIGCONDITIONVALUEEMPTYERROR = "FailedOperation.ConfigConditionValueEmptyError"
+//  FAILEDOPERATION_CONFIGDUPLICATEKEYERROR = "FailedOperation.ConfigDuplicateKeyError"
+//  FAILEDOPERATION_CONFIGFIELDTYPEERROR = "FailedOperation.ConfigFieldTypeError"
+//  FAILEDOPERATION_CONFIGFORMATERROR = "FailedOperation.ConfigFormatError"
+//  FAILEDOPERATION_CONFIGJSONFORMATERROR = "FailedOperation.ConfigJSONFormatError"
+//  FAILEDOPERATION_CONFIGMALFORMEDCONTENT = "FailedOperation.ConfigMalformedContent"
+//  FAILEDOPERATION_CONFIGPARAMVALIDATEERRORS = "FailedOperation.ConfigParamValidateErrors"
+//  FAILEDOPERATION_CONFIGTIMEPARSINGERROR = "FailedOperation.ConfigTimeParsingError"
+//  FAILEDOPERATION_CONFIGUNKNOWNFIELD = "FailedOperation.ConfigUnknownField"
+//  FAILEDOPERATION_CONFIGUNSUPPORTEDACTION = "FailedOperation.ConfigUnsupportedAction"
+//  FAILEDOPERATION_CONFIGUNSUPPORTEDFORMATVERSION = "FailedOperation.ConfigUnsupportedFormatVersion"
+//  FAILEDOPERATION_MISSINGCONFIGCHUNK = "FailedOperation.MissingConfigChunk"
+//  FAILEDOPERATION_UNKNOWNCONFIGGROUPTYPE = "FailedOperation.UnknownConfigGroupType"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_DUPLICATERULE = "InvalidParameter.DuplicateRule"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUE = "InvalidParameter.ErrInvalidConditionValueBadValue"
+//  INVALIDPARAMETER_INVALIDCACHEKEYQUERYSTRINGACTION = "InvalidParameter.InvalidCacheKeyQueryStringAction"
+//  INVALIDPARAMETER_INVALIDCONDITIONS = "InvalidParameter.InvalidConditions"
+//  INVALIDPARAMETER_INVALIDDYNAMICROUTINE = "InvalidParameter.InvalidDynamicRoutine"
+//  INVALIDPARAMETER_INVALIDIPV6SWITCH = "InvalidParameter.InvalidIpv6Switch"
+//  INVALIDPARAMETER_INVALIDMAXAGEFOLLOWORIGIN = "InvalidParameter.InvalidMaxAgeFollowOrigin"
+//  INVALIDPARAMETER_INVALIDSTANDARDDEBUG = "InvalidParameter.InvalidStandardDebug"
+//  INVALIDPARAMETER_POSTMAXSIZELIMITEXCEEDED = "InvalidParameter.PostMaxSizeLimitExceeded"
+//  INVALIDPARAMETER_STATUSCODECACHEINVALIDSTATUSCODE = "InvalidParameter.StatusCodeCacheInvalidStatusCode"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  LIMITEXCEEDED_RULELIMITEXCEEDED = "LimitExceeded.RuleLimitExceeded"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_ACCELERATEMAINLANDIPV6CONFLICT = "OperationDenied.AccelerateMainlandIpv6Conflict"
+//  OPERATIONDENIED_CONFIGLOCKED = "OperationDenied.ConfigLocked"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_NOTINVERSIONCONTROLWHITELIST = "OperationDenied.NotInVersionControlWhiteList"
+//  OPERATIONDENIED_OWNERSHIPVERIFICATIONNOTPASSED = "OperationDenied.OwnershipVerificationNotPassed"
+//  OPERATIONDENIED_VERSIONCONTROLLOCKED = "OperationDenied.VersionControlLocked"
+//  OPERATIONDENIED_WORKMODENOTINVERSIONCONTROL = "OperationDenied.WorkModeNotInVersionControl"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  RESOURCEUNAVAILABLE_FUNCTIONNOTFOUND = "ResourceUnavailable.FunctionNotFound"
+func (c *Client) CreateContentIdentifier(request *CreateContentIdentifierRequest) (response *CreateContentIdentifierResponse, err error) {
+    return c.CreateContentIdentifierWithContext(context.Background(), request)
+}
+
+// CreateContentIdentifier
+// 创建内容标识符，可以设置描述、标签等信息，同时需要绑定企业版套餐用于统计计费数据；一个内容标识符只能绑定一个计费套餐，一个计费套餐可以绑定多个内容标识符。该功能仅限白名单开放。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_CONFIGCONDITIONSYNTAXERROR = "FailedOperation.ConfigConditionSyntaxError"
+//  FAILEDOPERATION_CONFIGCONDITIONUNKNOWNTARGET = "FailedOperation.ConfigConditionUnknownTarget"
+//  FAILEDOPERATION_CONFIGCONDITIONVALUEEMPTYERROR = "FailedOperation.ConfigConditionValueEmptyError"
+//  FAILEDOPERATION_CONFIGDUPLICATEKEYERROR = "FailedOperation.ConfigDuplicateKeyError"
+//  FAILEDOPERATION_CONFIGFIELDTYPEERROR = "FailedOperation.ConfigFieldTypeError"
+//  FAILEDOPERATION_CONFIGFORMATERROR = "FailedOperation.ConfigFormatError"
+//  FAILEDOPERATION_CONFIGJSONFORMATERROR = "FailedOperation.ConfigJSONFormatError"
+//  FAILEDOPERATION_CONFIGMALFORMEDCONTENT = "FailedOperation.ConfigMalformedContent"
+//  FAILEDOPERATION_CONFIGPARAMVALIDATEERRORS = "FailedOperation.ConfigParamValidateErrors"
+//  FAILEDOPERATION_CONFIGTIMEPARSINGERROR = "FailedOperation.ConfigTimeParsingError"
+//  FAILEDOPERATION_CONFIGUNKNOWNFIELD = "FailedOperation.ConfigUnknownField"
+//  FAILEDOPERATION_CONFIGUNSUPPORTEDACTION = "FailedOperation.ConfigUnsupportedAction"
+//  FAILEDOPERATION_CONFIGUNSUPPORTEDFORMATVERSION = "FailedOperation.ConfigUnsupportedFormatVersion"
+//  FAILEDOPERATION_MISSINGCONFIGCHUNK = "FailedOperation.MissingConfigChunk"
+//  FAILEDOPERATION_UNKNOWNCONFIGGROUPTYPE = "FailedOperation.UnknownConfigGroupType"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_DUPLICATERULE = "InvalidParameter.DuplicateRule"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUE = "InvalidParameter.ErrInvalidConditionValueBadValue"
+//  INVALIDPARAMETER_INVALIDCACHEKEYQUERYSTRINGACTION = "InvalidParameter.InvalidCacheKeyQueryStringAction"
+//  INVALIDPARAMETER_INVALIDCONDITIONS = "InvalidParameter.InvalidConditions"
+//  INVALIDPARAMETER_INVALIDDYNAMICROUTINE = "InvalidParameter.InvalidDynamicRoutine"
+//  INVALIDPARAMETER_INVALIDIPV6SWITCH = "InvalidParameter.InvalidIpv6Switch"
+//  INVALIDPARAMETER_INVALIDMAXAGEFOLLOWORIGIN = "InvalidParameter.InvalidMaxAgeFollowOrigin"
+//  INVALIDPARAMETER_INVALIDSTANDARDDEBUG = "InvalidParameter.InvalidStandardDebug"
+//  INVALIDPARAMETER_POSTMAXSIZELIMITEXCEEDED = "InvalidParameter.PostMaxSizeLimitExceeded"
+//  INVALIDPARAMETER_STATUSCODECACHEINVALIDSTATUSCODE = "InvalidParameter.StatusCodeCacheInvalidStatusCode"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  LIMITEXCEEDED_RULELIMITEXCEEDED = "LimitExceeded.RuleLimitExceeded"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_ACCELERATEMAINLANDIPV6CONFLICT = "OperationDenied.AccelerateMainlandIpv6Conflict"
+//  OPERATIONDENIED_CONFIGLOCKED = "OperationDenied.ConfigLocked"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_NOTINVERSIONCONTROLWHITELIST = "OperationDenied.NotInVersionControlWhiteList"
+//  OPERATIONDENIED_OWNERSHIPVERIFICATIONNOTPASSED = "OperationDenied.OwnershipVerificationNotPassed"
+//  OPERATIONDENIED_VERSIONCONTROLLOCKED = "OperationDenied.VersionControlLocked"
+//  OPERATIONDENIED_WORKMODENOTINVERSIONCONTROL = "OperationDenied.WorkModeNotInVersionControl"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  RESOURCEUNAVAILABLE_FUNCTIONNOTFOUND = "ResourceUnavailable.FunctionNotFound"
+func (c *Client) CreateContentIdentifierWithContext(ctx context.Context, request *CreateContentIdentifierRequest) (response *CreateContentIdentifierResponse, err error) {
+    if request == nil {
+        request = NewCreateContentIdentifierRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateContentIdentifier")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateContentIdentifier require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateContentIdentifierResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateCustomizeErrorPageRequest() (request *CreateCustomizeErrorPageRequest) {
+    request = &CreateCustomizeErrorPageRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "CreateCustomizeErrorPage")
+    
+    
+    return
+}
+
+func NewCreateCustomizeErrorPageResponse() (response *CreateCustomizeErrorPageResponse) {
+    response = &CreateCustomizeErrorPageResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateCustomizeErrorPage
+// 创建自定义错误页面。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETERVALUE_CONTENTTYPENOTMATCH = "InvalidParameterValue.ContentTypeNotMatch"
+//  INVALIDPARAMETERVALUE_PAGENAMEALREADYEXIST = "InvalidParameterValue.PageNameAlreadyExist"
+func (c *Client) CreateCustomizeErrorPage(request *CreateCustomizeErrorPageRequest) (response *CreateCustomizeErrorPageResponse, err error) {
+    return c.CreateCustomizeErrorPageWithContext(context.Background(), request)
+}
+
+// CreateCustomizeErrorPage
+// 创建自定义错误页面。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETERVALUE_CONTENTTYPENOTMATCH = "InvalidParameterValue.ContentTypeNotMatch"
+//  INVALIDPARAMETERVALUE_PAGENAMEALREADYEXIST = "InvalidParameterValue.PageNameAlreadyExist"
+func (c *Client) CreateCustomizeErrorPageWithContext(ctx context.Context, request *CreateCustomizeErrorPageRequest) (response *CreateCustomizeErrorPageResponse, err error) {
+    if request == nil {
+        request = NewCreateCustomizeErrorPageRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateCustomizeErrorPage")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateCustomizeErrorPage require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateCustomizeErrorPageResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateDnsRecordRequest() (request *CreateDnsRecordRequest) {
+    request = &CreateDnsRecordRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "CreateDnsRecord")
+    
+    
+    return
+}
+
+func NewCreateDnsRecordResponse() (response *CreateDnsRecordResponse) {
+    response = &CreateDnsRecordResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateDnsRecord
+// 在创建完站点后，并且站点为 NS 模式接入时，您可以通过本接口创建 DNS 记录。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETERVALUE_CONTENTTYPENOTMATCH = "InvalidParameterValue.ContentTypeNotMatch"
+//  INVALIDPARAMETERVALUE_PAGENAMEALREADYEXIST = "InvalidParameterValue.PageNameAlreadyExist"
+func (c *Client) CreateDnsRecord(request *CreateDnsRecordRequest) (response *CreateDnsRecordResponse, err error) {
+    return c.CreateDnsRecordWithContext(context.Background(), request)
+}
+
+// CreateDnsRecord
+// 在创建完站点后，并且站点为 NS 模式接入时，您可以通过本接口创建 DNS 记录。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETERVALUE_CONTENTTYPENOTMATCH = "InvalidParameterValue.ContentTypeNotMatch"
+//  INVALIDPARAMETERVALUE_PAGENAMEALREADYEXIST = "InvalidParameterValue.PageNameAlreadyExist"
+func (c *Client) CreateDnsRecordWithContext(ctx context.Context, request *CreateDnsRecordRequest) (response *CreateDnsRecordResponse, err error) {
+    if request == nil {
+        request = NewCreateDnsRecordRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateDnsRecord")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateDnsRecord require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateDnsRecordResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateEdgeKVNamespaceRequest() (request *CreateEdgeKVNamespaceRequest) {
+    request = &CreateEdgeKVNamespaceRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "CreateEdgeKVNamespace")
+    
+    
+    return
+}
+
+func NewCreateEdgeKVNamespaceResponse() (response *CreateEdgeKVNamespaceResponse) {
+    response = &CreateEdgeKVNamespaceResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateEdgeKVNamespace
+// 本接口用于在指定站点下创建 KV 命名空间。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_BADNAMESPACENAME = "InvalidParameter.BadNamespaceName"
+//  INVALIDPARAMETER_DUPLICATEBINDINGNAME = "InvalidParameter.DuplicateBindingName"
+//  INVALIDPARAMETER_REMARKTOOLONG = "InvalidParameter.RemarkTooLong"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+func (c *Client) CreateEdgeKVNamespace(request *CreateEdgeKVNamespaceRequest) (response *CreateEdgeKVNamespaceResponse, err error) {
+    return c.CreateEdgeKVNamespaceWithContext(context.Background(), request)
+}
+
+// CreateEdgeKVNamespace
+// 本接口用于在指定站点下创建 KV 命名空间。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_BADNAMESPACENAME = "InvalidParameter.BadNamespaceName"
+//  INVALIDPARAMETER_DUPLICATEBINDINGNAME = "InvalidParameter.DuplicateBindingName"
+//  INVALIDPARAMETER_REMARKTOOLONG = "InvalidParameter.RemarkTooLong"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+func (c *Client) CreateEdgeKVNamespaceWithContext(ctx context.Context, request *CreateEdgeKVNamespaceRequest) (response *CreateEdgeKVNamespaceResponse, err error) {
+    if request == nil {
+        request = NewCreateEdgeKVNamespaceRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateEdgeKVNamespace")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateEdgeKVNamespace require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateEdgeKVNamespaceResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateFunctionRequest() (request *CreateFunctionRequest) {
+    request = &CreateFunctionRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "CreateFunction")
+    
+    
+    return
+}
+
+func NewCreateFunctionResponse() (response *CreateFunctionResponse) {
+    response = &CreateFunctionResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateFunction
+// 创建并部署边缘函数至 EdgeOne 的边缘节点。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_FUNCTIONDEPLOYING = "FailedOperation.FunctionDeploying"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_BADCONTENT = "InvalidParameter.BadContent"
+//  INVALIDPARAMETER_BADFUNCTIONNAME = "InvalidParameter.BadFunctionName"
+//  INVALIDPARAMETER_CONTENTEXCEEDSLIMIT = "InvalidParameter.ContentExceedsLimit"
+//  INVALIDPARAMETER_FUNCTIONNAMECONFLICT = "InvalidParameter.FunctionNameConflict"
+//  INVALIDPARAMETER_LENGTHEXCEEDSLIMIT = "InvalidParameter.LengthExceedsLimit"
+//  LIMITEXCEEDED_FUNCTIONLIMITEXCEEDED = "LimitExceeded.FunctionLimitExceeded"
+//  OPERATIONDENIED_VERSIONCONTROLLOCKED = "OperationDenied.VersionControlLocked"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) CreateFunction(request *CreateFunctionRequest) (response *CreateFunctionResponse, err error) {
+    return c.CreateFunctionWithContext(context.Background(), request)
+}
+
+// CreateFunction
+// 创建并部署边缘函数至 EdgeOne 的边缘节点。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_FUNCTIONDEPLOYING = "FailedOperation.FunctionDeploying"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_BADCONTENT = "InvalidParameter.BadContent"
+//  INVALIDPARAMETER_BADFUNCTIONNAME = "InvalidParameter.BadFunctionName"
+//  INVALIDPARAMETER_CONTENTEXCEEDSLIMIT = "InvalidParameter.ContentExceedsLimit"
+//  INVALIDPARAMETER_FUNCTIONNAMECONFLICT = "InvalidParameter.FunctionNameConflict"
+//  INVALIDPARAMETER_LENGTHEXCEEDSLIMIT = "InvalidParameter.LengthExceedsLimit"
+//  LIMITEXCEEDED_FUNCTIONLIMITEXCEEDED = "LimitExceeded.FunctionLimitExceeded"
+//  OPERATIONDENIED_VERSIONCONTROLLOCKED = "OperationDenied.VersionControlLocked"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) CreateFunctionWithContext(ctx context.Context, request *CreateFunctionRequest) (response *CreateFunctionResponse, err error) {
+    if request == nil {
+        request = NewCreateFunctionRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateFunction")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateFunction require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateFunctionResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateFunctionReplicaRequest() (request *CreateFunctionReplicaRequest) {
+    request = &CreateFunctionReplicaRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "CreateFunctionReplica")
+    
+    
+    return
+}
+
+func NewCreateFunctionReplicaResponse() (response *CreateFunctionReplicaResponse) {
+    response = &CreateFunctionReplicaResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateFunctionReplica
+// 本接口用于创建指定边缘函数的副本。创建副本后，当客户端请求匹配已配置的触发规则或默认域名时，您可以通过在请求头中添加 EO-Function-Replica-Name:[副本名称] 来访问特定的函数副本。每个函数默认支持创建两个副本。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_FUNCTIONDEPLOYING = "FailedOperation.FunctionDeploying"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_BADCONTENT = "InvalidParameter.BadContent"
+//  INVALIDPARAMETER_BADFUNCTIONNAME = "InvalidParameter.BadFunctionName"
+//  INVALIDPARAMETER_CONTENTEXCEEDSLIMIT = "InvalidParameter.ContentExceedsLimit"
+//  INVALIDPARAMETER_FUNCTIONNAMECONFLICT = "InvalidParameter.FunctionNameConflict"
+//  INVALIDPARAMETER_LENGTHEXCEEDSLIMIT = "InvalidParameter.LengthExceedsLimit"
+//  LIMITEXCEEDED_FUNCTIONLIMITEXCEEDED = "LimitExceeded.FunctionLimitExceeded"
+//  OPERATIONDENIED_VERSIONCONTROLLOCKED = "OperationDenied.VersionControlLocked"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) CreateFunctionReplica(request *CreateFunctionReplicaRequest) (response *CreateFunctionReplicaResponse, err error) {
+    return c.CreateFunctionReplicaWithContext(context.Background(), request)
+}
+
+// CreateFunctionReplica
+// 本接口用于创建指定边缘函数的副本。创建副本后，当客户端请求匹配已配置的触发规则或默认域名时，您可以通过在请求头中添加 EO-Function-Replica-Name:[副本名称] 来访问特定的函数副本。每个函数默认支持创建两个副本。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_FUNCTIONDEPLOYING = "FailedOperation.FunctionDeploying"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_BADCONTENT = "InvalidParameter.BadContent"
+//  INVALIDPARAMETER_BADFUNCTIONNAME = "InvalidParameter.BadFunctionName"
+//  INVALIDPARAMETER_CONTENTEXCEEDSLIMIT = "InvalidParameter.ContentExceedsLimit"
+//  INVALIDPARAMETER_FUNCTIONNAMECONFLICT = "InvalidParameter.FunctionNameConflict"
+//  INVALIDPARAMETER_LENGTHEXCEEDSLIMIT = "InvalidParameter.LengthExceedsLimit"
+//  LIMITEXCEEDED_FUNCTIONLIMITEXCEEDED = "LimitExceeded.FunctionLimitExceeded"
+//  OPERATIONDENIED_VERSIONCONTROLLOCKED = "OperationDenied.VersionControlLocked"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) CreateFunctionReplicaWithContext(ctx context.Context, request *CreateFunctionReplicaRequest) (response *CreateFunctionReplicaResponse, err error) {
+    if request == nil {
+        request = NewCreateFunctionReplicaRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateFunctionReplica")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateFunctionReplica require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateFunctionReplicaResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateFunctionRuleRequest() (request *CreateFunctionRuleRequest) {
+    request = &CreateFunctionRuleRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "CreateFunctionRule")
+    
+    
+    return
+}
+
+func NewCreateFunctionRuleResponse() (response *CreateFunctionRuleResponse) {
+    response = &CreateFunctionRuleResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateFunctionRule
+// 创建边缘函数的触发规则。支持通过自定义过滤条件来决定是否需要执行函数，当需要执行函数时，提供了多种选择目标函数的方式，包括：直接指定，基于客户端归属地区选择和基于权重选择。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_RULEOPERATIONCONFLICT = "FailedOperation.RuleOperationConflict"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_DUPLICATERULE = "InvalidParameter.DuplicateRule"
+//  INVALIDPARAMETER_INVALIDCONDITIONS = "InvalidParameter.InvalidConditions"
+//  LIMITEXCEEDED_RULELIMITEXCEEDED = "LimitExceeded.RuleLimitExceeded"
+//  OPERATIONDENIED_VERSIONCONTROLLOCKED = "OperationDenied.VersionControlLocked"
+//  RESOURCEUNAVAILABLE_FUNCTIONNOTFOUND = "ResourceUnavailable.FunctionNotFound"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
+func (c *Client) CreateFunctionRule(request *CreateFunctionRuleRequest) (response *CreateFunctionRuleResponse, err error) {
+    return c.CreateFunctionRuleWithContext(context.Background(), request)
+}
+
+// CreateFunctionRule
+// 创建边缘函数的触发规则。支持通过自定义过滤条件来决定是否需要执行函数，当需要执行函数时，提供了多种选择目标函数的方式，包括：直接指定，基于客户端归属地区选择和基于权重选择。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_RULEOPERATIONCONFLICT = "FailedOperation.RuleOperationConflict"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_DUPLICATERULE = "InvalidParameter.DuplicateRule"
+//  INVALIDPARAMETER_INVALIDCONDITIONS = "InvalidParameter.InvalidConditions"
+//  LIMITEXCEEDED_RULELIMITEXCEEDED = "LimitExceeded.RuleLimitExceeded"
+//  OPERATIONDENIED_VERSIONCONTROLLOCKED = "OperationDenied.VersionControlLocked"
+//  RESOURCEUNAVAILABLE_FUNCTIONNOTFOUND = "ResourceUnavailable.FunctionNotFound"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
+func (c *Client) CreateFunctionRuleWithContext(ctx context.Context, request *CreateFunctionRuleRequest) (response *CreateFunctionRuleResponse, err error) {
+    if request == nil {
+        request = NewCreateFunctionRuleRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateFunctionRule")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateFunctionRule require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateFunctionRuleResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateInferenceAPITokenRequest() (request *CreateInferenceAPITokenRequest) {
+    request = &CreateInferenceAPITokenRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "CreateInferenceAPIToken")
+    
+    
+    return
+}
+
+func NewCreateInferenceAPITokenResponse() (response *CreateInferenceAPITokenResponse) {
+    response = &CreateInferenceAPITokenResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateInferenceAPIToken
+// 创建推理 API Token，用于访问推理服务时进行鉴权，Token 内容仅在创建时返回一次，每个站点最多创建 100 个。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+//  LIMITEXCEEDED = "LimitExceeded"
+func (c *Client) CreateInferenceAPIToken(request *CreateInferenceAPITokenRequest) (response *CreateInferenceAPITokenResponse, err error) {
+    return c.CreateInferenceAPITokenWithContext(context.Background(), request)
+}
+
+// CreateInferenceAPIToken
+// 创建推理 API Token，用于访问推理服务时进行鉴权，Token 内容仅在创建时返回一次，每个站点最多创建 100 个。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+//  LIMITEXCEEDED = "LimitExceeded"
+func (c *Client) CreateInferenceAPITokenWithContext(ctx context.Context, request *CreateInferenceAPITokenRequest) (response *CreateInferenceAPITokenResponse, err error) {
+    if request == nil {
+        request = NewCreateInferenceAPITokenRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateInferenceAPIToken")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateInferenceAPIToken require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateInferenceAPITokenResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateInferenceServiceRequest() (request *CreateInferenceServiceRequest) {
+    request = &CreateInferenceServiceRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "CreateInferenceService")
+    
+    
+    return
+}
+
+func NewCreateInferenceServiceResponse() (response *CreateInferenceServiceResponse) {
+    response = &CreateInferenceServiceResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateInferenceService
+// 创建推理服务，支持设置服务名称、监听端口、容器镜像配置和资源配置，创建成功后提供推理访问地址。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETERVALUE_INFERENCESERVICENAME = "InvalidParameterValue.InferenceServiceName"
+//  INVALIDPARAMETERVALUE_INFERENCESERVICENAMEDUPLICATE = "InvalidParameterValue.InferenceServiceNameDuplicate"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+//  LIMITEXCEEDED_INFERENCESERVICE = "LimitExceeded.InferenceService"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) CreateInferenceService(request *CreateInferenceServiceRequest) (response *CreateInferenceServiceResponse, err error) {
+    return c.CreateInferenceServiceWithContext(context.Background(), request)
+}
+
+// CreateInferenceService
+// 创建推理服务，支持设置服务名称、监听端口、容器镜像配置和资源配置，创建成功后提供推理访问地址。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETERVALUE_INFERENCESERVICENAME = "InvalidParameterValue.InferenceServiceName"
+//  INVALIDPARAMETERVALUE_INFERENCESERVICENAMEDUPLICATE = "InvalidParameterValue.InferenceServiceNameDuplicate"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+//  LIMITEXCEEDED_INFERENCESERVICE = "LimitExceeded.InferenceService"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) CreateInferenceServiceWithContext(ctx context.Context, request *CreateInferenceServiceRequest) (response *CreateInferenceServiceResponse, err error) {
+    if request == nil {
+        request = NewCreateInferenceServiceRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateInferenceService")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateInferenceService require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateInferenceServiceResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateJustInTimeTranscodeTemplateRequest() (request *CreateJustInTimeTranscodeTemplateRequest) {
+    request = &CreateJustInTimeTranscodeTemplateRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "CreateJustInTimeTranscodeTemplate")
+    
+    
+    return
+}
+
+func NewCreateJustInTimeTranscodeTemplateResponse() (response *CreateJustInTimeTranscodeTemplateResponse) {
+    response = &CreateJustInTimeTranscodeTemplateResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateJustInTimeTranscodeTemplate
+// 即时转码已经提供了预置转码模板，满足大部分的需求。如果有个性化的转码需求，可以通过本接口创建自定义的转码模板，最多可创建100个自定义转码模板。
+//
+// 为了确保即时转码效果的一致性，避免因 EO 缓存或 M3U8 分片处理过程中的模板变更导致视频输出异常，模板在创建后不可进行修改。
+//
+// 即时转码详细能力了解：[EdgeOne视频即时处理功能介绍](https://cloud.tencent.com/document/product/1552/111927)。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_PRODUCTDISCONTINUED = "FailedOperation.ProductDiscontinued"
+//  FAILEDOPERATION_PRODUCTNOTACTIVATED = "FailedOperation.ProductNotActivated"
+//  FAILEDOPERATION_TEMPLATEOVERLIMIT = "FailedOperation.TemplateOverLimit"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+//  INVALIDPARAMETERVALUE_ZONEPAUSED = "InvalidParameterValue.ZonePaused"
+//  MISSINGPARAMETER = "MissingParameter"
+//  UNAUTHORIZEDOPERATION = "UnauthorizedOperation"
+func (c *Client) CreateJustInTimeTranscodeTemplate(request *CreateJustInTimeTranscodeTemplateRequest) (response *CreateJustInTimeTranscodeTemplateResponse, err error) {
+    return c.CreateJustInTimeTranscodeTemplateWithContext(context.Background(), request)
+}
+
+// CreateJustInTimeTranscodeTemplate
+// 即时转码已经提供了预置转码模板，满足大部分的需求。如果有个性化的转码需求，可以通过本接口创建自定义的转码模板，最多可创建100个自定义转码模板。
+//
+// 为了确保即时转码效果的一致性，避免因 EO 缓存或 M3U8 分片处理过程中的模板变更导致视频输出异常，模板在创建后不可进行修改。
+//
+// 即时转码详细能力了解：[EdgeOne视频即时处理功能介绍](https://cloud.tencent.com/document/product/1552/111927)。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_PRODUCTDISCONTINUED = "FailedOperation.ProductDiscontinued"
+//  FAILEDOPERATION_PRODUCTNOTACTIVATED = "FailedOperation.ProductNotActivated"
+//  FAILEDOPERATION_TEMPLATEOVERLIMIT = "FailedOperation.TemplateOverLimit"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+//  INVALIDPARAMETERVALUE_ZONEPAUSED = "InvalidParameterValue.ZonePaused"
+//  MISSINGPARAMETER = "MissingParameter"
+//  UNAUTHORIZEDOPERATION = "UnauthorizedOperation"
+func (c *Client) CreateJustInTimeTranscodeTemplateWithContext(ctx context.Context, request *CreateJustInTimeTranscodeTemplateRequest) (response *CreateJustInTimeTranscodeTemplateResponse, err error) {
+    if request == nil {
+        request = NewCreateJustInTimeTranscodeTemplateRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateJustInTimeTranscodeTemplate")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateJustInTimeTranscodeTemplate require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateJustInTimeTranscodeTemplateResponse()
     err = c.Send(request, response)
     return
 }
@@ -878,8 +1860,13 @@ func NewCreateL4ProxyResponse() (response *CreateL4ProxyResponse) {
 //  INVALIDPARAMETER_PROXYNAMEDUPLICATING = "InvalidParameter.ProxyNameDuplicating"
 //  OPERATIONDENIED = "OperationDenied"
 //  OPERATIONDENIED_ACCELERATEMAINLANDDISABLE = "OperationDenied.AccelerateMainlandDisable"
+//  OPERATIONDENIED_ACCELERATEMAINLANDIPV6CONFLICT = "OperationDenied.AccelerateMainlandIpv6Conflict"
 //  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_IPV6ADVANCEDCONFLICT = "OperationDenied.Ipv6AdvancedConflict"
+//  OPERATIONDENIED_IPV6STATICIPCONFLICT = "OperationDenied.Ipv6StaticIpConflict"
 //  OPERATIONDENIED_L4LACKOFRESOURCES = "OperationDenied.L4LackOfResources"
+//  OPERATIONDENIED_MSGIPV6ADVANCEDCONFLICT = "OperationDenied.MsgIpv6AdvancedConflict"
+//  OPERATIONDENIED_STATICIPAREACONFLICT = "OperationDenied.StaticIpAreaConflict"
 //  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
 func (c *Client) CreateL4Proxy(request *CreateL4ProxyRequest) (response *CreateL4ProxyResponse, err error) {
     return c.CreateL4ProxyWithContext(context.Background(), request)
@@ -893,13 +1880,19 @@ func (c *Client) CreateL4Proxy(request *CreateL4ProxyRequest) (response *CreateL
 //  INVALIDPARAMETER_PROXYNAMEDUPLICATING = "InvalidParameter.ProxyNameDuplicating"
 //  OPERATIONDENIED = "OperationDenied"
 //  OPERATIONDENIED_ACCELERATEMAINLANDDISABLE = "OperationDenied.AccelerateMainlandDisable"
+//  OPERATIONDENIED_ACCELERATEMAINLANDIPV6CONFLICT = "OperationDenied.AccelerateMainlandIpv6Conflict"
 //  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_IPV6ADVANCEDCONFLICT = "OperationDenied.Ipv6AdvancedConflict"
+//  OPERATIONDENIED_IPV6STATICIPCONFLICT = "OperationDenied.Ipv6StaticIpConflict"
 //  OPERATIONDENIED_L4LACKOFRESOURCES = "OperationDenied.L4LackOfResources"
+//  OPERATIONDENIED_MSGIPV6ADVANCEDCONFLICT = "OperationDenied.MsgIpv6AdvancedConflict"
+//  OPERATIONDENIED_STATICIPAREACONFLICT = "OperationDenied.StaticIpAreaConflict"
 //  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
 func (c *Client) CreateL4ProxyWithContext(ctx context.Context, request *CreateL4ProxyRequest) (response *CreateL4ProxyResponse, err error) {
     if request == nil {
         request = NewCreateL4ProxyRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateL4Proxy")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateL4Proxy require credential")
@@ -961,6 +1954,7 @@ func (c *Client) CreateL4ProxyRulesWithContext(ctx context.Context, request *Cre
     if request == nil {
         request = NewCreateL4ProxyRulesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateL4ProxyRules")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateL4ProxyRules require credential")
@@ -969,6 +1963,592 @@ func (c *Client) CreateL4ProxyRulesWithContext(ctx context.Context, request *Cre
     request.SetContext(ctx)
     
     response = NewCreateL4ProxyRulesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateL7AccRulesRequest() (request *CreateL7AccRulesRequest) {
+    request = &CreateL7AccRulesRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "CreateL7AccRules")
+    
+    
+    return
+}
+
+func NewCreateL7AccRulesResponse() (response *CreateL7AccRulesResponse) {
+    response = &CreateL7AccRulesResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateL7AccRules
+// 本接口用于在[规则引擎](https://cloud.tencent.com/document/product/1552/70901)中创建规则，支持批量创建。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_ACCESSREDIRECTREGEXERROR = "InvalidParameter.AccessRedirectRegexError"
+//  INVALIDPARAMETER_ACTIONINPROGRESS = "InvalidParameter.ActionInProgress"
+//  INVALIDPARAMETER_ADVANCEDORIGINROUTINGNOTSUPPORTACCELERATEMAINLAND = "InvalidParameter.AdvancedOriginRoutingNotSupportAccelerateMainland"
+//  INVALIDPARAMETER_ADVANCEDORIGINROUTINGNOTSUPPORTCURRENTPLANORIGINWHITELIST = "InvalidParameter.AdvancedOriginRoutingNotSupportCurrentPlanOriginWhitelist"
+//  INVALIDPARAMETER_ADVANCEDORIGINROUTINGNOTSUPPORTMULTIPLYLAYER = "InvalidParameter.AdvancedOriginRoutingNotSupportMultiplyLayer"
+//  INVALIDPARAMETER_ADVANCEDORIGINROUTINGNOTSUPPORTOCDIRECTORIGIN = "InvalidParameter.AdvancedOriginRoutingNotSupportOCDirectOrigin"
+//  INVALIDPARAMETER_ADVANCEDORIGINROUTINGNOTSUPPORTRACINGPLATFORM = "InvalidParameter.AdvancedOriginRoutingNotSupportRacingPlatform"
+//  INVALIDPARAMETER_CERTSYSTEMERROR = "InvalidParameter.CertSystemError"
+//  INVALIDPARAMETER_ERRACTIONUNSUPPORTTARGET = "InvalidParameter.ErrActionUnsupportTarget"
+//  INVALIDPARAMETER_ERRINVALIDACTION = "InvalidParameter.ErrInvalidAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONORIGINPRIVATEADDRESS = "InvalidParameter.ErrInvalidActionOriginPrivateAddress"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAM = "InvalidParameter.ErrInvalidActionParam"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMACTION = "InvalidParameter.ErrInvalidActionParamAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMBADVALUETYPE = "InvalidParameter.ErrInvalidActionParamBadValueType"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMDUPLICATENAME = "InvalidParameter.ErrInvalidActionParamDuplicateName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMNAME = "InvalidParameter.ErrInvalidActionParamName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMVALUE = "InvalidParameter.ErrInvalidActionParamValue"
+//  INVALIDPARAMETER_ERRINVALIDACTIONTYPE = "InvalidParameter.ErrInvalidActionType"
+//  INVALIDPARAMETER_ERRINVALIDCONDITION = "InvalidParameter.ErrInvalidCondition"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONCANNOTONLYCONTAINHOSTWHENMODIFYORIGINACTIONCONFIGURED = "InvalidParameter.ErrInvalidConditionCannotOnlyContainHostWhenModifyOriginActionConfigured"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONIGNORECASE = "InvalidParameter.ErrInvalidConditionIgnoreCase"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMEBADNAME = "InvalidParameter.ErrInvalidConditionNameBadName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMETARGETNOTSUPPORTNAME = "InvalidParameter.ErrInvalidConditionNameTargetNotSupportName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADREGULAR = "InvalidParameter.ErrInvalidConditionValueBadRegular"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADURL = "InvalidParameter.ErrInvalidConditionValueBadUrl"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUE = "InvalidParameter.ErrInvalidConditionValueBadValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUECONTAINFILENAMEEXTENSION = "InvalidParameter.ErrInvalidConditionValueBadValueContainFileNameExtension"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOLONGVALUE = "InvalidParameter.ErrInvalidConditionValueTooLongValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYREGULAR = "InvalidParameter.ErrInvalidConditionValueTooManyRegular"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYVALUES = "InvalidParameter.ErrInvalidConditionValueTooManyValues"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYWILDCARD = "InvalidParameter.ErrInvalidConditionValueTooManyWildcard"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEZEROLENGTH = "InvalidParameter.ErrInvalidConditionValueZeroLength"
+//  INVALIDPARAMETER_ERRNILCONDITION = "InvalidParameter.ErrNilCondition"
+//  INVALIDPARAMETER_GRPCREQUIREHTTP2 = "InvalidParameter.GrpcRequireHttp2"
+//  INVALIDPARAMETER_HOSTNOTFOUND = "InvalidParameter.HostNotFound"
+//  INVALIDPARAMETER_INVALIDADVANCEDORIGINROUTINGUNSUPPORTED = "InvalidParameter.InvalidAdvancedOriginRoutingUnsupported"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATION = "InvalidParameter.InvalidAuthentication"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPEEXPIRETIME = "InvalidParameter.InvalidAuthenticationTypeExpireTime"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPESIGNPARAM = "InvalidParameter.InvalidAuthenticationTypeSignParam"
+//  INVALIDPARAMETER_INVALIDAWSREGION = "InvalidParameter.InvalidAwsRegion"
+//  INVALIDPARAMETER_INVALIDBACKUPSERVERNAME = "InvalidParameter.InvalidBackupServerName"
+//  INVALIDPARAMETER_INVALIDCACHECONFIGCACHE = "InvalidParameter.InvalidCacheConfigCache"
+//  INVALIDPARAMETER_INVALIDCACHEKEY = "InvalidParameter.InvalidCacheKey"
+//  INVALIDPARAMETER_INVALIDCACHEKEYQUERYSTRINGVALUE = "InvalidParameter.InvalidCacheKeyQueryStringValue"
+//  INVALIDPARAMETER_INVALIDCACHETIME = "InvalidParameter.InvalidCacheTime"
+//  INVALIDPARAMETER_INVALIDCLIENTIPHEADERNAME = "InvalidParameter.InvalidClientIpHeaderName"
+//  INVALIDPARAMETER_INVALIDDYNAMICROUTINE = "InvalidParameter.InvalidDynamicRoutine"
+//  INVALIDPARAMETER_INVALIDDYNAMICROUTINEBILLING = "InvalidParameter.InvalidDynamicRoutineBilling"
+//  INVALIDPARAMETER_INVALIDERRORPAGEREDIRECTURL = "InvalidParameter.InvalidErrorPageRedirectUrl"
+//  INVALIDPARAMETER_INVALIDHTTPSCIPHERSUITEANDTLSVERSION = "InvalidParameter.InvalidHttpsCipherSuiteAndTlsVersion"
+//  INVALIDPARAMETER_INVALIDHTTPSHSTSMAXAGE = "InvalidParameter.InvalidHttpsHstsMaxAge"
+//  INVALIDPARAMETER_INVALIDIPV6SWITCH = "InvalidParameter.InvalidIpv6Switch"
+//  INVALIDPARAMETER_INVALIDMAXAGETIME = "InvalidParameter.InvalidMaxAgeTime"
+//  INVALIDPARAMETER_INVALIDORIGIN = "InvalidParameter.InvalidOrigin"
+//  INVALIDPARAMETER_INVALIDPARAMETER = "InvalidParameter.InvalidParameter"
+//  INVALIDPARAMETER_INVALIDPOSTSIZEVALUE = "InvalidParameter.InvalidPostSizeValue"
+//  INVALIDPARAMETER_INVALIDRANGEORIGINPULL = "InvalidParameter.InvalidRangeOriginPull"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAME = "InvalidParameter.InvalidRequestHeaderName"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAMEXFF = "InvalidParameter.InvalidRequestHeaderNameXff"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERVALUE = "InvalidParameter.InvalidRequestHeaderValue"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERNAME = "InvalidParameter.InvalidResponseHeaderName"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERVALUE = "InvalidParameter.InvalidResponseHeaderValue"
+//  INVALIDPARAMETER_INVALIDRULEENGINEACTION = "InvalidParameter.InvalidRuleEngineAction"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGET = "InvalidParameter.InvalidRuleEngineTarget"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSEXTENSION = "InvalidParameter.InvalidRuleEngineTargetsExtension"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSURL = "InvalidParameter.InvalidRuleEngineTargetsUrl"
+//  INVALIDPARAMETER_INVALIDSERVERNAME = "InvalidParameter.InvalidServerName"
+//  INVALIDPARAMETER_INVALIDSHIELDUNSUPPORTED = "InvalidParameter.InvalidShieldUnsupported"
+//  INVALIDPARAMETER_INVALIDSTANDARDDEBUGEXPIRETIMELIMIT = "InvalidParameter.InvalidStandardDebugExpireTimeLimit"
+//  INVALIDPARAMETER_INVALIDUPSTREAMREQUESTQUERYSTRINGVALUE = "InvalidParameter.InvalidUpstreamRequestQueryStringValue"
+//  INVALIDPARAMETER_INVALIDURLREDIRECT = "InvalidParameter.InvalidUrlRedirect"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTHOST = "InvalidParameter.InvalidUrlRedirectHost"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTURL = "InvalidParameter.InvalidUrlRedirectUrl"
+//  INVALIDPARAMETER_INVALIDWEBSOCKETTIMEOUT = "InvalidParameter.InvalidWebSocketTimeout"
+//  INVALIDPARAMETER_KEYRULESINVALIDQUERYSTRINGVALUE = "InvalidParameter.KeyRulesInvalidQueryStringValue"
+//  INVALIDPARAMETER_LOADBALANCEINSTANCEIDISREQUIRED = "InvalidParameter.LoadBalanceInstanceIdIsRequired"
+//  INVALIDPARAMETER_NOTSUPPORTTHISPRESET = "InvalidParameter.NotSupportThisPreset"
+//  INVALIDPARAMETER_ORIGINORIGINGROUPIDISREQUIRED = "InvalidParameter.OriginOriginGroupIdIsRequired"
+//  INVALIDPARAMETER_POSTMAXSIZELIMITEXCEEDED = "InvalidParameter.PostMaxSizeLimitExceeded"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTHOSTCACHEPREFRESH = "InvalidParameter.ShieldNotSupportHostCachePrefresh"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTHOSTORIGINWHITELIST = "InvalidParameter.ShieldNotSupportHostOriginWhitelist"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTHOSTSMARTROUTING = "InvalidParameter.ShieldNotSupportHostSmartRouting"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTZONECACHEPREFRESH = "InvalidParameter.ShieldNotSupportZoneCachePrefresh"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTZONESMARTROUTING = "InvalidParameter.ShieldNotSupportZoneSmartRouting"
+//  INVALIDPARAMETER_SHIELDSPACENOTFOUND = "InvalidParameter.ShieldSpaceNotFound"
+//  INVALIDPARAMETER_SHIELDSPACEREQUIREDERROR = "InvalidParameter.ShieldSpaceRequiredError"
+//  INVALIDPARAMETER_SHIELDSPACESTATUSMUSTONLINE = "InvalidParameter.ShieldSpaceStatusMustOnline"
+//  INVALIDPARAMETER_TASKSYSTEMERROR = "InvalidParameter.TaskSystemError"
+//  INVALIDPARAMETERVALUE_FORMATMISMATCH = "InvalidParameterValue.FormatMismatch"
+//  INVALIDPARAMETERVALUE_GENERALMISMATCH = "InvalidParameterValue.GeneralMismatch"
+//  INVALIDPARAMETERVALUE_INCLUDEINVALIDVALUE = "InvalidParameterValue.IncludeInvalidValue"
+//  INVALIDPARAMETERVALUE_INVALIDSITEFAILOVERUNSUPPORTED = "InvalidParameterValue.InvalidSiteFailoverUnsupported"
+//  INVALIDPARAMETERVALUE_MISSINGNECESSARYPARAM = "InvalidParameterValue.MissingNecessaryParam"
+//  INVALIDPARAMETERVALUE_NOTINENUMERATION = "InvalidParameterValue.NotInEnumeration"
+//  INVALIDPARAMETERVALUE_NOTWITHINRANGE = "InvalidParameterValue.NotWithinRange"
+//  INVALIDPARAMETERVALUE_REGEXMISMATCH = "InvalidParameterValue.RegExMismatch"
+//  INVALIDPARAMETERVALUE_SITEFAILOVERNOTSUPPORTHOSTORIGINPULLRATELIMIT = "InvalidParameterValue.SiteFailoverNotSupportHostOriginPullRateLimit"
+//  INVALIDPARAMETERVALUE_SITEFAILOVERNOTSUPPORTHOSTORIGINTYPEVOD = "InvalidParameterValue.SiteFailoverNotSupportHostOriginTypeVod"
+//  INVALIDPARAMETERVALUE_SITEFAILOVERNOTSUPPORTHOSTUPSTREAMVERIFY = "InvalidParameterValue.SiteFailoverNotSupportHostUpstreamVerify"
+//  INVALIDPARAMETERVALUE_UNRECOGNIZABLEVALUE = "InvalidParameterValue.UnrecognizableValue"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_ACCELERATEMAINLANDMULTIPLYLAYERCONFLICT = "OperationDenied.AccelerateMainlandMultiplyLayerConflict"
+//  OPERATIONDENIED_ADVANCEDORIGINROUTINGCONFLICTWITHDCIOVERSEALAN = "OperationDenied.AdvancedOriginRoutingConflictWithDciOverseaLan"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_INVALIDADVANCEDDEFENSESECURITYTYPE = "OperationDenied.InvalidAdvancedDefenseSecurityType"
+//  OPERATIONDENIED_INVALIDADVANCEDORIGINROUTINGBILLING = "OperationDenied.InvalidAdvancedOriginRoutingBilling"
+//  OPERATIONDENIED_NOTINADVANCEDORIGINROUTINGWHITELIST = "OperationDenied.NotInAdvancedOriginRoutingWhiteList"
+//  OPERATIONDENIED_NOTINSHIELDSPACEWHITELIST = "OperationDenied.NotInShieldSpaceWhiteList"
+//  OPERATIONDENIED_NOTINSITEFAILOVERWHITELIST = "OperationDenied.NotInSiteFailoverWhiteList"
+//  RESOURCEINUSE = "ResourceInUse"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) CreateL7AccRules(request *CreateL7AccRulesRequest) (response *CreateL7AccRulesResponse, err error) {
+    return c.CreateL7AccRulesWithContext(context.Background(), request)
+}
+
+// CreateL7AccRules
+// 本接口用于在[规则引擎](https://cloud.tencent.com/document/product/1552/70901)中创建规则，支持批量创建。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_ACCESSREDIRECTREGEXERROR = "InvalidParameter.AccessRedirectRegexError"
+//  INVALIDPARAMETER_ACTIONINPROGRESS = "InvalidParameter.ActionInProgress"
+//  INVALIDPARAMETER_ADVANCEDORIGINROUTINGNOTSUPPORTACCELERATEMAINLAND = "InvalidParameter.AdvancedOriginRoutingNotSupportAccelerateMainland"
+//  INVALIDPARAMETER_ADVANCEDORIGINROUTINGNOTSUPPORTCURRENTPLANORIGINWHITELIST = "InvalidParameter.AdvancedOriginRoutingNotSupportCurrentPlanOriginWhitelist"
+//  INVALIDPARAMETER_ADVANCEDORIGINROUTINGNOTSUPPORTMULTIPLYLAYER = "InvalidParameter.AdvancedOriginRoutingNotSupportMultiplyLayer"
+//  INVALIDPARAMETER_ADVANCEDORIGINROUTINGNOTSUPPORTOCDIRECTORIGIN = "InvalidParameter.AdvancedOriginRoutingNotSupportOCDirectOrigin"
+//  INVALIDPARAMETER_ADVANCEDORIGINROUTINGNOTSUPPORTRACINGPLATFORM = "InvalidParameter.AdvancedOriginRoutingNotSupportRacingPlatform"
+//  INVALIDPARAMETER_CERTSYSTEMERROR = "InvalidParameter.CertSystemError"
+//  INVALIDPARAMETER_ERRACTIONUNSUPPORTTARGET = "InvalidParameter.ErrActionUnsupportTarget"
+//  INVALIDPARAMETER_ERRINVALIDACTION = "InvalidParameter.ErrInvalidAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONORIGINPRIVATEADDRESS = "InvalidParameter.ErrInvalidActionOriginPrivateAddress"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAM = "InvalidParameter.ErrInvalidActionParam"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMACTION = "InvalidParameter.ErrInvalidActionParamAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMBADVALUETYPE = "InvalidParameter.ErrInvalidActionParamBadValueType"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMDUPLICATENAME = "InvalidParameter.ErrInvalidActionParamDuplicateName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMNAME = "InvalidParameter.ErrInvalidActionParamName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMVALUE = "InvalidParameter.ErrInvalidActionParamValue"
+//  INVALIDPARAMETER_ERRINVALIDACTIONTYPE = "InvalidParameter.ErrInvalidActionType"
+//  INVALIDPARAMETER_ERRINVALIDCONDITION = "InvalidParameter.ErrInvalidCondition"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONCANNOTONLYCONTAINHOSTWHENMODIFYORIGINACTIONCONFIGURED = "InvalidParameter.ErrInvalidConditionCannotOnlyContainHostWhenModifyOriginActionConfigured"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONIGNORECASE = "InvalidParameter.ErrInvalidConditionIgnoreCase"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMEBADNAME = "InvalidParameter.ErrInvalidConditionNameBadName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMETARGETNOTSUPPORTNAME = "InvalidParameter.ErrInvalidConditionNameTargetNotSupportName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADREGULAR = "InvalidParameter.ErrInvalidConditionValueBadRegular"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADURL = "InvalidParameter.ErrInvalidConditionValueBadUrl"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUE = "InvalidParameter.ErrInvalidConditionValueBadValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUECONTAINFILENAMEEXTENSION = "InvalidParameter.ErrInvalidConditionValueBadValueContainFileNameExtension"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOLONGVALUE = "InvalidParameter.ErrInvalidConditionValueTooLongValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYREGULAR = "InvalidParameter.ErrInvalidConditionValueTooManyRegular"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYVALUES = "InvalidParameter.ErrInvalidConditionValueTooManyValues"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYWILDCARD = "InvalidParameter.ErrInvalidConditionValueTooManyWildcard"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEZEROLENGTH = "InvalidParameter.ErrInvalidConditionValueZeroLength"
+//  INVALIDPARAMETER_ERRNILCONDITION = "InvalidParameter.ErrNilCondition"
+//  INVALIDPARAMETER_GRPCREQUIREHTTP2 = "InvalidParameter.GrpcRequireHttp2"
+//  INVALIDPARAMETER_HOSTNOTFOUND = "InvalidParameter.HostNotFound"
+//  INVALIDPARAMETER_INVALIDADVANCEDORIGINROUTINGUNSUPPORTED = "InvalidParameter.InvalidAdvancedOriginRoutingUnsupported"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATION = "InvalidParameter.InvalidAuthentication"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPEEXPIRETIME = "InvalidParameter.InvalidAuthenticationTypeExpireTime"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPESIGNPARAM = "InvalidParameter.InvalidAuthenticationTypeSignParam"
+//  INVALIDPARAMETER_INVALIDAWSREGION = "InvalidParameter.InvalidAwsRegion"
+//  INVALIDPARAMETER_INVALIDBACKUPSERVERNAME = "InvalidParameter.InvalidBackupServerName"
+//  INVALIDPARAMETER_INVALIDCACHECONFIGCACHE = "InvalidParameter.InvalidCacheConfigCache"
+//  INVALIDPARAMETER_INVALIDCACHEKEY = "InvalidParameter.InvalidCacheKey"
+//  INVALIDPARAMETER_INVALIDCACHEKEYQUERYSTRINGVALUE = "InvalidParameter.InvalidCacheKeyQueryStringValue"
+//  INVALIDPARAMETER_INVALIDCACHETIME = "InvalidParameter.InvalidCacheTime"
+//  INVALIDPARAMETER_INVALIDCLIENTIPHEADERNAME = "InvalidParameter.InvalidClientIpHeaderName"
+//  INVALIDPARAMETER_INVALIDDYNAMICROUTINE = "InvalidParameter.InvalidDynamicRoutine"
+//  INVALIDPARAMETER_INVALIDDYNAMICROUTINEBILLING = "InvalidParameter.InvalidDynamicRoutineBilling"
+//  INVALIDPARAMETER_INVALIDERRORPAGEREDIRECTURL = "InvalidParameter.InvalidErrorPageRedirectUrl"
+//  INVALIDPARAMETER_INVALIDHTTPSCIPHERSUITEANDTLSVERSION = "InvalidParameter.InvalidHttpsCipherSuiteAndTlsVersion"
+//  INVALIDPARAMETER_INVALIDHTTPSHSTSMAXAGE = "InvalidParameter.InvalidHttpsHstsMaxAge"
+//  INVALIDPARAMETER_INVALIDIPV6SWITCH = "InvalidParameter.InvalidIpv6Switch"
+//  INVALIDPARAMETER_INVALIDMAXAGETIME = "InvalidParameter.InvalidMaxAgeTime"
+//  INVALIDPARAMETER_INVALIDORIGIN = "InvalidParameter.InvalidOrigin"
+//  INVALIDPARAMETER_INVALIDPARAMETER = "InvalidParameter.InvalidParameter"
+//  INVALIDPARAMETER_INVALIDPOSTSIZEVALUE = "InvalidParameter.InvalidPostSizeValue"
+//  INVALIDPARAMETER_INVALIDRANGEORIGINPULL = "InvalidParameter.InvalidRangeOriginPull"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAME = "InvalidParameter.InvalidRequestHeaderName"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAMEXFF = "InvalidParameter.InvalidRequestHeaderNameXff"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERVALUE = "InvalidParameter.InvalidRequestHeaderValue"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERNAME = "InvalidParameter.InvalidResponseHeaderName"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERVALUE = "InvalidParameter.InvalidResponseHeaderValue"
+//  INVALIDPARAMETER_INVALIDRULEENGINEACTION = "InvalidParameter.InvalidRuleEngineAction"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGET = "InvalidParameter.InvalidRuleEngineTarget"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSEXTENSION = "InvalidParameter.InvalidRuleEngineTargetsExtension"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSURL = "InvalidParameter.InvalidRuleEngineTargetsUrl"
+//  INVALIDPARAMETER_INVALIDSERVERNAME = "InvalidParameter.InvalidServerName"
+//  INVALIDPARAMETER_INVALIDSHIELDUNSUPPORTED = "InvalidParameter.InvalidShieldUnsupported"
+//  INVALIDPARAMETER_INVALIDSTANDARDDEBUGEXPIRETIMELIMIT = "InvalidParameter.InvalidStandardDebugExpireTimeLimit"
+//  INVALIDPARAMETER_INVALIDUPSTREAMREQUESTQUERYSTRINGVALUE = "InvalidParameter.InvalidUpstreamRequestQueryStringValue"
+//  INVALIDPARAMETER_INVALIDURLREDIRECT = "InvalidParameter.InvalidUrlRedirect"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTHOST = "InvalidParameter.InvalidUrlRedirectHost"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTURL = "InvalidParameter.InvalidUrlRedirectUrl"
+//  INVALIDPARAMETER_INVALIDWEBSOCKETTIMEOUT = "InvalidParameter.InvalidWebSocketTimeout"
+//  INVALIDPARAMETER_KEYRULESINVALIDQUERYSTRINGVALUE = "InvalidParameter.KeyRulesInvalidQueryStringValue"
+//  INVALIDPARAMETER_LOADBALANCEINSTANCEIDISREQUIRED = "InvalidParameter.LoadBalanceInstanceIdIsRequired"
+//  INVALIDPARAMETER_NOTSUPPORTTHISPRESET = "InvalidParameter.NotSupportThisPreset"
+//  INVALIDPARAMETER_ORIGINORIGINGROUPIDISREQUIRED = "InvalidParameter.OriginOriginGroupIdIsRequired"
+//  INVALIDPARAMETER_POSTMAXSIZELIMITEXCEEDED = "InvalidParameter.PostMaxSizeLimitExceeded"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTHOSTCACHEPREFRESH = "InvalidParameter.ShieldNotSupportHostCachePrefresh"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTHOSTORIGINWHITELIST = "InvalidParameter.ShieldNotSupportHostOriginWhitelist"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTHOSTSMARTROUTING = "InvalidParameter.ShieldNotSupportHostSmartRouting"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTZONECACHEPREFRESH = "InvalidParameter.ShieldNotSupportZoneCachePrefresh"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTZONESMARTROUTING = "InvalidParameter.ShieldNotSupportZoneSmartRouting"
+//  INVALIDPARAMETER_SHIELDSPACENOTFOUND = "InvalidParameter.ShieldSpaceNotFound"
+//  INVALIDPARAMETER_SHIELDSPACEREQUIREDERROR = "InvalidParameter.ShieldSpaceRequiredError"
+//  INVALIDPARAMETER_SHIELDSPACESTATUSMUSTONLINE = "InvalidParameter.ShieldSpaceStatusMustOnline"
+//  INVALIDPARAMETER_TASKSYSTEMERROR = "InvalidParameter.TaskSystemError"
+//  INVALIDPARAMETERVALUE_FORMATMISMATCH = "InvalidParameterValue.FormatMismatch"
+//  INVALIDPARAMETERVALUE_GENERALMISMATCH = "InvalidParameterValue.GeneralMismatch"
+//  INVALIDPARAMETERVALUE_INCLUDEINVALIDVALUE = "InvalidParameterValue.IncludeInvalidValue"
+//  INVALIDPARAMETERVALUE_INVALIDSITEFAILOVERUNSUPPORTED = "InvalidParameterValue.InvalidSiteFailoverUnsupported"
+//  INVALIDPARAMETERVALUE_MISSINGNECESSARYPARAM = "InvalidParameterValue.MissingNecessaryParam"
+//  INVALIDPARAMETERVALUE_NOTINENUMERATION = "InvalidParameterValue.NotInEnumeration"
+//  INVALIDPARAMETERVALUE_NOTWITHINRANGE = "InvalidParameterValue.NotWithinRange"
+//  INVALIDPARAMETERVALUE_REGEXMISMATCH = "InvalidParameterValue.RegExMismatch"
+//  INVALIDPARAMETERVALUE_SITEFAILOVERNOTSUPPORTHOSTORIGINPULLRATELIMIT = "InvalidParameterValue.SiteFailoverNotSupportHostOriginPullRateLimit"
+//  INVALIDPARAMETERVALUE_SITEFAILOVERNOTSUPPORTHOSTORIGINTYPEVOD = "InvalidParameterValue.SiteFailoverNotSupportHostOriginTypeVod"
+//  INVALIDPARAMETERVALUE_SITEFAILOVERNOTSUPPORTHOSTUPSTREAMVERIFY = "InvalidParameterValue.SiteFailoverNotSupportHostUpstreamVerify"
+//  INVALIDPARAMETERVALUE_UNRECOGNIZABLEVALUE = "InvalidParameterValue.UnrecognizableValue"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_ACCELERATEMAINLANDMULTIPLYLAYERCONFLICT = "OperationDenied.AccelerateMainlandMultiplyLayerConflict"
+//  OPERATIONDENIED_ADVANCEDORIGINROUTINGCONFLICTWITHDCIOVERSEALAN = "OperationDenied.AdvancedOriginRoutingConflictWithDciOverseaLan"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_INVALIDADVANCEDDEFENSESECURITYTYPE = "OperationDenied.InvalidAdvancedDefenseSecurityType"
+//  OPERATIONDENIED_INVALIDADVANCEDORIGINROUTINGBILLING = "OperationDenied.InvalidAdvancedOriginRoutingBilling"
+//  OPERATIONDENIED_NOTINADVANCEDORIGINROUTINGWHITELIST = "OperationDenied.NotInAdvancedOriginRoutingWhiteList"
+//  OPERATIONDENIED_NOTINSHIELDSPACEWHITELIST = "OperationDenied.NotInShieldSpaceWhiteList"
+//  OPERATIONDENIED_NOTINSITEFAILOVERWHITELIST = "OperationDenied.NotInSiteFailoverWhiteList"
+//  RESOURCEINUSE = "ResourceInUse"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) CreateL7AccRulesWithContext(ctx context.Context, request *CreateL7AccRulesRequest) (response *CreateL7AccRulesResponse, err error) {
+    if request == nil {
+        request = NewCreateL7AccRulesRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateL7AccRules")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateL7AccRules require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateL7AccRulesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateLoadBalancerRequest() (request *CreateLoadBalancerRequest) {
+    request = &CreateLoadBalancerRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "CreateLoadBalancer")
+    
+    
+    return
+}
+
+func NewCreateLoadBalancerResponse() (response *CreateLoadBalancerResponse) {
+    response = &CreateLoadBalancerResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateLoadBalancer
+// 创建负载均衡实例。详情请参考 [快速创建负载均衡实例](https://cloud.tencent.com/document/product/1552/104223)。负载均衡功能内测中，如您需要使用请 [联系我们](https://cloud.tencent.com/online-service)。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER_LOADBALANCERBINDORIGINGROUPINVALID = "InvalidParameter.LoadBalancerBindOriginGroupInvalid"
+//  INVALIDPARAMETER_LOADBALANCERNAMEREPEATED = "InvalidParameter.LoadBalancerNameRepeated"
+//  INVALIDPARAMETER_ORIGINGROUPTYPECANNOTMATCHLBTYPE = "InvalidParameter.OriginGroupTypeCanNotMatchLBType"
+//  INVALIDPARAMETER_SOMEORIGINGROUPNOTEXIST = "InvalidParameter.SomeOriginGroupNotExist"
+//  LIMITEXCEEDED_LOADBALANCINGCOUNTLIMITEXCEEDED = "LimitExceeded.LoadBalancingCountLimitExceeded"
+func (c *Client) CreateLoadBalancer(request *CreateLoadBalancerRequest) (response *CreateLoadBalancerResponse, err error) {
+    return c.CreateLoadBalancerWithContext(context.Background(), request)
+}
+
+// CreateLoadBalancer
+// 创建负载均衡实例。详情请参考 [快速创建负载均衡实例](https://cloud.tencent.com/document/product/1552/104223)。负载均衡功能内测中，如您需要使用请 [联系我们](https://cloud.tencent.com/online-service)。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER_LOADBALANCERBINDORIGINGROUPINVALID = "InvalidParameter.LoadBalancerBindOriginGroupInvalid"
+//  INVALIDPARAMETER_LOADBALANCERNAMEREPEATED = "InvalidParameter.LoadBalancerNameRepeated"
+//  INVALIDPARAMETER_ORIGINGROUPTYPECANNOTMATCHLBTYPE = "InvalidParameter.OriginGroupTypeCanNotMatchLBType"
+//  INVALIDPARAMETER_SOMEORIGINGROUPNOTEXIST = "InvalidParameter.SomeOriginGroupNotExist"
+//  LIMITEXCEEDED_LOADBALANCINGCOUNTLIMITEXCEEDED = "LimitExceeded.LoadBalancingCountLimitExceeded"
+func (c *Client) CreateLoadBalancerWithContext(ctx context.Context, request *CreateLoadBalancerRequest) (response *CreateLoadBalancerResponse, err error) {
+    if request == nil {
+        request = NewCreateLoadBalancerRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateLoadBalancer")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateLoadBalancer require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateLoadBalancerResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateLogAnalysisDownloadTaskRequest() (request *CreateLogAnalysisDownloadTaskRequest) {
+    request = &CreateLogAnalysisDownloadTaskRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "CreateLogAnalysisDownloadTask")
+    
+    
+    return
+}
+
+func NewCreateLogAnalysisDownloadTaskResponse() (response *CreateLogAnalysisDownloadTaskResponse) {
+    response = &CreateLogAnalysisDownloadTaskResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateLogAnalysisDownloadTask
+// 本接口用以创建日志分析下载任务，创建完成后可通过 DescribeLogAnalysisDownloadTasks 接口查询下载任务。
+//
+// 注意：
+//
+// 1.单次最多支持下载 5000万条日志。
+//
+// 2.日志文件将保留 3 天。
+//
+// 3.同时存在多个任务时将按照任务创建时间依次处理。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER_LOADBALANCERBINDORIGINGROUPINVALID = "InvalidParameter.LoadBalancerBindOriginGroupInvalid"
+//  INVALIDPARAMETER_LOADBALANCERNAMEREPEATED = "InvalidParameter.LoadBalancerNameRepeated"
+//  INVALIDPARAMETER_ORIGINGROUPTYPECANNOTMATCHLBTYPE = "InvalidParameter.OriginGroupTypeCanNotMatchLBType"
+//  INVALIDPARAMETER_SOMEORIGINGROUPNOTEXIST = "InvalidParameter.SomeOriginGroupNotExist"
+//  LIMITEXCEEDED_LOADBALANCINGCOUNTLIMITEXCEEDED = "LimitExceeded.LoadBalancingCountLimitExceeded"
+func (c *Client) CreateLogAnalysisDownloadTask(request *CreateLogAnalysisDownloadTaskRequest) (response *CreateLogAnalysisDownloadTaskResponse, err error) {
+    return c.CreateLogAnalysisDownloadTaskWithContext(context.Background(), request)
+}
+
+// CreateLogAnalysisDownloadTask
+// 本接口用以创建日志分析下载任务，创建完成后可通过 DescribeLogAnalysisDownloadTasks 接口查询下载任务。
+//
+// 注意：
+//
+// 1.单次最多支持下载 5000万条日志。
+//
+// 2.日志文件将保留 3 天。
+//
+// 3.同时存在多个任务时将按照任务创建时间依次处理。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER_LOADBALANCERBINDORIGINGROUPINVALID = "InvalidParameter.LoadBalancerBindOriginGroupInvalid"
+//  INVALIDPARAMETER_LOADBALANCERNAMEREPEATED = "InvalidParameter.LoadBalancerNameRepeated"
+//  INVALIDPARAMETER_ORIGINGROUPTYPECANNOTMATCHLBTYPE = "InvalidParameter.OriginGroupTypeCanNotMatchLBType"
+//  INVALIDPARAMETER_SOMEORIGINGROUPNOTEXIST = "InvalidParameter.SomeOriginGroupNotExist"
+//  LIMITEXCEEDED_LOADBALANCINGCOUNTLIMITEXCEEDED = "LimitExceeded.LoadBalancingCountLimitExceeded"
+func (c *Client) CreateLogAnalysisDownloadTaskWithContext(ctx context.Context, request *CreateLogAnalysisDownloadTaskRequest) (response *CreateLogAnalysisDownloadTaskResponse, err error) {
+    if request == nil {
+        request = NewCreateLogAnalysisDownloadTaskRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateLogAnalysisDownloadTask")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateLogAnalysisDownloadTask require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateLogAnalysisDownloadTaskResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateMultiPathGatewayRequest() (request *CreateMultiPathGatewayRequest) {
+    request = &CreateMultiPathGatewayRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "CreateMultiPathGateway")
+    
+    
+    return
+}
+
+func NewCreateMultiPathGatewayResponse() (response *CreateMultiPathGatewayResponse) {
+    response = &CreateMultiPathGatewayResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateMultiPathGateway
+// 通过本接口创建多通道安全加速网关，包括云上网关（腾讯云创建和管理的网关）和自有网关（用户部署的私有网关），需要通过接口 DescribeMultiPathGateway，查询状态为 online 即创建成功。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) CreateMultiPathGateway(request *CreateMultiPathGatewayRequest) (response *CreateMultiPathGatewayResponse, err error) {
+    return c.CreateMultiPathGatewayWithContext(context.Background(), request)
+}
+
+// CreateMultiPathGateway
+// 通过本接口创建多通道安全加速网关，包括云上网关（腾讯云创建和管理的网关）和自有网关（用户部署的私有网关），需要通过接口 DescribeMultiPathGateway，查询状态为 online 即创建成功。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) CreateMultiPathGatewayWithContext(ctx context.Context, request *CreateMultiPathGatewayRequest) (response *CreateMultiPathGatewayResponse, err error) {
+    if request == nil {
+        request = NewCreateMultiPathGatewayRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateMultiPathGateway")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateMultiPathGateway require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateMultiPathGatewayResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateMultiPathGatewayLineRequest() (request *CreateMultiPathGatewayLineRequest) {
+    request = &CreateMultiPathGatewayLineRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "CreateMultiPathGatewayLine")
+    
+    
+    return
+}
+
+func NewCreateMultiPathGatewayLineResponse() (response *CreateMultiPathGatewayLineResponse) {
+    response = &CreateMultiPathGatewayLineResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateMultiPathGatewayLine
+// 通过本接口创建接入多通道安全加速网关的线路。包括 EdgeOne 四层代理线路、自定义线路。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) CreateMultiPathGatewayLine(request *CreateMultiPathGatewayLineRequest) (response *CreateMultiPathGatewayLineResponse, err error) {
+    return c.CreateMultiPathGatewayLineWithContext(context.Background(), request)
+}
+
+// CreateMultiPathGatewayLine
+// 通过本接口创建接入多通道安全加速网关的线路。包括 EdgeOne 四层代理线路、自定义线路。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) CreateMultiPathGatewayLineWithContext(ctx context.Context, request *CreateMultiPathGatewayLineRequest) (response *CreateMultiPathGatewayLineResponse, err error) {
+    if request == nil {
+        request = NewCreateMultiPathGatewayLineRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateMultiPathGatewayLine")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateMultiPathGatewayLine require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateMultiPathGatewayLineResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateMultiPathGatewaySecretKeyRequest() (request *CreateMultiPathGatewaySecretKeyRequest) {
+    request = &CreateMultiPathGatewaySecretKeyRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "CreateMultiPathGatewaySecretKey")
+    
+    
+    return
+}
+
+func NewCreateMultiPathGatewaySecretKeyResponse() (response *CreateMultiPathGatewaySecretKeyResponse) {
+    response = &CreateMultiPathGatewaySecretKeyResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateMultiPathGatewaySecretKey
+// 通过本接口创建接入多通道安全加速网关的密钥，客户基于接入密钥签名接入多通道安全加速网关。每个站点下只有一个密钥，可用于接入该站点下的所有网关，可通过接口 DescribeMultiPathGatewaySecretKey 查询。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) CreateMultiPathGatewaySecretKey(request *CreateMultiPathGatewaySecretKeyRequest) (response *CreateMultiPathGatewaySecretKeyResponse, err error) {
+    return c.CreateMultiPathGatewaySecretKeyWithContext(context.Background(), request)
+}
+
+// CreateMultiPathGatewaySecretKey
+// 通过本接口创建接入多通道安全加速网关的密钥，客户基于接入密钥签名接入多通道安全加速网关。每个站点下只有一个密钥，可用于接入该站点下的所有网关，可通过接口 DescribeMultiPathGatewaySecretKey 查询。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) CreateMultiPathGatewaySecretKeyWithContext(ctx context.Context, request *CreateMultiPathGatewaySecretKeyRequest) (response *CreateMultiPathGatewaySecretKeyResponse, err error) {
+    if request == nil {
+        request = NewCreateMultiPathGatewaySecretKeyRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateMultiPathGatewaySecretKey")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateMultiPathGatewaySecretKey require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateMultiPathGatewaySecretKeyResponse()
     err = c.Send(request, response)
     return
 }
@@ -1040,6 +2620,7 @@ func (c *Client) CreateOriginGroupWithContext(ctx context.Context, request *Crea
     if request == nil {
         request = NewCreateOriginGroupRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateOriginGroup")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateOriginGroup require credential")
@@ -1103,6 +2684,7 @@ func (c *Client) CreatePlanWithContext(ctx context.Context, request *CreatePlanR
     if request == nil {
         request = NewCreatePlanRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreatePlan")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreatePlan require credential")
@@ -1162,6 +2744,7 @@ func (c *Client) CreatePlanForZoneWithContext(ctx context.Context, request *Crea
     if request == nil {
         request = NewCreatePlanForZoneRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreatePlanForZone")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreatePlanForZone require credential")
@@ -1237,6 +2820,7 @@ func (c *Client) CreatePrefetchTaskWithContext(ctx context.Context, request *Cre
     if request == nil {
         request = NewCreatePrefetchTaskRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreatePrefetchTask")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreatePrefetchTask require credential")
@@ -1322,6 +2906,7 @@ func (c *Client) CreatePurgeTaskWithContext(ctx context.Context, request *Create
     if request == nil {
         request = NewCreatePurgeTaskRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreatePurgeTask")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreatePurgeTask require credential")
@@ -1354,9 +2939,21 @@ func NewCreateRealtimeLogDeliveryTaskResponse() (response *CreateRealtimeLogDeli
 }
 
 // CreateRealtimeLogDeliveryTask
-// 通过本接口创建实时日志投递任务。本接口有如下限制：
+// 本接口用于创建实时日志投递任务。本接口有如下限制：
 //
-// 同一个实体（七层域名或者四层代理实例）在同种数据投递类型（LogType）和数据投递区域（Area）的组合下，只能被添加到一个实时日志投递任务中。建议先通过 [DescribeRealtimeLogDeliveryTasks](https://cloud.tencent.com/document/product/1552/104110)  接口根据实体查询实时日志投递任务列表，检查实体是否已经被添加到另一实时日志投递任务中。
+// - 当数据投递类型（LogType）为七层访问日志、四层代理日志、边缘函数运行日志时，同一个实体（七层域名、四层代理实例、边缘函数实例）在同种数据投递类型（LogType）和数据投递区域（Area）的组合下，只能被添加到如下实时日志投递任务类型（TaskType）组合中：
+//
+//     - 一个推送至腾讯云  CLS 的任务，加上另一个推送至自定义 HTTP(S) 地址的任务；
+//
+//     - 一个推送至腾讯云  CLS 的任务，加上另一个推送至 AWS S3 兼容对象存储的任务；
+//
+// - 当数据投递类型（LogType）为速率限制和 CC 攻击防护日志、托管规则日志、自定义规则日志、Bot 管理日志时，同一个实体在同种数据投递类型（LogType）和数据投递区域（Area）的组合下，只能被添加到一个实时日志投递任务中。
+//
+// - 当实时日志投递任务类型（TaskType）为 EdgeOne 日志分析（log_analysis）时，只支持数据投递类型（LogType）为七层访问日志（l7-access-logs）或托管规则日志（web-attack）；在同一站点（ZoneId）、同一数据投递区域（Area）和数据的组合下，每种数据投递类型（LogType）只能添加一个推送至 EdgeOne 日志分析的实时日志投递任务。
+//
+// 
+//
+// 建议先通过 [DescribeRealtimeLogDeliveryTasks](https://cloud.tencent.com/document/product/1552/104110)  接口根据实体查询实时日志投递任务列表，检查实体是否已经被添加到另一实时日志投递任务中。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -1376,6 +2973,7 @@ func NewCreateRealtimeLogDeliveryTaskResponse() (response *CreateRealtimeLogDeli
 //  INVALIDPARAMETER_REALTIMELOGNUMSEXCEEDLIMIT = "InvalidParameter.RealtimeLogNumsExceedLimit"
 //  INVALIDPARAMETERVALUE = "InvalidParameterValue"
 //  LIMITEXCEEDED = "LimitExceeded"
+//  LIMITEXCEEDED_CUSTOMLOGFIELDREGEXLIMITEXCEEDED = "LimitExceeded.CustomLogFieldRegexLimitExceeded"
 //  OPERATIONDENIED = "OperationDenied"
 //  RESOURCENOTFOUND = "ResourceNotFound"
 //  RESOURCEUNAVAILABLE = "ResourceUnavailable"
@@ -1385,9 +2983,21 @@ func (c *Client) CreateRealtimeLogDeliveryTask(request *CreateRealtimeLogDeliver
 }
 
 // CreateRealtimeLogDeliveryTask
-// 通过本接口创建实时日志投递任务。本接口有如下限制：
+// 本接口用于创建实时日志投递任务。本接口有如下限制：
 //
-// 同一个实体（七层域名或者四层代理实例）在同种数据投递类型（LogType）和数据投递区域（Area）的组合下，只能被添加到一个实时日志投递任务中。建议先通过 [DescribeRealtimeLogDeliveryTasks](https://cloud.tencent.com/document/product/1552/104110)  接口根据实体查询实时日志投递任务列表，检查实体是否已经被添加到另一实时日志投递任务中。
+// - 当数据投递类型（LogType）为七层访问日志、四层代理日志、边缘函数运行日志时，同一个实体（七层域名、四层代理实例、边缘函数实例）在同种数据投递类型（LogType）和数据投递区域（Area）的组合下，只能被添加到如下实时日志投递任务类型（TaskType）组合中：
+//
+//     - 一个推送至腾讯云  CLS 的任务，加上另一个推送至自定义 HTTP(S) 地址的任务；
+//
+//     - 一个推送至腾讯云  CLS 的任务，加上另一个推送至 AWS S3 兼容对象存储的任务；
+//
+// - 当数据投递类型（LogType）为速率限制和 CC 攻击防护日志、托管规则日志、自定义规则日志、Bot 管理日志时，同一个实体在同种数据投递类型（LogType）和数据投递区域（Area）的组合下，只能被添加到一个实时日志投递任务中。
+//
+// - 当实时日志投递任务类型（TaskType）为 EdgeOne 日志分析（log_analysis）时，只支持数据投递类型（LogType）为七层访问日志（l7-access-logs）或托管规则日志（web-attack）；在同一站点（ZoneId）、同一数据投递区域（Area）和数据的组合下，每种数据投递类型（LogType）只能添加一个推送至 EdgeOne 日志分析的实时日志投递任务。
+//
+// 
+//
+// 建议先通过 [DescribeRealtimeLogDeliveryTasks](https://cloud.tencent.com/document/product/1552/104110)  接口根据实体查询实时日志投递任务列表，检查实体是否已经被添加到另一实时日志投递任务中。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -1407,6 +3017,7 @@ func (c *Client) CreateRealtimeLogDeliveryTask(request *CreateRealtimeLogDeliver
 //  INVALIDPARAMETER_REALTIMELOGNUMSEXCEEDLIMIT = "InvalidParameter.RealtimeLogNumsExceedLimit"
 //  INVALIDPARAMETERVALUE = "InvalidParameterValue"
 //  LIMITEXCEEDED = "LimitExceeded"
+//  LIMITEXCEEDED_CUSTOMLOGFIELDREGEXLIMITEXCEEDED = "LimitExceeded.CustomLogFieldRegexLimitExceeded"
 //  OPERATIONDENIED = "OperationDenied"
 //  RESOURCENOTFOUND = "ResourceNotFound"
 //  RESOURCEUNAVAILABLE = "ResourceUnavailable"
@@ -1415,6 +3026,7 @@ func (c *Client) CreateRealtimeLogDeliveryTaskWithContext(ctx context.Context, r
     if request == nil {
         request = NewCreateRealtimeLogDeliveryTaskRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateRealtimeLogDeliveryTask")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateRealtimeLogDeliveryTask require credential")
@@ -1447,7 +3059,9 @@ func NewCreateRuleResponse() (response *CreateRuleResponse) {
 }
 
 // CreateRule
-// 规则引擎创建规则。
+// 本接口为旧版本创建规则引擎接口，EdgeOne 于 2025 年 1 月 21 日已对规则引擎相关接口全面升级，新版本创建七层加速规则接口详情请参考 [CreateL7AccRules](https://cloud.tencent.com/document/product/1552/115822)。
+//
+// <p style="color: red;">注意：自 2025 年 1 月 21 日起，旧版接口停止更新迭代，后续新增功能将仅在新版接口中提供，旧版接口支持的原有能力将不受影响。为避免在使用旧版接口时出现数据字段冲突，建议您尽早迁移到新版规则引擎接口。</p>
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -1527,6 +3141,14 @@ func NewCreateRuleResponse() (response *CreateRuleResponse) {
 //  INVALIDPARAMETER_ORIGINORIGINGROUPIDISREQUIRED = "InvalidParameter.OriginOriginGroupIdIsRequired"
 //  INVALIDPARAMETER_POSTMAXSIZELIMITEXCEEDED = "InvalidParameter.PostMaxSizeLimitExceeded"
 //  INVALIDPARAMETER_TASKSYSTEMERROR = "InvalidParameter.TaskSystemError"
+//  INVALIDPARAMETERVALUE_FORMATMISMATCH = "InvalidParameterValue.FormatMismatch"
+//  INVALIDPARAMETERVALUE_GENERALMISMATCH = "InvalidParameterValue.GeneralMismatch"
+//  INVALIDPARAMETERVALUE_INCLUDEINVALIDVALUE = "InvalidParameterValue.IncludeInvalidValue"
+//  INVALIDPARAMETERVALUE_MISSINGNECESSARYPARAM = "InvalidParameterValue.MissingNecessaryParam"
+//  INVALIDPARAMETERVALUE_NOTINENUMERATION = "InvalidParameterValue.NotInEnumeration"
+//  INVALIDPARAMETERVALUE_NOTWITHINRANGE = "InvalidParameterValue.NotWithinRange"
+//  INVALIDPARAMETERVALUE_REGEXMISMATCH = "InvalidParameterValue.RegExMismatch"
+//  INVALIDPARAMETERVALUE_UNRECOGNIZABLEVALUE = "InvalidParameterValue.UnrecognizableValue"
 //  LIMITEXCEEDED = "LimitExceeded"
 //  OPERATIONDENIED = "OperationDenied"
 //  OPERATIONDENIED_ACCELERATEMAINLANDMULTIPLYLAYERCONFLICT = "OperationDenied.AccelerateMainlandMultiplyLayerConflict"
@@ -1539,7 +3161,9 @@ func (c *Client) CreateRule(request *CreateRuleRequest) (response *CreateRuleRes
 }
 
 // CreateRule
-// 规则引擎创建规则。
+// 本接口为旧版本创建规则引擎接口，EdgeOne 于 2025 年 1 月 21 日已对规则引擎相关接口全面升级，新版本创建七层加速规则接口详情请参考 [CreateL7AccRules](https://cloud.tencent.com/document/product/1552/115822)。
+//
+// <p style="color: red;">注意：自 2025 年 1 月 21 日起，旧版接口停止更新迭代，后续新增功能将仅在新版接口中提供，旧版接口支持的原有能力将不受影响。为避免在使用旧版接口时出现数据字段冲突，建议您尽早迁移到新版规则引擎接口。</p>
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -1619,6 +3243,14 @@ func (c *Client) CreateRule(request *CreateRuleRequest) (response *CreateRuleRes
 //  INVALIDPARAMETER_ORIGINORIGINGROUPIDISREQUIRED = "InvalidParameter.OriginOriginGroupIdIsRequired"
 //  INVALIDPARAMETER_POSTMAXSIZELIMITEXCEEDED = "InvalidParameter.PostMaxSizeLimitExceeded"
 //  INVALIDPARAMETER_TASKSYSTEMERROR = "InvalidParameter.TaskSystemError"
+//  INVALIDPARAMETERVALUE_FORMATMISMATCH = "InvalidParameterValue.FormatMismatch"
+//  INVALIDPARAMETERVALUE_GENERALMISMATCH = "InvalidParameterValue.GeneralMismatch"
+//  INVALIDPARAMETERVALUE_INCLUDEINVALIDVALUE = "InvalidParameterValue.IncludeInvalidValue"
+//  INVALIDPARAMETERVALUE_MISSINGNECESSARYPARAM = "InvalidParameterValue.MissingNecessaryParam"
+//  INVALIDPARAMETERVALUE_NOTINENUMERATION = "InvalidParameterValue.NotInEnumeration"
+//  INVALIDPARAMETERVALUE_NOTWITHINRANGE = "InvalidParameterValue.NotWithinRange"
+//  INVALIDPARAMETERVALUE_REGEXMISMATCH = "InvalidParameterValue.RegExMismatch"
+//  INVALIDPARAMETERVALUE_UNRECOGNIZABLEVALUE = "InvalidParameterValue.UnrecognizableValue"
 //  LIMITEXCEEDED = "LimitExceeded"
 //  OPERATIONDENIED = "OperationDenied"
 //  OPERATIONDENIED_ACCELERATEMAINLANDMULTIPLYLAYERCONFLICT = "OperationDenied.AccelerateMainlandMultiplyLayerConflict"
@@ -1630,6 +3262,7 @@ func (c *Client) CreateRuleWithContext(ctx context.Context, request *CreateRuleR
     if request == nil {
         request = NewCreateRuleRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateRule")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateRule require credential")
@@ -1638,6 +3271,702 @@ func (c *Client) CreateRuleWithContext(ctx context.Context, request *CreateRuleR
     request.SetContext(ctx)
     
     response = NewCreateRuleResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateSecurityAPIResourceRequest() (request *CreateSecurityAPIResourceRequest) {
+    request = &CreateSecurityAPIResourceRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "CreateSecurityAPIResource")
+    
+    
+    return
+}
+
+func NewCreateSecurityAPIResourceResponse() (response *CreateSecurityAPIResourceResponse) {
+    response = &CreateSecurityAPIResourceResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateSecurityAPIResource
+// 用于创建 API 资源。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_ACCESSREDIRECTREGEXERROR = "InvalidParameter.AccessRedirectRegexError"
+//  INVALIDPARAMETER_ACTIONINPROGRESS = "InvalidParameter.ActionInProgress"
+//  INVALIDPARAMETER_CERTSYSTEMERROR = "InvalidParameter.CertSystemError"
+//  INVALIDPARAMETER_ERRACTIONUNSUPPORTTARGET = "InvalidParameter.ErrActionUnsupportTarget"
+//  INVALIDPARAMETER_ERRINVALIDACTION = "InvalidParameter.ErrInvalidAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONORIGINPRIVATEADDRESS = "InvalidParameter.ErrInvalidActionOriginPrivateAddress"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAM = "InvalidParameter.ErrInvalidActionParam"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMACTION = "InvalidParameter.ErrInvalidActionParamAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMBADVALUETYPE = "InvalidParameter.ErrInvalidActionParamBadValueType"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMDUPLICATENAME = "InvalidParameter.ErrInvalidActionParamDuplicateName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMNAME = "InvalidParameter.ErrInvalidActionParamName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMVALUE = "InvalidParameter.ErrInvalidActionParamValue"
+//  INVALIDPARAMETER_ERRINVALIDACTIONTYPE = "InvalidParameter.ErrInvalidActionType"
+//  INVALIDPARAMETER_ERRINVALIDCONDITION = "InvalidParameter.ErrInvalidCondition"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONCANNOTONLYCONTAINHOSTWHENMODIFYORIGINACTIONCONFIGURED = "InvalidParameter.ErrInvalidConditionCannotOnlyContainHostWhenModifyOriginActionConfigured"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONIGNORECASE = "InvalidParameter.ErrInvalidConditionIgnoreCase"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMEBADNAME = "InvalidParameter.ErrInvalidConditionNameBadName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMETARGETNOTSUPPORTNAME = "InvalidParameter.ErrInvalidConditionNameTargetNotSupportName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADREGULAR = "InvalidParameter.ErrInvalidConditionValueBadRegular"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADURL = "InvalidParameter.ErrInvalidConditionValueBadUrl"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUE = "InvalidParameter.ErrInvalidConditionValueBadValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUECONTAINFILENAMEEXTENSION = "InvalidParameter.ErrInvalidConditionValueBadValueContainFileNameExtension"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOLONGVALUE = "InvalidParameter.ErrInvalidConditionValueTooLongValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYREGULAR = "InvalidParameter.ErrInvalidConditionValueTooManyRegular"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYVALUES = "InvalidParameter.ErrInvalidConditionValueTooManyValues"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYWILDCARD = "InvalidParameter.ErrInvalidConditionValueTooManyWildcard"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEZEROLENGTH = "InvalidParameter.ErrInvalidConditionValueZeroLength"
+//  INVALIDPARAMETER_ERRNILCONDITION = "InvalidParameter.ErrNilCondition"
+//  INVALIDPARAMETER_GRPCREQUIREHTTP2 = "InvalidParameter.GrpcRequireHttp2"
+//  INVALIDPARAMETER_HOSTNOTFOUND = "InvalidParameter.HostNotFound"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATION = "InvalidParameter.InvalidAuthentication"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPEEXPIRETIME = "InvalidParameter.InvalidAuthenticationTypeExpireTime"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPESIGNPARAM = "InvalidParameter.InvalidAuthenticationTypeSignParam"
+//  INVALIDPARAMETER_INVALIDAWSREGION = "InvalidParameter.InvalidAwsRegion"
+//  INVALIDPARAMETER_INVALIDBACKUPSERVERNAME = "InvalidParameter.InvalidBackupServerName"
+//  INVALIDPARAMETER_INVALIDCACHECONFIGCACHE = "InvalidParameter.InvalidCacheConfigCache"
+//  INVALIDPARAMETER_INVALIDCACHEKEY = "InvalidParameter.InvalidCacheKey"
+//  INVALIDPARAMETER_INVALIDCACHEKEYQUERYSTRINGVALUE = "InvalidParameter.InvalidCacheKeyQueryStringValue"
+//  INVALIDPARAMETER_INVALIDCACHETIME = "InvalidParameter.InvalidCacheTime"
+//  INVALIDPARAMETER_INVALIDCLIENTIPHEADERNAME = "InvalidParameter.InvalidClientIpHeaderName"
+//  INVALIDPARAMETER_INVALIDDYNAMICROUTINE = "InvalidParameter.InvalidDynamicRoutine"
+//  INVALIDPARAMETER_INVALIDDYNAMICROUTINEBILLING = "InvalidParameter.InvalidDynamicRoutineBilling"
+//  INVALIDPARAMETER_INVALIDERRORPAGEREDIRECTURL = "InvalidParameter.InvalidErrorPageRedirectUrl"
+//  INVALIDPARAMETER_INVALIDHTTPSCIPHERSUITEANDTLSVERSION = "InvalidParameter.InvalidHttpsCipherSuiteAndTlsVersion"
+//  INVALIDPARAMETER_INVALIDHTTPSHSTSMAXAGE = "InvalidParameter.InvalidHttpsHstsMaxAge"
+//  INVALIDPARAMETER_INVALIDIPV6SWITCH = "InvalidParameter.InvalidIpv6Switch"
+//  INVALIDPARAMETER_INVALIDMAXAGETIME = "InvalidParameter.InvalidMaxAgeTime"
+//  INVALIDPARAMETER_INVALIDORIGIN = "InvalidParameter.InvalidOrigin"
+//  INVALIDPARAMETER_INVALIDPARAMETER = "InvalidParameter.InvalidParameter"
+//  INVALIDPARAMETER_INVALIDPOSTSIZEVALUE = "InvalidParameter.InvalidPostSizeValue"
+//  INVALIDPARAMETER_INVALIDRANGEORIGINPULL = "InvalidParameter.InvalidRangeOriginPull"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAME = "InvalidParameter.InvalidRequestHeaderName"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAMEXFF = "InvalidParameter.InvalidRequestHeaderNameXff"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERVALUE = "InvalidParameter.InvalidRequestHeaderValue"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERNAME = "InvalidParameter.InvalidResponseHeaderName"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERVALUE = "InvalidParameter.InvalidResponseHeaderValue"
+//  INVALIDPARAMETER_INVALIDRULEENGINEACTION = "InvalidParameter.InvalidRuleEngineAction"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGET = "InvalidParameter.InvalidRuleEngineTarget"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSEXTENSION = "InvalidParameter.InvalidRuleEngineTargetsExtension"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSURL = "InvalidParameter.InvalidRuleEngineTargetsUrl"
+//  INVALIDPARAMETER_INVALIDSERVERNAME = "InvalidParameter.InvalidServerName"
+//  INVALIDPARAMETER_INVALIDSTANDARDDEBUGEXPIRETIMELIMIT = "InvalidParameter.InvalidStandardDebugExpireTimeLimit"
+//  INVALIDPARAMETER_INVALIDUPSTREAMREQUESTQUERYSTRINGVALUE = "InvalidParameter.InvalidUpstreamRequestQueryStringValue"
+//  INVALIDPARAMETER_INVALIDURLREDIRECT = "InvalidParameter.InvalidUrlRedirect"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTHOST = "InvalidParameter.InvalidUrlRedirectHost"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTURL = "InvalidParameter.InvalidUrlRedirectUrl"
+//  INVALIDPARAMETER_INVALIDWEBSOCKETTIMEOUT = "InvalidParameter.InvalidWebSocketTimeout"
+//  INVALIDPARAMETER_KEYRULESINVALIDQUERYSTRINGVALUE = "InvalidParameter.KeyRulesInvalidQueryStringValue"
+//  INVALIDPARAMETER_LOADBALANCEINSTANCEIDISREQUIRED = "InvalidParameter.LoadBalanceInstanceIdIsRequired"
+//  INVALIDPARAMETER_NOTSUPPORTTHISPRESET = "InvalidParameter.NotSupportThisPreset"
+//  INVALIDPARAMETER_ORIGINORIGINGROUPIDISREQUIRED = "InvalidParameter.OriginOriginGroupIdIsRequired"
+//  INVALIDPARAMETER_POSTMAXSIZELIMITEXCEEDED = "InvalidParameter.PostMaxSizeLimitExceeded"
+//  INVALIDPARAMETER_TASKSYSTEMERROR = "InvalidParameter.TaskSystemError"
+//  INVALIDPARAMETERVALUE_FORMATMISMATCH = "InvalidParameterValue.FormatMismatch"
+//  INVALIDPARAMETERVALUE_GENERALMISMATCH = "InvalidParameterValue.GeneralMismatch"
+//  INVALIDPARAMETERVALUE_INCLUDEINVALIDVALUE = "InvalidParameterValue.IncludeInvalidValue"
+//  INVALIDPARAMETERVALUE_MISSINGNECESSARYPARAM = "InvalidParameterValue.MissingNecessaryParam"
+//  INVALIDPARAMETERVALUE_NOTINENUMERATION = "InvalidParameterValue.NotInEnumeration"
+//  INVALIDPARAMETERVALUE_NOTWITHINRANGE = "InvalidParameterValue.NotWithinRange"
+//  INVALIDPARAMETERVALUE_REGEXMISMATCH = "InvalidParameterValue.RegExMismatch"
+//  INVALIDPARAMETERVALUE_UNRECOGNIZABLEVALUE = "InvalidParameterValue.UnrecognizableValue"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_ACCELERATEMAINLANDMULTIPLYLAYERCONFLICT = "OperationDenied.AccelerateMainlandMultiplyLayerConflict"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_INVALIDADVANCEDDEFENSESECURITYTYPE = "OperationDenied.InvalidAdvancedDefenseSecurityType"
+//  RESOURCEINUSE = "ResourceInUse"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) CreateSecurityAPIResource(request *CreateSecurityAPIResourceRequest) (response *CreateSecurityAPIResourceResponse, err error) {
+    return c.CreateSecurityAPIResourceWithContext(context.Background(), request)
+}
+
+// CreateSecurityAPIResource
+// 用于创建 API 资源。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_ACCESSREDIRECTREGEXERROR = "InvalidParameter.AccessRedirectRegexError"
+//  INVALIDPARAMETER_ACTIONINPROGRESS = "InvalidParameter.ActionInProgress"
+//  INVALIDPARAMETER_CERTSYSTEMERROR = "InvalidParameter.CertSystemError"
+//  INVALIDPARAMETER_ERRACTIONUNSUPPORTTARGET = "InvalidParameter.ErrActionUnsupportTarget"
+//  INVALIDPARAMETER_ERRINVALIDACTION = "InvalidParameter.ErrInvalidAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONORIGINPRIVATEADDRESS = "InvalidParameter.ErrInvalidActionOriginPrivateAddress"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAM = "InvalidParameter.ErrInvalidActionParam"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMACTION = "InvalidParameter.ErrInvalidActionParamAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMBADVALUETYPE = "InvalidParameter.ErrInvalidActionParamBadValueType"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMDUPLICATENAME = "InvalidParameter.ErrInvalidActionParamDuplicateName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMNAME = "InvalidParameter.ErrInvalidActionParamName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMVALUE = "InvalidParameter.ErrInvalidActionParamValue"
+//  INVALIDPARAMETER_ERRINVALIDACTIONTYPE = "InvalidParameter.ErrInvalidActionType"
+//  INVALIDPARAMETER_ERRINVALIDCONDITION = "InvalidParameter.ErrInvalidCondition"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONCANNOTONLYCONTAINHOSTWHENMODIFYORIGINACTIONCONFIGURED = "InvalidParameter.ErrInvalidConditionCannotOnlyContainHostWhenModifyOriginActionConfigured"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONIGNORECASE = "InvalidParameter.ErrInvalidConditionIgnoreCase"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMEBADNAME = "InvalidParameter.ErrInvalidConditionNameBadName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMETARGETNOTSUPPORTNAME = "InvalidParameter.ErrInvalidConditionNameTargetNotSupportName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADREGULAR = "InvalidParameter.ErrInvalidConditionValueBadRegular"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADURL = "InvalidParameter.ErrInvalidConditionValueBadUrl"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUE = "InvalidParameter.ErrInvalidConditionValueBadValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUECONTAINFILENAMEEXTENSION = "InvalidParameter.ErrInvalidConditionValueBadValueContainFileNameExtension"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOLONGVALUE = "InvalidParameter.ErrInvalidConditionValueTooLongValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYREGULAR = "InvalidParameter.ErrInvalidConditionValueTooManyRegular"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYVALUES = "InvalidParameter.ErrInvalidConditionValueTooManyValues"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYWILDCARD = "InvalidParameter.ErrInvalidConditionValueTooManyWildcard"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEZEROLENGTH = "InvalidParameter.ErrInvalidConditionValueZeroLength"
+//  INVALIDPARAMETER_ERRNILCONDITION = "InvalidParameter.ErrNilCondition"
+//  INVALIDPARAMETER_GRPCREQUIREHTTP2 = "InvalidParameter.GrpcRequireHttp2"
+//  INVALIDPARAMETER_HOSTNOTFOUND = "InvalidParameter.HostNotFound"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATION = "InvalidParameter.InvalidAuthentication"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPEEXPIRETIME = "InvalidParameter.InvalidAuthenticationTypeExpireTime"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPESIGNPARAM = "InvalidParameter.InvalidAuthenticationTypeSignParam"
+//  INVALIDPARAMETER_INVALIDAWSREGION = "InvalidParameter.InvalidAwsRegion"
+//  INVALIDPARAMETER_INVALIDBACKUPSERVERNAME = "InvalidParameter.InvalidBackupServerName"
+//  INVALIDPARAMETER_INVALIDCACHECONFIGCACHE = "InvalidParameter.InvalidCacheConfigCache"
+//  INVALIDPARAMETER_INVALIDCACHEKEY = "InvalidParameter.InvalidCacheKey"
+//  INVALIDPARAMETER_INVALIDCACHEKEYQUERYSTRINGVALUE = "InvalidParameter.InvalidCacheKeyQueryStringValue"
+//  INVALIDPARAMETER_INVALIDCACHETIME = "InvalidParameter.InvalidCacheTime"
+//  INVALIDPARAMETER_INVALIDCLIENTIPHEADERNAME = "InvalidParameter.InvalidClientIpHeaderName"
+//  INVALIDPARAMETER_INVALIDDYNAMICROUTINE = "InvalidParameter.InvalidDynamicRoutine"
+//  INVALIDPARAMETER_INVALIDDYNAMICROUTINEBILLING = "InvalidParameter.InvalidDynamicRoutineBilling"
+//  INVALIDPARAMETER_INVALIDERRORPAGEREDIRECTURL = "InvalidParameter.InvalidErrorPageRedirectUrl"
+//  INVALIDPARAMETER_INVALIDHTTPSCIPHERSUITEANDTLSVERSION = "InvalidParameter.InvalidHttpsCipherSuiteAndTlsVersion"
+//  INVALIDPARAMETER_INVALIDHTTPSHSTSMAXAGE = "InvalidParameter.InvalidHttpsHstsMaxAge"
+//  INVALIDPARAMETER_INVALIDIPV6SWITCH = "InvalidParameter.InvalidIpv6Switch"
+//  INVALIDPARAMETER_INVALIDMAXAGETIME = "InvalidParameter.InvalidMaxAgeTime"
+//  INVALIDPARAMETER_INVALIDORIGIN = "InvalidParameter.InvalidOrigin"
+//  INVALIDPARAMETER_INVALIDPARAMETER = "InvalidParameter.InvalidParameter"
+//  INVALIDPARAMETER_INVALIDPOSTSIZEVALUE = "InvalidParameter.InvalidPostSizeValue"
+//  INVALIDPARAMETER_INVALIDRANGEORIGINPULL = "InvalidParameter.InvalidRangeOriginPull"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAME = "InvalidParameter.InvalidRequestHeaderName"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAMEXFF = "InvalidParameter.InvalidRequestHeaderNameXff"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERVALUE = "InvalidParameter.InvalidRequestHeaderValue"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERNAME = "InvalidParameter.InvalidResponseHeaderName"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERVALUE = "InvalidParameter.InvalidResponseHeaderValue"
+//  INVALIDPARAMETER_INVALIDRULEENGINEACTION = "InvalidParameter.InvalidRuleEngineAction"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGET = "InvalidParameter.InvalidRuleEngineTarget"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSEXTENSION = "InvalidParameter.InvalidRuleEngineTargetsExtension"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSURL = "InvalidParameter.InvalidRuleEngineTargetsUrl"
+//  INVALIDPARAMETER_INVALIDSERVERNAME = "InvalidParameter.InvalidServerName"
+//  INVALIDPARAMETER_INVALIDSTANDARDDEBUGEXPIRETIMELIMIT = "InvalidParameter.InvalidStandardDebugExpireTimeLimit"
+//  INVALIDPARAMETER_INVALIDUPSTREAMREQUESTQUERYSTRINGVALUE = "InvalidParameter.InvalidUpstreamRequestQueryStringValue"
+//  INVALIDPARAMETER_INVALIDURLREDIRECT = "InvalidParameter.InvalidUrlRedirect"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTHOST = "InvalidParameter.InvalidUrlRedirectHost"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTURL = "InvalidParameter.InvalidUrlRedirectUrl"
+//  INVALIDPARAMETER_INVALIDWEBSOCKETTIMEOUT = "InvalidParameter.InvalidWebSocketTimeout"
+//  INVALIDPARAMETER_KEYRULESINVALIDQUERYSTRINGVALUE = "InvalidParameter.KeyRulesInvalidQueryStringValue"
+//  INVALIDPARAMETER_LOADBALANCEINSTANCEIDISREQUIRED = "InvalidParameter.LoadBalanceInstanceIdIsRequired"
+//  INVALIDPARAMETER_NOTSUPPORTTHISPRESET = "InvalidParameter.NotSupportThisPreset"
+//  INVALIDPARAMETER_ORIGINORIGINGROUPIDISREQUIRED = "InvalidParameter.OriginOriginGroupIdIsRequired"
+//  INVALIDPARAMETER_POSTMAXSIZELIMITEXCEEDED = "InvalidParameter.PostMaxSizeLimitExceeded"
+//  INVALIDPARAMETER_TASKSYSTEMERROR = "InvalidParameter.TaskSystemError"
+//  INVALIDPARAMETERVALUE_FORMATMISMATCH = "InvalidParameterValue.FormatMismatch"
+//  INVALIDPARAMETERVALUE_GENERALMISMATCH = "InvalidParameterValue.GeneralMismatch"
+//  INVALIDPARAMETERVALUE_INCLUDEINVALIDVALUE = "InvalidParameterValue.IncludeInvalidValue"
+//  INVALIDPARAMETERVALUE_MISSINGNECESSARYPARAM = "InvalidParameterValue.MissingNecessaryParam"
+//  INVALIDPARAMETERVALUE_NOTINENUMERATION = "InvalidParameterValue.NotInEnumeration"
+//  INVALIDPARAMETERVALUE_NOTWITHINRANGE = "InvalidParameterValue.NotWithinRange"
+//  INVALIDPARAMETERVALUE_REGEXMISMATCH = "InvalidParameterValue.RegExMismatch"
+//  INVALIDPARAMETERVALUE_UNRECOGNIZABLEVALUE = "InvalidParameterValue.UnrecognizableValue"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_ACCELERATEMAINLANDMULTIPLYLAYERCONFLICT = "OperationDenied.AccelerateMainlandMultiplyLayerConflict"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_INVALIDADVANCEDDEFENSESECURITYTYPE = "OperationDenied.InvalidAdvancedDefenseSecurityType"
+//  RESOURCEINUSE = "ResourceInUse"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) CreateSecurityAPIResourceWithContext(ctx context.Context, request *CreateSecurityAPIResourceRequest) (response *CreateSecurityAPIResourceResponse, err error) {
+    if request == nil {
+        request = NewCreateSecurityAPIResourceRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateSecurityAPIResource")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateSecurityAPIResource require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateSecurityAPIResourceResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateSecurityAPIServiceRequest() (request *CreateSecurityAPIServiceRequest) {
+    request = &CreateSecurityAPIServiceRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "CreateSecurityAPIService")
+    
+    
+    return
+}
+
+func NewCreateSecurityAPIServiceResponse() (response *CreateSecurityAPIServiceResponse) {
+    response = &CreateSecurityAPIServiceResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateSecurityAPIService
+// 用于创建 API 服务。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_ACCESSREDIRECTREGEXERROR = "InvalidParameter.AccessRedirectRegexError"
+//  INVALIDPARAMETER_ACTIONINPROGRESS = "InvalidParameter.ActionInProgress"
+//  INVALIDPARAMETER_CERTSYSTEMERROR = "InvalidParameter.CertSystemError"
+//  INVALIDPARAMETER_ERRACTIONUNSUPPORTTARGET = "InvalidParameter.ErrActionUnsupportTarget"
+//  INVALIDPARAMETER_ERRINVALIDACTION = "InvalidParameter.ErrInvalidAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONORIGINPRIVATEADDRESS = "InvalidParameter.ErrInvalidActionOriginPrivateAddress"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAM = "InvalidParameter.ErrInvalidActionParam"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMACTION = "InvalidParameter.ErrInvalidActionParamAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMBADVALUETYPE = "InvalidParameter.ErrInvalidActionParamBadValueType"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMDUPLICATENAME = "InvalidParameter.ErrInvalidActionParamDuplicateName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMNAME = "InvalidParameter.ErrInvalidActionParamName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMVALUE = "InvalidParameter.ErrInvalidActionParamValue"
+//  INVALIDPARAMETER_ERRINVALIDACTIONTYPE = "InvalidParameter.ErrInvalidActionType"
+//  INVALIDPARAMETER_ERRINVALIDCONDITION = "InvalidParameter.ErrInvalidCondition"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONCANNOTONLYCONTAINHOSTWHENMODIFYORIGINACTIONCONFIGURED = "InvalidParameter.ErrInvalidConditionCannotOnlyContainHostWhenModifyOriginActionConfigured"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONIGNORECASE = "InvalidParameter.ErrInvalidConditionIgnoreCase"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMEBADNAME = "InvalidParameter.ErrInvalidConditionNameBadName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMETARGETNOTSUPPORTNAME = "InvalidParameter.ErrInvalidConditionNameTargetNotSupportName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADREGULAR = "InvalidParameter.ErrInvalidConditionValueBadRegular"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADURL = "InvalidParameter.ErrInvalidConditionValueBadUrl"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUE = "InvalidParameter.ErrInvalidConditionValueBadValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUECONTAINFILENAMEEXTENSION = "InvalidParameter.ErrInvalidConditionValueBadValueContainFileNameExtension"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOLONGVALUE = "InvalidParameter.ErrInvalidConditionValueTooLongValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYREGULAR = "InvalidParameter.ErrInvalidConditionValueTooManyRegular"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYVALUES = "InvalidParameter.ErrInvalidConditionValueTooManyValues"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYWILDCARD = "InvalidParameter.ErrInvalidConditionValueTooManyWildcard"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEZEROLENGTH = "InvalidParameter.ErrInvalidConditionValueZeroLength"
+//  INVALIDPARAMETER_ERRNILCONDITION = "InvalidParameter.ErrNilCondition"
+//  INVALIDPARAMETER_GRPCREQUIREHTTP2 = "InvalidParameter.GrpcRequireHttp2"
+//  INVALIDPARAMETER_HOSTNOTFOUND = "InvalidParameter.HostNotFound"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATION = "InvalidParameter.InvalidAuthentication"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPEEXPIRETIME = "InvalidParameter.InvalidAuthenticationTypeExpireTime"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPESIGNPARAM = "InvalidParameter.InvalidAuthenticationTypeSignParam"
+//  INVALIDPARAMETER_INVALIDAWSREGION = "InvalidParameter.InvalidAwsRegion"
+//  INVALIDPARAMETER_INVALIDBACKUPSERVERNAME = "InvalidParameter.InvalidBackupServerName"
+//  INVALIDPARAMETER_INVALIDCACHECONFIGCACHE = "InvalidParameter.InvalidCacheConfigCache"
+//  INVALIDPARAMETER_INVALIDCACHEKEY = "InvalidParameter.InvalidCacheKey"
+//  INVALIDPARAMETER_INVALIDCACHEKEYQUERYSTRINGVALUE = "InvalidParameter.InvalidCacheKeyQueryStringValue"
+//  INVALIDPARAMETER_INVALIDCACHETIME = "InvalidParameter.InvalidCacheTime"
+//  INVALIDPARAMETER_INVALIDCLIENTIPHEADERNAME = "InvalidParameter.InvalidClientIpHeaderName"
+//  INVALIDPARAMETER_INVALIDDYNAMICROUTINE = "InvalidParameter.InvalidDynamicRoutine"
+//  INVALIDPARAMETER_INVALIDDYNAMICROUTINEBILLING = "InvalidParameter.InvalidDynamicRoutineBilling"
+//  INVALIDPARAMETER_INVALIDERRORPAGEREDIRECTURL = "InvalidParameter.InvalidErrorPageRedirectUrl"
+//  INVALIDPARAMETER_INVALIDHTTPSCIPHERSUITEANDTLSVERSION = "InvalidParameter.InvalidHttpsCipherSuiteAndTlsVersion"
+//  INVALIDPARAMETER_INVALIDHTTPSHSTSMAXAGE = "InvalidParameter.InvalidHttpsHstsMaxAge"
+//  INVALIDPARAMETER_INVALIDIPV6SWITCH = "InvalidParameter.InvalidIpv6Switch"
+//  INVALIDPARAMETER_INVALIDMAXAGETIME = "InvalidParameter.InvalidMaxAgeTime"
+//  INVALIDPARAMETER_INVALIDORIGIN = "InvalidParameter.InvalidOrigin"
+//  INVALIDPARAMETER_INVALIDPARAMETER = "InvalidParameter.InvalidParameter"
+//  INVALIDPARAMETER_INVALIDPOSTSIZEVALUE = "InvalidParameter.InvalidPostSizeValue"
+//  INVALIDPARAMETER_INVALIDRANGEORIGINPULL = "InvalidParameter.InvalidRangeOriginPull"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAME = "InvalidParameter.InvalidRequestHeaderName"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAMEXFF = "InvalidParameter.InvalidRequestHeaderNameXff"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERVALUE = "InvalidParameter.InvalidRequestHeaderValue"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERNAME = "InvalidParameter.InvalidResponseHeaderName"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERVALUE = "InvalidParameter.InvalidResponseHeaderValue"
+//  INVALIDPARAMETER_INVALIDRULEENGINEACTION = "InvalidParameter.InvalidRuleEngineAction"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGET = "InvalidParameter.InvalidRuleEngineTarget"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSEXTENSION = "InvalidParameter.InvalidRuleEngineTargetsExtension"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSURL = "InvalidParameter.InvalidRuleEngineTargetsUrl"
+//  INVALIDPARAMETER_INVALIDSERVERNAME = "InvalidParameter.InvalidServerName"
+//  INVALIDPARAMETER_INVALIDSTANDARDDEBUGEXPIRETIMELIMIT = "InvalidParameter.InvalidStandardDebugExpireTimeLimit"
+//  INVALIDPARAMETER_INVALIDUPSTREAMREQUESTQUERYSTRINGVALUE = "InvalidParameter.InvalidUpstreamRequestQueryStringValue"
+//  INVALIDPARAMETER_INVALIDURLREDIRECT = "InvalidParameter.InvalidUrlRedirect"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTHOST = "InvalidParameter.InvalidUrlRedirectHost"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTURL = "InvalidParameter.InvalidUrlRedirectUrl"
+//  INVALIDPARAMETER_INVALIDWEBSOCKETTIMEOUT = "InvalidParameter.InvalidWebSocketTimeout"
+//  INVALIDPARAMETER_KEYRULESINVALIDQUERYSTRINGVALUE = "InvalidParameter.KeyRulesInvalidQueryStringValue"
+//  INVALIDPARAMETER_LOADBALANCEINSTANCEIDISREQUIRED = "InvalidParameter.LoadBalanceInstanceIdIsRequired"
+//  INVALIDPARAMETER_NOTSUPPORTTHISPRESET = "InvalidParameter.NotSupportThisPreset"
+//  INVALIDPARAMETER_ORIGINORIGINGROUPIDISREQUIRED = "InvalidParameter.OriginOriginGroupIdIsRequired"
+//  INVALIDPARAMETER_POSTMAXSIZELIMITEXCEEDED = "InvalidParameter.PostMaxSizeLimitExceeded"
+//  INVALIDPARAMETER_TASKSYSTEMERROR = "InvalidParameter.TaskSystemError"
+//  INVALIDPARAMETERVALUE_FORMATMISMATCH = "InvalidParameterValue.FormatMismatch"
+//  INVALIDPARAMETERVALUE_GENERALMISMATCH = "InvalidParameterValue.GeneralMismatch"
+//  INVALIDPARAMETERVALUE_INCLUDEINVALIDVALUE = "InvalidParameterValue.IncludeInvalidValue"
+//  INVALIDPARAMETERVALUE_MISSINGNECESSARYPARAM = "InvalidParameterValue.MissingNecessaryParam"
+//  INVALIDPARAMETERVALUE_NOTINENUMERATION = "InvalidParameterValue.NotInEnumeration"
+//  INVALIDPARAMETERVALUE_NOTWITHINRANGE = "InvalidParameterValue.NotWithinRange"
+//  INVALIDPARAMETERVALUE_REGEXMISMATCH = "InvalidParameterValue.RegExMismatch"
+//  INVALIDPARAMETERVALUE_UNRECOGNIZABLEVALUE = "InvalidParameterValue.UnrecognizableValue"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_ACCELERATEMAINLANDMULTIPLYLAYERCONFLICT = "OperationDenied.AccelerateMainlandMultiplyLayerConflict"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_INVALIDADVANCEDDEFENSESECURITYTYPE = "OperationDenied.InvalidAdvancedDefenseSecurityType"
+//  RESOURCEINUSE = "ResourceInUse"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) CreateSecurityAPIService(request *CreateSecurityAPIServiceRequest) (response *CreateSecurityAPIServiceResponse, err error) {
+    return c.CreateSecurityAPIServiceWithContext(context.Background(), request)
+}
+
+// CreateSecurityAPIService
+// 用于创建 API 服务。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_ACCESSREDIRECTREGEXERROR = "InvalidParameter.AccessRedirectRegexError"
+//  INVALIDPARAMETER_ACTIONINPROGRESS = "InvalidParameter.ActionInProgress"
+//  INVALIDPARAMETER_CERTSYSTEMERROR = "InvalidParameter.CertSystemError"
+//  INVALIDPARAMETER_ERRACTIONUNSUPPORTTARGET = "InvalidParameter.ErrActionUnsupportTarget"
+//  INVALIDPARAMETER_ERRINVALIDACTION = "InvalidParameter.ErrInvalidAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONORIGINPRIVATEADDRESS = "InvalidParameter.ErrInvalidActionOriginPrivateAddress"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAM = "InvalidParameter.ErrInvalidActionParam"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMACTION = "InvalidParameter.ErrInvalidActionParamAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMBADVALUETYPE = "InvalidParameter.ErrInvalidActionParamBadValueType"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMDUPLICATENAME = "InvalidParameter.ErrInvalidActionParamDuplicateName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMNAME = "InvalidParameter.ErrInvalidActionParamName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMVALUE = "InvalidParameter.ErrInvalidActionParamValue"
+//  INVALIDPARAMETER_ERRINVALIDACTIONTYPE = "InvalidParameter.ErrInvalidActionType"
+//  INVALIDPARAMETER_ERRINVALIDCONDITION = "InvalidParameter.ErrInvalidCondition"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONCANNOTONLYCONTAINHOSTWHENMODIFYORIGINACTIONCONFIGURED = "InvalidParameter.ErrInvalidConditionCannotOnlyContainHostWhenModifyOriginActionConfigured"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONIGNORECASE = "InvalidParameter.ErrInvalidConditionIgnoreCase"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMEBADNAME = "InvalidParameter.ErrInvalidConditionNameBadName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMETARGETNOTSUPPORTNAME = "InvalidParameter.ErrInvalidConditionNameTargetNotSupportName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADREGULAR = "InvalidParameter.ErrInvalidConditionValueBadRegular"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADURL = "InvalidParameter.ErrInvalidConditionValueBadUrl"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUE = "InvalidParameter.ErrInvalidConditionValueBadValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUECONTAINFILENAMEEXTENSION = "InvalidParameter.ErrInvalidConditionValueBadValueContainFileNameExtension"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOLONGVALUE = "InvalidParameter.ErrInvalidConditionValueTooLongValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYREGULAR = "InvalidParameter.ErrInvalidConditionValueTooManyRegular"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYVALUES = "InvalidParameter.ErrInvalidConditionValueTooManyValues"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYWILDCARD = "InvalidParameter.ErrInvalidConditionValueTooManyWildcard"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEZEROLENGTH = "InvalidParameter.ErrInvalidConditionValueZeroLength"
+//  INVALIDPARAMETER_ERRNILCONDITION = "InvalidParameter.ErrNilCondition"
+//  INVALIDPARAMETER_GRPCREQUIREHTTP2 = "InvalidParameter.GrpcRequireHttp2"
+//  INVALIDPARAMETER_HOSTNOTFOUND = "InvalidParameter.HostNotFound"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATION = "InvalidParameter.InvalidAuthentication"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPEEXPIRETIME = "InvalidParameter.InvalidAuthenticationTypeExpireTime"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPESIGNPARAM = "InvalidParameter.InvalidAuthenticationTypeSignParam"
+//  INVALIDPARAMETER_INVALIDAWSREGION = "InvalidParameter.InvalidAwsRegion"
+//  INVALIDPARAMETER_INVALIDBACKUPSERVERNAME = "InvalidParameter.InvalidBackupServerName"
+//  INVALIDPARAMETER_INVALIDCACHECONFIGCACHE = "InvalidParameter.InvalidCacheConfigCache"
+//  INVALIDPARAMETER_INVALIDCACHEKEY = "InvalidParameter.InvalidCacheKey"
+//  INVALIDPARAMETER_INVALIDCACHEKEYQUERYSTRINGVALUE = "InvalidParameter.InvalidCacheKeyQueryStringValue"
+//  INVALIDPARAMETER_INVALIDCACHETIME = "InvalidParameter.InvalidCacheTime"
+//  INVALIDPARAMETER_INVALIDCLIENTIPHEADERNAME = "InvalidParameter.InvalidClientIpHeaderName"
+//  INVALIDPARAMETER_INVALIDDYNAMICROUTINE = "InvalidParameter.InvalidDynamicRoutine"
+//  INVALIDPARAMETER_INVALIDDYNAMICROUTINEBILLING = "InvalidParameter.InvalidDynamicRoutineBilling"
+//  INVALIDPARAMETER_INVALIDERRORPAGEREDIRECTURL = "InvalidParameter.InvalidErrorPageRedirectUrl"
+//  INVALIDPARAMETER_INVALIDHTTPSCIPHERSUITEANDTLSVERSION = "InvalidParameter.InvalidHttpsCipherSuiteAndTlsVersion"
+//  INVALIDPARAMETER_INVALIDHTTPSHSTSMAXAGE = "InvalidParameter.InvalidHttpsHstsMaxAge"
+//  INVALIDPARAMETER_INVALIDIPV6SWITCH = "InvalidParameter.InvalidIpv6Switch"
+//  INVALIDPARAMETER_INVALIDMAXAGETIME = "InvalidParameter.InvalidMaxAgeTime"
+//  INVALIDPARAMETER_INVALIDORIGIN = "InvalidParameter.InvalidOrigin"
+//  INVALIDPARAMETER_INVALIDPARAMETER = "InvalidParameter.InvalidParameter"
+//  INVALIDPARAMETER_INVALIDPOSTSIZEVALUE = "InvalidParameter.InvalidPostSizeValue"
+//  INVALIDPARAMETER_INVALIDRANGEORIGINPULL = "InvalidParameter.InvalidRangeOriginPull"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAME = "InvalidParameter.InvalidRequestHeaderName"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAMEXFF = "InvalidParameter.InvalidRequestHeaderNameXff"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERVALUE = "InvalidParameter.InvalidRequestHeaderValue"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERNAME = "InvalidParameter.InvalidResponseHeaderName"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERVALUE = "InvalidParameter.InvalidResponseHeaderValue"
+//  INVALIDPARAMETER_INVALIDRULEENGINEACTION = "InvalidParameter.InvalidRuleEngineAction"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGET = "InvalidParameter.InvalidRuleEngineTarget"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSEXTENSION = "InvalidParameter.InvalidRuleEngineTargetsExtension"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSURL = "InvalidParameter.InvalidRuleEngineTargetsUrl"
+//  INVALIDPARAMETER_INVALIDSERVERNAME = "InvalidParameter.InvalidServerName"
+//  INVALIDPARAMETER_INVALIDSTANDARDDEBUGEXPIRETIMELIMIT = "InvalidParameter.InvalidStandardDebugExpireTimeLimit"
+//  INVALIDPARAMETER_INVALIDUPSTREAMREQUESTQUERYSTRINGVALUE = "InvalidParameter.InvalidUpstreamRequestQueryStringValue"
+//  INVALIDPARAMETER_INVALIDURLREDIRECT = "InvalidParameter.InvalidUrlRedirect"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTHOST = "InvalidParameter.InvalidUrlRedirectHost"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTURL = "InvalidParameter.InvalidUrlRedirectUrl"
+//  INVALIDPARAMETER_INVALIDWEBSOCKETTIMEOUT = "InvalidParameter.InvalidWebSocketTimeout"
+//  INVALIDPARAMETER_KEYRULESINVALIDQUERYSTRINGVALUE = "InvalidParameter.KeyRulesInvalidQueryStringValue"
+//  INVALIDPARAMETER_LOADBALANCEINSTANCEIDISREQUIRED = "InvalidParameter.LoadBalanceInstanceIdIsRequired"
+//  INVALIDPARAMETER_NOTSUPPORTTHISPRESET = "InvalidParameter.NotSupportThisPreset"
+//  INVALIDPARAMETER_ORIGINORIGINGROUPIDISREQUIRED = "InvalidParameter.OriginOriginGroupIdIsRequired"
+//  INVALIDPARAMETER_POSTMAXSIZELIMITEXCEEDED = "InvalidParameter.PostMaxSizeLimitExceeded"
+//  INVALIDPARAMETER_TASKSYSTEMERROR = "InvalidParameter.TaskSystemError"
+//  INVALIDPARAMETERVALUE_FORMATMISMATCH = "InvalidParameterValue.FormatMismatch"
+//  INVALIDPARAMETERVALUE_GENERALMISMATCH = "InvalidParameterValue.GeneralMismatch"
+//  INVALIDPARAMETERVALUE_INCLUDEINVALIDVALUE = "InvalidParameterValue.IncludeInvalidValue"
+//  INVALIDPARAMETERVALUE_MISSINGNECESSARYPARAM = "InvalidParameterValue.MissingNecessaryParam"
+//  INVALIDPARAMETERVALUE_NOTINENUMERATION = "InvalidParameterValue.NotInEnumeration"
+//  INVALIDPARAMETERVALUE_NOTWITHINRANGE = "InvalidParameterValue.NotWithinRange"
+//  INVALIDPARAMETERVALUE_REGEXMISMATCH = "InvalidParameterValue.RegExMismatch"
+//  INVALIDPARAMETERVALUE_UNRECOGNIZABLEVALUE = "InvalidParameterValue.UnrecognizableValue"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_ACCELERATEMAINLANDMULTIPLYLAYERCONFLICT = "OperationDenied.AccelerateMainlandMultiplyLayerConflict"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_INVALIDADVANCEDDEFENSESECURITYTYPE = "OperationDenied.InvalidAdvancedDefenseSecurityType"
+//  RESOURCEINUSE = "ResourceInUse"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) CreateSecurityAPIServiceWithContext(ctx context.Context, request *CreateSecurityAPIServiceRequest) (response *CreateSecurityAPIServiceResponse, err error) {
+    if request == nil {
+        request = NewCreateSecurityAPIServiceRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateSecurityAPIService")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateSecurityAPIService require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateSecurityAPIServiceResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateSecurityClientAttesterRequest() (request *CreateSecurityClientAttesterRequest) {
+    request = &CreateSecurityClientAttesterRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "CreateSecurityClientAttester")
+    
+    
+    return
+}
+
+func NewCreateSecurityClientAttesterResponse() (response *CreateSecurityClientAttesterResponse) {
+    response = &CreateSecurityClientAttesterResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateSecurityClientAttester
+// 创建客户端认证选项。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_ACCESSREDIRECTREGEXERROR = "InvalidParameter.AccessRedirectRegexError"
+//  INVALIDPARAMETER_ACTIONINPROGRESS = "InvalidParameter.ActionInProgress"
+//  INVALIDPARAMETER_CERTSYSTEMERROR = "InvalidParameter.CertSystemError"
+//  INVALIDPARAMETER_ERRACTIONUNSUPPORTTARGET = "InvalidParameter.ErrActionUnsupportTarget"
+//  INVALIDPARAMETER_ERRINVALIDACTION = "InvalidParameter.ErrInvalidAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONORIGINPRIVATEADDRESS = "InvalidParameter.ErrInvalidActionOriginPrivateAddress"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAM = "InvalidParameter.ErrInvalidActionParam"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMACTION = "InvalidParameter.ErrInvalidActionParamAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMBADVALUETYPE = "InvalidParameter.ErrInvalidActionParamBadValueType"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMDUPLICATENAME = "InvalidParameter.ErrInvalidActionParamDuplicateName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMNAME = "InvalidParameter.ErrInvalidActionParamName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMVALUE = "InvalidParameter.ErrInvalidActionParamValue"
+//  INVALIDPARAMETER_ERRINVALIDACTIONTYPE = "InvalidParameter.ErrInvalidActionType"
+//  INVALIDPARAMETER_ERRINVALIDCONDITION = "InvalidParameter.ErrInvalidCondition"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONCANNOTONLYCONTAINHOSTWHENMODIFYORIGINACTIONCONFIGURED = "InvalidParameter.ErrInvalidConditionCannotOnlyContainHostWhenModifyOriginActionConfigured"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONIGNORECASE = "InvalidParameter.ErrInvalidConditionIgnoreCase"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMEBADNAME = "InvalidParameter.ErrInvalidConditionNameBadName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMETARGETNOTSUPPORTNAME = "InvalidParameter.ErrInvalidConditionNameTargetNotSupportName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADREGULAR = "InvalidParameter.ErrInvalidConditionValueBadRegular"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADURL = "InvalidParameter.ErrInvalidConditionValueBadUrl"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUE = "InvalidParameter.ErrInvalidConditionValueBadValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUECONTAINFILENAMEEXTENSION = "InvalidParameter.ErrInvalidConditionValueBadValueContainFileNameExtension"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOLONGVALUE = "InvalidParameter.ErrInvalidConditionValueTooLongValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYREGULAR = "InvalidParameter.ErrInvalidConditionValueTooManyRegular"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYVALUES = "InvalidParameter.ErrInvalidConditionValueTooManyValues"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYWILDCARD = "InvalidParameter.ErrInvalidConditionValueTooManyWildcard"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEZEROLENGTH = "InvalidParameter.ErrInvalidConditionValueZeroLength"
+//  INVALIDPARAMETER_ERRNILCONDITION = "InvalidParameter.ErrNilCondition"
+//  INVALIDPARAMETER_GRPCREQUIREHTTP2 = "InvalidParameter.GrpcRequireHttp2"
+//  INVALIDPARAMETER_HOSTNOTFOUND = "InvalidParameter.HostNotFound"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATION = "InvalidParameter.InvalidAuthentication"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPEEXPIRETIME = "InvalidParameter.InvalidAuthenticationTypeExpireTime"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPESIGNPARAM = "InvalidParameter.InvalidAuthenticationTypeSignParam"
+//  INVALIDPARAMETER_INVALIDAWSREGION = "InvalidParameter.InvalidAwsRegion"
+//  INVALIDPARAMETER_INVALIDBACKUPSERVERNAME = "InvalidParameter.InvalidBackupServerName"
+//  INVALIDPARAMETER_INVALIDCACHECONFIGCACHE = "InvalidParameter.InvalidCacheConfigCache"
+//  INVALIDPARAMETER_INVALIDCACHEKEY = "InvalidParameter.InvalidCacheKey"
+//  INVALIDPARAMETER_INVALIDCACHEKEYQUERYSTRINGVALUE = "InvalidParameter.InvalidCacheKeyQueryStringValue"
+//  INVALIDPARAMETER_INVALIDCACHETIME = "InvalidParameter.InvalidCacheTime"
+//  INVALIDPARAMETER_INVALIDCLIENTIPHEADERNAME = "InvalidParameter.InvalidClientIpHeaderName"
+//  INVALIDPARAMETER_INVALIDDYNAMICROUTINE = "InvalidParameter.InvalidDynamicRoutine"
+//  INVALIDPARAMETER_INVALIDDYNAMICROUTINEBILLING = "InvalidParameter.InvalidDynamicRoutineBilling"
+//  INVALIDPARAMETER_INVALIDERRORPAGEREDIRECTURL = "InvalidParameter.InvalidErrorPageRedirectUrl"
+//  INVALIDPARAMETER_INVALIDHTTPSCIPHERSUITEANDTLSVERSION = "InvalidParameter.InvalidHttpsCipherSuiteAndTlsVersion"
+//  INVALIDPARAMETER_INVALIDHTTPSHSTSMAXAGE = "InvalidParameter.InvalidHttpsHstsMaxAge"
+//  INVALIDPARAMETER_INVALIDIPV6SWITCH = "InvalidParameter.InvalidIpv6Switch"
+//  INVALIDPARAMETER_INVALIDMAXAGETIME = "InvalidParameter.InvalidMaxAgeTime"
+//  INVALIDPARAMETER_INVALIDORIGIN = "InvalidParameter.InvalidOrigin"
+//  INVALIDPARAMETER_INVALIDPARAMETER = "InvalidParameter.InvalidParameter"
+//  INVALIDPARAMETER_INVALIDPOSTSIZEVALUE = "InvalidParameter.InvalidPostSizeValue"
+//  INVALIDPARAMETER_INVALIDRANGEORIGINPULL = "InvalidParameter.InvalidRangeOriginPull"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAME = "InvalidParameter.InvalidRequestHeaderName"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAMEXFF = "InvalidParameter.InvalidRequestHeaderNameXff"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERVALUE = "InvalidParameter.InvalidRequestHeaderValue"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERNAME = "InvalidParameter.InvalidResponseHeaderName"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERVALUE = "InvalidParameter.InvalidResponseHeaderValue"
+//  INVALIDPARAMETER_INVALIDRULEENGINEACTION = "InvalidParameter.InvalidRuleEngineAction"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGET = "InvalidParameter.InvalidRuleEngineTarget"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSEXTENSION = "InvalidParameter.InvalidRuleEngineTargetsExtension"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSURL = "InvalidParameter.InvalidRuleEngineTargetsUrl"
+//  INVALIDPARAMETER_INVALIDSERVERNAME = "InvalidParameter.InvalidServerName"
+//  INVALIDPARAMETER_INVALIDSTANDARDDEBUGEXPIRETIMELIMIT = "InvalidParameter.InvalidStandardDebugExpireTimeLimit"
+//  INVALIDPARAMETER_INVALIDUPSTREAMREQUESTQUERYSTRINGVALUE = "InvalidParameter.InvalidUpstreamRequestQueryStringValue"
+//  INVALIDPARAMETER_INVALIDURLREDIRECT = "InvalidParameter.InvalidUrlRedirect"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTHOST = "InvalidParameter.InvalidUrlRedirectHost"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTURL = "InvalidParameter.InvalidUrlRedirectUrl"
+//  INVALIDPARAMETER_INVALIDWEBSOCKETTIMEOUT = "InvalidParameter.InvalidWebSocketTimeout"
+//  INVALIDPARAMETER_KEYRULESINVALIDQUERYSTRINGVALUE = "InvalidParameter.KeyRulesInvalidQueryStringValue"
+//  INVALIDPARAMETER_LOADBALANCEINSTANCEIDISREQUIRED = "InvalidParameter.LoadBalanceInstanceIdIsRequired"
+//  INVALIDPARAMETER_NOTSUPPORTTHISPRESET = "InvalidParameter.NotSupportThisPreset"
+//  INVALIDPARAMETER_ORIGINORIGINGROUPIDISREQUIRED = "InvalidParameter.OriginOriginGroupIdIsRequired"
+//  INVALIDPARAMETER_POSTMAXSIZELIMITEXCEEDED = "InvalidParameter.PostMaxSizeLimitExceeded"
+//  INVALIDPARAMETER_TASKSYSTEMERROR = "InvalidParameter.TaskSystemError"
+//  INVALIDPARAMETERVALUE_FORMATMISMATCH = "InvalidParameterValue.FormatMismatch"
+//  INVALIDPARAMETERVALUE_GENERALMISMATCH = "InvalidParameterValue.GeneralMismatch"
+//  INVALIDPARAMETERVALUE_INCLUDEINVALIDVALUE = "InvalidParameterValue.IncludeInvalidValue"
+//  INVALIDPARAMETERVALUE_MISSINGNECESSARYPARAM = "InvalidParameterValue.MissingNecessaryParam"
+//  INVALIDPARAMETERVALUE_NOTINENUMERATION = "InvalidParameterValue.NotInEnumeration"
+//  INVALIDPARAMETERVALUE_NOTWITHINRANGE = "InvalidParameterValue.NotWithinRange"
+//  INVALIDPARAMETERVALUE_REGEXMISMATCH = "InvalidParameterValue.RegExMismatch"
+//  INVALIDPARAMETERVALUE_UNRECOGNIZABLEVALUE = "InvalidParameterValue.UnrecognizableValue"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_ACCELERATEMAINLANDMULTIPLYLAYERCONFLICT = "OperationDenied.AccelerateMainlandMultiplyLayerConflict"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_INVALIDADVANCEDDEFENSESECURITYTYPE = "OperationDenied.InvalidAdvancedDefenseSecurityType"
+//  RESOURCEINUSE = "ResourceInUse"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) CreateSecurityClientAttester(request *CreateSecurityClientAttesterRequest) (response *CreateSecurityClientAttesterResponse, err error) {
+    return c.CreateSecurityClientAttesterWithContext(context.Background(), request)
+}
+
+// CreateSecurityClientAttester
+// 创建客户端认证选项。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_ACCESSREDIRECTREGEXERROR = "InvalidParameter.AccessRedirectRegexError"
+//  INVALIDPARAMETER_ACTIONINPROGRESS = "InvalidParameter.ActionInProgress"
+//  INVALIDPARAMETER_CERTSYSTEMERROR = "InvalidParameter.CertSystemError"
+//  INVALIDPARAMETER_ERRACTIONUNSUPPORTTARGET = "InvalidParameter.ErrActionUnsupportTarget"
+//  INVALIDPARAMETER_ERRINVALIDACTION = "InvalidParameter.ErrInvalidAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONORIGINPRIVATEADDRESS = "InvalidParameter.ErrInvalidActionOriginPrivateAddress"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAM = "InvalidParameter.ErrInvalidActionParam"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMACTION = "InvalidParameter.ErrInvalidActionParamAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMBADVALUETYPE = "InvalidParameter.ErrInvalidActionParamBadValueType"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMDUPLICATENAME = "InvalidParameter.ErrInvalidActionParamDuplicateName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMNAME = "InvalidParameter.ErrInvalidActionParamName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMVALUE = "InvalidParameter.ErrInvalidActionParamValue"
+//  INVALIDPARAMETER_ERRINVALIDACTIONTYPE = "InvalidParameter.ErrInvalidActionType"
+//  INVALIDPARAMETER_ERRINVALIDCONDITION = "InvalidParameter.ErrInvalidCondition"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONCANNOTONLYCONTAINHOSTWHENMODIFYORIGINACTIONCONFIGURED = "InvalidParameter.ErrInvalidConditionCannotOnlyContainHostWhenModifyOriginActionConfigured"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONIGNORECASE = "InvalidParameter.ErrInvalidConditionIgnoreCase"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMEBADNAME = "InvalidParameter.ErrInvalidConditionNameBadName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMETARGETNOTSUPPORTNAME = "InvalidParameter.ErrInvalidConditionNameTargetNotSupportName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADREGULAR = "InvalidParameter.ErrInvalidConditionValueBadRegular"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADURL = "InvalidParameter.ErrInvalidConditionValueBadUrl"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUE = "InvalidParameter.ErrInvalidConditionValueBadValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUECONTAINFILENAMEEXTENSION = "InvalidParameter.ErrInvalidConditionValueBadValueContainFileNameExtension"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOLONGVALUE = "InvalidParameter.ErrInvalidConditionValueTooLongValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYREGULAR = "InvalidParameter.ErrInvalidConditionValueTooManyRegular"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYVALUES = "InvalidParameter.ErrInvalidConditionValueTooManyValues"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYWILDCARD = "InvalidParameter.ErrInvalidConditionValueTooManyWildcard"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEZEROLENGTH = "InvalidParameter.ErrInvalidConditionValueZeroLength"
+//  INVALIDPARAMETER_ERRNILCONDITION = "InvalidParameter.ErrNilCondition"
+//  INVALIDPARAMETER_GRPCREQUIREHTTP2 = "InvalidParameter.GrpcRequireHttp2"
+//  INVALIDPARAMETER_HOSTNOTFOUND = "InvalidParameter.HostNotFound"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATION = "InvalidParameter.InvalidAuthentication"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPEEXPIRETIME = "InvalidParameter.InvalidAuthenticationTypeExpireTime"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPESIGNPARAM = "InvalidParameter.InvalidAuthenticationTypeSignParam"
+//  INVALIDPARAMETER_INVALIDAWSREGION = "InvalidParameter.InvalidAwsRegion"
+//  INVALIDPARAMETER_INVALIDBACKUPSERVERNAME = "InvalidParameter.InvalidBackupServerName"
+//  INVALIDPARAMETER_INVALIDCACHECONFIGCACHE = "InvalidParameter.InvalidCacheConfigCache"
+//  INVALIDPARAMETER_INVALIDCACHEKEY = "InvalidParameter.InvalidCacheKey"
+//  INVALIDPARAMETER_INVALIDCACHEKEYQUERYSTRINGVALUE = "InvalidParameter.InvalidCacheKeyQueryStringValue"
+//  INVALIDPARAMETER_INVALIDCACHETIME = "InvalidParameter.InvalidCacheTime"
+//  INVALIDPARAMETER_INVALIDCLIENTIPHEADERNAME = "InvalidParameter.InvalidClientIpHeaderName"
+//  INVALIDPARAMETER_INVALIDDYNAMICROUTINE = "InvalidParameter.InvalidDynamicRoutine"
+//  INVALIDPARAMETER_INVALIDDYNAMICROUTINEBILLING = "InvalidParameter.InvalidDynamicRoutineBilling"
+//  INVALIDPARAMETER_INVALIDERRORPAGEREDIRECTURL = "InvalidParameter.InvalidErrorPageRedirectUrl"
+//  INVALIDPARAMETER_INVALIDHTTPSCIPHERSUITEANDTLSVERSION = "InvalidParameter.InvalidHttpsCipherSuiteAndTlsVersion"
+//  INVALIDPARAMETER_INVALIDHTTPSHSTSMAXAGE = "InvalidParameter.InvalidHttpsHstsMaxAge"
+//  INVALIDPARAMETER_INVALIDIPV6SWITCH = "InvalidParameter.InvalidIpv6Switch"
+//  INVALIDPARAMETER_INVALIDMAXAGETIME = "InvalidParameter.InvalidMaxAgeTime"
+//  INVALIDPARAMETER_INVALIDORIGIN = "InvalidParameter.InvalidOrigin"
+//  INVALIDPARAMETER_INVALIDPARAMETER = "InvalidParameter.InvalidParameter"
+//  INVALIDPARAMETER_INVALIDPOSTSIZEVALUE = "InvalidParameter.InvalidPostSizeValue"
+//  INVALIDPARAMETER_INVALIDRANGEORIGINPULL = "InvalidParameter.InvalidRangeOriginPull"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAME = "InvalidParameter.InvalidRequestHeaderName"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAMEXFF = "InvalidParameter.InvalidRequestHeaderNameXff"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERVALUE = "InvalidParameter.InvalidRequestHeaderValue"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERNAME = "InvalidParameter.InvalidResponseHeaderName"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERVALUE = "InvalidParameter.InvalidResponseHeaderValue"
+//  INVALIDPARAMETER_INVALIDRULEENGINEACTION = "InvalidParameter.InvalidRuleEngineAction"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGET = "InvalidParameter.InvalidRuleEngineTarget"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSEXTENSION = "InvalidParameter.InvalidRuleEngineTargetsExtension"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSURL = "InvalidParameter.InvalidRuleEngineTargetsUrl"
+//  INVALIDPARAMETER_INVALIDSERVERNAME = "InvalidParameter.InvalidServerName"
+//  INVALIDPARAMETER_INVALIDSTANDARDDEBUGEXPIRETIMELIMIT = "InvalidParameter.InvalidStandardDebugExpireTimeLimit"
+//  INVALIDPARAMETER_INVALIDUPSTREAMREQUESTQUERYSTRINGVALUE = "InvalidParameter.InvalidUpstreamRequestQueryStringValue"
+//  INVALIDPARAMETER_INVALIDURLREDIRECT = "InvalidParameter.InvalidUrlRedirect"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTHOST = "InvalidParameter.InvalidUrlRedirectHost"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTURL = "InvalidParameter.InvalidUrlRedirectUrl"
+//  INVALIDPARAMETER_INVALIDWEBSOCKETTIMEOUT = "InvalidParameter.InvalidWebSocketTimeout"
+//  INVALIDPARAMETER_KEYRULESINVALIDQUERYSTRINGVALUE = "InvalidParameter.KeyRulesInvalidQueryStringValue"
+//  INVALIDPARAMETER_LOADBALANCEINSTANCEIDISREQUIRED = "InvalidParameter.LoadBalanceInstanceIdIsRequired"
+//  INVALIDPARAMETER_NOTSUPPORTTHISPRESET = "InvalidParameter.NotSupportThisPreset"
+//  INVALIDPARAMETER_ORIGINORIGINGROUPIDISREQUIRED = "InvalidParameter.OriginOriginGroupIdIsRequired"
+//  INVALIDPARAMETER_POSTMAXSIZELIMITEXCEEDED = "InvalidParameter.PostMaxSizeLimitExceeded"
+//  INVALIDPARAMETER_TASKSYSTEMERROR = "InvalidParameter.TaskSystemError"
+//  INVALIDPARAMETERVALUE_FORMATMISMATCH = "InvalidParameterValue.FormatMismatch"
+//  INVALIDPARAMETERVALUE_GENERALMISMATCH = "InvalidParameterValue.GeneralMismatch"
+//  INVALIDPARAMETERVALUE_INCLUDEINVALIDVALUE = "InvalidParameterValue.IncludeInvalidValue"
+//  INVALIDPARAMETERVALUE_MISSINGNECESSARYPARAM = "InvalidParameterValue.MissingNecessaryParam"
+//  INVALIDPARAMETERVALUE_NOTINENUMERATION = "InvalidParameterValue.NotInEnumeration"
+//  INVALIDPARAMETERVALUE_NOTWITHINRANGE = "InvalidParameterValue.NotWithinRange"
+//  INVALIDPARAMETERVALUE_REGEXMISMATCH = "InvalidParameterValue.RegExMismatch"
+//  INVALIDPARAMETERVALUE_UNRECOGNIZABLEVALUE = "InvalidParameterValue.UnrecognizableValue"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_ACCELERATEMAINLANDMULTIPLYLAYERCONFLICT = "OperationDenied.AccelerateMainlandMultiplyLayerConflict"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_INVALIDADVANCEDDEFENSESECURITYTYPE = "OperationDenied.InvalidAdvancedDefenseSecurityType"
+//  RESOURCEINUSE = "ResourceInUse"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) CreateSecurityClientAttesterWithContext(ctx context.Context, request *CreateSecurityClientAttesterRequest) (response *CreateSecurityClientAttesterResponse, err error) {
+    if request == nil {
+        request = NewCreateSecurityClientAttesterRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateSecurityClientAttester")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateSecurityClientAttester require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateSecurityClientAttesterResponse()
     err = c.Send(request, response)
     return
 }
@@ -1683,6 +4012,7 @@ func (c *Client) CreateSecurityIPGroupWithContext(ctx context.Context, request *
     if request == nil {
         request = NewCreateSecurityIPGroupRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateSecurityIPGroup")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateSecurityIPGroup require credential")
@@ -1691,6 +4021,60 @@ func (c *Client) CreateSecurityIPGroupWithContext(ctx context.Context, request *
     request.SetContext(ctx)
     
     response = NewCreateSecurityIPGroupResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateSecurityJSInjectionRuleRequest() (request *CreateSecurityJSInjectionRuleRequest) {
+    request = &CreateSecurityJSInjectionRuleRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "CreateSecurityJSInjectionRule")
+    
+    
+    return
+}
+
+func NewCreateSecurityJSInjectionRuleResponse() (response *CreateSecurityJSInjectionRuleResponse) {
+    response = &CreateSecurityJSInjectionRuleResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateSecurityJSInjectionRule
+// 创建 JavaScript 注入规则。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER_SECURITY = "InvalidParameter.Security"
+//  OPERATIONDENIED = "OperationDenied"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) CreateSecurityJSInjectionRule(request *CreateSecurityJSInjectionRuleRequest) (response *CreateSecurityJSInjectionRuleResponse, err error) {
+    return c.CreateSecurityJSInjectionRuleWithContext(context.Background(), request)
+}
+
+// CreateSecurityJSInjectionRule
+// 创建 JavaScript 注入规则。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER_SECURITY = "InvalidParameter.Security"
+//  OPERATIONDENIED = "OperationDenied"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) CreateSecurityJSInjectionRuleWithContext(ctx context.Context, request *CreateSecurityJSInjectionRuleRequest) (response *CreateSecurityJSInjectionRuleResponse, err error) {
+    if request == nil {
+        request = NewCreateSecurityJSInjectionRuleRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateSecurityJSInjectionRule")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateSecurityJSInjectionRule require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateSecurityJSInjectionRuleResponse()
     err = c.Send(request, response)
     return
 }
@@ -1740,6 +4124,7 @@ func (c *Client) CreateSharedCNAMEWithContext(ctx context.Context, request *Crea
     if request == nil {
         request = NewCreateSharedCNAMERequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateSharedCNAME")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateSharedCNAME require credential")
@@ -1748,6 +4133,60 @@ func (c *Client) CreateSharedCNAMEWithContext(ctx context.Context, request *Crea
     request.SetContext(ctx)
     
     response = NewCreateSharedCNAMEResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateWebSecurityTemplateRequest() (request *CreateWebSecurityTemplateRequest) {
+    request = &CreateWebSecurityTemplateRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "CreateWebSecurityTemplate")
+    
+    
+    return
+}
+
+func NewCreateWebSecurityTemplateResponse() (response *CreateWebSecurityTemplateResponse) {
+    response = &CreateWebSecurityTemplateResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateWebSecurityTemplate
+// 创建安全策略配置模板
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER_SECURITY = "InvalidParameter.Security"
+//  LIMITEXCEEDED_SECURITY = "LimitExceeded.Security"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) CreateWebSecurityTemplate(request *CreateWebSecurityTemplateRequest) (response *CreateWebSecurityTemplateResponse, err error) {
+    return c.CreateWebSecurityTemplateWithContext(context.Background(), request)
+}
+
+// CreateWebSecurityTemplate
+// 创建安全策略配置模板
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER_SECURITY = "InvalidParameter.Security"
+//  LIMITEXCEEDED_SECURITY = "LimitExceeded.Security"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) CreateWebSecurityTemplateWithContext(ctx context.Context, request *CreateWebSecurityTemplateRequest) (response *CreateWebSecurityTemplateResponse, err error) {
+    if request == nil {
+        request = NewCreateWebSecurityTemplateRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateWebSecurityTemplate")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateWebSecurityTemplate require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateWebSecurityTemplateResponse()
     err = c.Send(request, response)
     return
 }
@@ -1780,6 +4219,7 @@ func NewCreateZoneResponse() (response *CreateZoneResponse) {
 //
 // 可能返回的错误码:
 //  DRYRUNOPERATION = "DryRunOperation"
+//  FAILEDOPERATION_FAILEDTOCALLDNSPOD = "FailedOperation.FailedToCallDNSPod"
 //  INVALIDPARAMETER_INVALIDORIGINIP = "InvalidParameter.InvalidOriginIp"
 //  INVALIDPARAMETER_LENGTHEXCEEDSLIMIT = "InvalidParameter.LengthExceedsLimit"
 //  INVALIDPARAMETER_PLANNOTFOUND = "InvalidParameter.PlanNotFound"
@@ -1794,6 +4234,8 @@ func NewCreateZoneResponse() (response *CreateZoneResponse) {
 //  INVALIDPARAMETERVALUE_ZONESAMEASNAME = "InvalidParameterValue.ZoneSameAsName"
 //  LIMITEXCEEDED_ZONEBINDPLAN = "LimitExceeded.ZoneBindPlan"
 //  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_COMPLIANCEFORBIDDEN = "OperationDenied.ComplianceForbidden"
+//  OPERATIONDENIED_DNSPODUNAUTHORIZEDROLEOPERATION = "OperationDenied.DNSPodUnauthorizedRoleOperation"
 //  OPERATIONDENIED_DOMAINISBLOCKED = "OperationDenied.DomainIsBlocked"
 //  OPERATIONDENIED_RECORDISFORBIDDEN = "OperationDenied.RecordIsForbidden"
 //  RESOURCEINUSE = "ResourceInUse"
@@ -1810,6 +4252,7 @@ func NewCreateZoneResponse() (response *CreateZoneResponse) {
 //  RESOURCEINUSE_OTHERSNS = "ResourceInUse.OthersNS"
 //  RESOURCEINUSE_SELFANDOTHERSCNAME = "ResourceInUse.SelfAndOthersCname"
 //  RESOURCENOTFOUND = "ResourceNotFound"
+//  RESOURCENOTFOUND_DNSPODDOMAINNOTINACCOUNT = "ResourceNotFound.DNSPodDomainNotInAccount"
 //  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
 //  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
 //  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
@@ -1826,6 +4269,7 @@ func (c *Client) CreateZone(request *CreateZoneRequest) (response *CreateZoneRes
 //
 // 可能返回的错误码:
 //  DRYRUNOPERATION = "DryRunOperation"
+//  FAILEDOPERATION_FAILEDTOCALLDNSPOD = "FailedOperation.FailedToCallDNSPod"
 //  INVALIDPARAMETER_INVALIDORIGINIP = "InvalidParameter.InvalidOriginIp"
 //  INVALIDPARAMETER_LENGTHEXCEEDSLIMIT = "InvalidParameter.LengthExceedsLimit"
 //  INVALIDPARAMETER_PLANNOTFOUND = "InvalidParameter.PlanNotFound"
@@ -1840,6 +4284,8 @@ func (c *Client) CreateZone(request *CreateZoneRequest) (response *CreateZoneRes
 //  INVALIDPARAMETERVALUE_ZONESAMEASNAME = "InvalidParameterValue.ZoneSameAsName"
 //  LIMITEXCEEDED_ZONEBINDPLAN = "LimitExceeded.ZoneBindPlan"
 //  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_COMPLIANCEFORBIDDEN = "OperationDenied.ComplianceForbidden"
+//  OPERATIONDENIED_DNSPODUNAUTHORIZEDROLEOPERATION = "OperationDenied.DNSPodUnauthorizedRoleOperation"
 //  OPERATIONDENIED_DOMAINISBLOCKED = "OperationDenied.DomainIsBlocked"
 //  OPERATIONDENIED_RECORDISFORBIDDEN = "OperationDenied.RecordIsForbidden"
 //  RESOURCEINUSE = "ResourceInUse"
@@ -1856,6 +4302,7 @@ func (c *Client) CreateZone(request *CreateZoneRequest) (response *CreateZoneRes
 //  RESOURCEINUSE_OTHERSNS = "ResourceInUse.OthersNS"
 //  RESOURCEINUSE_SELFANDOTHERSCNAME = "ResourceInUse.SelfAndOthersCname"
 //  RESOURCENOTFOUND = "ResourceNotFound"
+//  RESOURCENOTFOUND_DNSPODDOMAINNOTINACCOUNT = "ResourceNotFound.DNSPodDomainNotInAccount"
 //  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
 //  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
 //  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
@@ -1863,6 +4310,7 @@ func (c *Client) CreateZoneWithContext(ctx context.Context, request *CreateZoneR
     if request == nil {
         request = NewCreateZoneRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "CreateZone")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateZone require credential")
@@ -1928,6 +4376,7 @@ func (c *Client) DeleteAccelerationDomainsWithContext(ctx context.Context, reque
     if request == nil {
         request = NewDeleteAccelerationDomainsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteAccelerationDomains")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteAccelerationDomains require credential")
@@ -1962,6 +4411,8 @@ func NewDeleteAliasDomainResponse() (response *DeleteAliasDomainResponse) {
 // DeleteAliasDomain
 // 删除别称域名。
 //
+// 该功能仅企业版套餐支持，并且该功能当前仍在内测中，如需使用，请[联系我们](https://cloud.tencent.com/online-service?from=connect-us)。
+//
 // 可能返回的错误码:
 //  INTERNALERROR = "InternalError"
 //  OPERATIONDENIED = "OperationDenied"
@@ -1974,6 +4425,8 @@ func (c *Client) DeleteAliasDomain(request *DeleteAliasDomainRequest) (response 
 // DeleteAliasDomain
 // 删除别称域名。
 //
+// 该功能仅企业版套餐支持，并且该功能当前仍在内测中，如需使用，请[联系我们](https://cloud.tencent.com/online-service?from=connect-us)。
+//
 // 可能返回的错误码:
 //  INTERNALERROR = "InternalError"
 //  OPERATIONDENIED = "OperationDenied"
@@ -1983,6 +4436,7 @@ func (c *Client) DeleteAliasDomainWithContext(ctx context.Context, request *Dele
     if request == nil {
         request = NewDeleteAliasDomainRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteAliasDomain")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteAliasDomain require credential")
@@ -2040,6 +4494,7 @@ func (c *Client) DeleteApplicationProxyWithContext(ctx context.Context, request 
     if request == nil {
         request = NewDeleteApplicationProxyRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteApplicationProxy")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteApplicationProxy require credential")
@@ -2093,6 +4548,7 @@ func (c *Client) DeleteApplicationProxyRuleWithContext(ctx context.Context, requ
     if request == nil {
         request = NewDeleteApplicationProxyRuleRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteApplicationProxyRule")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteApplicationProxyRule require credential")
@@ -2101,6 +4557,518 @@ func (c *Client) DeleteApplicationProxyRuleWithContext(ctx context.Context, requ
     request.SetContext(ctx)
     
     response = NewDeleteApplicationProxyRuleResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDeleteContentIdentifierRequest() (request *DeleteContentIdentifierRequest) {
+    request = &DeleteContentIdentifierRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DeleteContentIdentifier")
+    
+    
+    return
+}
+
+func NewDeleteContentIdentifierResponse() (response *DeleteContentIdentifierResponse) {
+    response = &DeleteContentIdentifierResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DeleteContentIdentifier
+// 删除指定的内容标识符。该功能仅白名单开放。
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
+func (c *Client) DeleteContentIdentifier(request *DeleteContentIdentifierRequest) (response *DeleteContentIdentifierResponse, err error) {
+    return c.DeleteContentIdentifierWithContext(context.Background(), request)
+}
+
+// DeleteContentIdentifier
+// 删除指定的内容标识符。该功能仅白名单开放。
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
+func (c *Client) DeleteContentIdentifierWithContext(ctx context.Context, request *DeleteContentIdentifierRequest) (response *DeleteContentIdentifierResponse, err error) {
+    if request == nil {
+        request = NewDeleteContentIdentifierRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteContentIdentifier")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DeleteContentIdentifier require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDeleteContentIdentifierResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDeleteCustomErrorPageRequest() (request *DeleteCustomErrorPageRequest) {
+    request = &DeleteCustomErrorPageRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DeleteCustomErrorPage")
+    
+    
+    return
+}
+
+func NewDeleteCustomErrorPageResponse() (response *DeleteCustomErrorPageResponse) {
+    response = &DeleteCustomErrorPageResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DeleteCustomErrorPage
+// 删除自定义错误页面。
+//
+// 可能返回的错误码:
+//  RESOURCEINUSE = "ResourceInUse"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+func (c *Client) DeleteCustomErrorPage(request *DeleteCustomErrorPageRequest) (response *DeleteCustomErrorPageResponse, err error) {
+    return c.DeleteCustomErrorPageWithContext(context.Background(), request)
+}
+
+// DeleteCustomErrorPage
+// 删除自定义错误页面。
+//
+// 可能返回的错误码:
+//  RESOURCEINUSE = "ResourceInUse"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+func (c *Client) DeleteCustomErrorPageWithContext(ctx context.Context, request *DeleteCustomErrorPageRequest) (response *DeleteCustomErrorPageResponse, err error) {
+    if request == nil {
+        request = NewDeleteCustomErrorPageRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteCustomErrorPage")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DeleteCustomErrorPage require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDeleteCustomErrorPageResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDeleteDnsRecordsRequest() (request *DeleteDnsRecordsRequest) {
+    request = &DeleteDnsRecordsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DeleteDnsRecords")
+    
+    
+    return
+}
+
+func NewDeleteDnsRecordsResponse() (response *DeleteDnsRecordsResponse) {
+    response = &DeleteDnsRecordsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DeleteDnsRecords
+// 您可以用本接口批量删除 DNS 记录。
+//
+// 可能返回的错误码:
+//  RESOURCEINUSE = "ResourceInUse"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+func (c *Client) DeleteDnsRecords(request *DeleteDnsRecordsRequest) (response *DeleteDnsRecordsResponse, err error) {
+    return c.DeleteDnsRecordsWithContext(context.Background(), request)
+}
+
+// DeleteDnsRecords
+// 您可以用本接口批量删除 DNS 记录。
+//
+// 可能返回的错误码:
+//  RESOURCEINUSE = "ResourceInUse"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+func (c *Client) DeleteDnsRecordsWithContext(ctx context.Context, request *DeleteDnsRecordsRequest) (response *DeleteDnsRecordsResponse, err error) {
+    if request == nil {
+        request = NewDeleteDnsRecordsRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteDnsRecords")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DeleteDnsRecords require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDeleteDnsRecordsResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDeleteEdgeKVNamespaceRequest() (request *DeleteEdgeKVNamespaceRequest) {
+    request = &DeleteEdgeKVNamespaceRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DeleteEdgeKVNamespace")
+    
+    
+    return
+}
+
+func NewDeleteEdgeKVNamespaceResponse() (response *DeleteEdgeKVNamespaceResponse) {
+    response = &DeleteEdgeKVNamespaceResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DeleteEdgeKVNamespace
+// 本接口用于删除指定的 KV 命名空间。删除后命名空间内的所有键值对数据将被清空且不可恢复。若命名空间正被边缘函数引用，需先解除绑定关系后方可删除。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_NAMESPACEINUSE = "InvalidParameter.NamespaceInUse"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  RESOURCEUNAVAILABLE_NAMESPACENOTFOUND = "ResourceUnavailable.NamespaceNotFound"
+func (c *Client) DeleteEdgeKVNamespace(request *DeleteEdgeKVNamespaceRequest) (response *DeleteEdgeKVNamespaceResponse, err error) {
+    return c.DeleteEdgeKVNamespaceWithContext(context.Background(), request)
+}
+
+// DeleteEdgeKVNamespace
+// 本接口用于删除指定的 KV 命名空间。删除后命名空间内的所有键值对数据将被清空且不可恢复。若命名空间正被边缘函数引用，需先解除绑定关系后方可删除。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_NAMESPACEINUSE = "InvalidParameter.NamespaceInUse"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  RESOURCEUNAVAILABLE_NAMESPACENOTFOUND = "ResourceUnavailable.NamespaceNotFound"
+func (c *Client) DeleteEdgeKVNamespaceWithContext(ctx context.Context, request *DeleteEdgeKVNamespaceRequest) (response *DeleteEdgeKVNamespaceResponse, err error) {
+    if request == nil {
+        request = NewDeleteEdgeKVNamespaceRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteEdgeKVNamespace")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DeleteEdgeKVNamespace require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDeleteEdgeKVNamespaceResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDeleteFunctionRequest() (request *DeleteFunctionRequest) {
+    request = &DeleteFunctionRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DeleteFunction")
+    
+    
+    return
+}
+
+func NewDeleteFunctionResponse() (response *DeleteFunctionResponse) {
+    response = &DeleteFunctionResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DeleteFunction
+// 删除边缘函数，删除后函数无法恢复，关联的触发规则会一并删除。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_RULEOPERATIONCONFLICT = "FailedOperation.RuleOperationConflict"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  OPERATIONDENIED_VERSIONCONTROLLOCKED = "OperationDenied.VersionControlLocked"
+//  RESOURCEUNAVAILABLE_FUNCTIONNOTFOUND = "ResourceUnavailable.FunctionNotFound"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
+func (c *Client) DeleteFunction(request *DeleteFunctionRequest) (response *DeleteFunctionResponse, err error) {
+    return c.DeleteFunctionWithContext(context.Background(), request)
+}
+
+// DeleteFunction
+// 删除边缘函数，删除后函数无法恢复，关联的触发规则会一并删除。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_RULEOPERATIONCONFLICT = "FailedOperation.RuleOperationConflict"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  OPERATIONDENIED_VERSIONCONTROLLOCKED = "OperationDenied.VersionControlLocked"
+//  RESOURCEUNAVAILABLE_FUNCTIONNOTFOUND = "ResourceUnavailable.FunctionNotFound"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
+func (c *Client) DeleteFunctionWithContext(ctx context.Context, request *DeleteFunctionRequest) (response *DeleteFunctionResponse, err error) {
+    if request == nil {
+        request = NewDeleteFunctionRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteFunction")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DeleteFunction require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDeleteFunctionResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDeleteFunctionReplicaRequest() (request *DeleteFunctionReplicaRequest) {
+    request = &DeleteFunctionReplicaRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DeleteFunctionReplica")
+    
+    
+    return
+}
+
+func NewDeleteFunctionReplicaResponse() (response *DeleteFunctionReplicaResponse) {
+    response = &DeleteFunctionReplicaResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DeleteFunctionReplica
+// 本接口用于删除指定的边缘函数副本。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_RULEOPERATIONCONFLICT = "FailedOperation.RuleOperationConflict"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  OPERATIONDENIED_VERSIONCONTROLLOCKED = "OperationDenied.VersionControlLocked"
+//  RESOURCEUNAVAILABLE_FUNCTIONNOTFOUND = "ResourceUnavailable.FunctionNotFound"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
+func (c *Client) DeleteFunctionReplica(request *DeleteFunctionReplicaRequest) (response *DeleteFunctionReplicaResponse, err error) {
+    return c.DeleteFunctionReplicaWithContext(context.Background(), request)
+}
+
+// DeleteFunctionReplica
+// 本接口用于删除指定的边缘函数副本。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_RULEOPERATIONCONFLICT = "FailedOperation.RuleOperationConflict"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  OPERATIONDENIED_VERSIONCONTROLLOCKED = "OperationDenied.VersionControlLocked"
+//  RESOURCEUNAVAILABLE_FUNCTIONNOTFOUND = "ResourceUnavailable.FunctionNotFound"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
+func (c *Client) DeleteFunctionReplicaWithContext(ctx context.Context, request *DeleteFunctionReplicaRequest) (response *DeleteFunctionReplicaResponse, err error) {
+    if request == nil {
+        request = NewDeleteFunctionReplicaRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteFunctionReplica")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DeleteFunctionReplica require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDeleteFunctionReplicaResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDeleteFunctionRulesRequest() (request *DeleteFunctionRulesRequest) {
+    request = &DeleteFunctionRulesRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DeleteFunctionRules")
+    
+    
+    return
+}
+
+func NewDeleteFunctionRulesResponse() (response *DeleteFunctionRulesResponse) {
+    response = &DeleteFunctionRulesResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DeleteFunctionRules
+// 删除边缘函数触发规则。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_RULEOPERATIONCONFLICT = "FailedOperation.RuleOperationConflict"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  RESOURCEUNAVAILABLE_RULENOTFOUND = "ResourceUnavailable.RuleNotFound"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
+func (c *Client) DeleteFunctionRules(request *DeleteFunctionRulesRequest) (response *DeleteFunctionRulesResponse, err error) {
+    return c.DeleteFunctionRulesWithContext(context.Background(), request)
+}
+
+// DeleteFunctionRules
+// 删除边缘函数触发规则。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_RULEOPERATIONCONFLICT = "FailedOperation.RuleOperationConflict"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  RESOURCEUNAVAILABLE_RULENOTFOUND = "ResourceUnavailable.RuleNotFound"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
+func (c *Client) DeleteFunctionRulesWithContext(ctx context.Context, request *DeleteFunctionRulesRequest) (response *DeleteFunctionRulesResponse, err error) {
+    if request == nil {
+        request = NewDeleteFunctionRulesRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteFunctionRules")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DeleteFunctionRules require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDeleteFunctionRulesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDeleteInferenceAPITokenRequest() (request *DeleteInferenceAPITokenRequest) {
+    request = &DeleteInferenceAPITokenRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DeleteInferenceAPIToken")
+    
+    
+    return
+}
+
+func NewDeleteInferenceAPITokenResponse() (response *DeleteInferenceAPITokenResponse) {
+    response = &DeleteInferenceAPITokenResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DeleteInferenceAPIToken
+// 删除推理 API Token，删除后该 Token 立即失效，使用其访问推理服务的请求将无法通过鉴权。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+func (c *Client) DeleteInferenceAPIToken(request *DeleteInferenceAPITokenRequest) (response *DeleteInferenceAPITokenResponse, err error) {
+    return c.DeleteInferenceAPITokenWithContext(context.Background(), request)
+}
+
+// DeleteInferenceAPIToken
+// 删除推理 API Token，删除后该 Token 立即失效，使用其访问推理服务的请求将无法通过鉴权。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+func (c *Client) DeleteInferenceAPITokenWithContext(ctx context.Context, request *DeleteInferenceAPITokenRequest) (response *DeleteInferenceAPITokenResponse, err error) {
+    if request == nil {
+        request = NewDeleteInferenceAPITokenRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteInferenceAPIToken")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DeleteInferenceAPIToken require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDeleteInferenceAPITokenResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDeleteJustInTimeTranscodeTemplatesRequest() (request *DeleteJustInTimeTranscodeTemplatesRequest) {
+    request = &DeleteJustInTimeTranscodeTemplatesRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DeleteJustInTimeTranscodeTemplates")
+    
+    
+    return
+}
+
+func NewDeleteJustInTimeTranscodeTemplatesResponse() (response *DeleteJustInTimeTranscodeTemplatesResponse) {
+    response = &DeleteJustInTimeTranscodeTemplatesResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DeleteJustInTimeTranscodeTemplates
+// 根据站点 id 下唯一的模板标识，删除相应的即时转码模板。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_PRODUCTDISCONTINUED = "FailedOperation.ProductDiscontinued"
+//  FAILEDOPERATION_PRODUCTNOTACTIVATED = "FailedOperation.ProductNotActivated"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  INVALIDPARAMETERVALUE_TEMPLATENOTCUSTOM = "InvalidParameterValue.TemplateNotCustom"
+//  INVALIDPARAMETERVALUE_TEMPLATENOTFOUND = "InvalidParameterValue.TemplateNotFound"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+//  INVALIDPARAMETERVALUE_ZONEPAUSED = "InvalidParameterValue.ZonePaused"
+//  MISSINGPARAMETER = "MissingParameter"
+//  UNAUTHORIZEDOPERATION = "UnauthorizedOperation"
+func (c *Client) DeleteJustInTimeTranscodeTemplates(request *DeleteJustInTimeTranscodeTemplatesRequest) (response *DeleteJustInTimeTranscodeTemplatesResponse, err error) {
+    return c.DeleteJustInTimeTranscodeTemplatesWithContext(context.Background(), request)
+}
+
+// DeleteJustInTimeTranscodeTemplates
+// 根据站点 id 下唯一的模板标识，删除相应的即时转码模板。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_PRODUCTDISCONTINUED = "FailedOperation.ProductDiscontinued"
+//  FAILEDOPERATION_PRODUCTNOTACTIVATED = "FailedOperation.ProductNotActivated"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  INVALIDPARAMETERVALUE_TEMPLATENOTCUSTOM = "InvalidParameterValue.TemplateNotCustom"
+//  INVALIDPARAMETERVALUE_TEMPLATENOTFOUND = "InvalidParameterValue.TemplateNotFound"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+//  INVALIDPARAMETERVALUE_ZONEPAUSED = "InvalidParameterValue.ZonePaused"
+//  MISSINGPARAMETER = "MissingParameter"
+//  UNAUTHORIZEDOPERATION = "UnauthorizedOperation"
+func (c *Client) DeleteJustInTimeTranscodeTemplatesWithContext(ctx context.Context, request *DeleteJustInTimeTranscodeTemplatesRequest) (response *DeleteJustInTimeTranscodeTemplatesResponse, err error) {
+    if request == nil {
+        request = NewDeleteJustInTimeTranscodeTemplatesRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteJustInTimeTranscodeTemplates")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DeleteJustInTimeTranscodeTemplates require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDeleteJustInTimeTranscodeTemplatesResponse()
     err = c.Send(request, response)
     return
 }
@@ -2146,6 +5114,7 @@ func (c *Client) DeleteL4ProxyWithContext(ctx context.Context, request *DeleteL4
     if request == nil {
         request = NewDeleteL4ProxyRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteL4Proxy")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteL4Proxy require credential")
@@ -2199,6 +5168,7 @@ func (c *Client) DeleteL4ProxyRulesWithContext(ctx context.Context, request *Del
     if request == nil {
         request = NewDeleteL4ProxyRulesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteL4ProxyRules")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteL4ProxyRules require credential")
@@ -2207,6 +5177,262 @@ func (c *Client) DeleteL4ProxyRulesWithContext(ctx context.Context, request *Del
     request.SetContext(ctx)
     
     response = NewDeleteL4ProxyRulesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDeleteL7AccRulesRequest() (request *DeleteL7AccRulesRequest) {
+    request = &DeleteL7AccRulesRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DeleteL7AccRules")
+    
+    
+    return
+}
+
+func NewDeleteL7AccRulesResponse() (response *DeleteL7AccRulesResponse) {
+    response = &DeleteL7AccRulesResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DeleteL7AccRules
+// 本接口用于删除[规则引擎](https://cloud.tencent.com/document/product/1552/70901)的规则，支持批量删除。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_ACTIONINPROGRESS = "InvalidParameter.ActionInProgress"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAM = "InvalidParameter.ErrInvalidActionParam"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMVALUE = "InvalidParameter.ErrInvalidActionParamValue"
+//  INVALIDPARAMETER_INVALIDHTTPS = "InvalidParameter.InvalidHttps"
+//  INVALIDPARAMETER_INVALIDHTTPSCIPHERSUITEANDTLSVERSION = "InvalidParameter.InvalidHttpsCipherSuiteAndTlsVersion"
+//  INVALIDPARAMETER_INVALIDRANGEORIGINPULL = "InvalidParameter.InvalidRangeOriginPull"
+//  INVALIDPARAMETER_INVALIDRULEENGINENOTFOUND = "InvalidParameter.InvalidRuleEngineNotFound"
+//  INVALIDPARAMETER_NOTSUPPORTTHISPRESET = "InvalidParameter.NotSupportThisPreset"
+//  INVALIDPARAMETER_ZONENOTFOUND = "InvalidParameter.ZoneNotFound"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_DISABLEZONENOTCOMPLETED = "OperationDenied.DisableZoneNotCompleted"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  RESOURCEINUSE = "ResourceInUse"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) DeleteL7AccRules(request *DeleteL7AccRulesRequest) (response *DeleteL7AccRulesResponse, err error) {
+    return c.DeleteL7AccRulesWithContext(context.Background(), request)
+}
+
+// DeleteL7AccRules
+// 本接口用于删除[规则引擎](https://cloud.tencent.com/document/product/1552/70901)的规则，支持批量删除。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_ACTIONINPROGRESS = "InvalidParameter.ActionInProgress"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAM = "InvalidParameter.ErrInvalidActionParam"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMVALUE = "InvalidParameter.ErrInvalidActionParamValue"
+//  INVALIDPARAMETER_INVALIDHTTPS = "InvalidParameter.InvalidHttps"
+//  INVALIDPARAMETER_INVALIDHTTPSCIPHERSUITEANDTLSVERSION = "InvalidParameter.InvalidHttpsCipherSuiteAndTlsVersion"
+//  INVALIDPARAMETER_INVALIDRANGEORIGINPULL = "InvalidParameter.InvalidRangeOriginPull"
+//  INVALIDPARAMETER_INVALIDRULEENGINENOTFOUND = "InvalidParameter.InvalidRuleEngineNotFound"
+//  INVALIDPARAMETER_NOTSUPPORTTHISPRESET = "InvalidParameter.NotSupportThisPreset"
+//  INVALIDPARAMETER_ZONENOTFOUND = "InvalidParameter.ZoneNotFound"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_DISABLEZONENOTCOMPLETED = "OperationDenied.DisableZoneNotCompleted"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  RESOURCEINUSE = "ResourceInUse"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) DeleteL7AccRulesWithContext(ctx context.Context, request *DeleteL7AccRulesRequest) (response *DeleteL7AccRulesResponse, err error) {
+    if request == nil {
+        request = NewDeleteL7AccRulesRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteL7AccRules")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DeleteL7AccRules require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDeleteL7AccRulesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDeleteLoadBalancerRequest() (request *DeleteLoadBalancerRequest) {
+    request = &DeleteLoadBalancerRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DeleteLoadBalancer")
+    
+    
+    return
+}
+
+func NewDeleteLoadBalancerResponse() (response *DeleteLoadBalancerResponse) {
+    response = &DeleteLoadBalancerResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DeleteLoadBalancer
+// 删除负载均衡实例，若负载均衡示例被其他服务（例如：四层代理等）引用的时候，示例无法被删除，需要先解除引用关系。负载均衡功能内测中，如您需要使用请 [联系我们](https://cloud.tencent.com/online-service)。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_LOADBALANCERUSEDINL4PROXY = "InvalidParameter.LoadBalancerUsedInL4Proxy"
+//  INVALIDPARAMETER_LOADBALANCERUSEDINL7DOMAIN = "InvalidParameter.LoadBalancerUsedInL7Domain"
+//  INVALIDPARAMETER_LOADBALANCERUSEDINRULEENGINE = "InvalidParameter.LoadBalancerUsedInRuleEngine"
+func (c *Client) DeleteLoadBalancer(request *DeleteLoadBalancerRequest) (response *DeleteLoadBalancerResponse, err error) {
+    return c.DeleteLoadBalancerWithContext(context.Background(), request)
+}
+
+// DeleteLoadBalancer
+// 删除负载均衡实例，若负载均衡示例被其他服务（例如：四层代理等）引用的时候，示例无法被删除，需要先解除引用关系。负载均衡功能内测中，如您需要使用请 [联系我们](https://cloud.tencent.com/online-service)。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_LOADBALANCERUSEDINL4PROXY = "InvalidParameter.LoadBalancerUsedInL4Proxy"
+//  INVALIDPARAMETER_LOADBALANCERUSEDINL7DOMAIN = "InvalidParameter.LoadBalancerUsedInL7Domain"
+//  INVALIDPARAMETER_LOADBALANCERUSEDINRULEENGINE = "InvalidParameter.LoadBalancerUsedInRuleEngine"
+func (c *Client) DeleteLoadBalancerWithContext(ctx context.Context, request *DeleteLoadBalancerRequest) (response *DeleteLoadBalancerResponse, err error) {
+    if request == nil {
+        request = NewDeleteLoadBalancerRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteLoadBalancer")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DeleteLoadBalancer require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDeleteLoadBalancerResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDeleteMultiPathGatewayRequest() (request *DeleteMultiPathGatewayRequest) {
+    request = &DeleteMultiPathGatewayRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DeleteMultiPathGateway")
+    
+    
+    return
+}
+
+func NewDeleteMultiPathGatewayResponse() (response *DeleteMultiPathGatewayResponse) {
+    response = &DeleteMultiPathGatewayResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DeleteMultiPathGateway
+// 通过本接口删除多通道安全加速网关，包括自有网关和云上网关。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) DeleteMultiPathGateway(request *DeleteMultiPathGatewayRequest) (response *DeleteMultiPathGatewayResponse, err error) {
+    return c.DeleteMultiPathGatewayWithContext(context.Background(), request)
+}
+
+// DeleteMultiPathGateway
+// 通过本接口删除多通道安全加速网关，包括自有网关和云上网关。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) DeleteMultiPathGatewayWithContext(ctx context.Context, request *DeleteMultiPathGatewayRequest) (response *DeleteMultiPathGatewayResponse, err error) {
+    if request == nil {
+        request = NewDeleteMultiPathGatewayRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteMultiPathGateway")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DeleteMultiPathGateway require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDeleteMultiPathGatewayResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDeleteMultiPathGatewayLineRequest() (request *DeleteMultiPathGatewayLineRequest) {
+    request = &DeleteMultiPathGatewayLineRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DeleteMultiPathGatewayLine")
+    
+    
+    return
+}
+
+func NewDeleteMultiPathGatewayLineResponse() (response *DeleteMultiPathGatewayLineResponse) {
+    response = &DeleteMultiPathGatewayLineResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DeleteMultiPathGatewayLine
+// 通过本接口删除接入多通道安全加速网关的线路，仅自定义线路支持删除。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) DeleteMultiPathGatewayLine(request *DeleteMultiPathGatewayLineRequest) (response *DeleteMultiPathGatewayLineResponse, err error) {
+    return c.DeleteMultiPathGatewayLineWithContext(context.Background(), request)
+}
+
+// DeleteMultiPathGatewayLine
+// 通过本接口删除接入多通道安全加速网关的线路，仅自定义线路支持删除。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) DeleteMultiPathGatewayLineWithContext(ctx context.Context, request *DeleteMultiPathGatewayLineRequest) (response *DeleteMultiPathGatewayLineResponse, err error) {
+    if request == nil {
+        request = NewDeleteMultiPathGatewayLineRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteMultiPathGatewayLine")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DeleteMultiPathGatewayLine require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDeleteMultiPathGatewayLineResponse()
     err = c.Send(request, response)
     return
 }
@@ -2262,6 +5488,7 @@ func (c *Client) DeleteOriginGroupWithContext(ctx context.Context, request *Dele
     if request == nil {
         request = NewDeleteOriginGroupRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteOriginGroup")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteOriginGroup require credential")
@@ -2311,6 +5538,7 @@ func (c *Client) DeleteRealtimeLogDeliveryTaskWithContext(ctx context.Context, r
     if request == nil {
         request = NewDeleteRealtimeLogDeliveryTaskRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteRealtimeLogDeliveryTask")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteRealtimeLogDeliveryTask require credential")
@@ -2343,7 +5571,9 @@ func NewDeleteRulesResponse() (response *DeleteRulesResponse) {
 }
 
 // DeleteRules
-// 批量删除规则引擎规则。
+// 本接口为旧版本删除规则引擎接口，EdgeOne 于 2025 年 1 月 21 日已对规则引擎相关接口全面升级，新版本删除七层加速规则接口详情请参考 [DeleteL7AccRules](https://cloud.tencent.com/document/product/1552/115821)。
+//
+// <p style="color: red;">注意：自 2025 年 1 月 21 日起，旧版接口停止更新迭代，后续新增功能将仅在新版接口中提供，旧版接口支持的原有能力将不受影响。为避免在使用旧版接口时出现数据字段冲突，建议您尽早迁移到新版规则引擎接口。</p>
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -2369,7 +5599,9 @@ func (c *Client) DeleteRules(request *DeleteRulesRequest) (response *DeleteRules
 }
 
 // DeleteRules
-// 批量删除规则引擎规则。
+// 本接口为旧版本删除规则引擎接口，EdgeOne 于 2025 年 1 月 21 日已对规则引擎相关接口全面升级，新版本删除七层加速规则接口详情请参考 [DeleteL7AccRules](https://cloud.tencent.com/document/product/1552/115821)。
+//
+// <p style="color: red;">注意：自 2025 年 1 月 21 日起，旧版接口停止更新迭代，后续新增功能将仅在新版接口中提供，旧版接口支持的原有能力将不受影响。为避免在使用旧版接口时出现数据字段冲突，建议您尽早迁移到新版规则引擎接口。</p>
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -2394,6 +5626,7 @@ func (c *Client) DeleteRulesWithContext(ctx context.Context, request *DeleteRule
     if request == nil {
         request = NewDeleteRulesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteRules")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteRules require credential")
@@ -2402,6 +5635,258 @@ func (c *Client) DeleteRulesWithContext(ctx context.Context, request *DeleteRule
     request.SetContext(ctx)
     
     response = NewDeleteRulesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDeleteSecurityAPIResourceRequest() (request *DeleteSecurityAPIResourceRequest) {
+    request = &DeleteSecurityAPIResourceRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DeleteSecurityAPIResource")
+    
+    
+    return
+}
+
+func NewDeleteSecurityAPIResourceResponse() (response *DeleteSecurityAPIResourceResponse) {
+    response = &DeleteSecurityAPIResourceResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DeleteSecurityAPIResource
+// 用于删除 API 资源。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_ACTIONINPROGRESS = "InvalidParameter.ActionInProgress"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAM = "InvalidParameter.ErrInvalidActionParam"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMVALUE = "InvalidParameter.ErrInvalidActionParamValue"
+//  INVALIDPARAMETER_INVALIDHTTPS = "InvalidParameter.InvalidHttps"
+//  INVALIDPARAMETER_INVALIDHTTPSCIPHERSUITEANDTLSVERSION = "InvalidParameter.InvalidHttpsCipherSuiteAndTlsVersion"
+//  INVALIDPARAMETER_INVALIDRANGEORIGINPULL = "InvalidParameter.InvalidRangeOriginPull"
+//  INVALIDPARAMETER_INVALIDRULEENGINENOTFOUND = "InvalidParameter.InvalidRuleEngineNotFound"
+//  INVALIDPARAMETER_NOTSUPPORTTHISPRESET = "InvalidParameter.NotSupportThisPreset"
+//  INVALIDPARAMETER_ZONENOTFOUND = "InvalidParameter.ZoneNotFound"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_DISABLEZONENOTCOMPLETED = "OperationDenied.DisableZoneNotCompleted"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  RESOURCEINUSE = "ResourceInUse"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) DeleteSecurityAPIResource(request *DeleteSecurityAPIResourceRequest) (response *DeleteSecurityAPIResourceResponse, err error) {
+    return c.DeleteSecurityAPIResourceWithContext(context.Background(), request)
+}
+
+// DeleteSecurityAPIResource
+// 用于删除 API 资源。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_ACTIONINPROGRESS = "InvalidParameter.ActionInProgress"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAM = "InvalidParameter.ErrInvalidActionParam"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMVALUE = "InvalidParameter.ErrInvalidActionParamValue"
+//  INVALIDPARAMETER_INVALIDHTTPS = "InvalidParameter.InvalidHttps"
+//  INVALIDPARAMETER_INVALIDHTTPSCIPHERSUITEANDTLSVERSION = "InvalidParameter.InvalidHttpsCipherSuiteAndTlsVersion"
+//  INVALIDPARAMETER_INVALIDRANGEORIGINPULL = "InvalidParameter.InvalidRangeOriginPull"
+//  INVALIDPARAMETER_INVALIDRULEENGINENOTFOUND = "InvalidParameter.InvalidRuleEngineNotFound"
+//  INVALIDPARAMETER_NOTSUPPORTTHISPRESET = "InvalidParameter.NotSupportThisPreset"
+//  INVALIDPARAMETER_ZONENOTFOUND = "InvalidParameter.ZoneNotFound"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_DISABLEZONENOTCOMPLETED = "OperationDenied.DisableZoneNotCompleted"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  RESOURCEINUSE = "ResourceInUse"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) DeleteSecurityAPIResourceWithContext(ctx context.Context, request *DeleteSecurityAPIResourceRequest) (response *DeleteSecurityAPIResourceResponse, err error) {
+    if request == nil {
+        request = NewDeleteSecurityAPIResourceRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteSecurityAPIResource")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DeleteSecurityAPIResource require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDeleteSecurityAPIResourceResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDeleteSecurityAPIServiceRequest() (request *DeleteSecurityAPIServiceRequest) {
+    request = &DeleteSecurityAPIServiceRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DeleteSecurityAPIService")
+    
+    
+    return
+}
+
+func NewDeleteSecurityAPIServiceResponse() (response *DeleteSecurityAPIServiceResponse) {
+    response = &DeleteSecurityAPIServiceResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DeleteSecurityAPIService
+// 用于删除 API 服务。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_ACTIONINPROGRESS = "InvalidParameter.ActionInProgress"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAM = "InvalidParameter.ErrInvalidActionParam"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMVALUE = "InvalidParameter.ErrInvalidActionParamValue"
+//  INVALIDPARAMETER_INVALIDHTTPS = "InvalidParameter.InvalidHttps"
+//  INVALIDPARAMETER_INVALIDHTTPSCIPHERSUITEANDTLSVERSION = "InvalidParameter.InvalidHttpsCipherSuiteAndTlsVersion"
+//  INVALIDPARAMETER_INVALIDRANGEORIGINPULL = "InvalidParameter.InvalidRangeOriginPull"
+//  INVALIDPARAMETER_INVALIDRULEENGINENOTFOUND = "InvalidParameter.InvalidRuleEngineNotFound"
+//  INVALIDPARAMETER_NOTSUPPORTTHISPRESET = "InvalidParameter.NotSupportThisPreset"
+//  INVALIDPARAMETER_ZONENOTFOUND = "InvalidParameter.ZoneNotFound"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_DISABLEZONENOTCOMPLETED = "OperationDenied.DisableZoneNotCompleted"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  RESOURCEINUSE = "ResourceInUse"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) DeleteSecurityAPIService(request *DeleteSecurityAPIServiceRequest) (response *DeleteSecurityAPIServiceResponse, err error) {
+    return c.DeleteSecurityAPIServiceWithContext(context.Background(), request)
+}
+
+// DeleteSecurityAPIService
+// 用于删除 API 服务。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_ACTIONINPROGRESS = "InvalidParameter.ActionInProgress"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAM = "InvalidParameter.ErrInvalidActionParam"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMVALUE = "InvalidParameter.ErrInvalidActionParamValue"
+//  INVALIDPARAMETER_INVALIDHTTPS = "InvalidParameter.InvalidHttps"
+//  INVALIDPARAMETER_INVALIDHTTPSCIPHERSUITEANDTLSVERSION = "InvalidParameter.InvalidHttpsCipherSuiteAndTlsVersion"
+//  INVALIDPARAMETER_INVALIDRANGEORIGINPULL = "InvalidParameter.InvalidRangeOriginPull"
+//  INVALIDPARAMETER_INVALIDRULEENGINENOTFOUND = "InvalidParameter.InvalidRuleEngineNotFound"
+//  INVALIDPARAMETER_NOTSUPPORTTHISPRESET = "InvalidParameter.NotSupportThisPreset"
+//  INVALIDPARAMETER_ZONENOTFOUND = "InvalidParameter.ZoneNotFound"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_DISABLEZONENOTCOMPLETED = "OperationDenied.DisableZoneNotCompleted"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  RESOURCEINUSE = "ResourceInUse"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) DeleteSecurityAPIServiceWithContext(ctx context.Context, request *DeleteSecurityAPIServiceRequest) (response *DeleteSecurityAPIServiceResponse, err error) {
+    if request == nil {
+        request = NewDeleteSecurityAPIServiceRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteSecurityAPIService")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DeleteSecurityAPIService require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDeleteSecurityAPIServiceResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDeleteSecurityClientAttesterRequest() (request *DeleteSecurityClientAttesterRequest) {
+    request = &DeleteSecurityClientAttesterRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DeleteSecurityClientAttester")
+    
+    
+    return
+}
+
+func NewDeleteSecurityClientAttesterResponse() (response *DeleteSecurityClientAttesterResponse) {
+    response = &DeleteSecurityClientAttesterResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DeleteSecurityClientAttester
+// 删除客户端认证选项。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_ACTIONINPROGRESS = "InvalidParameter.ActionInProgress"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAM = "InvalidParameter.ErrInvalidActionParam"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMVALUE = "InvalidParameter.ErrInvalidActionParamValue"
+//  INVALIDPARAMETER_INVALIDHTTPS = "InvalidParameter.InvalidHttps"
+//  INVALIDPARAMETER_INVALIDHTTPSCIPHERSUITEANDTLSVERSION = "InvalidParameter.InvalidHttpsCipherSuiteAndTlsVersion"
+//  INVALIDPARAMETER_INVALIDRANGEORIGINPULL = "InvalidParameter.InvalidRangeOriginPull"
+//  INVALIDPARAMETER_INVALIDRULEENGINENOTFOUND = "InvalidParameter.InvalidRuleEngineNotFound"
+//  INVALIDPARAMETER_NOTSUPPORTTHISPRESET = "InvalidParameter.NotSupportThisPreset"
+//  INVALIDPARAMETER_ZONENOTFOUND = "InvalidParameter.ZoneNotFound"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_DISABLEZONENOTCOMPLETED = "OperationDenied.DisableZoneNotCompleted"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  RESOURCEINUSE = "ResourceInUse"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) DeleteSecurityClientAttester(request *DeleteSecurityClientAttesterRequest) (response *DeleteSecurityClientAttesterResponse, err error) {
+    return c.DeleteSecurityClientAttesterWithContext(context.Background(), request)
+}
+
+// DeleteSecurityClientAttester
+// 删除客户端认证选项。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_ACTIONINPROGRESS = "InvalidParameter.ActionInProgress"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAM = "InvalidParameter.ErrInvalidActionParam"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMVALUE = "InvalidParameter.ErrInvalidActionParamValue"
+//  INVALIDPARAMETER_INVALIDHTTPS = "InvalidParameter.InvalidHttps"
+//  INVALIDPARAMETER_INVALIDHTTPSCIPHERSUITEANDTLSVERSION = "InvalidParameter.InvalidHttpsCipherSuiteAndTlsVersion"
+//  INVALIDPARAMETER_INVALIDRANGEORIGINPULL = "InvalidParameter.InvalidRangeOriginPull"
+//  INVALIDPARAMETER_INVALIDRULEENGINENOTFOUND = "InvalidParameter.InvalidRuleEngineNotFound"
+//  INVALIDPARAMETER_NOTSUPPORTTHISPRESET = "InvalidParameter.NotSupportThisPreset"
+//  INVALIDPARAMETER_ZONENOTFOUND = "InvalidParameter.ZoneNotFound"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_DISABLEZONENOTCOMPLETED = "OperationDenied.DisableZoneNotCompleted"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  RESOURCEINUSE = "ResourceInUse"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) DeleteSecurityClientAttesterWithContext(ctx context.Context, request *DeleteSecurityClientAttesterRequest) (response *DeleteSecurityClientAttesterResponse, err error) {
+    if request == nil {
+        request = NewDeleteSecurityClientAttesterRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteSecurityClientAttester")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DeleteSecurityClientAttester require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDeleteSecurityClientAttesterResponse()
     err = c.Send(request, response)
     return
 }
@@ -2449,6 +5934,7 @@ func (c *Client) DeleteSecurityIPGroupWithContext(ctx context.Context, request *
     if request == nil {
         request = NewDeleteSecurityIPGroupRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteSecurityIPGroup")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteSecurityIPGroup require credential")
@@ -2457,6 +5943,62 @@ func (c *Client) DeleteSecurityIPGroupWithContext(ctx context.Context, request *
     request.SetContext(ctx)
     
     response = NewDeleteSecurityIPGroupResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDeleteSecurityJSInjectionRuleRequest() (request *DeleteSecurityJSInjectionRuleRequest) {
+    request = &DeleteSecurityJSInjectionRuleRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DeleteSecurityJSInjectionRule")
+    
+    
+    return
+}
+
+func NewDeleteSecurityJSInjectionRuleResponse() (response *DeleteSecurityJSInjectionRuleResponse) {
+    response = &DeleteSecurityJSInjectionRuleResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DeleteSecurityJSInjectionRule
+// 删除 JavaScript 注入规则。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER_SECURITY = "InvalidParameter.Security"
+//  OPERATIONDENIED = "OperationDenied"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) DeleteSecurityJSInjectionRule(request *DeleteSecurityJSInjectionRuleRequest) (response *DeleteSecurityJSInjectionRuleResponse, err error) {
+    return c.DeleteSecurityJSInjectionRuleWithContext(context.Background(), request)
+}
+
+// DeleteSecurityJSInjectionRule
+// 删除 JavaScript 注入规则。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER_SECURITY = "InvalidParameter.Security"
+//  OPERATIONDENIED = "OperationDenied"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) DeleteSecurityJSInjectionRuleWithContext(ctx context.Context, request *DeleteSecurityJSInjectionRuleRequest) (response *DeleteSecurityJSInjectionRuleResponse, err error) {
+    if request == nil {
+        request = NewDeleteSecurityJSInjectionRuleRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteSecurityJSInjectionRule")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DeleteSecurityJSInjectionRule require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDeleteSecurityJSInjectionRuleResponse()
     err = c.Send(request, response)
     return
 }
@@ -2498,6 +6040,7 @@ func (c *Client) DeleteSharedCNAMEWithContext(ctx context.Context, request *Dele
     if request == nil {
         request = NewDeleteSharedCNAMERequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteSharedCNAME")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteSharedCNAME require credential")
@@ -2506,6 +6049,60 @@ func (c *Client) DeleteSharedCNAMEWithContext(ctx context.Context, request *Dele
     request.SetContext(ctx)
     
     response = NewDeleteSharedCNAMEResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDeleteWebSecurityTemplateRequest() (request *DeleteWebSecurityTemplateRequest) {
+    request = &DeleteWebSecurityTemplateRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DeleteWebSecurityTemplate")
+    
+    
+    return
+}
+
+func NewDeleteWebSecurityTemplateResponse() (response *DeleteWebSecurityTemplateResponse) {
+    response = &DeleteWebSecurityTemplateResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DeleteWebSecurityTemplate
+// 删除安全策略配置模板
+//
+// 可能返回的错误码:
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INVALIDPARAMETER_SECURITY = "InvalidParameter.Security"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+func (c *Client) DeleteWebSecurityTemplate(request *DeleteWebSecurityTemplateRequest) (response *DeleteWebSecurityTemplateResponse, err error) {
+    return c.DeleteWebSecurityTemplateWithContext(context.Background(), request)
+}
+
+// DeleteWebSecurityTemplate
+// 删除安全策略配置模板
+//
+// 可能返回的错误码:
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INVALIDPARAMETER_SECURITY = "InvalidParameter.Security"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+func (c *Client) DeleteWebSecurityTemplateWithContext(ctx context.Context, request *DeleteWebSecurityTemplateRequest) (response *DeleteWebSecurityTemplateResponse, err error) {
+    if request == nil {
+        request = NewDeleteWebSecurityTemplateRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteWebSecurityTemplate")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DeleteWebSecurityTemplate require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDeleteWebSecurityTemplateResponse()
     err = c.Send(request, response)
     return
 }
@@ -2561,6 +6158,7 @@ func (c *Client) DeleteZoneWithContext(ctx context.Context, request *DeleteZoneR
     if request == nil {
         request = NewDeleteZoneRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeleteZone")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteZone require credential")
@@ -2644,6 +6242,7 @@ func (c *Client) DeployConfigGroupVersionWithContext(ctx context.Context, reques
     if request == nil {
         request = NewDeployConfigGroupVersionRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DeployConfigGroupVersion")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeployConfigGroupVersion require credential")
@@ -2709,6 +6308,7 @@ func (c *Client) DescribeAccelerationDomainsWithContext(ctx context.Context, req
     if request == nil {
         request = NewDescribeAccelerationDomainsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeAccelerationDomains")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeAccelerationDomains require credential")
@@ -2743,6 +6343,8 @@ func NewDescribeAliasDomainsResponse() (response *DescribeAliasDomainsResponse) 
 // DescribeAliasDomains
 // 查询别称域名信息列表。
 //
+// 该功能仅企业版套餐支持，并且该功能当前仍在内测中，如需使用，请[联系我们](https://cloud.tencent.com/online-service?from=connect-us)。
+//
 // 可能返回的错误码:
 //  INTERNALERROR = "InternalError"
 //  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
@@ -2756,6 +6358,8 @@ func (c *Client) DescribeAliasDomains(request *DescribeAliasDomainsRequest) (res
 // DescribeAliasDomains
 // 查询别称域名信息列表。
 //
+// 该功能仅企业版套餐支持，并且该功能当前仍在内测中，如需使用，请[联系我们](https://cloud.tencent.com/online-service?from=connect-us)。
+//
 // 可能返回的错误码:
 //  INTERNALERROR = "InternalError"
 //  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
@@ -2766,6 +6370,7 @@ func (c *Client) DescribeAliasDomainsWithContext(ctx context.Context, request *D
     if request == nil {
         request = NewDescribeAliasDomainsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeAliasDomains")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeAliasDomains require credential")
@@ -2823,6 +6428,7 @@ func (c *Client) DescribeApplicationProxiesWithContext(ctx context.Context, requ
     if request == nil {
         request = NewDescribeApplicationProxiesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeApplicationProxies")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeApplicationProxies require credential")
@@ -2831,6 +6437,56 @@ func (c *Client) DescribeApplicationProxiesWithContext(ctx context.Context, requ
     request.SetContext(ctx)
     
     response = NewDescribeApplicationProxiesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeAvailableCustomActionsForRuleEngineRequest() (request *DescribeAvailableCustomActionsForRuleEngineRequest) {
+    request = &DescribeAvailableCustomActionsForRuleEngineRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeAvailableCustomActionsForRuleEngine")
+    
+    
+    return
+}
+
+func NewDescribeAvailableCustomActionsForRuleEngineResponse() (response *DescribeAvailableCustomActionsForRuleEngineResponse) {
+    response = &DescribeAvailableCustomActionsForRuleEngineResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeAvailableCustomActionsForRuleEngine
+// 查询站点规则引擎操作可用的定制配置列表。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+func (c *Client) DescribeAvailableCustomActionsForRuleEngine(request *DescribeAvailableCustomActionsForRuleEngineRequest) (response *DescribeAvailableCustomActionsForRuleEngineResponse, err error) {
+    return c.DescribeAvailableCustomActionsForRuleEngineWithContext(context.Background(), request)
+}
+
+// DescribeAvailableCustomActionsForRuleEngine
+// 查询站点规则引擎操作可用的定制配置列表。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+func (c *Client) DescribeAvailableCustomActionsForRuleEngineWithContext(ctx context.Context, request *DescribeAvailableCustomActionsForRuleEngineRequest) (response *DescribeAvailableCustomActionsForRuleEngineResponse, err error) {
+    if request == nil {
+        request = NewDescribeAvailableCustomActionsForRuleEngineRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeAvailableCustomActionsForRuleEngine")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeAvailableCustomActionsForRuleEngine require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeAvailableCustomActionsForRuleEngineResponse()
     err = c.Send(request, response)
     return
 }
@@ -2872,6 +6528,7 @@ func (c *Client) DescribeAvailablePlansWithContext(ctx context.Context, request 
     if request == nil {
         request = NewDescribeAvailablePlansRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeAvailablePlans")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeAvailablePlans require credential")
@@ -2908,6 +6565,7 @@ func NewDescribeBillingDataResponse() (response *DescribeBillingDataResponse) {
 //
 // 可能返回的错误码:
 //  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INVALIDPARAMETER_GROUPBYLIMITEXCEEDED = "InvalidParameter.GroupByLimitExceeded"
 //  INVALIDPARAMETER_INVALIDINTERVAL = "InvalidParameter.InvalidInterval"
 //  INVALIDPARAMETER_INVALIDMETRIC = "InvalidParameter.InvalidMetric"
 //  INVALIDPARAMETER_ZONEHASNOTBEENBOUNDTOPLAN = "InvalidParameter.ZoneHasNotBeenBoundToPlan"
@@ -2920,6 +6578,7 @@ func (c *Client) DescribeBillingData(request *DescribeBillingDataRequest) (respo
 //
 // 可能返回的错误码:
 //  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INVALIDPARAMETER_GROUPBYLIMITEXCEEDED = "InvalidParameter.GroupByLimitExceeded"
 //  INVALIDPARAMETER_INVALIDINTERVAL = "InvalidParameter.InvalidInterval"
 //  INVALIDPARAMETER_INVALIDMETRIC = "InvalidParameter.InvalidMetric"
 //  INVALIDPARAMETER_ZONEHASNOTBEENBOUNDTOPLAN = "InvalidParameter.ZoneHasNotBeenBoundToPlan"
@@ -2927,6 +6586,7 @@ func (c *Client) DescribeBillingDataWithContext(ctx context.Context, request *De
     if request == nil {
         request = NewDescribeBillingDataRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeBillingData")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeBillingData require credential")
@@ -2976,6 +6636,7 @@ func (c *Client) DescribeConfigGroupVersionDetailWithContext(ctx context.Context
     if request == nil {
         request = NewDescribeConfigGroupVersionDetailRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeConfigGroupVersionDetail")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeConfigGroupVersionDetail require credential")
@@ -3025,6 +6686,7 @@ func (c *Client) DescribeConfigGroupVersionsWithContext(ctx context.Context, req
     if request == nil {
         request = NewDescribeConfigGroupVersionsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeConfigGroupVersions")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeConfigGroupVersions require credential")
@@ -3033,6 +6695,56 @@ func (c *Client) DescribeConfigGroupVersionsWithContext(ctx context.Context, req
     request.SetContext(ctx)
     
     response = NewDescribeConfigGroupVersionsResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeContentIdentifiersRequest() (request *DescribeContentIdentifiersRequest) {
+    request = &DescribeContentIdentifiersRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeContentIdentifiers")
+    
+    
+    return
+}
+
+func NewDescribeContentIdentifiersResponse() (response *DescribeContentIdentifiersResponse) {
+    response = &DescribeContentIdentifiersResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeContentIdentifiers
+// 批量查询内容标识符，可以根据 ID、描述、状态或者标签过滤。按照状态查询被删除的内容标识符仅保留三个月。该功能仅白名单开放。
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND = "ResourceNotFound"
+func (c *Client) DescribeContentIdentifiers(request *DescribeContentIdentifiersRequest) (response *DescribeContentIdentifiersResponse, err error) {
+    return c.DescribeContentIdentifiersWithContext(context.Background(), request)
+}
+
+// DescribeContentIdentifiers
+// 批量查询内容标识符，可以根据 ID、描述、状态或者标签过滤。按照状态查询被删除的内容标识符仅保留三个月。该功能仅白名单开放。
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND = "ResourceNotFound"
+func (c *Client) DescribeContentIdentifiersWithContext(ctx context.Context, request *DescribeContentIdentifiersRequest) (response *DescribeContentIdentifiersResponse, err error) {
+    if request == nil {
+        request = NewDescribeContentIdentifiersRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeContentIdentifiers")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeContentIdentifiers require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeContentIdentifiersResponse()
     err = c.Send(request, response)
     return
 }
@@ -3078,6 +6790,7 @@ func (c *Client) DescribeContentQuotaWithContext(ctx context.Context, request *D
     if request == nil {
         request = NewDescribeContentQuotaRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeContentQuota")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeContentQuota require credential")
@@ -3086,6 +6799,56 @@ func (c *Client) DescribeContentQuotaWithContext(ctx context.Context, request *D
     request.SetContext(ctx)
     
     response = NewDescribeContentQuotaResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeCustomErrorPagesRequest() (request *DescribeCustomErrorPagesRequest) {
+    request = &DescribeCustomErrorPagesRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeCustomErrorPages")
+    
+    
+    return
+}
+
+func NewDescribeCustomErrorPagesResponse() (response *DescribeCustomErrorPagesResponse) {
+    response = &DescribeCustomErrorPagesResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeCustomErrorPages
+// 查询自定义错误页列表。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
+func (c *Client) DescribeCustomErrorPages(request *DescribeCustomErrorPagesRequest) (response *DescribeCustomErrorPagesResponse, err error) {
+    return c.DescribeCustomErrorPagesWithContext(context.Background(), request)
+}
+
+// DescribeCustomErrorPages
+// 查询自定义错误页列表。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
+func (c *Client) DescribeCustomErrorPagesWithContext(ctx context.Context, request *DescribeCustomErrorPagesRequest) (response *DescribeCustomErrorPagesResponse, err error) {
+    if request == nil {
+        request = NewDescribeCustomErrorPagesRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeCustomErrorPages")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeCustomErrorPages require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeCustomErrorPagesResponse()
     err = c.Send(request, response)
     return
 }
@@ -3139,6 +6902,7 @@ func (c *Client) DescribeDDoSAttackDataWithContext(ctx context.Context, request 
     if request == nil {
         request = NewDescribeDDoSAttackDataRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeDDoSAttackData")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDDoSAttackData require credential")
@@ -3200,6 +6964,7 @@ func (c *Client) DescribeDDoSAttackEventWithContext(ctx context.Context, request
     if request == nil {
         request = NewDescribeDDoSAttackEventRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeDDoSAttackEvent")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDDoSAttackEvent require credential")
@@ -3257,6 +7022,7 @@ func (c *Client) DescribeDDoSAttackTopDataWithContext(ctx context.Context, reque
     if request == nil {
         request = NewDescribeDDoSAttackTopDataRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeDDoSAttackTopData")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDDoSAttackTopData require credential")
@@ -3265,6 +7031,68 @@ func (c *Client) DescribeDDoSAttackTopDataWithContext(ctx context.Context, reque
     request.SetContext(ctx)
     
     response = NewDescribeDDoSAttackTopDataResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeDDoSProtectionRequest() (request *DescribeDDoSProtectionRequest) {
+    request = &DescribeDDoSProtectionRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeDDoSProtection")
+    
+    
+    return
+}
+
+func NewDescribeDDoSProtectionResponse() (response *DescribeDDoSProtectionResponse) {
+    response = &DescribeDDoSProtectionResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeDDoSProtection
+// 获取站点的独立 DDoS 防护信息。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INVALIDPARAMETER_SECURITY = "InvalidParameter.Security"
+//  OPERATIONDENIED = "OperationDenied"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeDDoSProtection(request *DescribeDDoSProtectionRequest) (response *DescribeDDoSProtectionResponse, err error) {
+    return c.DescribeDDoSProtectionWithContext(context.Background(), request)
+}
+
+// DescribeDDoSProtection
+// 获取站点的独立 DDoS 防护信息。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INVALIDPARAMETER_SECURITY = "InvalidParameter.Security"
+//  OPERATIONDENIED = "OperationDenied"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeDDoSProtectionWithContext(ctx context.Context, request *DescribeDDoSProtectionRequest) (response *DescribeDDoSProtectionResponse, err error) {
+    if request == nil {
+        request = NewDescribeDDoSProtectionRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeDDoSProtection")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeDDoSProtection require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeDDoSProtectionResponse()
     err = c.Send(request, response)
     return
 }
@@ -3291,6 +7119,8 @@ func NewDescribeDefaultCertificatesResponse() (response *DescribeDefaultCertific
 // DescribeDefaultCertificates
 // 查询默认证书列表
 //
+// <p style="color: red;">注意：该旧版接口已停止更新迭代，后续新增功能将仅在新版接口中提供，旧版接口支持的原有能力将不受影响。如需查询域名配置的证书，请使用DescribeAccelerationDomains。</p>
+//
 // 可能返回的错误码:
 //  INTERNALERROR_DBERROR = "InternalError.DBError"
 //  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
@@ -3308,6 +7138,8 @@ func (c *Client) DescribeDefaultCertificates(request *DescribeDefaultCertificate
 // DescribeDefaultCertificates
 // 查询默认证书列表
 //
+// <p style="color: red;">注意：该旧版接口已停止更新迭代，后续新增功能将仅在新版接口中提供，旧版接口支持的原有能力将不受影响。如需查询域名配置的证书，请使用DescribeAccelerationDomains。</p>
+//
 // 可能返回的错误码:
 //  INTERNALERROR_DBERROR = "InternalError.DBError"
 //  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
@@ -3322,6 +7154,7 @@ func (c *Client) DescribeDefaultCertificatesWithContext(ctx context.Context, req
     if request == nil {
         request = NewDescribeDefaultCertificatesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeDefaultCertificates")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDefaultCertificates require credential")
@@ -3371,6 +7204,7 @@ func (c *Client) DescribeDeployHistoryWithContext(ctx context.Context, request *
     if request == nil {
         request = NewDescribeDeployHistoryRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeDeployHistory")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeDeployHistory require credential")
@@ -3379,6 +7213,116 @@ func (c *Client) DescribeDeployHistoryWithContext(ctx context.Context, request *
     request.SetContext(ctx)
     
     response = NewDescribeDeployHistoryResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeDnsRecordsRequest() (request *DescribeDnsRecordsRequest) {
+    request = &DescribeDnsRecordsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeDnsRecords")
+    
+    
+    return
+}
+
+func NewDescribeDnsRecordsResponse() (response *DescribeDnsRecordsResponse) {
+    response = &DescribeDnsRecordsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeDnsRecords
+// 您可以用过本接口查看站点下的 DNS 记录信息，包括 DNS 记录名、记录类型以及记录内容等信息，支持指定过滤条件查询对应的 DNS 记录信息。
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND = "ResourceNotFound"
+func (c *Client) DescribeDnsRecords(request *DescribeDnsRecordsRequest) (response *DescribeDnsRecordsResponse, err error) {
+    return c.DescribeDnsRecordsWithContext(context.Background(), request)
+}
+
+// DescribeDnsRecords
+// 您可以用过本接口查看站点下的 DNS 记录信息，包括 DNS 记录名、记录类型以及记录内容等信息，支持指定过滤条件查询对应的 DNS 记录信息。
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND = "ResourceNotFound"
+func (c *Client) DescribeDnsRecordsWithContext(ctx context.Context, request *DescribeDnsRecordsRequest) (response *DescribeDnsRecordsResponse, err error) {
+    if request == nil {
+        request = NewDescribeDnsRecordsRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeDnsRecords")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeDnsRecords require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeDnsRecordsResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeEdgeKVNamespacesRequest() (request *DescribeEdgeKVNamespacesRequest) {
+    request = &DescribeEdgeKVNamespacesRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeEdgeKVNamespaces")
+    
+    
+    return
+}
+
+func NewDescribeEdgeKVNamespacesResponse() (response *DescribeEdgeKVNamespacesResponse) {
+    response = &DescribeEdgeKVNamespacesResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeEdgeKVNamespaces
+// 查询指定站点下的 KV 命名空间列表，支持分页、排序和条件过滤。返回命名空间的基本信息、存储容量使用情况以及被引用关系。若查询不到数据，则返回空数组。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_INVALIDFILTERNAME = "InvalidParameter.InvalidFilterName"
+//  INVALIDPARAMETER_INVALIDSORTBY = "InvalidParameter.InvalidSortBy"
+//  INVALIDPARAMETER_INVALIDSORTORDER = "InvalidParameter.InvalidSortOrder"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  LIMITEXCEEDED_NAMESPACELIMITEXCEEDED = "LimitExceeded.NamespaceLimitExceeded"
+func (c *Client) DescribeEdgeKVNamespaces(request *DescribeEdgeKVNamespacesRequest) (response *DescribeEdgeKVNamespacesResponse, err error) {
+    return c.DescribeEdgeKVNamespacesWithContext(context.Background(), request)
+}
+
+// DescribeEdgeKVNamespaces
+// 查询指定站点下的 KV 命名空间列表，支持分页、排序和条件过滤。返回命名空间的基本信息、存储容量使用情况以及被引用关系。若查询不到数据，则返回空数组。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_INVALIDFILTERNAME = "InvalidParameter.InvalidFilterName"
+//  INVALIDPARAMETER_INVALIDSORTBY = "InvalidParameter.InvalidSortBy"
+//  INVALIDPARAMETER_INVALIDSORTORDER = "InvalidParameter.InvalidSortOrder"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  LIMITEXCEEDED_NAMESPACELIMITEXCEEDED = "LimitExceeded.NamespaceLimitExceeded"
+func (c *Client) DescribeEdgeKVNamespacesWithContext(ctx context.Context, request *DescribeEdgeKVNamespacesRequest) (response *DescribeEdgeKVNamespacesResponse, err error) {
+    if request == nil {
+        request = NewDescribeEdgeKVNamespacesRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeEdgeKVNamespaces")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeEdgeKVNamespaces require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeEdgeKVNamespacesResponse()
     err = c.Send(request, response)
     return
 }
@@ -3406,7 +7350,12 @@ func NewDescribeEnvironmentsResponse() (response *DescribeEnvironmentsResponse) 
 // 在版本管理模式下，用于查询环境信息，可获取环境 ID、类型、当前生效版本等。版本管理功能内测中，当前仅白名单开放。
 //
 // 可能返回的错误码:
-//  RESOURCENOTFOUND = "ResourceNotFound"
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_INVALIDFILTERNAME = "InvalidParameter.InvalidFilterName"
+//  INVALIDPARAMETER_INVALIDSORTBY = "InvalidParameter.InvalidSortBy"
+//  INVALIDPARAMETER_INVALIDSORTORDER = "InvalidParameter.InvalidSortOrder"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  LIMITEXCEEDED_NAMESPACELIMITEXCEEDED = "LimitExceeded.NamespaceLimitExceeded"
 func (c *Client) DescribeEnvironments(request *DescribeEnvironmentsRequest) (response *DescribeEnvironmentsResponse, err error) {
     return c.DescribeEnvironmentsWithContext(context.Background(), request)
 }
@@ -3415,11 +7364,17 @@ func (c *Client) DescribeEnvironments(request *DescribeEnvironmentsRequest) (res
 // 在版本管理模式下，用于查询环境信息，可获取环境 ID、类型、当前生效版本等。版本管理功能内测中，当前仅白名单开放。
 //
 // 可能返回的错误码:
-//  RESOURCENOTFOUND = "ResourceNotFound"
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_INVALIDFILTERNAME = "InvalidParameter.InvalidFilterName"
+//  INVALIDPARAMETER_INVALIDSORTBY = "InvalidParameter.InvalidSortBy"
+//  INVALIDPARAMETER_INVALIDSORTORDER = "InvalidParameter.InvalidSortOrder"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  LIMITEXCEEDED_NAMESPACELIMITEXCEEDED = "LimitExceeded.NamespaceLimitExceeded"
 func (c *Client) DescribeEnvironmentsWithContext(ctx context.Context, request *DescribeEnvironmentsRequest) (response *DescribeEnvironmentsResponse, err error) {
     if request == nil {
         request = NewDescribeEnvironmentsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeEnvironments")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeEnvironments require credential")
@@ -3428,6 +7383,298 @@ func (c *Client) DescribeEnvironmentsWithContext(ctx context.Context, request *D
     request.SetContext(ctx)
     
     response = NewDescribeEnvironmentsResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeFunctionComponentBindingsRequest() (request *DescribeFunctionComponentBindingsRequest) {
+    request = &DescribeFunctionComponentBindingsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeFunctionComponentBindings")
+    
+    
+    return
+}
+
+func NewDescribeFunctionComponentBindingsResponse() (response *DescribeFunctionComponentBindingsResponse) {
+    response = &DescribeFunctionComponentBindingsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeFunctionComponentBindings
+// 本接口用于查询指定边缘函数的组件绑定列表，支持分页和条件过滤，返回绑定的组件类型、变量名及配置参数等详细信息。当前支持的绑定组件类型为 KV 命名空间（kv_namespace）。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_INVALIDFILTERNAME = "InvalidParameter.InvalidFilterName"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+func (c *Client) DescribeFunctionComponentBindings(request *DescribeFunctionComponentBindingsRequest) (response *DescribeFunctionComponentBindingsResponse, err error) {
+    return c.DescribeFunctionComponentBindingsWithContext(context.Background(), request)
+}
+
+// DescribeFunctionComponentBindings
+// 本接口用于查询指定边缘函数的组件绑定列表，支持分页和条件过滤，返回绑定的组件类型、变量名及配置参数等详细信息。当前支持的绑定组件类型为 KV 命名空间（kv_namespace）。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_INVALIDFILTERNAME = "InvalidParameter.InvalidFilterName"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+func (c *Client) DescribeFunctionComponentBindingsWithContext(ctx context.Context, request *DescribeFunctionComponentBindingsRequest) (response *DescribeFunctionComponentBindingsResponse, err error) {
+    if request == nil {
+        request = NewDescribeFunctionComponentBindingsRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeFunctionComponentBindings")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeFunctionComponentBindings require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeFunctionComponentBindingsResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeFunctionReplicasRequest() (request *DescribeFunctionReplicasRequest) {
+    request = &DescribeFunctionReplicasRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeFunctionReplicas")
+    
+    
+    return
+}
+
+func NewDescribeFunctionReplicasResponse() (response *DescribeFunctionReplicasResponse) {
+    response = &DescribeFunctionReplicasResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeFunctionReplicas
+// 本接口用于查询边缘函数的副本列表。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_INVALIDFILTERNAME = "InvalidParameter.InvalidFilterName"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+func (c *Client) DescribeFunctionReplicas(request *DescribeFunctionReplicasRequest) (response *DescribeFunctionReplicasResponse, err error) {
+    return c.DescribeFunctionReplicasWithContext(context.Background(), request)
+}
+
+// DescribeFunctionReplicas
+// 本接口用于查询边缘函数的副本列表。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_INVALIDFILTERNAME = "InvalidParameter.InvalidFilterName"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+func (c *Client) DescribeFunctionReplicasWithContext(ctx context.Context, request *DescribeFunctionReplicasRequest) (response *DescribeFunctionReplicasResponse, err error) {
+    if request == nil {
+        request = NewDescribeFunctionReplicasRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeFunctionReplicas")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeFunctionReplicas require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeFunctionReplicasResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeFunctionRulesRequest() (request *DescribeFunctionRulesRequest) {
+    request = &DescribeFunctionRulesRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeFunctionRules")
+    
+    
+    return
+}
+
+func NewDescribeFunctionRulesResponse() (response *DescribeFunctionRulesResponse) {
+    response = &DescribeFunctionRulesResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeFunctionRules
+// 查询边缘函数触发规则列表，支持按照规则 ID、函数 ID、规则描述等条件进行过滤。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_INVALIDFILTERNAME = "InvalidParameter.InvalidFilterName"
+//  INVALIDPARAMETER_TOOMANYFILTERVALUES = "InvalidParameter.TooManyFilterValues"
+//  INVALIDPARAMETER_TOOMANYFILTERS = "InvalidParameter.TooManyFilters"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
+func (c *Client) DescribeFunctionRules(request *DescribeFunctionRulesRequest) (response *DescribeFunctionRulesResponse, err error) {
+    return c.DescribeFunctionRulesWithContext(context.Background(), request)
+}
+
+// DescribeFunctionRules
+// 查询边缘函数触发规则列表，支持按照规则 ID、函数 ID、规则描述等条件进行过滤。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_INVALIDFILTERNAME = "InvalidParameter.InvalidFilterName"
+//  INVALIDPARAMETER_TOOMANYFILTERVALUES = "InvalidParameter.TooManyFilterValues"
+//  INVALIDPARAMETER_TOOMANYFILTERS = "InvalidParameter.TooManyFilters"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
+func (c *Client) DescribeFunctionRulesWithContext(ctx context.Context, request *DescribeFunctionRulesRequest) (response *DescribeFunctionRulesResponse, err error) {
+    if request == nil {
+        request = NewDescribeFunctionRulesRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeFunctionRules")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeFunctionRules require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeFunctionRulesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeFunctionRuntimeEnvironmentRequest() (request *DescribeFunctionRuntimeEnvironmentRequest) {
+    request = &DescribeFunctionRuntimeEnvironmentRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeFunctionRuntimeEnvironment")
+    
+    
+    return
+}
+
+func NewDescribeFunctionRuntimeEnvironmentResponse() (response *DescribeFunctionRuntimeEnvironmentResponse) {
+    response = &DescribeFunctionRuntimeEnvironmentResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeFunctionRuntimeEnvironment
+// 查询边缘函数运行环境，包括环境变量。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_DBERROR = "InternalError.DBError"
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_INVALIDFILTERNAME = "InvalidParameter.InvalidFilterName"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
+func (c *Client) DescribeFunctionRuntimeEnvironment(request *DescribeFunctionRuntimeEnvironmentRequest) (response *DescribeFunctionRuntimeEnvironmentResponse, err error) {
+    return c.DescribeFunctionRuntimeEnvironmentWithContext(context.Background(), request)
+}
+
+// DescribeFunctionRuntimeEnvironment
+// 查询边缘函数运行环境，包括环境变量。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_DBERROR = "InternalError.DBError"
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_INVALIDFILTERNAME = "InvalidParameter.InvalidFilterName"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
+func (c *Client) DescribeFunctionRuntimeEnvironmentWithContext(ctx context.Context, request *DescribeFunctionRuntimeEnvironmentRequest) (response *DescribeFunctionRuntimeEnvironmentResponse, err error) {
+    if request == nil {
+        request = NewDescribeFunctionRuntimeEnvironmentRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeFunctionRuntimeEnvironment")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeFunctionRuntimeEnvironment require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeFunctionRuntimeEnvironmentResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeFunctionsRequest() (request *DescribeFunctionsRequest) {
+    request = &DescribeFunctionsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeFunctions")
+    
+    
+    return
+}
+
+func NewDescribeFunctionsResponse() (response *DescribeFunctionsResponse) {
+    response = &DescribeFunctionsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeFunctions
+// 查询边缘函数列表，支持函数 ID、函数名称、描述等条件的过滤。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_INVALIDFILTERNAME = "InvalidParameter.InvalidFilterName"
+//  INVALIDPARAMETER_LENGTHEXCEEDSLIMIT = "InvalidParameter.LengthExceedsLimit"
+//  INVALIDPARAMETER_TOOMANYFILTERVALUES = "InvalidParameter.TooManyFilterValues"
+//  INVALIDPARAMETER_TOOMANYFILTERS = "InvalidParameter.TooManyFilters"
+//  RESOURCEUNAVAILABLE_FUNCTIONNOTFOUND = "ResourceUnavailable.FunctionNotFound"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
+func (c *Client) DescribeFunctions(request *DescribeFunctionsRequest) (response *DescribeFunctionsResponse, err error) {
+    return c.DescribeFunctionsWithContext(context.Background(), request)
+}
+
+// DescribeFunctions
+// 查询边缘函数列表，支持函数 ID、函数名称、描述等条件的过滤。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_INVALIDFILTERNAME = "InvalidParameter.InvalidFilterName"
+//  INVALIDPARAMETER_LENGTHEXCEEDSLIMIT = "InvalidParameter.LengthExceedsLimit"
+//  INVALIDPARAMETER_TOOMANYFILTERVALUES = "InvalidParameter.TooManyFilterValues"
+//  INVALIDPARAMETER_TOOMANYFILTERS = "InvalidParameter.TooManyFilters"
+//  RESOURCEUNAVAILABLE_FUNCTIONNOTFOUND = "ResourceUnavailable.FunctionNotFound"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
+func (c *Client) DescribeFunctionsWithContext(ctx context.Context, request *DescribeFunctionsRequest) (response *DescribeFunctionsResponse, err error) {
+    if request == nil {
+        request = NewDescribeFunctionsRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeFunctions")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeFunctions require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeFunctionsResponse()
     err = c.Send(request, response)
     return
 }
@@ -3452,7 +7699,7 @@ func NewDescribeHostsSettingResponse() (response *DescribeHostsSettingResponse) 
 }
 
 // DescribeHostsSetting
-// 用于查询域名配置信息
+// 本接口为旧版，EdgeOne 已对规则引擎相关接口全面升级，可通过 [DescribeL7AccSetting](https://cloud.tencent.com/document/product/1552/115819) 和 [DescribeL7AccRules](https://cloud.tencent.com/document/product/1552/115820) 来获取域名的详细配置。
 //
 // 可能返回的错误码:
 //  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
@@ -3467,7 +7714,7 @@ func (c *Client) DescribeHostsSetting(request *DescribeHostsSettingRequest) (res
 }
 
 // DescribeHostsSetting
-// 用于查询域名配置信息
+// 本接口为旧版，EdgeOne 已对规则引擎相关接口全面升级，可通过 [DescribeL7AccSetting](https://cloud.tencent.com/document/product/1552/115819) 和 [DescribeL7AccRules](https://cloud.tencent.com/document/product/1552/115820) 来获取域名的详细配置。
 //
 // 可能返回的错误码:
 //  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
@@ -3481,6 +7728,7 @@ func (c *Client) DescribeHostsSettingWithContext(ctx context.Context, request *D
     if request == nil {
         request = NewDescribeHostsSettingRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeHostsSetting")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeHostsSetting require credential")
@@ -3489,6 +7737,68 @@ func (c *Client) DescribeHostsSettingWithContext(ctx context.Context, request *D
     request.SetContext(ctx)
     
     response = NewDescribeHostsSettingResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeIPGroupReferencesRequest() (request *DescribeIPGroupReferencesRequest) {
+    request = &DescribeIPGroupReferencesRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeIPGroupReferences")
+    
+    
+    return
+}
+
+func NewDescribeIPGroupReferencesResponse() (response *DescribeIPGroupReferencesResponse) {
+    response = &DescribeIPGroupReferencesResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeIPGroupReferences
+// 获取使用 IP 分组的策略配置。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  OPERATIONDENIED = "OperationDenied"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeIPGroupReferences(request *DescribeIPGroupReferencesRequest) (response *DescribeIPGroupReferencesResponse, err error) {
+    return c.DescribeIPGroupReferencesWithContext(context.Background(), request)
+}
+
+// DescribeIPGroupReferences
+// 获取使用 IP 分组的策略配置。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  OPERATIONDENIED = "OperationDenied"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeIPGroupReferencesWithContext(ctx context.Context, request *DescribeIPGroupReferencesRequest) (response *DescribeIPGroupReferencesResponse, err error) {
+    if request == nil {
+        request = NewDescribeIPGroupReferencesRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeIPGroupReferences")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeIPGroupReferences require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeIPGroupReferencesResponse()
     err = c.Send(request, response)
     return
 }
@@ -3530,6 +7840,7 @@ func (c *Client) DescribeIPRegionWithContext(ctx context.Context, request *Descr
     if request == nil {
         request = NewDescribeIPRegionRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeIPRegion")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeIPRegion require credential")
@@ -3587,6 +7898,7 @@ func (c *Client) DescribeIdentificationsWithContext(ctx context.Context, request
     if request == nil {
         request = NewDescribeIdentificationsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeIdentifications")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeIdentifications require credential")
@@ -3595,6 +7907,400 @@ func (c *Client) DescribeIdentificationsWithContext(ctx context.Context, request
     request.SetContext(ctx)
     
     response = NewDescribeIdentificationsResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeInferenceAPITokensRequest() (request *DescribeInferenceAPITokensRequest) {
+    request = &DescribeInferenceAPITokensRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeInferenceAPITokens")
+    
+    
+    return
+}
+
+func NewDescribeInferenceAPITokensResponse() (response *DescribeInferenceAPITokensResponse) {
+    response = &DescribeInferenceAPITokensResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeInferenceAPITokens
+// 查询推理 API Token 列表，返回 Token 的 ID、名称、内容和创建时间，支持分页查询。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+func (c *Client) DescribeInferenceAPITokens(request *DescribeInferenceAPITokensRequest) (response *DescribeInferenceAPITokensResponse, err error) {
+    return c.DescribeInferenceAPITokensWithContext(context.Background(), request)
+}
+
+// DescribeInferenceAPITokens
+// 查询推理 API Token 列表，返回 Token 的 ID、名称、内容和创建时间，支持分页查询。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+func (c *Client) DescribeInferenceAPITokensWithContext(ctx context.Context, request *DescribeInferenceAPITokensRequest) (response *DescribeInferenceAPITokensResponse, err error) {
+    if request == nil {
+        request = NewDescribeInferenceAPITokensRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeInferenceAPITokens")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeInferenceAPITokens require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeInferenceAPITokensResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeInferenceHardwareSpecificationsRequest() (request *DescribeInferenceHardwareSpecificationsRequest) {
+    request = &DescribeInferenceHardwareSpecificationsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeInferenceHardwareSpecifications")
+    
+    
+    return
+}
+
+func NewDescribeInferenceHardwareSpecificationsResponse() (response *DescribeInferenceHardwareSpecificationsResponse) {
+    response = &DescribeInferenceHardwareSpecificationsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeInferenceHardwareSpecifications
+// 查询推理硬件规格列表，返回各规格的 CPU、内存、GPU 和显存等配置，创建服务时可从中选择所需规格。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+func (c *Client) DescribeInferenceHardwareSpecifications(request *DescribeInferenceHardwareSpecificationsRequest) (response *DescribeInferenceHardwareSpecificationsResponse, err error) {
+    return c.DescribeInferenceHardwareSpecificationsWithContext(context.Background(), request)
+}
+
+// DescribeInferenceHardwareSpecifications
+// 查询推理硬件规格列表，返回各规格的 CPU、内存、GPU 和显存等配置，创建服务时可从中选择所需规格。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+func (c *Client) DescribeInferenceHardwareSpecificationsWithContext(ctx context.Context, request *DescribeInferenceHardwareSpecificationsRequest) (response *DescribeInferenceHardwareSpecificationsResponse, err error) {
+    if request == nil {
+        request = NewDescribeInferenceHardwareSpecificationsRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeInferenceHardwareSpecifications")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeInferenceHardwareSpecifications require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeInferenceHardwareSpecificationsResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeInferenceServiceDeploymentLogsRequest() (request *DescribeInferenceServiceDeploymentLogsRequest) {
+    request = &DescribeInferenceServiceDeploymentLogsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeInferenceServiceDeploymentLogs")
+    
+    
+    return
+}
+
+func NewDescribeInferenceServiceDeploymentLogsResponse() (response *DescribeInferenceServiceDeploymentLogsResponse) {
+    response = &DescribeInferenceServiceDeploymentLogsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeInferenceServiceDeploymentLogs
+// 查询推理服务指定一次部署的日志，返回日志内容和产生时间，支持按时间范围检索、分页和排序。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+func (c *Client) DescribeInferenceServiceDeploymentLogs(request *DescribeInferenceServiceDeploymentLogsRequest) (response *DescribeInferenceServiceDeploymentLogsResponse, err error) {
+    return c.DescribeInferenceServiceDeploymentLogsWithContext(context.Background(), request)
+}
+
+// DescribeInferenceServiceDeploymentLogs
+// 查询推理服务指定一次部署的日志，返回日志内容和产生时间，支持按时间范围检索、分页和排序。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+func (c *Client) DescribeInferenceServiceDeploymentLogsWithContext(ctx context.Context, request *DescribeInferenceServiceDeploymentLogsRequest) (response *DescribeInferenceServiceDeploymentLogsResponse, err error) {
+    if request == nil {
+        request = NewDescribeInferenceServiceDeploymentLogsRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeInferenceServiceDeploymentLogs")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeInferenceServiceDeploymentLogs require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeInferenceServiceDeploymentLogsResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeInferenceServiceDeploymentRecordsRequest() (request *DescribeInferenceServiceDeploymentRecordsRequest) {
+    request = &DescribeInferenceServiceDeploymentRecordsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeInferenceServiceDeploymentRecords")
+    
+    
+    return
+}
+
+func NewDescribeInferenceServiceDeploymentRecordsResponse() (response *DescribeInferenceServiceDeploymentRecordsResponse) {
+    response = &DescribeInferenceServiceDeploymentRecordsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeInferenceServiceDeploymentRecords
+// 查询推理服务部署历史列表，返回每次部署的操作类型、状态、耗时、配置快照和是否为当前生效配置，支持分页和排序。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+func (c *Client) DescribeInferenceServiceDeploymentRecords(request *DescribeInferenceServiceDeploymentRecordsRequest) (response *DescribeInferenceServiceDeploymentRecordsResponse, err error) {
+    return c.DescribeInferenceServiceDeploymentRecordsWithContext(context.Background(), request)
+}
+
+// DescribeInferenceServiceDeploymentRecords
+// 查询推理服务部署历史列表，返回每次部署的操作类型、状态、耗时、配置快照和是否为当前生效配置，支持分页和排序。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+func (c *Client) DescribeInferenceServiceDeploymentRecordsWithContext(ctx context.Context, request *DescribeInferenceServiceDeploymentRecordsRequest) (response *DescribeInferenceServiceDeploymentRecordsResponse, err error) {
+    if request == nil {
+        request = NewDescribeInferenceServiceDeploymentRecordsRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeInferenceServiceDeploymentRecords")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeInferenceServiceDeploymentRecords require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeInferenceServiceDeploymentRecordsResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeInferenceServiceMonitorDataRequest() (request *DescribeInferenceServiceMonitorDataRequest) {
+    request = &DescribeInferenceServiceMonitorDataRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeInferenceServiceMonitorData")
+    
+    
+    return
+}
+
+func NewDescribeInferenceServiceMonitorDataResponse() (response *DescribeInferenceServiceMonitorDataResponse) {
+    response = &DescribeInferenceServiceMonitorDataResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeInferenceServiceMonitorData
+// 查询推理服务监控数据，支持 CPU、内存、GPU、显存使用率和实例数量等指标，可指定时间范围和聚合粒度，最多查询最近 30 天的数据。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+func (c *Client) DescribeInferenceServiceMonitorData(request *DescribeInferenceServiceMonitorDataRequest) (response *DescribeInferenceServiceMonitorDataResponse, err error) {
+    return c.DescribeInferenceServiceMonitorDataWithContext(context.Background(), request)
+}
+
+// DescribeInferenceServiceMonitorData
+// 查询推理服务监控数据，支持 CPU、内存、GPU、显存使用率和实例数量等指标，可指定时间范围和聚合粒度，最多查询最近 30 天的数据。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+func (c *Client) DescribeInferenceServiceMonitorDataWithContext(ctx context.Context, request *DescribeInferenceServiceMonitorDataRequest) (response *DescribeInferenceServiceMonitorDataResponse, err error) {
+    if request == nil {
+        request = NewDescribeInferenceServiceMonitorDataRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeInferenceServiceMonitorData")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeInferenceServiceMonitorData require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeInferenceServiceMonitorDataResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeInferenceServicesRequest() (request *DescribeInferenceServicesRequest) {
+    request = &DescribeInferenceServicesRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeInferenceServices")
+    
+    
+    return
+}
+
+func NewDescribeInferenceServicesResponse() (response *DescribeInferenceServicesResponse) {
+    response = &DescribeInferenceServicesResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeInferenceServices
+// 查询推理服务列表，支持按服务名称、服务 ID、状态过滤，返回服务的配置、运行状态、实例数和推理访问地址等信息。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+func (c *Client) DescribeInferenceServices(request *DescribeInferenceServicesRequest) (response *DescribeInferenceServicesResponse, err error) {
+    return c.DescribeInferenceServicesWithContext(context.Background(), request)
+}
+
+// DescribeInferenceServices
+// 查询推理服务列表，支持按服务名称、服务 ID、状态过滤，返回服务的配置、运行状态、实例数和推理访问地址等信息。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+func (c *Client) DescribeInferenceServicesWithContext(ctx context.Context, request *DescribeInferenceServicesRequest) (response *DescribeInferenceServicesResponse, err error) {
+    if request == nil {
+        request = NewDescribeInferenceServicesRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeInferenceServices")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeInferenceServices require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeInferenceServicesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeJustInTimeTranscodeTemplatesRequest() (request *DescribeJustInTimeTranscodeTemplatesRequest) {
+    request = &DescribeJustInTimeTranscodeTemplatesRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeJustInTimeTranscodeTemplates")
+    
+    
+    return
+}
+
+func NewDescribeJustInTimeTranscodeTemplatesResponse() (response *DescribeJustInTimeTranscodeTemplatesResponse) {
+    response = &DescribeJustInTimeTranscodeTemplatesResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeJustInTimeTranscodeTemplates
+// 根据即时转码模板名字、模板类型或唯一标识，获取即时转码模板详情列表。返回结果包含符合条件的所有用户自定义模板及预置模板。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_PRODUCTDISCONTINUED = "FailedOperation.ProductDiscontinued"
+//  FAILEDOPERATION_PRODUCTNOTACTIVATED = "FailedOperation.ProductNotActivated"
+//  INTERNALERROR = "InternalError"
+//  INVALIDFILTER = "InvalidFilter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+//  INVALIDPARAMETERVALUE_ZONEPAUSED = "InvalidParameterValue.ZonePaused"
+//  MISSINGPARAMETER = "MissingParameter"
+//  UNAUTHORIZEDOPERATION = "UnauthorizedOperation"
+func (c *Client) DescribeJustInTimeTranscodeTemplates(request *DescribeJustInTimeTranscodeTemplatesRequest) (response *DescribeJustInTimeTranscodeTemplatesResponse, err error) {
+    return c.DescribeJustInTimeTranscodeTemplatesWithContext(context.Background(), request)
+}
+
+// DescribeJustInTimeTranscodeTemplates
+// 根据即时转码模板名字、模板类型或唯一标识，获取即时转码模板详情列表。返回结果包含符合条件的所有用户自定义模板及预置模板。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_PRODUCTDISCONTINUED = "FailedOperation.ProductDiscontinued"
+//  FAILEDOPERATION_PRODUCTNOTACTIVATED = "FailedOperation.ProductNotActivated"
+//  INTERNALERROR = "InternalError"
+//  INVALIDFILTER = "InvalidFilter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+//  INVALIDPARAMETERVALUE_ZONEPAUSED = "InvalidParameterValue.ZonePaused"
+//  MISSINGPARAMETER = "MissingParameter"
+//  UNAUTHORIZEDOPERATION = "UnauthorizedOperation"
+func (c *Client) DescribeJustInTimeTranscodeTemplatesWithContext(ctx context.Context, request *DescribeJustInTimeTranscodeTemplatesRequest) (response *DescribeJustInTimeTranscodeTemplatesResponse, err error) {
+    if request == nil {
+        request = NewDescribeJustInTimeTranscodeTemplatesRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeJustInTimeTranscodeTemplates")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeJustInTimeTranscodeTemplates require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeJustInTimeTranscodeTemplatesResponse()
     err = c.Send(request, response)
     return
 }
@@ -3642,6 +8348,7 @@ func (c *Client) DescribeL4ProxyWithContext(ctx context.Context, request *Descri
     if request == nil {
         request = NewDescribeL4ProxyRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeL4Proxy")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeL4Proxy require credential")
@@ -3697,6 +8404,7 @@ func (c *Client) DescribeL4ProxyRulesWithContext(ctx context.Context, request *D
     if request == nil {
         request = NewDescribeL4ProxyRulesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeL4ProxyRules")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeL4ProxyRules require credential")
@@ -3705,6 +8413,682 @@ func (c *Client) DescribeL4ProxyRulesWithContext(ctx context.Context, request *D
     request.SetContext(ctx)
     
     response = NewDescribeL4ProxyRulesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeL7AccRulesRequest() (request *DescribeL7AccRulesRequest) {
+    request = &DescribeL7AccRulesRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeL7AccRules")
+    
+    
+    return
+}
+
+func NewDescribeL7AccRulesResponse() (response *DescribeL7AccRulesResponse) {
+    response = &DescribeL7AccRulesResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeL7AccRules
+// 本接口用于查询[规则引擎](https://cloud.tencent.com/document/product/1552/70901)的规则列表。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeL7AccRules(request *DescribeL7AccRulesRequest) (response *DescribeL7AccRulesResponse, err error) {
+    return c.DescribeL7AccRulesWithContext(context.Background(), request)
+}
+
+// DescribeL7AccRules
+// 本接口用于查询[规则引擎](https://cloud.tencent.com/document/product/1552/70901)的规则列表。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeL7AccRulesWithContext(ctx context.Context, request *DescribeL7AccRulesRequest) (response *DescribeL7AccRulesResponse, err error) {
+    if request == nil {
+        request = NewDescribeL7AccRulesRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeL7AccRules")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeL7AccRules require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeL7AccRulesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeL7AccSettingRequest() (request *DescribeL7AccSettingRequest) {
+    request = &DescribeL7AccSettingRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeL7AccSetting")
+    
+    
+    return
+}
+
+func NewDescribeL7AccSettingResponse() (response *DescribeL7AccSettingResponse) {
+    response = &DescribeL7AccSettingResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeL7AccSetting
+// 本接口用于查询[站点加速](https://cloud.tencent.com/document/product/1552/96193)全局配置。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_SETTINGINVALIDPARAM = "InvalidParameter.SettingInvalidParam"
+//  INVALIDPARAMETER_ZONENOTFOUND = "InvalidParameter.ZoneNotFound"
+//  OPERATIONDENIED = "OperationDenied"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeL7AccSetting(request *DescribeL7AccSettingRequest) (response *DescribeL7AccSettingResponse, err error) {
+    return c.DescribeL7AccSettingWithContext(context.Background(), request)
+}
+
+// DescribeL7AccSetting
+// 本接口用于查询[站点加速](https://cloud.tencent.com/document/product/1552/96193)全局配置。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_SETTINGINVALIDPARAM = "InvalidParameter.SettingInvalidParam"
+//  INVALIDPARAMETER_ZONENOTFOUND = "InvalidParameter.ZoneNotFound"
+//  OPERATIONDENIED = "OperationDenied"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeL7AccSettingWithContext(ctx context.Context, request *DescribeL7AccSettingRequest) (response *DescribeL7AccSettingResponse, err error) {
+    if request == nil {
+        request = NewDescribeL7AccSettingRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeL7AccSetting")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeL7AccSetting require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeL7AccSettingResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeLoadBalancerListRequest() (request *DescribeLoadBalancerListRequest) {
+    request = &DescribeLoadBalancerListRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeLoadBalancerList")
+    
+    
+    return
+}
+
+func NewDescribeLoadBalancerListResponse() (response *DescribeLoadBalancerListResponse) {
+    response = &DescribeLoadBalancerListResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeLoadBalancerList
+// 查询负载均衡实例列表。负载均衡功能内测中，如您需要使用请 [联系我们](https://cloud.tencent.com/online-service)。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+func (c *Client) DescribeLoadBalancerList(request *DescribeLoadBalancerListRequest) (response *DescribeLoadBalancerListResponse, err error) {
+    return c.DescribeLoadBalancerListWithContext(context.Background(), request)
+}
+
+// DescribeLoadBalancerList
+// 查询负载均衡实例列表。负载均衡功能内测中，如您需要使用请 [联系我们](https://cloud.tencent.com/online-service)。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+func (c *Client) DescribeLoadBalancerListWithContext(ctx context.Context, request *DescribeLoadBalancerListRequest) (response *DescribeLoadBalancerListResponse, err error) {
+    if request == nil {
+        request = NewDescribeLoadBalancerListRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeLoadBalancerList")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeLoadBalancerList require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeLoadBalancerListResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeLogAnalysisDetailRequest() (request *DescribeLogAnalysisDetailRequest) {
+    request = &DescribeLogAnalysisDetailRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeLogAnalysisDetail")
+    
+    
+    return
+}
+
+func NewDescribeLogAnalysisDetailResponse() (response *DescribeLogAnalysisDetailResponse) {
+    response = &DescribeLogAnalysisDetailResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeLogAnalysisDetail
+// 本接口用以查询日志分析日志详情，数据来自站点下实时日志推送任务目的地为 "log-analysis" 的任务推送的日志数据。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+func (c *Client) DescribeLogAnalysisDetail(request *DescribeLogAnalysisDetailRequest) (response *DescribeLogAnalysisDetailResponse, err error) {
+    return c.DescribeLogAnalysisDetailWithContext(context.Background(), request)
+}
+
+// DescribeLogAnalysisDetail
+// 本接口用以查询日志分析日志详情，数据来自站点下实时日志推送任务目的地为 "log-analysis" 的任务推送的日志数据。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+func (c *Client) DescribeLogAnalysisDetailWithContext(ctx context.Context, request *DescribeLogAnalysisDetailRequest) (response *DescribeLogAnalysisDetailResponse, err error) {
+    if request == nil {
+        request = NewDescribeLogAnalysisDetailRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeLogAnalysisDetail")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeLogAnalysisDetail require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeLogAnalysisDetailResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeLogAnalysisDownloadTasksRequest() (request *DescribeLogAnalysisDownloadTasksRequest) {
+    request = &DescribeLogAnalysisDownloadTasksRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeLogAnalysisDownloadTasks")
+    
+    
+    return
+}
+
+func NewDescribeLogAnalysisDownloadTasksResponse() (response *DescribeLogAnalysisDownloadTasksResponse) {
+    response = &DescribeLogAnalysisDownloadTasksResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeLogAnalysisDownloadTasks
+// 本接口用以查询日志分析日志下载任务列表。注意：只保留最近三天的下载任务记录。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_REALTIMELOGLOGANALYSISNOTSUPPORT = "FailedOperation.RealtimeLogLogAnalysisNotSupport"
+//  INVALIDPARAMETER_INVALIDLOGANALYSISCONDITION = "InvalidParameter.InvalidLogAnalysisCondition"
+func (c *Client) DescribeLogAnalysisDownloadTasks(request *DescribeLogAnalysisDownloadTasksRequest) (response *DescribeLogAnalysisDownloadTasksResponse, err error) {
+    return c.DescribeLogAnalysisDownloadTasksWithContext(context.Background(), request)
+}
+
+// DescribeLogAnalysisDownloadTasks
+// 本接口用以查询日志分析日志下载任务列表。注意：只保留最近三天的下载任务记录。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION_REALTIMELOGLOGANALYSISNOTSUPPORT = "FailedOperation.RealtimeLogLogAnalysisNotSupport"
+//  INVALIDPARAMETER_INVALIDLOGANALYSISCONDITION = "InvalidParameter.InvalidLogAnalysisCondition"
+func (c *Client) DescribeLogAnalysisDownloadTasksWithContext(ctx context.Context, request *DescribeLogAnalysisDownloadTasksRequest) (response *DescribeLogAnalysisDownloadTasksResponse, err error) {
+    if request == nil {
+        request = NewDescribeLogAnalysisDownloadTasksRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeLogAnalysisDownloadTasks")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeLogAnalysisDownloadTasks require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeLogAnalysisDownloadTasksResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeMultiPathGatewayRequest() (request *DescribeMultiPathGatewayRequest) {
+    request = &DescribeMultiPathGatewayRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeMultiPathGateway")
+    
+    
+    return
+}
+
+func NewDescribeMultiPathGatewayResponse() (response *DescribeMultiPathGatewayResponse) {
+    response = &DescribeMultiPathGatewayResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeMultiPathGateway
+// 通过本接口查询多通道安全加速网关详情。如名称、网关 ID、IP、端口、类型等。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) DescribeMultiPathGateway(request *DescribeMultiPathGatewayRequest) (response *DescribeMultiPathGatewayResponse, err error) {
+    return c.DescribeMultiPathGatewayWithContext(context.Background(), request)
+}
+
+// DescribeMultiPathGateway
+// 通过本接口查询多通道安全加速网关详情。如名称、网关 ID、IP、端口、类型等。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) DescribeMultiPathGatewayWithContext(ctx context.Context, request *DescribeMultiPathGatewayRequest) (response *DescribeMultiPathGatewayResponse, err error) {
+    if request == nil {
+        request = NewDescribeMultiPathGatewayRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeMultiPathGateway")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeMultiPathGateway require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeMultiPathGatewayResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeMultiPathGatewayLineRequest() (request *DescribeMultiPathGatewayLineRequest) {
+    request = &DescribeMultiPathGatewayLineRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeMultiPathGatewayLine")
+    
+    
+    return
+}
+
+func NewDescribeMultiPathGatewayLineResponse() (response *DescribeMultiPathGatewayLineResponse) {
+    response = &DescribeMultiPathGatewayLineResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeMultiPathGatewayLine
+// 通过本接口查询接入多通道安全加速网关的线路。包括直连、EdgeOne 四层代理线路、自定义线路。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) DescribeMultiPathGatewayLine(request *DescribeMultiPathGatewayLineRequest) (response *DescribeMultiPathGatewayLineResponse, err error) {
+    return c.DescribeMultiPathGatewayLineWithContext(context.Background(), request)
+}
+
+// DescribeMultiPathGatewayLine
+// 通过本接口查询接入多通道安全加速网关的线路。包括直连、EdgeOne 四层代理线路、自定义线路。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) DescribeMultiPathGatewayLineWithContext(ctx context.Context, request *DescribeMultiPathGatewayLineRequest) (response *DescribeMultiPathGatewayLineResponse, err error) {
+    if request == nil {
+        request = NewDescribeMultiPathGatewayLineRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeMultiPathGatewayLine")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeMultiPathGatewayLine require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeMultiPathGatewayLineResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeMultiPathGatewayOriginACLRequest() (request *DescribeMultiPathGatewayOriginACLRequest) {
+    request = &DescribeMultiPathGatewayOriginACLRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeMultiPathGatewayOriginACL")
+    
+    
+    return
+}
+
+func NewDescribeMultiPathGatewayOriginACLResponse() (response *DescribeMultiPathGatewayOriginACLResponse) {
+    response = &DescribeMultiPathGatewayOriginACLResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeMultiPathGatewayOriginACL
+// 本接口用于查询多通道安全加速网关实例与回源 IP 网段的绑定关系，以及回源 IP 网段详情。若 MultiPathGatewayNextOriginACL 字段有返回值，则需要将最新的回源 IP 网段同步到源站防火墙配置中。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeMultiPathGatewayOriginACL(request *DescribeMultiPathGatewayOriginACLRequest) (response *DescribeMultiPathGatewayOriginACLResponse, err error) {
+    return c.DescribeMultiPathGatewayOriginACLWithContext(context.Background(), request)
+}
+
+// DescribeMultiPathGatewayOriginACL
+// 本接口用于查询多通道安全加速网关实例与回源 IP 网段的绑定关系，以及回源 IP 网段详情。若 MultiPathGatewayNextOriginACL 字段有返回值，则需要将最新的回源 IP 网段同步到源站防火墙配置中。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeMultiPathGatewayOriginACLWithContext(ctx context.Context, request *DescribeMultiPathGatewayOriginACLRequest) (response *DescribeMultiPathGatewayOriginACLResponse, err error) {
+    if request == nil {
+        request = NewDescribeMultiPathGatewayOriginACLRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeMultiPathGatewayOriginACL")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeMultiPathGatewayOriginACL require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeMultiPathGatewayOriginACLResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeMultiPathGatewayRegionsRequest() (request *DescribeMultiPathGatewayRegionsRequest) {
+    request = &DescribeMultiPathGatewayRegionsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeMultiPathGatewayRegions")
+    
+    
+    return
+}
+
+func NewDescribeMultiPathGatewayRegionsResponse() (response *DescribeMultiPathGatewayRegionsResponse) {
+    response = &DescribeMultiPathGatewayRegionsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeMultiPathGatewayRegions
+// 通过本接口查询用户创建的多通道安全加速网关（云上网关）的可用地域列表。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) DescribeMultiPathGatewayRegions(request *DescribeMultiPathGatewayRegionsRequest) (response *DescribeMultiPathGatewayRegionsResponse, err error) {
+    return c.DescribeMultiPathGatewayRegionsWithContext(context.Background(), request)
+}
+
+// DescribeMultiPathGatewayRegions
+// 通过本接口查询用户创建的多通道安全加速网关（云上网关）的可用地域列表。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) DescribeMultiPathGatewayRegionsWithContext(ctx context.Context, request *DescribeMultiPathGatewayRegionsRequest) (response *DescribeMultiPathGatewayRegionsResponse, err error) {
+    if request == nil {
+        request = NewDescribeMultiPathGatewayRegionsRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeMultiPathGatewayRegions")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeMultiPathGatewayRegions require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeMultiPathGatewayRegionsResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeMultiPathGatewaySecretKeyRequest() (request *DescribeMultiPathGatewaySecretKeyRequest) {
+    request = &DescribeMultiPathGatewaySecretKeyRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeMultiPathGatewaySecretKey")
+    
+    
+    return
+}
+
+func NewDescribeMultiPathGatewaySecretKeyResponse() (response *DescribeMultiPathGatewaySecretKeyResponse) {
+    response = &DescribeMultiPathGatewaySecretKeyResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeMultiPathGatewaySecretKey
+// 通过本接口查询接入多通道安全加速网关的密钥，客户基于接入密钥签名接入多通道安全加速网关。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) DescribeMultiPathGatewaySecretKey(request *DescribeMultiPathGatewaySecretKeyRequest) (response *DescribeMultiPathGatewaySecretKeyResponse, err error) {
+    return c.DescribeMultiPathGatewaySecretKeyWithContext(context.Background(), request)
+}
+
+// DescribeMultiPathGatewaySecretKey
+// 通过本接口查询接入多通道安全加速网关的密钥，客户基于接入密钥签名接入多通道安全加速网关。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) DescribeMultiPathGatewaySecretKeyWithContext(ctx context.Context, request *DescribeMultiPathGatewaySecretKeyRequest) (response *DescribeMultiPathGatewaySecretKeyResponse, err error) {
+    if request == nil {
+        request = NewDescribeMultiPathGatewaySecretKeyRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeMultiPathGatewaySecretKey")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeMultiPathGatewaySecretKey require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeMultiPathGatewaySecretKeyResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeMultiPathGatewaysRequest() (request *DescribeMultiPathGatewaysRequest) {
+    request = &DescribeMultiPathGatewaysRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeMultiPathGateways")
+    
+    
+    return
+}
+
+func NewDescribeMultiPathGatewaysResponse() (response *DescribeMultiPathGatewaysResponse) {
+    response = &DescribeMultiPathGatewaysResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeMultiPathGateways
+// 通过本接口查询用户创建的多通道安全加速网关列表。支持翻页。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) DescribeMultiPathGateways(request *DescribeMultiPathGatewaysRequest) (response *DescribeMultiPathGatewaysResponse, err error) {
+    return c.DescribeMultiPathGatewaysWithContext(context.Background(), request)
+}
+
+// DescribeMultiPathGateways
+// 通过本接口查询用户创建的多通道安全加速网关列表。支持翻页。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) DescribeMultiPathGatewaysWithContext(ctx context.Context, request *DescribeMultiPathGatewaysRequest) (response *DescribeMultiPathGatewaysResponse, err error) {
+    if request == nil {
+        request = NewDescribeMultiPathGatewaysRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeMultiPathGateways")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeMultiPathGateways require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeMultiPathGatewaysResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeOriginACLRequest() (request *DescribeOriginACLRequest) {
+    request = &DescribeOriginACLRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeOriginACL")
+    
+    
+    return
+}
+
+func NewDescribeOriginACLResponse() (response *DescribeOriginACLResponse) {
+    response = &DescribeOriginACLResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeOriginACL
+// 本接口用于查询站点下的七层加速域名/四层代理实例与回源 IP 网段的绑定关系，以及回源 IP 网段详情。如果您想通过自动化脚本定期获取回源 IP 网段的最新版本，可以较低频率（建议每三天一次）轮询本接口，若 NextOriginACL 字段有返回值，则将最新的回源 IP 网段同步到源站防火墙配置中。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeOriginACL(request *DescribeOriginACLRequest) (response *DescribeOriginACLResponse, err error) {
+    return c.DescribeOriginACLWithContext(context.Background(), request)
+}
+
+// DescribeOriginACL
+// 本接口用于查询站点下的七层加速域名/四层代理实例与回源 IP 网段的绑定关系，以及回源 IP 网段详情。如果您想通过自动化脚本定期获取回源 IP 网段的最新版本，可以较低频率（建议每三天一次）轮询本接口，若 NextOriginACL 字段有返回值，则将最新的回源 IP 网段同步到源站防火墙配置中。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeOriginACLWithContext(ctx context.Context, request *DescribeOriginACLRequest) (response *DescribeOriginACLResponse, err error) {
+    if request == nil {
+        request = NewDescribeOriginACLRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeOriginACL")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeOriginACL require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeOriginACLResponse()
     err = c.Send(request, response)
     return
 }
@@ -3750,6 +9134,7 @@ func (c *Client) DescribeOriginGroupWithContext(ctx context.Context, request *De
     if request == nil {
         request = NewDescribeOriginGroupRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeOriginGroup")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeOriginGroup require credential")
@@ -3758,6 +9143,60 @@ func (c *Client) DescribeOriginGroupWithContext(ctx context.Context, request *De
     request.SetContext(ctx)
     
     response = NewDescribeOriginGroupResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeOriginGroupHealthStatusRequest() (request *DescribeOriginGroupHealthStatusRequest) {
+    request = &DescribeOriginGroupHealthStatusRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeOriginGroupHealthStatus")
+    
+    
+    return
+}
+
+func NewDescribeOriginGroupHealthStatusResponse() (response *DescribeOriginGroupHealthStatusResponse) {
+    response = &DescribeOriginGroupHealthStatusResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeOriginGroupHealthStatus
+// 查询负载均衡实例下源站组健康状态。负载均衡功能内测中，如您需要使用请 [联系我们](https://cloud.tencent.com/online-service)。
+//
+// 可能返回的错误码:
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeOriginGroupHealthStatus(request *DescribeOriginGroupHealthStatusRequest) (response *DescribeOriginGroupHealthStatusResponse, err error) {
+    return c.DescribeOriginGroupHealthStatusWithContext(context.Background(), request)
+}
+
+// DescribeOriginGroupHealthStatus
+// 查询负载均衡实例下源站组健康状态。负载均衡功能内测中，如您需要使用请 [联系我们](https://cloud.tencent.com/online-service)。
+//
+// 可能返回的错误码:
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeOriginGroupHealthStatusWithContext(ctx context.Context, request *DescribeOriginGroupHealthStatusRequest) (response *DescribeOriginGroupHealthStatusResponse, err error) {
+    if request == nil {
+        request = NewDescribeOriginGroupHealthStatusRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeOriginGroupHealthStatus")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeOriginGroupHealthStatus require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeOriginGroupHealthStatusResponse()
     err = c.Send(request, response)
     return
 }
@@ -3782,7 +9221,11 @@ func NewDescribeOriginProtectionResponse() (response *DescribeOriginProtectionRe
 }
 
 // DescribeOriginProtection
-// 查询源站防护信息
+// 本接口为旧版本查询源站防护接口，EdgeOne 于 2025 年 6 月 27 日已对源站防护相关接口全面升级，新版本查询源站防护接口详情请参考 [DescribeOriginACL](https://cloud.tencent.com/document/product/1552/120408)。
+//
+// 
+//
+// <p style="color: red;">注意：自 2025 年 6 月 27 日起，旧版接口停止更新迭代，后续新增功能将仅在新版接口中提供。为避免在使用旧版接口时出现数据字段冲突，建议您尽早迁移到新版源站防护接口。</p>
 //
 // 可能返回的错误码:
 //  INTERNALERROR = "InternalError"
@@ -3795,7 +9238,11 @@ func (c *Client) DescribeOriginProtection(request *DescribeOriginProtectionReque
 }
 
 // DescribeOriginProtection
-// 查询源站防护信息
+// 本接口为旧版本查询源站防护接口，EdgeOne 于 2025 年 6 月 27 日已对源站防护相关接口全面升级，新版本查询源站防护接口详情请参考 [DescribeOriginACL](https://cloud.tencent.com/document/product/1552/120408)。
+//
+// 
+//
+// <p style="color: red;">注意：自 2025 年 6 月 27 日起，旧版接口停止更新迭代，后续新增功能将仅在新版接口中提供。为避免在使用旧版接口时出现数据字段冲突，建议您尽早迁移到新版源站防护接口。</p>
 //
 // 可能返回的错误码:
 //  INTERNALERROR = "InternalError"
@@ -3807,6 +9254,7 @@ func (c *Client) DescribeOriginProtectionWithContext(ctx context.Context, reques
     if request == nil {
         request = NewDescribeOriginProtectionRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeOriginProtection")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeOriginProtection require credential")
@@ -3870,6 +9318,7 @@ func (c *Client) DescribeOverviewL7DataWithContext(ctx context.Context, request 
     if request == nil {
         request = NewDescribeOverviewL7DataRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeOverviewL7Data")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeOverviewL7Data require credential")
@@ -3878,6 +9327,124 @@ func (c *Client) DescribeOverviewL7DataWithContext(ctx context.Context, request 
     request.SetContext(ctx)
     
     response = NewDescribeOverviewL7DataResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribePlansRequest() (request *DescribePlansRequest) {
+    request = &DescribePlansRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribePlans")
+    
+    
+    return
+}
+
+func NewDescribePlansResponse() (response *DescribePlansResponse) {
+    response = &DescribePlansResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribePlans
+// 查询套餐信息列表，支持分页。
+//
+// 可能返回的错误码:
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+func (c *Client) DescribePlans(request *DescribePlansRequest) (response *DescribePlansResponse, err error) {
+    return c.DescribePlansWithContext(context.Background(), request)
+}
+
+// DescribePlans
+// 查询套餐信息列表，支持分页。
+//
+// 可能返回的错误码:
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+func (c *Client) DescribePlansWithContext(ctx context.Context, request *DescribePlansRequest) (response *DescribePlansResponse, err error) {
+    if request == nil {
+        request = NewDescribePlansRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribePlans")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribePlans require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribePlansResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribePrefetchOriginLimitRequest() (request *DescribePrefetchOriginLimitRequest) {
+    request = &DescribePrefetchOriginLimitRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribePrefetchOriginLimit")
+    
+    
+    return
+}
+
+func NewDescribePrefetchOriginLimitResponse() (response *DescribePrefetchOriginLimitResponse) {
+    response = &DescribePrefetchOriginLimitResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribePrefetchOriginLimit
+// 本接口用于查询回源限速限制，该功能白名单内测中。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR_BACKENDERROR = "InternalError.BackendError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_DOMAINNOTFOUND = "InvalidParameter.DomainNotFound"
+//  INVALIDPARAMETER_PREFETCHORIGINLIMITAREAINVALID = "InvalidParameter.PrefetchOriginLimitAreaInvalid"
+//  OPERATIONDENIED_NOTINPREFETCHORIGINLIMITWHITELIST = "OperationDenied.NotInPrefetchOriginLimitWhiteList"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribePrefetchOriginLimit(request *DescribePrefetchOriginLimitRequest) (response *DescribePrefetchOriginLimitResponse, err error) {
+    return c.DescribePrefetchOriginLimitWithContext(context.Background(), request)
+}
+
+// DescribePrefetchOriginLimit
+// 本接口用于查询回源限速限制，该功能白名单内测中。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR_BACKENDERROR = "InternalError.BackendError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_DOMAINNOTFOUND = "InvalidParameter.DomainNotFound"
+//  INVALIDPARAMETER_PREFETCHORIGINLIMITAREAINVALID = "InvalidParameter.PrefetchOriginLimitAreaInvalid"
+//  OPERATIONDENIED_NOTINPREFETCHORIGINLIMITWHITELIST = "OperationDenied.NotInPrefetchOriginLimitWhiteList"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribePrefetchOriginLimitWithContext(ctx context.Context, request *DescribePrefetchOriginLimitRequest) (response *DescribePrefetchOriginLimitResponse, err error) {
+    if request == nil {
+        request = NewDescribePrefetchOriginLimitRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribePrefetchOriginLimit")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribePrefetchOriginLimit require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribePrefetchOriginLimitResponse()
     err = c.Send(request, response)
     return
 }
@@ -3925,6 +9492,7 @@ func (c *Client) DescribePrefetchTasksWithContext(ctx context.Context, request *
     if request == nil {
         request = NewDescribePrefetchTasksRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribePrefetchTasks")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribePrefetchTasks require credential")
@@ -3978,6 +9546,7 @@ func (c *Client) DescribePurgeTasksWithContext(ctx context.Context, request *Des
     if request == nil {
         request = NewDescribePurgeTasksRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribePurgeTasks")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribePurgeTasks require credential")
@@ -4027,6 +9596,7 @@ func (c *Client) DescribeRealtimeLogDeliveryTasksWithContext(ctx context.Context
     if request == nil {
         request = NewDescribeRealtimeLogDeliveryTasksRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeRealtimeLogDeliveryTasks")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeRealtimeLogDeliveryTasks require credential")
@@ -4059,7 +9629,9 @@ func NewDescribeRulesResponse() (response *DescribeRulesResponse) {
 }
 
 // DescribeRules
-// 查询规则引擎规则。
+// 本接口为旧版本查询规则引擎规则接口，EdgeOne 于 2025 年 1 月 21 日已对规则引擎相关接口全面升级，新版本查询七层加速规则接口详情请参考  [DescribeL7AccRules](https://cloud.tencent.com/document/product/1552/115820)。
+//
+// <p style="color: red;">注意：自 2025 年 1 月 21 日起，旧版接口停止更新迭代，后续新增功能将仅在新版接口中提供，旧版接口支持的原有能力将不受影响。为避免在使用旧版接口时出现数据字段冲突，建议您尽早迁移到新版规则引擎接口。</p>
 //
 // 可能返回的错误码:
 //  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
@@ -4070,7 +9642,9 @@ func (c *Client) DescribeRules(request *DescribeRulesRequest) (response *Describ
 }
 
 // DescribeRules
-// 查询规则引擎规则。
+// 本接口为旧版本查询规则引擎规则接口，EdgeOne 于 2025 年 1 月 21 日已对规则引擎相关接口全面升级，新版本查询七层加速规则接口详情请参考  [DescribeL7AccRules](https://cloud.tencent.com/document/product/1552/115820)。
+//
+// <p style="color: red;">注意：自 2025 年 1 月 21 日起，旧版接口停止更新迭代，后续新增功能将仅在新版接口中提供，旧版接口支持的原有能力将不受影响。为避免在使用旧版接口时出现数据字段冲突，建议您尽早迁移到新版规则引擎接口。</p>
 //
 // 可能返回的错误码:
 //  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
@@ -4080,6 +9654,7 @@ func (c *Client) DescribeRulesWithContext(ctx context.Context, request *Describe
     if request == nil {
         request = NewDescribeRulesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeRules")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeRules require credential")
@@ -4112,7 +9687,7 @@ func NewDescribeRulesSettingResponse() (response *DescribeRulesSettingResponse) 
 }
 
 // DescribeRulesSetting
-// 返回规则引擎可应用匹配请求的设置列表及其详细建议配置信息
+// 本接口为旧版，EdgeOne 已对规则引擎相关接口全面升级，详情请参考 [RuleEngineAction](https://cloud.tencent.com/document/product/1552/80721#RuleEngineAction)。
 //
 // 可能返回的错误码:
 //  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
@@ -4123,7 +9698,7 @@ func (c *Client) DescribeRulesSetting(request *DescribeRulesSettingRequest) (res
 }
 
 // DescribeRulesSetting
-// 返回规则引擎可应用匹配请求的设置列表及其详细建议配置信息
+// 本接口为旧版，EdgeOne 已对规则引擎相关接口全面升级，详情请参考 [RuleEngineAction](https://cloud.tencent.com/document/product/1552/80721#RuleEngineAction)。
 //
 // 可能返回的错误码:
 //  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
@@ -4133,6 +9708,7 @@ func (c *Client) DescribeRulesSettingWithContext(ctx context.Context, request *D
     if request == nil {
         request = NewDescribeRulesSettingRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeRulesSetting")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeRulesSetting require credential")
@@ -4141,6 +9717,276 @@ func (c *Client) DescribeRulesSettingWithContext(ctx context.Context, request *D
     request.SetContext(ctx)
     
     response = NewDescribeRulesSettingResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeSecurityAPIResourceRequest() (request *DescribeSecurityAPIResourceRequest) {
+    request = &DescribeSecurityAPIResourceRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeSecurityAPIResource")
+    
+    
+    return
+}
+
+func NewDescribeSecurityAPIResourceResponse() (response *DescribeSecurityAPIResourceResponse) {
+    response = &DescribeSecurityAPIResourceResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeSecurityAPIResource
+// 查询站点下的 API 资源。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeSecurityAPIResource(request *DescribeSecurityAPIResourceRequest) (response *DescribeSecurityAPIResourceResponse, err error) {
+    return c.DescribeSecurityAPIResourceWithContext(context.Background(), request)
+}
+
+// DescribeSecurityAPIResource
+// 查询站点下的 API 资源。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeSecurityAPIResourceWithContext(ctx context.Context, request *DescribeSecurityAPIResourceRequest) (response *DescribeSecurityAPIResourceResponse, err error) {
+    if request == nil {
+        request = NewDescribeSecurityAPIResourceRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeSecurityAPIResource")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeSecurityAPIResource require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeSecurityAPIResourceResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeSecurityAPIServiceRequest() (request *DescribeSecurityAPIServiceRequest) {
+    request = &DescribeSecurityAPIServiceRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeSecurityAPIService")
+    
+    
+    return
+}
+
+func NewDescribeSecurityAPIServiceResponse() (response *DescribeSecurityAPIServiceResponse) {
+    response = &DescribeSecurityAPIServiceResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeSecurityAPIService
+// 查询站点下的 API 服务。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeSecurityAPIService(request *DescribeSecurityAPIServiceRequest) (response *DescribeSecurityAPIServiceResponse, err error) {
+    return c.DescribeSecurityAPIServiceWithContext(context.Background(), request)
+}
+
+// DescribeSecurityAPIService
+// 查询站点下的 API 服务。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeSecurityAPIServiceWithContext(ctx context.Context, request *DescribeSecurityAPIServiceRequest) (response *DescribeSecurityAPIServiceResponse, err error) {
+    if request == nil {
+        request = NewDescribeSecurityAPIServiceRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeSecurityAPIService")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeSecurityAPIService require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeSecurityAPIServiceResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeSecurityClientAttesterRequest() (request *DescribeSecurityClientAttesterRequest) {
+    request = &DescribeSecurityClientAttesterRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeSecurityClientAttester")
+    
+    
+    return
+}
+
+func NewDescribeSecurityClientAttesterResponse() (response *DescribeSecurityClientAttesterResponse) {
+    response = &DescribeSecurityClientAttesterResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeSecurityClientAttester
+// 查询客户端认证选项配置。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeSecurityClientAttester(request *DescribeSecurityClientAttesterRequest) (response *DescribeSecurityClientAttesterResponse, err error) {
+    return c.DescribeSecurityClientAttesterWithContext(context.Background(), request)
+}
+
+// DescribeSecurityClientAttester
+// 查询客户端认证选项配置。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeSecurityClientAttesterWithContext(ctx context.Context, request *DescribeSecurityClientAttesterRequest) (response *DescribeSecurityClientAttesterResponse, err error) {
+    if request == nil {
+        request = NewDescribeSecurityClientAttesterRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeSecurityClientAttester")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeSecurityClientAttester require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeSecurityClientAttesterResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeSecurityIPGroupRequest() (request *DescribeSecurityIPGroupRequest) {
+    request = &DescribeSecurityIPGroupRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeSecurityIPGroup")
+    
+    
+    return
+}
+
+func NewDescribeSecurityIPGroupResponse() (response *DescribeSecurityIPGroupResponse) {
+    response = &DescribeSecurityIPGroupResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeSecurityIPGroup
+// 查询安全 IP 组的配置信息，包括安全 IP 组的 ID、名称和内容。本接口的查询结果中，每个 IP 组最多只返回 2000 个 IP / 网段。如果存在超过 2000 个 IP / 网段的超大 IP 组，请调用 DescribeSecurityIPGroupContent 进行分页查询。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeSecurityIPGroup(request *DescribeSecurityIPGroupRequest) (response *DescribeSecurityIPGroupResponse, err error) {
+    return c.DescribeSecurityIPGroupWithContext(context.Background(), request)
+}
+
+// DescribeSecurityIPGroup
+// 查询安全 IP 组的配置信息，包括安全 IP 组的 ID、名称和内容。本接口的查询结果中，每个 IP 组最多只返回 2000 个 IP / 网段。如果存在超过 2000 个 IP / 网段的超大 IP 组，请调用 DescribeSecurityIPGroupContent 进行分页查询。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeSecurityIPGroupWithContext(ctx context.Context, request *DescribeSecurityIPGroupRequest) (response *DescribeSecurityIPGroupResponse, err error) {
+    if request == nil {
+        request = NewDescribeSecurityIPGroupRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeSecurityIPGroup")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeSecurityIPGroup require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeSecurityIPGroupResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeSecurityIPGroupContentRequest() (request *DescribeSecurityIPGroupContentRequest) {
+    request = &DescribeSecurityIPGroupContentRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeSecurityIPGroupContent")
+    
+    
+    return
+}
+
+func NewDescribeSecurityIPGroupContentResponse() (response *DescribeSecurityIPGroupContentResponse) {
+    response = &DescribeSecurityIPGroupContentResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeSecurityIPGroupContent
+// 该接口用于分页查询指定 IP 组中的 IP 地址列表。当 IP 组中的 IP 地址数量超过 2000 个时，可以使用此接口进行分页查询，以获取完整的 IP 地址列表。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeSecurityIPGroupContent(request *DescribeSecurityIPGroupContentRequest) (response *DescribeSecurityIPGroupContentResponse, err error) {
+    return c.DescribeSecurityIPGroupContentWithContext(context.Background(), request)
+}
+
+// DescribeSecurityIPGroupContent
+// 该接口用于分页查询指定 IP 组中的 IP 地址列表。当 IP 组中的 IP 地址数量超过 2000 个时，可以使用此接口进行分页查询，以获取完整的 IP 地址列表。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeSecurityIPGroupContentWithContext(ctx context.Context, request *DescribeSecurityIPGroupContentRequest) (response *DescribeSecurityIPGroupContentResponse, err error) {
+    if request == nil {
+        request = NewDescribeSecurityIPGroupContentRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeSecurityIPGroupContent")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeSecurityIPGroupContent require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeSecurityIPGroupContentResponse()
     err = c.Send(request, response)
     return
 }
@@ -4165,6 +10011,12 @@ func NewDescribeSecurityIPGroupInfoResponse() (response *DescribeSecurityIPGroup
 }
 
 // DescribeSecurityIPGroupInfo
+// 接口已废弃，将于 2024 年 6 月 30 日停止服务。请使用 [查询安全 IP 组
+//
+// ](https://cloud.tencent.com/document/product/1552/105866) 接口。
+//
+// 
+//
 // 查询 IP 组的配置信息，包括 IP 组名称、 IP 组内容、 IP 组归属站点。
 //
 // 可能返回的错误码:
@@ -4176,6 +10028,12 @@ func (c *Client) DescribeSecurityIPGroupInfo(request *DescribeSecurityIPGroupInf
 }
 
 // DescribeSecurityIPGroupInfo
+// 接口已废弃，将于 2024 年 6 月 30 日停止服务。请使用 [查询安全 IP 组
+//
+// ](https://cloud.tencent.com/document/product/1552/105866) 接口。
+//
+// 
+//
 // 查询 IP 组的配置信息，包括 IP 组名称、 IP 组内容、 IP 组归属站点。
 //
 // 可能返回的错误码:
@@ -4186,6 +10044,7 @@ func (c *Client) DescribeSecurityIPGroupInfoWithContext(ctx context.Context, req
     if request == nil {
         request = NewDescribeSecurityIPGroupInfoRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeSecurityIPGroupInfo")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeSecurityIPGroupInfo require credential")
@@ -4194,6 +10053,118 @@ func (c *Client) DescribeSecurityIPGroupInfoWithContext(ctx context.Context, req
     request.SetContext(ctx)
     
     response = NewDescribeSecurityIPGroupInfoResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeSecurityJSInjectionRuleRequest() (request *DescribeSecurityJSInjectionRuleRequest) {
+    request = &DescribeSecurityJSInjectionRuleRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeSecurityJSInjectionRule")
+    
+    
+    return
+}
+
+func NewDescribeSecurityJSInjectionRuleResponse() (response *DescribeSecurityJSInjectionRuleResponse) {
+    response = &DescribeSecurityJSInjectionRuleResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeSecurityJSInjectionRule
+// 查询 JavaScript 注入规则。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeSecurityJSInjectionRule(request *DescribeSecurityJSInjectionRuleRequest) (response *DescribeSecurityJSInjectionRuleResponse, err error) {
+    return c.DescribeSecurityJSInjectionRuleWithContext(context.Background(), request)
+}
+
+// DescribeSecurityJSInjectionRule
+// 查询 JavaScript 注入规则。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeSecurityJSInjectionRuleWithContext(ctx context.Context, request *DescribeSecurityJSInjectionRuleRequest) (response *DescribeSecurityJSInjectionRuleResponse, err error) {
+    if request == nil {
+        request = NewDescribeSecurityJSInjectionRuleRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeSecurityJSInjectionRule")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeSecurityJSInjectionRule require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeSecurityJSInjectionRuleResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeSecurityPolicyRequest() (request *DescribeSecurityPolicyRequest) {
+    request = &DescribeSecurityPolicyRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeSecurityPolicy")
+    
+    
+    return
+}
+
+func NewDescribeSecurityPolicyResponse() (response *DescribeSecurityPolicyResponse) {
+    response = &DescribeSecurityPolicyResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeSecurityPolicy
+// 查询安全防护配置详情。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INVALIDPARAMETER_SECURITY = "InvalidParameter.Security"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeSecurityPolicy(request *DescribeSecurityPolicyRequest) (response *DescribeSecurityPolicyResponse, err error) {
+    return c.DescribeSecurityPolicyWithContext(context.Background(), request)
+}
+
+// DescribeSecurityPolicy
+// 查询安全防护配置详情。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INVALIDPARAMETER_SECURITY = "InvalidParameter.Security"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeSecurityPolicyWithContext(ctx context.Context, request *DescribeSecurityPolicyRequest) (response *DescribeSecurityPolicyResponse, err error) {
+    if request == nil {
+        request = NewDescribeSecurityPolicyRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeSecurityPolicy")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeSecurityPolicy require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeSecurityPolicyResponse()
     err = c.Send(request, response)
     return
 }
@@ -4241,6 +10212,7 @@ func (c *Client) DescribeSecurityTemplateBindingsWithContext(ctx context.Context
     if request == nil {
         request = NewDescribeSecurityTemplateBindingsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeSecurityTemplateBindings")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeSecurityTemplateBindings require credential")
@@ -4249,6 +10221,56 @@ func (c *Client) DescribeSecurityTemplateBindingsWithContext(ctx context.Context
     request.SetContext(ctx)
     
     response = NewDescribeSecurityTemplateBindingsResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeSharedCNAMERequest() (request *DescribeSharedCNAMERequest) {
+    request = &DescribeSharedCNAMERequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeSharedCNAME")
+    
+    
+    return
+}
+
+func NewDescribeSharedCNAMEResponse() (response *DescribeSharedCNAMEResponse) {
+    response = &DescribeSharedCNAMEResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeSharedCNAME
+// 查询共享CNAME列表，支持模糊搜索、分页、排序等。
+//
+// 可能返回的错误码:
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeSharedCNAME(request *DescribeSharedCNAMERequest) (response *DescribeSharedCNAMEResponse, err error) {
+    return c.DescribeSharedCNAMEWithContext(context.Background(), request)
+}
+
+// DescribeSharedCNAME
+// 查询共享CNAME列表，支持模糊搜索、分页、排序等。
+//
+// 可能返回的错误码:
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeSharedCNAMEWithContext(ctx context.Context, request *DescribeSharedCNAMERequest) (response *DescribeSharedCNAMEResponse, err error) {
+    if request == nil {
+        request = NewDescribeSharedCNAMERequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeSharedCNAME")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeSharedCNAME require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeSharedCNAMEResponse()
     err = c.Send(request, response)
     return
 }
@@ -4273,7 +10295,7 @@ func NewDescribeTimingL4DataResponse() (response *DescribeTimingL4DataResponse) 
 }
 
 // DescribeTimingL4Data
-// 本接口（DescribeTimingL4Data）用于查询四层时序流量数据列表。
+// <p>本接口（<code>DescribeTimingL4Data</code>）用于查询四层时序数据列表。</p>
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -4288,7 +10310,7 @@ func (c *Client) DescribeTimingL4Data(request *DescribeTimingL4DataRequest) (res
 }
 
 // DescribeTimingL4Data
-// 本接口（DescribeTimingL4Data）用于查询四层时序流量数据列表。
+// <p>本接口（<code>DescribeTimingL4Data</code>）用于查询四层时序数据列表。</p>
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -4302,6 +10324,7 @@ func (c *Client) DescribeTimingL4DataWithContext(ctx context.Context, request *D
     if request == nil {
         request = NewDescribeTimingL4DataRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeTimingL4Data")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeTimingL4Data require credential")
@@ -4334,7 +10357,13 @@ func NewDescribeTimingL7AnalysisDataResponse() (response *DescribeTimingL7Analys
 }
 
 // DescribeTimingL7AnalysisData
-// 本接口（DescribeTimingL7AnalysisData）查询七层数据分析类时序数据。
+// 本接口用于查询七层域名业务的时序数据。
+//
+// 注意：
+//
+// 1. 本接口查询数据有 10 分钟左右延迟，建议拉取当前时间 10 分钟以前的数据。
+//
+// 2. 本接口默认返回防护后的流量请求数据，用户可在 `Filters.mitigatedByWebSecurity` 中自定义查询已防护缓释的数据。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -4352,7 +10381,13 @@ func (c *Client) DescribeTimingL7AnalysisData(request *DescribeTimingL7AnalysisD
 }
 
 // DescribeTimingL7AnalysisData
-// 本接口（DescribeTimingL7AnalysisData）查询七层数据分析类时序数据。
+// 本接口用于查询七层域名业务的时序数据。
+//
+// 注意：
+//
+// 1. 本接口查询数据有 10 分钟左右延迟，建议拉取当前时间 10 分钟以前的数据。
+//
+// 2. 本接口默认返回防护后的流量请求数据，用户可在 `Filters.mitigatedByWebSecurity` 中自定义查询已防护缓释的数据。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -4369,6 +10404,7 @@ func (c *Client) DescribeTimingL7AnalysisDataWithContext(ctx context.Context, re
     if request == nil {
         request = NewDescribeTimingL7AnalysisDataRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeTimingL7AnalysisData")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeTimingL7AnalysisData require credential")
@@ -4401,7 +10437,7 @@ func NewDescribeTimingL7CacheDataResponse() (response *DescribeTimingL7CacheData
 }
 
 // DescribeTimingL7CacheData
-// 本接口（DescribeTimingL7CacheData）用于查询七层缓存分析时序类流量数据。
+// 本接口用于查询七层缓存分析时序类流量数据。此接口待废弃，请使用 <a href="https://cloud.tencent.com/document/product/1552/80648">DescribeTimingL7AnalysisData</a> 接口。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -4413,7 +10449,7 @@ func (c *Client) DescribeTimingL7CacheData(request *DescribeTimingL7CacheDataReq
 }
 
 // DescribeTimingL7CacheData
-// 本接口（DescribeTimingL7CacheData）用于查询七层缓存分析时序类流量数据。
+// 本接口用于查询七层缓存分析时序类流量数据。此接口待废弃，请使用 <a href="https://cloud.tencent.com/document/product/1552/80648">DescribeTimingL7AnalysisData</a> 接口。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -4424,6 +10460,7 @@ func (c *Client) DescribeTimingL7CacheDataWithContext(ctx context.Context, reque
     if request == nil {
         request = NewDescribeTimingL7CacheDataRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeTimingL7CacheData")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeTimingL7CacheData require credential")
@@ -4432,6 +10469,68 @@ func (c *Client) DescribeTimingL7CacheDataWithContext(ctx context.Context, reque
     request.SetContext(ctx)
     
     response = NewDescribeTimingL7CacheDataResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeTimingL7OriginPullDataRequest() (request *DescribeTimingL7OriginPullDataRequest) {
+    request = &DescribeTimingL7OriginPullDataRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeTimingL7OriginPullData")
+    
+    
+    return
+}
+
+func NewDescribeTimingL7OriginPullDataResponse() (response *DescribeTimingL7OriginPullDataResponse) {
+    response = &DescribeTimingL7OriginPullDataResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeTimingL7OriginPullData
+// 本接口用以查询七层域名业务的回源时序数据。
+//
+// 您可以选择通过指定查询维度 <code>DimensionName</code> 进行分组查询，返回多组时序数据，详细指引与使用限制请参考 [如何使用 API 实现单次调用中的分组查询](https://cloud.tencent.com/document/product/1552/127501)。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER_ACTIONINPROGRESS = "InvalidParameter.ActionInProgress"
+//  INVALIDPARAMETERVALUE_FILTERSMUSTINCLUDEDIMENSIONNAME = "InvalidParameterValue.FiltersMustIncludeDimensionName"
+//  LIMITEXCEEDED_QUERYTIMELIMITEXCEEDED = "LimitExceeded.QueryTimeLimitExceeded"
+//  LIMITEXCEEDED_TIMINGDATAITEMLIMITEXCEEDED = "LimitExceeded.TimingDataItemLimitExceeded"
+//  OPERATIONDENIED_ORIGINPULLDATANOTSUPPORTED = "OperationDenied.OriginPullDataNotSupported"
+func (c *Client) DescribeTimingL7OriginPullData(request *DescribeTimingL7OriginPullDataRequest) (response *DescribeTimingL7OriginPullDataResponse, err error) {
+    return c.DescribeTimingL7OriginPullDataWithContext(context.Background(), request)
+}
+
+// DescribeTimingL7OriginPullData
+// 本接口用以查询七层域名业务的回源时序数据。
+//
+// 您可以选择通过指定查询维度 <code>DimensionName</code> 进行分组查询，返回多组时序数据，详细指引与使用限制请参考 [如何使用 API 实现单次调用中的分组查询](https://cloud.tencent.com/document/product/1552/127501)。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER_ACTIONINPROGRESS = "InvalidParameter.ActionInProgress"
+//  INVALIDPARAMETERVALUE_FILTERSMUSTINCLUDEDIMENSIONNAME = "InvalidParameterValue.FiltersMustIncludeDimensionName"
+//  LIMITEXCEEDED_QUERYTIMELIMITEXCEEDED = "LimitExceeded.QueryTimeLimitExceeded"
+//  LIMITEXCEEDED_TIMINGDATAITEMLIMITEXCEEDED = "LimitExceeded.TimingDataItemLimitExceeded"
+//  OPERATIONDENIED_ORIGINPULLDATANOTSUPPORTED = "OperationDenied.OriginPullDataNotSupported"
+func (c *Client) DescribeTimingL7OriginPullDataWithContext(ctx context.Context, request *DescribeTimingL7OriginPullDataRequest) (response *DescribeTimingL7OriginPullDataResponse, err error) {
+    if request == nil {
+        request = NewDescribeTimingL7OriginPullDataRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeTimingL7OriginPullData")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeTimingL7OriginPullData require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeTimingL7OriginPullDataResponse()
     err = c.Send(request, response)
     return
 }
@@ -4456,7 +10555,13 @@ func NewDescribeTopL7AnalysisDataResponse() (response *DescribeTopL7AnalysisData
 }
 
 // DescribeTopL7AnalysisData
-// 本接口（DescribeTopL7AnalysisData）用于查询七层流量前topN的数据。
+// 本接口用于查询七层域名业务按照指定维度的 topN 数据。
+//
+// 注意：
+//
+// 1. 本接口查询数据有 10 分钟左右延迟，建议拉取当前时间 10 分钟以前的数据。
+//
+// 2. 本接口默认返回防护后的流量请求数据，用户可在 `Filters.mitigatedByWebSecurity` 中自定义查询已防护缓释的数据。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -4475,7 +10580,13 @@ func (c *Client) DescribeTopL7AnalysisData(request *DescribeTopL7AnalysisDataReq
 }
 
 // DescribeTopL7AnalysisData
-// 本接口（DescribeTopL7AnalysisData）用于查询七层流量前topN的数据。
+// 本接口用于查询七层域名业务按照指定维度的 topN 数据。
+//
+// 注意：
+//
+// 1. 本接口查询数据有 10 分钟左右延迟，建议拉取当前时间 10 分钟以前的数据。
+//
+// 2. 本接口默认返回防护后的流量请求数据，用户可在 `Filters.mitigatedByWebSecurity` 中自定义查询已防护缓释的数据。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -4493,6 +10604,7 @@ func (c *Client) DescribeTopL7AnalysisDataWithContext(ctx context.Context, reque
     if request == nil {
         request = NewDescribeTopL7AnalysisDataRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeTopL7AnalysisData")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeTopL7AnalysisData require credential")
@@ -4525,7 +10637,7 @@ func NewDescribeTopL7CacheDataResponse() (response *DescribeTopL7CacheDataRespon
 }
 
 // DescribeTopL7CacheData
-// 本接口（DescribeTopL7CacheData）用于查询七层缓存分析topN流量数据。
+// 本接口用于查询七层缓存分析 topN 数据。此接口待废弃，请使用 <a href="https://cloud.tencent.com/document/product/1552/80646"> DescribeTopL7AnalysisData</a> 接口。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -4537,7 +10649,7 @@ func (c *Client) DescribeTopL7CacheData(request *DescribeTopL7CacheDataRequest) 
 }
 
 // DescribeTopL7CacheData
-// 本接口（DescribeTopL7CacheData）用于查询七层缓存分析topN流量数据。
+// 本接口用于查询七层缓存分析 topN 数据。此接口待废弃，请使用 <a href="https://cloud.tencent.com/document/product/1552/80646"> DescribeTopL7AnalysisData</a> 接口。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -4548,6 +10660,7 @@ func (c *Client) DescribeTopL7CacheDataWithContext(ctx context.Context, request 
     if request == nil {
         request = NewDescribeTopL7CacheDataRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeTopL7CacheData")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeTopL7CacheData require credential")
@@ -4556,6 +10669,174 @@ func (c *Client) DescribeTopL7CacheDataWithContext(ctx context.Context, request 
     request.SetContext(ctx)
     
     response = NewDescribeTopL7CacheDataResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeWebSecurityTemplateRequest() (request *DescribeWebSecurityTemplateRequest) {
+    request = &DescribeWebSecurityTemplateRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeWebSecurityTemplate")
+    
+    
+    return
+}
+
+func NewDescribeWebSecurityTemplateResponse() (response *DescribeWebSecurityTemplateResponse) {
+    response = &DescribeWebSecurityTemplateResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeWebSecurityTemplate
+// 查询安全策略配置模板详情
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  LIMITEXCEEDED_QUERYTIMELIMITEXCEEDED = "LimitExceeded.QueryTimeLimitExceeded"
+//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) DescribeWebSecurityTemplate(request *DescribeWebSecurityTemplateRequest) (response *DescribeWebSecurityTemplateResponse, err error) {
+    return c.DescribeWebSecurityTemplateWithContext(context.Background(), request)
+}
+
+// DescribeWebSecurityTemplate
+// 查询安全策略配置模板详情
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  LIMITEXCEEDED_QUERYTIMELIMITEXCEEDED = "LimitExceeded.QueryTimeLimitExceeded"
+//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) DescribeWebSecurityTemplateWithContext(ctx context.Context, request *DescribeWebSecurityTemplateRequest) (response *DescribeWebSecurityTemplateResponse, err error) {
+    if request == nil {
+        request = NewDescribeWebSecurityTemplateRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeWebSecurityTemplate")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeWebSecurityTemplate require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeWebSecurityTemplateResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeWebSecurityTemplatesRequest() (request *DescribeWebSecurityTemplatesRequest) {
+    request = &DescribeWebSecurityTemplatesRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeWebSecurityTemplates")
+    
+    
+    return
+}
+
+func NewDescribeWebSecurityTemplatesResponse() (response *DescribeWebSecurityTemplatesResponse) {
+    response = &DescribeWebSecurityTemplatesResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeWebSecurityTemplates
+// 查询安全策略配置模板列表
+//
+// 可能返回的错误码:
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeWebSecurityTemplates(request *DescribeWebSecurityTemplatesRequest) (response *DescribeWebSecurityTemplatesResponse, err error) {
+    return c.DescribeWebSecurityTemplatesWithContext(context.Background(), request)
+}
+
+// DescribeWebSecurityTemplates
+// 查询安全策略配置模板列表
+//
+// 可能返回的错误码:
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeWebSecurityTemplatesWithContext(ctx context.Context, request *DescribeWebSecurityTemplatesRequest) (response *DescribeWebSecurityTemplatesResponse, err error) {
+    if request == nil {
+        request = NewDescribeWebSecurityTemplatesRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeWebSecurityTemplates")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeWebSecurityTemplates require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeWebSecurityTemplatesResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeZoneConfigImportResultRequest() (request *DescribeZoneConfigImportResultRequest) {
+    request = &DescribeZoneConfigImportResultRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DescribeZoneConfigImportResult")
+    
+    
+    return
+}
+
+func NewDescribeZoneConfigImportResultResponse() (response *DescribeZoneConfigImportResultResponse) {
+    response = &DescribeZoneConfigImportResultResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeZoneConfigImportResult
+// 查询站点配置项导入结果接口，本接口用于站点配置导入接口（ImportZoneConfig）的结果查询。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeZoneConfigImportResult(request *DescribeZoneConfigImportResultRequest) (response *DescribeZoneConfigImportResultResponse, err error) {
+    return c.DescribeZoneConfigImportResultWithContext(context.Background(), request)
+}
+
+// DescribeZoneConfigImportResult
+// 查询站点配置项导入结果接口，本接口用于站点配置导入接口（ImportZoneConfig）的结果查询。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) DescribeZoneConfigImportResultWithContext(ctx context.Context, request *DescribeZoneConfigImportResultRequest) (response *DescribeZoneConfigImportResultResponse, err error) {
+    if request == nil {
+        request = NewDescribeZoneConfigImportResultRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeZoneConfigImportResult")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeZoneConfigImportResult require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeZoneConfigImportResultResponse()
     err = c.Send(request, response)
     return
 }
@@ -4580,7 +10861,7 @@ func NewDescribeZoneSettingResponse() (response *DescribeZoneSettingResponse) {
 }
 
 // DescribeZoneSetting
-// 用于查询站点的所有配置信息。
+// 本接口为旧版，EdgeOne 已对规则引擎相关接口全面升级，详情请参考 [DescribeL7AccSetting](https://cloud.tencent.com/document/product/1552/115819)。
 //
 // 可能返回的错误码:
 //  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
@@ -4596,7 +10877,7 @@ func (c *Client) DescribeZoneSetting(request *DescribeZoneSettingRequest) (respo
 }
 
 // DescribeZoneSetting
-// 用于查询站点的所有配置信息。
+// 本接口为旧版，EdgeOne 已对规则引擎相关接口全面升级，详情请参考 [DescribeL7AccSetting](https://cloud.tencent.com/document/product/1552/115819)。
 //
 // 可能返回的错误码:
 //  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
@@ -4611,6 +10892,7 @@ func (c *Client) DescribeZoneSettingWithContext(ctx context.Context, request *De
     if request == nil {
         request = NewDescribeZoneSettingRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeZoneSetting")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeZoneSetting require credential")
@@ -4668,6 +10950,7 @@ func (c *Client) DescribeZonesWithContext(ctx context.Context, request *Describe
     if request == nil {
         request = NewDescribeZonesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DescribeZones")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeZones require credential")
@@ -4747,6 +11030,7 @@ func (c *Client) DestroyPlanWithContext(ctx context.Context, request *DestroyPla
     if request == nil {
         request = NewDestroyPlanRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DestroyPlan")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DestroyPlan require credential")
@@ -4755,6 +11039,62 @@ func (c *Client) DestroyPlanWithContext(ctx context.Context, request *DestroyPla
     request.SetContext(ctx)
     
     response = NewDestroyPlanResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDisableOriginACLRequest() (request *DisableOriginACLRequest) {
+    request = &DisableOriginACLRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DisableOriginACL")
+    
+    
+    return
+}
+
+func NewDisableOriginACLResponse() (response *DisableOriginACLResponse) {
+    response = &DisableOriginACLResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DisableOriginACL
+// 本接口用于关闭站点的源站防护功能。停用后，相关资源不再仅使用「源站防护」提供的回源 IP 网段请求您的源站，同时停止发送回源 IP 网段更新通知。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR = "InternalError"
+//  OPERATIONDENIED = "OperationDenied"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) DisableOriginACL(request *DisableOriginACLRequest) (response *DisableOriginACLResponse, err error) {
+    return c.DisableOriginACLWithContext(context.Background(), request)
+}
+
+// DisableOriginACL
+// 本接口用于关闭站点的源站防护功能。停用后，相关资源不再仅使用「源站防护」提供的回源 IP 网段请求您的源站，同时停止发送回源 IP 网段更新通知。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR = "InternalError"
+//  OPERATIONDENIED = "OperationDenied"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) DisableOriginACLWithContext(ctx context.Context, request *DisableOriginACLRequest) (response *DisableOriginACLResponse, err error) {
+    if request == nil {
+        request = NewDisableOriginACLRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DisableOriginACL")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DisableOriginACL require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDisableOriginACLResponse()
     err = c.Send(request, response)
     return
 }
@@ -4796,6 +11136,7 @@ func (c *Client) DownloadL4LogsWithContext(ctx context.Context, request *Downloa
     if request == nil {
         request = NewDownloadL4LogsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DownloadL4Logs")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DownloadL4Logs require credential")
@@ -4849,6 +11190,7 @@ func (c *Client) DownloadL7LogsWithContext(ctx context.Context, request *Downloa
     if request == nil {
         request = NewDownloadL7LogsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DownloadL7Logs")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DownloadL7Logs require credential")
@@ -4857,6 +11199,490 @@ func (c *Client) DownloadL7LogsWithContext(ctx context.Context, request *Downloa
     request.SetContext(ctx)
     
     response = NewDownloadL7LogsResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDummyParseZoneFullConfigRequest() (request *DummyParseZoneFullConfigRequest) {
+    request = &DummyParseZoneFullConfigRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "DummyParseZoneFullConfig")
+    
+    
+    return
+}
+
+func NewDummyParseZoneFullConfigResponse() (response *DummyParseZoneFullConfigResponse) {
+    response = &DummyParseZoneFullConfigResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DummyParseZoneFullConfig
+// 本接口用于定义站点完整配置的结构，仅供查阅。注意：调用本接口不返回实际数据。
+//
+// 可能返回的错误码:
+//  OPERATIONDENIED = "OperationDenied"
+//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) DummyParseZoneFullConfig(request *DummyParseZoneFullConfigRequest) (response *DummyParseZoneFullConfigResponse, err error) {
+    return c.DummyParseZoneFullConfigWithContext(context.Background(), request)
+}
+
+// DummyParseZoneFullConfig
+// 本接口用于定义站点完整配置的结构，仅供查阅。注意：调用本接口不返回实际数据。
+//
+// 可能返回的错误码:
+//  OPERATIONDENIED = "OperationDenied"
+//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) DummyParseZoneFullConfigWithContext(ctx context.Context, request *DummyParseZoneFullConfigRequest) (response *DummyParseZoneFullConfigResponse, err error) {
+    if request == nil {
+        request = NewDummyParseZoneFullConfigRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "DummyParseZoneFullConfig")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DummyParseZoneFullConfig require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDummyParseZoneFullConfigResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewEdgeKVDeleteRequest() (request *EdgeKVDeleteRequest) {
+    request = &EdgeKVDeleteRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "EdgeKVDelete")
+    
+    
+    return
+}
+
+func NewEdgeKVDeleteResponse() (response *EdgeKVDeleteResponse) {
+    response = &EdgeKVDeleteResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// EdgeKVDelete
+// 本接口用于删除指定命名空间中的一个或多个键值对数据，支持批量删除。删除后数据不可恢复。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_KEYSTOOMANY = "InvalidParameter.KeysTooMany"
+//  RESOURCEUNAVAILABLE_NAMESPACENOTFOUND = "ResourceUnavailable.NamespaceNotFound"
+func (c *Client) EdgeKVDelete(request *EdgeKVDeleteRequest) (response *EdgeKVDeleteResponse, err error) {
+    return c.EdgeKVDeleteWithContext(context.Background(), request)
+}
+
+// EdgeKVDelete
+// 本接口用于删除指定命名空间中的一个或多个键值对数据，支持批量删除。删除后数据不可恢复。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_KEYSTOOMANY = "InvalidParameter.KeysTooMany"
+//  RESOURCEUNAVAILABLE_NAMESPACENOTFOUND = "ResourceUnavailable.NamespaceNotFound"
+func (c *Client) EdgeKVDeleteWithContext(ctx context.Context, request *EdgeKVDeleteRequest) (response *EdgeKVDeleteResponse, err error) {
+    if request == nil {
+        request = NewEdgeKVDeleteRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "EdgeKVDelete")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("EdgeKVDelete require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewEdgeKVDeleteResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewEdgeKVGetRequest() (request *EdgeKVGetRequest) {
+    request = &EdgeKVGetRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "EdgeKVGet")
+    
+    
+    return
+}
+
+func NewEdgeKVGetResponse() (response *EdgeKVGetResponse) {
+    response = &EdgeKVGetResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// EdgeKVGet
+// 本接口用于从指定命名空间中批量读取键的值，支持一次查询最多 20 个键。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_KEYSTOOMANY = "InvalidParameter.KeysTooMany"
+//  RESOURCEUNAVAILABLE_NAMESPACENOTFOUND = "ResourceUnavailable.NamespaceNotFound"
+func (c *Client) EdgeKVGet(request *EdgeKVGetRequest) (response *EdgeKVGetResponse, err error) {
+    return c.EdgeKVGetWithContext(context.Background(), request)
+}
+
+// EdgeKVGet
+// 本接口用于从指定命名空间中批量读取键的值，支持一次查询最多 20 个键。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_KEYSTOOMANY = "InvalidParameter.KeysTooMany"
+//  RESOURCEUNAVAILABLE_NAMESPACENOTFOUND = "ResourceUnavailable.NamespaceNotFound"
+func (c *Client) EdgeKVGetWithContext(ctx context.Context, request *EdgeKVGetRequest) (response *EdgeKVGetResponse, err error) {
+    if request == nil {
+        request = NewEdgeKVGetRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "EdgeKVGet")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("EdgeKVGet require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewEdgeKVGetResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewEdgeKVListRequest() (request *EdgeKVListRequest) {
+    request = &EdgeKVListRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "EdgeKVList")
+    
+    
+    return
+}
+
+func NewEdgeKVListResponse() (response *EdgeKVListResponse) {
+    response = &EdgeKVListResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// EdgeKVList
+// 本接口用于列出指定命名空间下的所有键名，支持前缀过滤。通过 Cursor 实现游标遍历，返回下一个游标用于继续查询。适用于遍历命名空间中的所有键。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  RESOURCEUNAVAILABLE_NAMESPACENOTFOUND = "ResourceUnavailable.NamespaceNotFound"
+func (c *Client) EdgeKVList(request *EdgeKVListRequest) (response *EdgeKVListResponse, err error) {
+    return c.EdgeKVListWithContext(context.Background(), request)
+}
+
+// EdgeKVList
+// 本接口用于列出指定命名空间下的所有键名，支持前缀过滤。通过 Cursor 实现游标遍历，返回下一个游标用于继续查询。适用于遍历命名空间中的所有键。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  RESOURCEUNAVAILABLE_NAMESPACENOTFOUND = "ResourceUnavailable.NamespaceNotFound"
+func (c *Client) EdgeKVListWithContext(ctx context.Context, request *EdgeKVListRequest) (response *EdgeKVListResponse, err error) {
+    if request == nil {
+        request = NewEdgeKVListRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "EdgeKVList")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("EdgeKVList require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewEdgeKVListResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewEdgeKVPutRequest() (request *EdgeKVPutRequest) {
+    request = &EdgeKVPutRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "EdgeKVPut")
+    
+    
+    return
+}
+
+func NewEdgeKVPutResponse() (response *EdgeKVPutResponse) {
+    response = &EdgeKVPutResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// EdgeKVPut
+// 本接口用于向指定命名空间写入键值对数据，支持设置过期时间。若键已存在则覆盖原有值，若不存在则创建新键值对。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  RESOURCEUNAVAILABLE_NAMESPACENOTFOUND = "ResourceUnavailable.NamespaceNotFound"
+func (c *Client) EdgeKVPut(request *EdgeKVPutRequest) (response *EdgeKVPutResponse, err error) {
+    return c.EdgeKVPutWithContext(context.Background(), request)
+}
+
+// EdgeKVPut
+// 本接口用于向指定命名空间写入键值对数据，支持设置过期时间。若键已存在则覆盖原有值，若不存在则创建新键值对。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  RESOURCEUNAVAILABLE_NAMESPACENOTFOUND = "ResourceUnavailable.NamespaceNotFound"
+func (c *Client) EdgeKVPutWithContext(ctx context.Context, request *EdgeKVPutRequest) (response *EdgeKVPutResponse, err error) {
+    if request == nil {
+        request = NewEdgeKVPutRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "EdgeKVPut")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("EdgeKVPut require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewEdgeKVPutResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewEnableOriginACLRequest() (request *EnableOriginACLRequest) {
+    request = &EnableOriginACLRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "EnableOriginACL")
+    
+    
+    return
+}
+
+func NewEnableOriginACLResponse() (response *EnableOriginACLResponse) {
+    response = &EnableOriginACLResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// EnableOriginACL
+// 本接口用于站点首次开启源站防护，启用后 EdgeOne 将会使用特定的回源 IP 网段为七层加速域名/四层代理实例回源。单次支持提交的七层加速域名的数量最大为 200，四层代理实例的数量最大为 100，支持七层加速域名/四层代理实例混合提交，总实例个数最大为 200。如需要启用超过 200 个资源，可先通过指定资源的方式以最大数量启用，剩余资源通过 ModifyOriginACL 接口启用。后续新增七层加速域名/四层代理实例均请通过 ModifyOriginACL 接口配置。同时开启的时候对开白的账户支持选择其他回源 IP 网段版本，例如精简版，来达到使用更少的 IP 网段回源效果。
+//
+// 
+//
+// 注意：
+//
+// - 调用本接口视为同意 [源站防护启用特别约定](https://cloud.tencent.com/document/product/1552/120141)；
+//
+// - 回源 IP 网段会不定期变更，EdgeOne 将在回源 IP 网段变更前 14 天、前 7 天、前 3 天和前 1 天分别通过站内信、短信、邮件等一种或多种方式发起通知，为了能正常收到回源 IP 网段的变更通知，请务必确保您在 [腾讯云消息中心控制台](https://console.cloud.tencent.com/message)内，已勾选边缘安全加速平台 EO 的产品服务相关消息通知，并配置正确的消息接收人。配置方式请参考 [消息订阅管理](https://cloud.tencent.com/document/product/567/43476)。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_INVALIDDOMAINS = "InvalidParameter.InvalidDomains"
+//  INVALIDPARAMETER_INVALIDPROXIES = "InvalidParameter.InvalidProxies"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTHOSTORIGINWHITELIST = "InvalidParameter.ShieldNotSupportHostOriginWhitelist"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_UNSUPPORTEDPLAN = "OperationDenied.UnsupportedPlan"
+//  OPERATIONDENIED_VERSIONCONTROLISGRAYING = "OperationDenied.VersionControlIsGraying"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) EnableOriginACL(request *EnableOriginACLRequest) (response *EnableOriginACLResponse, err error) {
+    return c.EnableOriginACLWithContext(context.Background(), request)
+}
+
+// EnableOriginACL
+// 本接口用于站点首次开启源站防护，启用后 EdgeOne 将会使用特定的回源 IP 网段为七层加速域名/四层代理实例回源。单次支持提交的七层加速域名的数量最大为 200，四层代理实例的数量最大为 100，支持七层加速域名/四层代理实例混合提交，总实例个数最大为 200。如需要启用超过 200 个资源，可先通过指定资源的方式以最大数量启用，剩余资源通过 ModifyOriginACL 接口启用。后续新增七层加速域名/四层代理实例均请通过 ModifyOriginACL 接口配置。同时开启的时候对开白的账户支持选择其他回源 IP 网段版本，例如精简版，来达到使用更少的 IP 网段回源效果。
+//
+// 
+//
+// 注意：
+//
+// - 调用本接口视为同意 [源站防护启用特别约定](https://cloud.tencent.com/document/product/1552/120141)；
+//
+// - 回源 IP 网段会不定期变更，EdgeOne 将在回源 IP 网段变更前 14 天、前 7 天、前 3 天和前 1 天分别通过站内信、短信、邮件等一种或多种方式发起通知，为了能正常收到回源 IP 网段的变更通知，请务必确保您在 [腾讯云消息中心控制台](https://console.cloud.tencent.com/message)内，已勾选边缘安全加速平台 EO 的产品服务相关消息通知，并配置正确的消息接收人。配置方式请参考 [消息订阅管理](https://cloud.tencent.com/document/product/567/43476)。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_INVALIDDOMAINS = "InvalidParameter.InvalidDomains"
+//  INVALIDPARAMETER_INVALIDPROXIES = "InvalidParameter.InvalidProxies"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTHOSTORIGINWHITELIST = "InvalidParameter.ShieldNotSupportHostOriginWhitelist"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_UNSUPPORTEDPLAN = "OperationDenied.UnsupportedPlan"
+//  OPERATIONDENIED_VERSIONCONTROLISGRAYING = "OperationDenied.VersionControlIsGraying"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) EnableOriginACLWithContext(ctx context.Context, request *EnableOriginACLRequest) (response *EnableOriginACLResponse, err error) {
+    if request == nil {
+        request = NewEnableOriginACLRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "EnableOriginACL")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("EnableOriginACL require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewEnableOriginACLResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewExportZoneConfigRequest() (request *ExportZoneConfigRequest) {
+    request = &ExportZoneConfigRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ExportZoneConfig")
+    
+    
+    return
+}
+
+func NewExportZoneConfigResponse() (response *ExportZoneConfigResponse) {
+    response = &ExportZoneConfigResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ExportZoneConfig
+// 导出站点配置接口，本接口支持用户根据需要的配置项进行配置导出，导出的配置用于导入站点配置接口（ImportZoneConfig）进行配置导入。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_INVALIDDOMAINS = "InvalidParameter.InvalidDomains"
+//  INVALIDPARAMETER_INVALIDPROXIES = "InvalidParameter.InvalidProxies"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTHOSTORIGINWHITELIST = "InvalidParameter.ShieldNotSupportHostOriginWhitelist"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_UNSUPPORTEDPLAN = "OperationDenied.UnsupportedPlan"
+//  OPERATIONDENIED_VERSIONCONTROLISGRAYING = "OperationDenied.VersionControlIsGraying"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) ExportZoneConfig(request *ExportZoneConfigRequest) (response *ExportZoneConfigResponse, err error) {
+    return c.ExportZoneConfigWithContext(context.Background(), request)
+}
+
+// ExportZoneConfig
+// 导出站点配置接口，本接口支持用户根据需要的配置项进行配置导出，导出的配置用于导入站点配置接口（ImportZoneConfig）进行配置导入。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_INVALIDDOMAINS = "InvalidParameter.InvalidDomains"
+//  INVALIDPARAMETER_INVALIDPROXIES = "InvalidParameter.InvalidProxies"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTHOSTORIGINWHITELIST = "InvalidParameter.ShieldNotSupportHostOriginWhitelist"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_UNSUPPORTEDPLAN = "OperationDenied.UnsupportedPlan"
+//  OPERATIONDENIED_VERSIONCONTROLISGRAYING = "OperationDenied.VersionControlIsGraying"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) ExportZoneConfigWithContext(ctx context.Context, request *ExportZoneConfigRequest) (response *ExportZoneConfigResponse, err error) {
+    if request == nil {
+        request = NewExportZoneConfigRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ExportZoneConfig")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ExportZoneConfig require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewExportZoneConfigResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewHandleFunctionRuntimeEnvironmentRequest() (request *HandleFunctionRuntimeEnvironmentRequest) {
+    request = &HandleFunctionRuntimeEnvironmentRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "HandleFunctionRuntimeEnvironment")
+    
+    
+    return
+}
+
+func NewHandleFunctionRuntimeEnvironmentResponse() (response *HandleFunctionRuntimeEnvironmentResponse) {
+    response = &HandleFunctionRuntimeEnvironmentResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// HandleFunctionRuntimeEnvironment
+// 操作边缘函数运行环境，支持环境变量的相关设置。
+//
+// 设置环境变量后，可在函数代码中使用，具体参考 [边缘函数引入环境变量](https://cloud.tencent.com/document/product/1552/109151#0151fd9a-8b0e-407b-ae37-54553a60ded6)。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_FUNCTIONDEPLOYING = "FailedOperation.FunctionDeploying"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_LENGTHEXCEEDSLIMIT = "InvalidParameter.LengthExceedsLimit"
+//  RESOURCEUNAVAILABLE_FUNCTIONNOTFOUND = "ResourceUnavailable.FunctionNotFound"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
+func (c *Client) HandleFunctionRuntimeEnvironment(request *HandleFunctionRuntimeEnvironmentRequest) (response *HandleFunctionRuntimeEnvironmentResponse, err error) {
+    return c.HandleFunctionRuntimeEnvironmentWithContext(context.Background(), request)
+}
+
+// HandleFunctionRuntimeEnvironment
+// 操作边缘函数运行环境，支持环境变量的相关设置。
+//
+// 设置环境变量后，可在函数代码中使用，具体参考 [边缘函数引入环境变量](https://cloud.tencent.com/document/product/1552/109151#0151fd9a-8b0e-407b-ae37-54553a60ded6)。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_FUNCTIONDEPLOYING = "FailedOperation.FunctionDeploying"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_LENGTHEXCEEDSLIMIT = "InvalidParameter.LengthExceedsLimit"
+//  RESOURCEUNAVAILABLE_FUNCTIONNOTFOUND = "ResourceUnavailable.FunctionNotFound"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
+func (c *Client) HandleFunctionRuntimeEnvironmentWithContext(ctx context.Context, request *HandleFunctionRuntimeEnvironmentRequest) (response *HandleFunctionRuntimeEnvironmentResponse, err error) {
+    if request == nil {
+        request = NewHandleFunctionRuntimeEnvironmentRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "HandleFunctionRuntimeEnvironment")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("HandleFunctionRuntimeEnvironment require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewHandleFunctionRuntimeEnvironmentResponse()
     err = c.Send(request, response)
     return
 }
@@ -4902,6 +11728,7 @@ func (c *Client) IdentifyZoneWithContext(ctx context.Context, request *IdentifyZ
     if request == nil {
         request = NewIdentifyZoneRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "IdentifyZone")
     
     if c.GetCredential() == nil {
         return nil, errors.New("IdentifyZone require credential")
@@ -4910,6 +11737,60 @@ func (c *Client) IdentifyZoneWithContext(ctx context.Context, request *IdentifyZ
     request.SetContext(ctx)
     
     response = NewIdentifyZoneResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewImportZoneConfigRequest() (request *ImportZoneConfigRequest) {
+    request = &ImportZoneConfigRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ImportZoneConfig")
+    
+    
+    return
+}
+
+func NewImportZoneConfigResponse() (response *ImportZoneConfigResponse) {
+    response = &ImportZoneConfigResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ImportZoneConfig
+// 导入站点配置接口，本接口支持站点配置文件的快速导入，发起导入后接口会返回对应的任务 ID（TaskId），用户需通过查询站点配置导入结果接口（DescribeZoneConfigImportResult）获取本次导入任务执行的结果。
+//
+// 可能返回的错误码:
+//  OPERATIONDENIED = "OperationDenied"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) ImportZoneConfig(request *ImportZoneConfigRequest) (response *ImportZoneConfigResponse, err error) {
+    return c.ImportZoneConfigWithContext(context.Background(), request)
+}
+
+// ImportZoneConfig
+// 导入站点配置接口，本接口支持站点配置文件的快速导入，发起导入后接口会返回对应的任务 ID（TaskId），用户需通过查询站点配置导入结果接口（DescribeZoneConfigImportResult）获取本次导入任务执行的结果。
+//
+// 可能返回的错误码:
+//  OPERATIONDENIED = "OperationDenied"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+func (c *Client) ImportZoneConfigWithContext(ctx context.Context, request *ImportZoneConfigRequest) (response *ImportZoneConfigResponse, err error) {
+    if request == nil {
+        request = NewImportZoneConfigRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ImportZoneConfig")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ImportZoneConfig require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewImportZoneConfigResponse()
     err = c.Send(request, response)
     return
 }
@@ -4965,6 +11846,7 @@ func (c *Client) IncreasePlanQuotaWithContext(ctx context.Context, request *Incr
     if request == nil {
         request = NewIncreasePlanQuotaRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "IncreasePlanQuota")
     
     if c.GetCredential() == nil {
         return nil, errors.New("IncreasePlanQuota require credential")
@@ -5020,6 +11902,7 @@ func NewModifyAccelerationDomainResponse() (response *ModifyAccelerationDomainRe
 //  INVALIDPARAMETERVALUE_CONFLICTRECORD = "InvalidParameterValue.ConflictRecord"
 //  INVALIDPARAMETERVALUE_DOMAINNOTMATCHZONE = "InvalidParameterValue.DomainNotMatchZone"
 //  INVALIDPARAMETERVALUE_INVALIDDOMAINSTATUS = "InvalidParameterValue.InvalidDomainStatus"
+//  INVALIDPARAMETERVALUE_SITEFAILOVERNOTSUPPORTHOSTORIGINTYPEVOD = "InvalidParameterValue.SiteFailoverNotSupportHostOriginTypeVod"
 //  OPERATIONDENIED_DOMAINNOICP = "OperationDenied.DomainNoICP"
 //  OPERATIONDENIED_RESOURCELOCKEDTEMPORARY = "OperationDenied.ResourceLockedTemporary"
 //  OPERATIONDENIED_VERSIONCONTROLISGRAYING = "OperationDenied.VersionControlIsGraying"
@@ -5056,6 +11939,7 @@ func (c *Client) ModifyAccelerationDomain(request *ModifyAccelerationDomainReque
 //  INVALIDPARAMETERVALUE_CONFLICTRECORD = "InvalidParameterValue.ConflictRecord"
 //  INVALIDPARAMETERVALUE_DOMAINNOTMATCHZONE = "InvalidParameterValue.DomainNotMatchZone"
 //  INVALIDPARAMETERVALUE_INVALIDDOMAINSTATUS = "InvalidParameterValue.InvalidDomainStatus"
+//  INVALIDPARAMETERVALUE_SITEFAILOVERNOTSUPPORTHOSTORIGINTYPEVOD = "InvalidParameterValue.SiteFailoverNotSupportHostOriginTypeVod"
 //  OPERATIONDENIED_DOMAINNOICP = "OperationDenied.DomainNoICP"
 //  OPERATIONDENIED_RESOURCELOCKEDTEMPORARY = "OperationDenied.ResourceLockedTemporary"
 //  OPERATIONDENIED_VERSIONCONTROLISGRAYING = "OperationDenied.VersionControlIsGraying"
@@ -5068,6 +11952,7 @@ func (c *Client) ModifyAccelerationDomainWithContext(ctx context.Context, reques
     if request == nil {
         request = NewModifyAccelerationDomainRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyAccelerationDomain")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyAccelerationDomain require credential")
@@ -5149,6 +12034,7 @@ func (c *Client) ModifyAccelerationDomainStatusesWithContext(ctx context.Context
     if request == nil {
         request = NewModifyAccelerationDomainStatusesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyAccelerationDomainStatuses")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyAccelerationDomainStatuses require credential")
@@ -5183,6 +12069,8 @@ func NewModifyAliasDomainResponse() (response *ModifyAliasDomainResponse) {
 // ModifyAliasDomain
 // 修改别称域名。
 //
+// 该功能仅企业版套餐支持，并且该功能当前仍在内测中，如需使用，请[联系我们](https://cloud.tencent.com/online-service?from=connect-us)。
+//
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
 //  INTERNALERROR = "InternalError"
@@ -5195,6 +12083,8 @@ func (c *Client) ModifyAliasDomain(request *ModifyAliasDomainRequest) (response 
 // ModifyAliasDomain
 // 修改别称域名。
 //
+// 该功能仅企业版套餐支持，并且该功能当前仍在内测中，如需使用，请[联系我们](https://cloud.tencent.com/online-service?from=connect-us)。
+//
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
 //  INTERNALERROR = "InternalError"
@@ -5204,6 +12094,7 @@ func (c *Client) ModifyAliasDomainWithContext(ctx context.Context, request *Modi
     if request == nil {
         request = NewModifyAliasDomainRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyAliasDomain")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyAliasDomain require credential")
@@ -5238,6 +12129,8 @@ func NewModifyAliasDomainStatusResponse() (response *ModifyAliasDomainStatusResp
 // ModifyAliasDomainStatus
 // 修改别称域名状态。
 //
+// 该功能仅企业版套餐支持，并且该功能当前仍在内测中，如需使用，请[联系我们](https://cloud.tencent.com/online-service?from=connect-us)。
+//
 // 可能返回的错误码:
 //  INTERNALERROR = "InternalError"
 //  OPERATIONDENIED = "OperationDenied"
@@ -5249,6 +12142,8 @@ func (c *Client) ModifyAliasDomainStatus(request *ModifyAliasDomainStatusRequest
 // ModifyAliasDomainStatus
 // 修改别称域名状态。
 //
+// 该功能仅企业版套餐支持，并且该功能当前仍在内测中，如需使用，请[联系我们](https://cloud.tencent.com/online-service?from=connect-us)。
+//
 // 可能返回的错误码:
 //  INTERNALERROR = "InternalError"
 //  OPERATIONDENIED = "OperationDenied"
@@ -5257,6 +12152,7 @@ func (c *Client) ModifyAliasDomainStatusWithContext(ctx context.Context, request
     if request == nil {
         request = NewModifyAliasDomainStatusRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyAliasDomainStatus")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyAliasDomainStatus require credential")
@@ -5320,6 +12216,7 @@ func (c *Client) ModifyApplicationProxyWithContext(ctx context.Context, request 
     if request == nil {
         request = NewModifyApplicationProxyRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyApplicationProxy")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyApplicationProxy require credential")
@@ -5383,6 +12280,7 @@ func (c *Client) ModifyApplicationProxyRuleWithContext(ctx context.Context, requ
     if request == nil {
         request = NewModifyApplicationProxyRuleRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyApplicationProxyRule")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyApplicationProxyRule require credential")
@@ -5442,6 +12340,7 @@ func (c *Client) ModifyApplicationProxyRuleStatusWithContext(ctx context.Context
     if request == nil {
         request = NewModifyApplicationProxyRuleStatusRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyApplicationProxyRuleStatus")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyApplicationProxyRuleStatus require credential")
@@ -5503,6 +12402,7 @@ func (c *Client) ModifyApplicationProxyStatusWithContext(ctx context.Context, re
     if request == nil {
         request = NewModifyApplicationProxyStatusRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyApplicationProxyStatus")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyApplicationProxyStatus require credential")
@@ -5511,6 +12411,652 @@ func (c *Client) ModifyApplicationProxyStatusWithContext(ctx context.Context, re
     request.SetContext(ctx)
     
     response = NewModifyApplicationProxyStatusResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyContentIdentifierRequest() (request *ModifyContentIdentifierRequest) {
+    request = &ModifyContentIdentifierRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifyContentIdentifier")
+    
+    
+    return
+}
+
+func NewModifyContentIdentifierResponse() (response *ModifyContentIdentifierResponse) {
+    response = &ModifyContentIdentifierResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyContentIdentifier
+// 修改内容标识符，仅支持修改描述。该功能仅白名单开放。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_DISABLEZONENOTCOMPLETED = "OperationDenied.DisableZoneNotCompleted"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_L4PROXYINBANNEDSTATUS = "OperationDenied.L4ProxyInBannedStatus"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+func (c *Client) ModifyContentIdentifier(request *ModifyContentIdentifierRequest) (response *ModifyContentIdentifierResponse, err error) {
+    return c.ModifyContentIdentifierWithContext(context.Background(), request)
+}
+
+// ModifyContentIdentifier
+// 修改内容标识符，仅支持修改描述。该功能仅白名单开放。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_DISABLEZONENOTCOMPLETED = "OperationDenied.DisableZoneNotCompleted"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_L4PROXYINBANNEDSTATUS = "OperationDenied.L4ProxyInBannedStatus"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+func (c *Client) ModifyContentIdentifierWithContext(ctx context.Context, request *ModifyContentIdentifierRequest) (response *ModifyContentIdentifierResponse, err error) {
+    if request == nil {
+        request = NewModifyContentIdentifierRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyContentIdentifier")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyContentIdentifier require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyContentIdentifierResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyCustomErrorPageRequest() (request *ModifyCustomErrorPageRequest) {
+    request = &ModifyCustomErrorPageRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifyCustomErrorPage")
+    
+    
+    return
+}
+
+func NewModifyCustomErrorPageResponse() (response *ModifyCustomErrorPageResponse) {
+    response = &ModifyCustomErrorPageResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyCustomErrorPage
+// 修改自定义错误页面。
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND = "ResourceNotFound"
+func (c *Client) ModifyCustomErrorPage(request *ModifyCustomErrorPageRequest) (response *ModifyCustomErrorPageResponse, err error) {
+    return c.ModifyCustomErrorPageWithContext(context.Background(), request)
+}
+
+// ModifyCustomErrorPage
+// 修改自定义错误页面。
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND = "ResourceNotFound"
+func (c *Client) ModifyCustomErrorPageWithContext(ctx context.Context, request *ModifyCustomErrorPageRequest) (response *ModifyCustomErrorPageResponse, err error) {
+    if request == nil {
+        request = NewModifyCustomErrorPageRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyCustomErrorPage")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyCustomErrorPage require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyCustomErrorPageResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyDDoSProtectionRequest() (request *ModifyDDoSProtectionRequest) {
+    request = &ModifyDDoSProtectionRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifyDDoSProtection")
+    
+    
+    return
+}
+
+func NewModifyDDoSProtectionResponse() (response *ModifyDDoSProtectionResponse) {
+    response = &ModifyDDoSProtectionResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyDDoSProtection
+// 修改站点的独立 DDoS 防护。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_SECURITY = "InvalidParameter.Security"
+//  OPERATIONDENIED_SECURITYLACKOFRESOURCES = "OperationDenied.SecurityLackOfResources"
+func (c *Client) ModifyDDoSProtection(request *ModifyDDoSProtectionRequest) (response *ModifyDDoSProtectionResponse, err error) {
+    return c.ModifyDDoSProtectionWithContext(context.Background(), request)
+}
+
+// ModifyDDoSProtection
+// 修改站点的独立 DDoS 防护。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_SECURITY = "InvalidParameter.Security"
+//  OPERATIONDENIED_SECURITYLACKOFRESOURCES = "OperationDenied.SecurityLackOfResources"
+func (c *Client) ModifyDDoSProtectionWithContext(ctx context.Context, request *ModifyDDoSProtectionRequest) (response *ModifyDDoSProtectionResponse, err error) {
+    if request == nil {
+        request = NewModifyDDoSProtectionRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyDDoSProtection")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyDDoSProtection require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyDDoSProtectionResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyDnsRecordsRequest() (request *ModifyDnsRecordsRequest) {
+    request = &ModifyDnsRecordsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifyDnsRecords")
+    
+    
+    return
+}
+
+func NewModifyDnsRecordsResponse() (response *ModifyDnsRecordsResponse) {
+    response = &ModifyDnsRecordsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyDnsRecords
+// 您可以通过本接口批量修改 DNS 记录。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_SECURITY = "InvalidParameter.Security"
+//  OPERATIONDENIED_SECURITYLACKOFRESOURCES = "OperationDenied.SecurityLackOfResources"
+func (c *Client) ModifyDnsRecords(request *ModifyDnsRecordsRequest) (response *ModifyDnsRecordsResponse, err error) {
+    return c.ModifyDnsRecordsWithContext(context.Background(), request)
+}
+
+// ModifyDnsRecords
+// 您可以通过本接口批量修改 DNS 记录。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_SECURITY = "InvalidParameter.Security"
+//  OPERATIONDENIED_SECURITYLACKOFRESOURCES = "OperationDenied.SecurityLackOfResources"
+func (c *Client) ModifyDnsRecordsWithContext(ctx context.Context, request *ModifyDnsRecordsRequest) (response *ModifyDnsRecordsResponse, err error) {
+    if request == nil {
+        request = NewModifyDnsRecordsRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyDnsRecords")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyDnsRecords require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyDnsRecordsResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyDnsRecordsStatusRequest() (request *ModifyDnsRecordsStatusRequest) {
+    request = &ModifyDnsRecordsStatusRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifyDnsRecordsStatus")
+    
+    
+    return
+}
+
+func NewModifyDnsRecordsStatusResponse() (response *ModifyDnsRecordsStatusResponse) {
+    response = &ModifyDnsRecordsStatusResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyDnsRecordsStatus
+// 您可以通过本接口批量修改 DNS 记录的状态，批量对记录进行开启和停用。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_SECURITY = "InvalidParameter.Security"
+//  OPERATIONDENIED_SECURITYLACKOFRESOURCES = "OperationDenied.SecurityLackOfResources"
+func (c *Client) ModifyDnsRecordsStatus(request *ModifyDnsRecordsStatusRequest) (response *ModifyDnsRecordsStatusResponse, err error) {
+    return c.ModifyDnsRecordsStatusWithContext(context.Background(), request)
+}
+
+// ModifyDnsRecordsStatus
+// 您可以通过本接口批量修改 DNS 记录的状态，批量对记录进行开启和停用。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_SECURITY = "InvalidParameter.Security"
+//  OPERATIONDENIED_SECURITYLACKOFRESOURCES = "OperationDenied.SecurityLackOfResources"
+func (c *Client) ModifyDnsRecordsStatusWithContext(ctx context.Context, request *ModifyDnsRecordsStatusRequest) (response *ModifyDnsRecordsStatusResponse, err error) {
+    if request == nil {
+        request = NewModifyDnsRecordsStatusRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyDnsRecordsStatus")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyDnsRecordsStatus require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyDnsRecordsStatusResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyEdgeKVNamespaceRequest() (request *ModifyEdgeKVNamespaceRequest) {
+    request = &ModifyEdgeKVNamespaceRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifyEdgeKVNamespace")
+    
+    
+    return
+}
+
+func NewModifyEdgeKVNamespaceResponse() (response *ModifyEdgeKVNamespaceResponse) {
+    response = &ModifyEdgeKVNamespaceResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyEdgeKVNamespace
+// 本接口用于修改指定 KV 命名空间的属性信息，当前支持修改命名空间描述。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_REMARKTOOLONG = "InvalidParameter.RemarkTooLong"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  RESOURCEUNAVAILABLE_NAMESPACENOTFOUND = "ResourceUnavailable.NamespaceNotFound"
+func (c *Client) ModifyEdgeKVNamespace(request *ModifyEdgeKVNamespaceRequest) (response *ModifyEdgeKVNamespaceResponse, err error) {
+    return c.ModifyEdgeKVNamespaceWithContext(context.Background(), request)
+}
+
+// ModifyEdgeKVNamespace
+// 本接口用于修改指定 KV 命名空间的属性信息，当前支持修改命名空间描述。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_REMARKTOOLONG = "InvalidParameter.RemarkTooLong"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  RESOURCEUNAVAILABLE_NAMESPACENOTFOUND = "ResourceUnavailable.NamespaceNotFound"
+func (c *Client) ModifyEdgeKVNamespaceWithContext(ctx context.Context, request *ModifyEdgeKVNamespaceRequest) (response *ModifyEdgeKVNamespaceResponse, err error) {
+    if request == nil {
+        request = NewModifyEdgeKVNamespaceRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyEdgeKVNamespace")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyEdgeKVNamespace require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyEdgeKVNamespaceResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyFunctionRequest() (request *ModifyFunctionRequest) {
+    request = &ModifyFunctionRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifyFunction")
+    
+    
+    return
+}
+
+func NewModifyFunctionResponse() (response *ModifyFunctionResponse) {
+    response = &ModifyFunctionResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyFunction
+// 修改边缘函数，支持修改函数的内容及描述信息，修改且重新部署后，函数立刻生效。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_FUNCTIONDEPLOYING = "FailedOperation.FunctionDeploying"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_BADCONTENT = "InvalidParameter.BadContent"
+//  INVALIDPARAMETER_CONTENTEXCEEDSLIMIT = "InvalidParameter.ContentExceedsLimit"
+//  INVALIDPARAMETER_LENGTHEXCEEDSLIMIT = "InvalidParameter.LengthExceedsLimit"
+//  INVALIDPARAMETER_MODIFYPARAMETERSMISSING = "InvalidParameter.ModifyParametersMissing"
+//  RESOURCEUNAVAILABLE_FUNCTIONNOTFOUND = "ResourceUnavailable.FunctionNotFound"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
+func (c *Client) ModifyFunction(request *ModifyFunctionRequest) (response *ModifyFunctionResponse, err error) {
+    return c.ModifyFunctionWithContext(context.Background(), request)
+}
+
+// ModifyFunction
+// 修改边缘函数，支持修改函数的内容及描述信息，修改且重新部署后，函数立刻生效。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_FUNCTIONDEPLOYING = "FailedOperation.FunctionDeploying"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_BADCONTENT = "InvalidParameter.BadContent"
+//  INVALIDPARAMETER_CONTENTEXCEEDSLIMIT = "InvalidParameter.ContentExceedsLimit"
+//  INVALIDPARAMETER_LENGTHEXCEEDSLIMIT = "InvalidParameter.LengthExceedsLimit"
+//  INVALIDPARAMETER_MODIFYPARAMETERSMISSING = "InvalidParameter.ModifyParametersMissing"
+//  RESOURCEUNAVAILABLE_FUNCTIONNOTFOUND = "ResourceUnavailable.FunctionNotFound"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
+func (c *Client) ModifyFunctionWithContext(ctx context.Context, request *ModifyFunctionRequest) (response *ModifyFunctionResponse, err error) {
+    if request == nil {
+        request = NewModifyFunctionRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyFunction")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyFunction require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyFunctionResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyFunctionComponentBindingsRequest() (request *ModifyFunctionComponentBindingsRequest) {
+    request = &ModifyFunctionComponentBindingsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifyFunctionComponentBindings")
+    
+    
+    return
+}
+
+func NewModifyFunctionComponentBindingsResponse() (response *ModifyFunctionComponentBindingsResponse) {
+    response = &ModifyFunctionComponentBindingsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyFunctionComponentBindings
+// 修改边缘函数与组件的绑定关系，支持绑定（bind）、覆盖绑定（bind-override）、解绑（unbind）和重置绑定（rebind）四种操作模式。通过指定操作类型和组件列表，可实现对函数组件绑定关系的管理。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_BINDINGNOTFOUND = "InvalidParameter.BindingNotFound"
+//  INVALIDPARAMETER_DUPLICATEBINDINGNAME = "InvalidParameter.DuplicateBindingName"
+//  INVALIDPARAMETER_FUNCTIONBINDVARIABLENAMECONFLICT = "InvalidParameter.FunctionBindVariableNameConflict"
+//  INVALIDPARAMETER_INVALIDOPERATION = "InvalidParameter.InvalidOperation"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  RESOURCEUNAVAILABLE_FUNCTIONNOTFOUND = "ResourceUnavailable.FunctionNotFound"
+//  RESOURCEUNAVAILABLE_NAMESPACENOTFOUND = "ResourceUnavailable.NamespaceNotFound"
+func (c *Client) ModifyFunctionComponentBindings(request *ModifyFunctionComponentBindingsRequest) (response *ModifyFunctionComponentBindingsResponse, err error) {
+    return c.ModifyFunctionComponentBindingsWithContext(context.Background(), request)
+}
+
+// ModifyFunctionComponentBindings
+// 修改边缘函数与组件的绑定关系，支持绑定（bind）、覆盖绑定（bind-override）、解绑（unbind）和重置绑定（rebind）四种操作模式。通过指定操作类型和组件列表，可实现对函数组件绑定关系的管理。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_BINDINGNOTFOUND = "InvalidParameter.BindingNotFound"
+//  INVALIDPARAMETER_DUPLICATEBINDINGNAME = "InvalidParameter.DuplicateBindingName"
+//  INVALIDPARAMETER_FUNCTIONBINDVARIABLENAMECONFLICT = "InvalidParameter.FunctionBindVariableNameConflict"
+//  INVALIDPARAMETER_INVALIDOPERATION = "InvalidParameter.InvalidOperation"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  RESOURCEUNAVAILABLE_FUNCTIONNOTFOUND = "ResourceUnavailable.FunctionNotFound"
+//  RESOURCEUNAVAILABLE_NAMESPACENOTFOUND = "ResourceUnavailable.NamespaceNotFound"
+func (c *Client) ModifyFunctionComponentBindingsWithContext(ctx context.Context, request *ModifyFunctionComponentBindingsRequest) (response *ModifyFunctionComponentBindingsResponse, err error) {
+    if request == nil {
+        request = NewModifyFunctionComponentBindingsRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyFunctionComponentBindings")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyFunctionComponentBindings require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyFunctionComponentBindingsResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyFunctionReplicaRequest() (request *ModifyFunctionReplicaRequest) {
+    request = &ModifyFunctionReplicaRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifyFunctionReplica")
+    
+    
+    return
+}
+
+func NewModifyFunctionReplicaResponse() (response *ModifyFunctionReplicaResponse) {
+    response = &ModifyFunctionReplicaResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyFunctionReplica
+// 本接口用于修改指定边缘函数副本的内容和描述。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_BINDINGNOTFOUND = "InvalidParameter.BindingNotFound"
+//  INVALIDPARAMETER_DUPLICATEBINDINGNAME = "InvalidParameter.DuplicateBindingName"
+//  INVALIDPARAMETER_FUNCTIONBINDVARIABLENAMECONFLICT = "InvalidParameter.FunctionBindVariableNameConflict"
+//  INVALIDPARAMETER_INVALIDOPERATION = "InvalidParameter.InvalidOperation"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  RESOURCEUNAVAILABLE_FUNCTIONNOTFOUND = "ResourceUnavailable.FunctionNotFound"
+//  RESOURCEUNAVAILABLE_NAMESPACENOTFOUND = "ResourceUnavailable.NamespaceNotFound"
+func (c *Client) ModifyFunctionReplica(request *ModifyFunctionReplicaRequest) (response *ModifyFunctionReplicaResponse, err error) {
+    return c.ModifyFunctionReplicaWithContext(context.Background(), request)
+}
+
+// ModifyFunctionReplica
+// 本接口用于修改指定边缘函数副本的内容和描述。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  INVALIDPARAMETER_BINDINGNOTFOUND = "InvalidParameter.BindingNotFound"
+//  INVALIDPARAMETER_DUPLICATEBINDINGNAME = "InvalidParameter.DuplicateBindingName"
+//  INVALIDPARAMETER_FUNCTIONBINDVARIABLENAMECONFLICT = "InvalidParameter.FunctionBindVariableNameConflict"
+//  INVALIDPARAMETER_INVALIDOPERATION = "InvalidParameter.InvalidOperation"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  RESOURCEUNAVAILABLE_FUNCTIONNOTFOUND = "ResourceUnavailable.FunctionNotFound"
+//  RESOURCEUNAVAILABLE_NAMESPACENOTFOUND = "ResourceUnavailable.NamespaceNotFound"
+func (c *Client) ModifyFunctionReplicaWithContext(ctx context.Context, request *ModifyFunctionReplicaRequest) (response *ModifyFunctionReplicaResponse, err error) {
+    if request == nil {
+        request = NewModifyFunctionReplicaRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyFunctionReplica")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyFunctionReplica require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyFunctionReplicaResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyFunctionRuleRequest() (request *ModifyFunctionRuleRequest) {
+    request = &ModifyFunctionRuleRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifyFunctionRule")
+    
+    
+    return
+}
+
+func NewModifyFunctionRuleResponse() (response *ModifyFunctionRuleResponse) {
+    response = &ModifyFunctionRuleResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyFunctionRule
+// 修改边缘函数触发规则，支持修改规则条件、执行函数以及描述信息。您可以先通过 DescribeFunctionRules 接口来获取需要修改的规则的 RuleId，然后传入修改后的规则内容，原规则内容会被覆盖式更新。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_RULEOPERATIONCONFLICT = "FailedOperation.RuleOperationConflict"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_DUPLICATERULE = "InvalidParameter.DuplicateRule"
+//  INVALIDPARAMETER_INVALIDCONDITIONS = "InvalidParameter.InvalidConditions"
+//  INVALIDPARAMETER_MODIFYPARAMETERSMISSING = "InvalidParameter.ModifyParametersMissing"
+//  RESOURCEUNAVAILABLE_FUNCTIONNOTFOUND = "ResourceUnavailable.FunctionNotFound"
+//  RESOURCEUNAVAILABLE_RULENOTFOUND = "ResourceUnavailable.RuleNotFound"
+func (c *Client) ModifyFunctionRule(request *ModifyFunctionRuleRequest) (response *ModifyFunctionRuleResponse, err error) {
+    return c.ModifyFunctionRuleWithContext(context.Background(), request)
+}
+
+// ModifyFunctionRule
+// 修改边缘函数触发规则，支持修改规则条件、执行函数以及描述信息。您可以先通过 DescribeFunctionRules 接口来获取需要修改的规则的 RuleId，然后传入修改后的规则内容，原规则内容会被覆盖式更新。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_RULEOPERATIONCONFLICT = "FailedOperation.RuleOperationConflict"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_DUPLICATERULE = "InvalidParameter.DuplicateRule"
+//  INVALIDPARAMETER_INVALIDCONDITIONS = "InvalidParameter.InvalidConditions"
+//  INVALIDPARAMETER_MODIFYPARAMETERSMISSING = "InvalidParameter.ModifyParametersMissing"
+//  RESOURCEUNAVAILABLE_FUNCTIONNOTFOUND = "ResourceUnavailable.FunctionNotFound"
+//  RESOURCEUNAVAILABLE_RULENOTFOUND = "ResourceUnavailable.RuleNotFound"
+func (c *Client) ModifyFunctionRuleWithContext(ctx context.Context, request *ModifyFunctionRuleRequest) (response *ModifyFunctionRuleResponse, err error) {
+    if request == nil {
+        request = NewModifyFunctionRuleRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyFunctionRule")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyFunctionRule require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyFunctionRuleResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyFunctionRulePriorityRequest() (request *ModifyFunctionRulePriorityRequest) {
+    request = &ModifyFunctionRulePriorityRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifyFunctionRulePriority")
+    
+    
+    return
+}
+
+func NewModifyFunctionRulePriorityResponse() (response *ModifyFunctionRulePriorityResponse) {
+    response = &ModifyFunctionRulePriorityResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyFunctionRulePriority
+// 修改边缘函数触发规则的优先级。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_RULEOPERATIONCONFLICT = "FailedOperation.RuleOperationConflict"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
+func (c *Client) ModifyFunctionRulePriority(request *ModifyFunctionRulePriorityRequest) (response *ModifyFunctionRulePriorityResponse, err error) {
+    return c.ModifyFunctionRulePriorityWithContext(context.Background(), request)
+}
+
+// ModifyFunctionRulePriority
+// 修改边缘函数触发规则的优先级。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_RULEOPERATIONCONFLICT = "FailedOperation.RuleOperationConflict"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
+func (c *Client) ModifyFunctionRulePriorityWithContext(ctx context.Context, request *ModifyFunctionRulePriorityRequest) (response *ModifyFunctionRulePriorityResponse, err error) {
+    if request == nil {
+        request = NewModifyFunctionRulePriorityRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyFunctionRulePriority")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyFunctionRulePriority require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyFunctionRulePriorityResponse()
     err = c.Send(request, response)
     return
 }
@@ -5545,8 +13091,11 @@ func NewModifyHostsCertificateResponse() (response *ModifyHostsCertificateRespon
 //  FAILEDOPERATION = "FailedOperation"
 //  FAILEDOPERATION_CERTIFICATEHASEXPIRED = "FailedOperation.CertificateHasExpired"
 //  FAILEDOPERATION_CERTIFICATENOTFOUND = "FailedOperation.CertificateNotFound"
+//  FAILEDOPERATION_EDGECLIENTCERTIFICATEHASEXPIRED = "FailedOperation.EdgeClientCertificateHasExpired"
 //  FAILEDOPERATION_INVALIDZONESTATUS = "FailedOperation.InvalidZoneStatus"
 //  FAILEDOPERATION_MODIFYFAILED = "FailedOperation.ModifyFailed"
+//  FAILEDOPERATION_UPSTREAMCLIENTCERTIFICATEHASEXPIRED = "FailedOperation.UpstreamClientCertificateHasExpired"
+//  FAILEDOPERATION_UPSTREAMVERIFYCUSTOMCACERTIFICATEHASEXPIRED = "FailedOperation.UpstreamVerifyCustomCACertificateHasExpired"
 //  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
 //  INTERNALERROR_GETROLEERROR = "InternalError.GetRoleError"
 //  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
@@ -5554,24 +13103,62 @@ func NewModifyHostsCertificateResponse() (response *ModifyHostsCertificateRespon
 //  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
 //  INTERNALERROR_UNKNOWERROR = "InternalError.UnknowError"
 //  INVALIDPARAMETER_ACTIONINPROGRESS = "InvalidParameter.ActionInProgress"
+//  INVALIDPARAMETER_ALIASDOMAINNOTSUPPORTKEYLESS = "InvalidParameter.AliasDomainNotSupportKeyless"
 //  INVALIDPARAMETER_CERTNOTMATCHDOMAIN = "InvalidParameter.CertNotMatchDomain"
 //  INVALIDPARAMETER_CERTTOEXPIRE = "InvalidParameter.CertToExpire"
 //  INVALIDPARAMETER_CERTTOOSHORTKEYSIZE = "InvalidParameter.CertTooShortKeySize"
+//  INVALIDPARAMETER_CERTIFICATECONFLICTWITHKEYLESSSERVER = "InvalidParameter.CertificateConflictWithKeylessServer"
 //  INVALIDPARAMETER_CNAMEWILDHOSTNOTALLOWAPPLYCERTIFICATE = "InvalidParameter.CnameWildHostNotAllowApplyCertificate"
+//  INVALIDPARAMETER_EDGECLIENTCERTCHECKERROR = "InvalidParameter.EdgeClientCertCheckError"
 //  INVALIDPARAMETER_HOSTSTATUSNOTALLOWAPPLYCERTIFICATE = "InvalidParameter.HostStatusNotAllowApplyCertificate"
 //  INVALIDPARAMETER_INVALIDCERTINFO = "InvalidParameter.InvalidCertInfo"
 //  INVALIDPARAMETER_INVALIDHTTPSCERTINFO = "InvalidParameter.InvalidHttpsCertInfo"
 //  INVALIDPARAMETER_INVALIDHTTPSTLSVERSION = "InvalidParameter.InvalidHttpsTlsVersion"
+//  INVALIDPARAMETER_UPSTREAMCLIENTCERTCHECKERROR = "InvalidParameter.UpstreamClientCertCheckError"
+//  INVALIDPARAMETER_UPSTREAMVERIFYCERTCHECKERROR = "InvalidParameter.UpstreamVerifyCertCheckError"
+//  INVALIDPARAMETER_UPSTREAMVERIFYCUSTOMCACERTNOINFO = "InvalidParameter.UpstreamVerifyCustomCACertNoInfo"
 //  INVALIDPARAMETER_ZONEISGRAYPUBLISHING = "InvalidParameter.ZoneIsGrayPublishing"
+//  INVALIDPARAMETERVALUE_ALIASDOMAINNOTSUPPORTEDGEMTLS = "InvalidParameterValue.AliasDomainNotSupportEdgeMTLS"
+//  INVALIDPARAMETERVALUE_ALIASDOMAINNOTSUPPORTUPSTREAMMTLS = "InvalidParameterValue.AliasDomainNotSupportUpstreamMTLS"
+//  INVALIDPARAMETERVALUE_ALIASDOMAINNOTSUPPORTUPSTREAMVERIFY = "InvalidParameterValue.AliasDomainNotSupportUpstreamVerify"
+//  INVALIDPARAMETERVALUE_CERTIFICATEVERIFYCLIENTMUSTCA = "InvalidParameterValue.CertificateVerifyClientMustCa"
+//  INVALIDPARAMETERVALUE_CERTIFICATEVERIFYCLIENTNEEDCERT = "InvalidParameterValue.CertificateVerifyClientNeedCert"
+//  INVALIDPARAMETERVALUE_CERTIFICATEVERIFYUPSTREAMCLIENTMUSTRSAORECC = "InvalidParameterValue.CertificateVerifyUpstreamClientMustRSAorECC"
+//  INVALIDPARAMETERVALUE_CERTIFICATEVERIFYUPSTREAMCLIENTMUSTSVR = "InvalidParameterValue.CertificateVerifyUpstreamClientMustSVR"
+//  INVALIDPARAMETERVALUE_CERTIFICATEVERIFYUPSTREAMCLIENTNEEDCERT = "InvalidParameterValue.CertificateVerifyUpstreamClientNeedCert"
+//  INVALIDPARAMETERVALUE_CERTIFICATEVERIFYUPSTREAMVERIFYCUSTOMCAMUSTCA = "InvalidParameterValue.CertificateVerifyUpstreamVerifyCustomCAMustCA"
+//  INVALIDPARAMETERVALUE_CERTIFICATEVERIFYUPSTREAMVERIFYCUSTOMCAMUSTRSAORECC = "InvalidParameterValue.CertificateVerifyUpstreamVerifyCustomCAMustRSAorECC"
+//  INVALIDPARAMETERVALUE_CERTIFICATEVERIFYUPSTREAMVERIFYCUSTOMCANEEDCERT = "InvalidParameterValue.CertificateVerifyUpstreamVerifyCustomCANeedCert"
+//  INVALIDPARAMETERVALUE_CLIENTCERTINFOQUOTALIMIT = "InvalidParameterValue.ClientCertInfoQuotaLimit"
+//  INVALIDPARAMETERVALUE_INVALIDKEYLESSSERVERID = "InvalidParameterValue.InvalidKeylessServerId"
+//  INVALIDPARAMETERVALUE_OCDIRECTORIGINDOMAINNOTSUPPORTUPSTREAMVERIFY = "InvalidParameterValue.OCDirectOriginDomainNotSupportUpstreamVerify"
+//  INVALIDPARAMETERVALUE_SERVERCERTINFONEEDCONTAINRSAORECC = "InvalidParameterValue.ServerCertInfoNeedContainRSAorECC"
+//  INVALIDPARAMETERVALUE_SERVERCERTINFONEEDCONTAINSM2 = "InvalidParameterValue.ServerCertInfoNeedContainSM2"
+//  INVALIDPARAMETERVALUE_SITEFAILOVERNOTSUPPORTHOSTUPSTREAMVERIFY = "InvalidParameterValue.SiteFailoverNotSupportHostUpstreamVerify"
+//  INVALIDPARAMETERVALUE_UPSTREAMCLIENTCERTINFOQUOTALIMIT = "InvalidParameterValue.UpstreamClientCertInfoQuotaLimit"
+//  INVALIDPARAMETERVALUE_UPSTREAMVERIFYCUSTOMCACERTINFOQUOTALIMIT = "InvalidParameterValue.UpstreamVerifyCustomCACertInfoQuotaLimit"
 //  LIMITEXCEEDED_RATELIMITEXCEEDED = "LimitExceeded.RateLimitExceeded"
 //  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_CERTIFICATEPRIVATEKEYISEMPTY = "OperationDenied.CertificatePrivateKeyIsEmpty"
 //  OPERATIONDENIED_CONFIGLOCKED = "OperationDenied.ConfigLocked"
 //  OPERATIONDENIED_DISABLEZONENOTCOMPLETED = "OperationDenied.DisableZoneNotCompleted"
 //  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_HOSTSCERTIFICATEINCONSISTENCY = "OperationDenied.HostsCertificateInconsistency"
+//  OPERATIONDENIED_HOSTSCLIENTCERTIFICATEINCONSISTENCY = "OperationDenied.HostsClientCertificateInconsistency"
+//  OPERATIONDENIED_HOSTSKEYLESSSERVERINCONSISTENCY = "OperationDenied.HostsKeylessServerInconsistency"
+//  OPERATIONDENIED_HOSTSUPSTREAMCERTIFICATEINCONSISTENCY = "OperationDenied.HostsUpstreamCertificateInconsistency"
+//  OPERATIONDENIED_HOSTSUPSTREAMCERTIFICATEVERIFYINCONSISTENCY = "OperationDenied.HostsUpstreamCertificateVerifyInconsistency"
+//  OPERATIONDENIED_KEYLESSCERTSWITCHTOFREECERTCONFLICT = "OperationDenied.KeylessCertSwitchToFreeCertConflict"
+//  OPERATIONDENIED_KEYLESSMODECERTIFICATEPRIVATEKEYNEEDEMPTY = "OperationDenied.KeylessModeCertificatePrivateKeyNeedEmpty"
+//  OPERATIONDENIED_NOTINKEYLESSWHITELIST = "OperationDenied.NotInKeylessWhiteList"
+//  OPERATIONDENIED_NOTINUPSTREAMMTLSWHITELIST = "OperationDenied.NotInUpstreamMTLSWhiteList"
+//  OPERATIONDENIED_UNSUPPORTTOCLOSEUPSTREAMMTLS = "OperationDenied.UnSupportToCloseUpstreamMTLS"
+//  OPERATIONDENIED_USEUPSTREAMMTLSNEEDOPENHTTPS = "OperationDenied.UseUpstreamMTLSNeedOpenHttps"
 //  OPERATIONDENIED_VERSIONCONTROLISGRAYING = "OperationDenied.VersionControlIsGraying"
 //  RESOURCEINUSE = "ResourceInUse"
 //  RESOURCEUNAVAILABLE_CERTNOTFOUND = "ResourceUnavailable.CertNotFound"
 //  RESOURCEUNAVAILABLE_HOSTNOTFOUND = "ResourceUnavailable.HostNotFound"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
 //  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
 func (c *Client) ModifyHostsCertificate(request *ModifyHostsCertificateRequest) (response *ModifyHostsCertificateResponse, err error) {
     return c.ModifyHostsCertificateWithContext(context.Background(), request)
@@ -5588,8 +13175,11 @@ func (c *Client) ModifyHostsCertificate(request *ModifyHostsCertificateRequest) 
 //  FAILEDOPERATION = "FailedOperation"
 //  FAILEDOPERATION_CERTIFICATEHASEXPIRED = "FailedOperation.CertificateHasExpired"
 //  FAILEDOPERATION_CERTIFICATENOTFOUND = "FailedOperation.CertificateNotFound"
+//  FAILEDOPERATION_EDGECLIENTCERTIFICATEHASEXPIRED = "FailedOperation.EdgeClientCertificateHasExpired"
 //  FAILEDOPERATION_INVALIDZONESTATUS = "FailedOperation.InvalidZoneStatus"
 //  FAILEDOPERATION_MODIFYFAILED = "FailedOperation.ModifyFailed"
+//  FAILEDOPERATION_UPSTREAMCLIENTCERTIFICATEHASEXPIRED = "FailedOperation.UpstreamClientCertificateHasExpired"
+//  FAILEDOPERATION_UPSTREAMVERIFYCUSTOMCACERTIFICATEHASEXPIRED = "FailedOperation.UpstreamVerifyCustomCACertificateHasExpired"
 //  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
 //  INTERNALERROR_GETROLEERROR = "InternalError.GetRoleError"
 //  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
@@ -5597,29 +13187,68 @@ func (c *Client) ModifyHostsCertificate(request *ModifyHostsCertificateRequest) 
 //  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
 //  INTERNALERROR_UNKNOWERROR = "InternalError.UnknowError"
 //  INVALIDPARAMETER_ACTIONINPROGRESS = "InvalidParameter.ActionInProgress"
+//  INVALIDPARAMETER_ALIASDOMAINNOTSUPPORTKEYLESS = "InvalidParameter.AliasDomainNotSupportKeyless"
 //  INVALIDPARAMETER_CERTNOTMATCHDOMAIN = "InvalidParameter.CertNotMatchDomain"
 //  INVALIDPARAMETER_CERTTOEXPIRE = "InvalidParameter.CertToExpire"
 //  INVALIDPARAMETER_CERTTOOSHORTKEYSIZE = "InvalidParameter.CertTooShortKeySize"
+//  INVALIDPARAMETER_CERTIFICATECONFLICTWITHKEYLESSSERVER = "InvalidParameter.CertificateConflictWithKeylessServer"
 //  INVALIDPARAMETER_CNAMEWILDHOSTNOTALLOWAPPLYCERTIFICATE = "InvalidParameter.CnameWildHostNotAllowApplyCertificate"
+//  INVALIDPARAMETER_EDGECLIENTCERTCHECKERROR = "InvalidParameter.EdgeClientCertCheckError"
 //  INVALIDPARAMETER_HOSTSTATUSNOTALLOWAPPLYCERTIFICATE = "InvalidParameter.HostStatusNotAllowApplyCertificate"
 //  INVALIDPARAMETER_INVALIDCERTINFO = "InvalidParameter.InvalidCertInfo"
 //  INVALIDPARAMETER_INVALIDHTTPSCERTINFO = "InvalidParameter.InvalidHttpsCertInfo"
 //  INVALIDPARAMETER_INVALIDHTTPSTLSVERSION = "InvalidParameter.InvalidHttpsTlsVersion"
+//  INVALIDPARAMETER_UPSTREAMCLIENTCERTCHECKERROR = "InvalidParameter.UpstreamClientCertCheckError"
+//  INVALIDPARAMETER_UPSTREAMVERIFYCERTCHECKERROR = "InvalidParameter.UpstreamVerifyCertCheckError"
+//  INVALIDPARAMETER_UPSTREAMVERIFYCUSTOMCACERTNOINFO = "InvalidParameter.UpstreamVerifyCustomCACertNoInfo"
 //  INVALIDPARAMETER_ZONEISGRAYPUBLISHING = "InvalidParameter.ZoneIsGrayPublishing"
+//  INVALIDPARAMETERVALUE_ALIASDOMAINNOTSUPPORTEDGEMTLS = "InvalidParameterValue.AliasDomainNotSupportEdgeMTLS"
+//  INVALIDPARAMETERVALUE_ALIASDOMAINNOTSUPPORTUPSTREAMMTLS = "InvalidParameterValue.AliasDomainNotSupportUpstreamMTLS"
+//  INVALIDPARAMETERVALUE_ALIASDOMAINNOTSUPPORTUPSTREAMVERIFY = "InvalidParameterValue.AliasDomainNotSupportUpstreamVerify"
+//  INVALIDPARAMETERVALUE_CERTIFICATEVERIFYCLIENTMUSTCA = "InvalidParameterValue.CertificateVerifyClientMustCa"
+//  INVALIDPARAMETERVALUE_CERTIFICATEVERIFYCLIENTNEEDCERT = "InvalidParameterValue.CertificateVerifyClientNeedCert"
+//  INVALIDPARAMETERVALUE_CERTIFICATEVERIFYUPSTREAMCLIENTMUSTRSAORECC = "InvalidParameterValue.CertificateVerifyUpstreamClientMustRSAorECC"
+//  INVALIDPARAMETERVALUE_CERTIFICATEVERIFYUPSTREAMCLIENTMUSTSVR = "InvalidParameterValue.CertificateVerifyUpstreamClientMustSVR"
+//  INVALIDPARAMETERVALUE_CERTIFICATEVERIFYUPSTREAMCLIENTNEEDCERT = "InvalidParameterValue.CertificateVerifyUpstreamClientNeedCert"
+//  INVALIDPARAMETERVALUE_CERTIFICATEVERIFYUPSTREAMVERIFYCUSTOMCAMUSTCA = "InvalidParameterValue.CertificateVerifyUpstreamVerifyCustomCAMustCA"
+//  INVALIDPARAMETERVALUE_CERTIFICATEVERIFYUPSTREAMVERIFYCUSTOMCAMUSTRSAORECC = "InvalidParameterValue.CertificateVerifyUpstreamVerifyCustomCAMustRSAorECC"
+//  INVALIDPARAMETERVALUE_CERTIFICATEVERIFYUPSTREAMVERIFYCUSTOMCANEEDCERT = "InvalidParameterValue.CertificateVerifyUpstreamVerifyCustomCANeedCert"
+//  INVALIDPARAMETERVALUE_CLIENTCERTINFOQUOTALIMIT = "InvalidParameterValue.ClientCertInfoQuotaLimit"
+//  INVALIDPARAMETERVALUE_INVALIDKEYLESSSERVERID = "InvalidParameterValue.InvalidKeylessServerId"
+//  INVALIDPARAMETERVALUE_OCDIRECTORIGINDOMAINNOTSUPPORTUPSTREAMVERIFY = "InvalidParameterValue.OCDirectOriginDomainNotSupportUpstreamVerify"
+//  INVALIDPARAMETERVALUE_SERVERCERTINFONEEDCONTAINRSAORECC = "InvalidParameterValue.ServerCertInfoNeedContainRSAorECC"
+//  INVALIDPARAMETERVALUE_SERVERCERTINFONEEDCONTAINSM2 = "InvalidParameterValue.ServerCertInfoNeedContainSM2"
+//  INVALIDPARAMETERVALUE_SITEFAILOVERNOTSUPPORTHOSTUPSTREAMVERIFY = "InvalidParameterValue.SiteFailoverNotSupportHostUpstreamVerify"
+//  INVALIDPARAMETERVALUE_UPSTREAMCLIENTCERTINFOQUOTALIMIT = "InvalidParameterValue.UpstreamClientCertInfoQuotaLimit"
+//  INVALIDPARAMETERVALUE_UPSTREAMVERIFYCUSTOMCACERTINFOQUOTALIMIT = "InvalidParameterValue.UpstreamVerifyCustomCACertInfoQuotaLimit"
 //  LIMITEXCEEDED_RATELIMITEXCEEDED = "LimitExceeded.RateLimitExceeded"
 //  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_CERTIFICATEPRIVATEKEYISEMPTY = "OperationDenied.CertificatePrivateKeyIsEmpty"
 //  OPERATIONDENIED_CONFIGLOCKED = "OperationDenied.ConfigLocked"
 //  OPERATIONDENIED_DISABLEZONENOTCOMPLETED = "OperationDenied.DisableZoneNotCompleted"
 //  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_HOSTSCERTIFICATEINCONSISTENCY = "OperationDenied.HostsCertificateInconsistency"
+//  OPERATIONDENIED_HOSTSCLIENTCERTIFICATEINCONSISTENCY = "OperationDenied.HostsClientCertificateInconsistency"
+//  OPERATIONDENIED_HOSTSKEYLESSSERVERINCONSISTENCY = "OperationDenied.HostsKeylessServerInconsistency"
+//  OPERATIONDENIED_HOSTSUPSTREAMCERTIFICATEINCONSISTENCY = "OperationDenied.HostsUpstreamCertificateInconsistency"
+//  OPERATIONDENIED_HOSTSUPSTREAMCERTIFICATEVERIFYINCONSISTENCY = "OperationDenied.HostsUpstreamCertificateVerifyInconsistency"
+//  OPERATIONDENIED_KEYLESSCERTSWITCHTOFREECERTCONFLICT = "OperationDenied.KeylessCertSwitchToFreeCertConflict"
+//  OPERATIONDENIED_KEYLESSMODECERTIFICATEPRIVATEKEYNEEDEMPTY = "OperationDenied.KeylessModeCertificatePrivateKeyNeedEmpty"
+//  OPERATIONDENIED_NOTINKEYLESSWHITELIST = "OperationDenied.NotInKeylessWhiteList"
+//  OPERATIONDENIED_NOTINUPSTREAMMTLSWHITELIST = "OperationDenied.NotInUpstreamMTLSWhiteList"
+//  OPERATIONDENIED_UNSUPPORTTOCLOSEUPSTREAMMTLS = "OperationDenied.UnSupportToCloseUpstreamMTLS"
+//  OPERATIONDENIED_USEUPSTREAMMTLSNEEDOPENHTTPS = "OperationDenied.UseUpstreamMTLSNeedOpenHttps"
 //  OPERATIONDENIED_VERSIONCONTROLISGRAYING = "OperationDenied.VersionControlIsGraying"
 //  RESOURCEINUSE = "ResourceInUse"
 //  RESOURCEUNAVAILABLE_CERTNOTFOUND = "ResourceUnavailable.CertNotFound"
 //  RESOURCEUNAVAILABLE_HOSTNOTFOUND = "ResourceUnavailable.HostNotFound"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
 //  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
 func (c *Client) ModifyHostsCertificateWithContext(ctx context.Context, request *ModifyHostsCertificateRequest) (response *ModifyHostsCertificateResponse, err error) {
     if request == nil {
         request = NewModifyHostsCertificateRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyHostsCertificate")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyHostsCertificate require credential")
@@ -5628,6 +13257,60 @@ func (c *Client) ModifyHostsCertificateWithContext(ctx context.Context, request 
     request.SetContext(ctx)
     
     response = NewModifyHostsCertificateResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyInferenceServiceRequest() (request *ModifyInferenceServiceRequest) {
+    request = &ModifyInferenceServiceRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifyInferenceService")
+    
+    
+    return
+}
+
+func NewModifyInferenceServiceResponse() (response *ModifyInferenceServiceResponse) {
+    response = &ModifyInferenceServiceResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyInferenceService
+// 修改推理服务，支持更新监听端口、请求路径、容器镜像、资源配置和描述信息，仅传入的参数会被修改，未传入的参数保持不变。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+//  RESOURCENOTFOUND_INFERENCESERVICE = "ResourceNotFound.InferenceService"
+func (c *Client) ModifyInferenceService(request *ModifyInferenceServiceRequest) (response *ModifyInferenceServiceResponse, err error) {
+    return c.ModifyInferenceServiceWithContext(context.Background(), request)
+}
+
+// ModifyInferenceService
+// 修改推理服务，支持更新监听端口、请求路径、容器镜像、资源配置和描述信息，仅传入的参数会被修改，未传入的参数保持不变。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+//  RESOURCENOTFOUND_INFERENCESERVICE = "ResourceNotFound.InferenceService"
+func (c *Client) ModifyInferenceServiceWithContext(ctx context.Context, request *ModifyInferenceServiceRequest) (response *ModifyInferenceServiceResponse, err error) {
+    if request == nil {
+        request = NewModifyInferenceServiceRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyInferenceService")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyInferenceService require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyInferenceServiceResponse()
     err = c.Send(request, response)
     return
 }
@@ -5683,6 +13366,7 @@ func (c *Client) ModifyL4ProxyWithContext(ctx context.Context, request *ModifyL4
     if request == nil {
         request = NewModifyL4ProxyRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyL4Proxy")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyL4Proxy require credential")
@@ -5740,6 +13424,7 @@ func (c *Client) ModifyL4ProxyRulesWithContext(ctx context.Context, request *Mod
     if request == nil {
         request = NewModifyL4ProxyRulesRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyL4ProxyRules")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyL4ProxyRules require credential")
@@ -5795,6 +13480,7 @@ func (c *Client) ModifyL4ProxyRulesStatusWithContext(ctx context.Context, reques
     if request == nil {
         request = NewModifyL4ProxyRulesStatusRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyL4ProxyRulesStatus")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyL4ProxyRulesStatus require credential")
@@ -5854,6 +13540,7 @@ func (c *Client) ModifyL4ProxyStatusWithContext(ctx context.Context, request *Mo
     if request == nil {
         request = NewModifyL4ProxyStatusRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyL4ProxyStatus")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyL4ProxyStatus require credential")
@@ -5862,6 +13549,878 @@ func (c *Client) ModifyL4ProxyStatusWithContext(ctx context.Context, request *Mo
     request.SetContext(ctx)
     
     response = NewModifyL4ProxyStatusResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyL7AccRuleRequest() (request *ModifyL7AccRuleRequest) {
+    request = &ModifyL7AccRuleRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifyL7AccRule")
+    
+    
+    return
+}
+
+func NewModifyL7AccRuleResponse() (response *ModifyL7AccRuleResponse) {
+    response = &ModifyL7AccRuleResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyL7AccRule
+// 本接口用于修改[规则引擎](https://cloud.tencent.com/document/product/1552/70901)中的规则，单次仅支持修改单条规则。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_ADVANCEDORIGINROUTINGNOTSUPPORTACCELERATEMAINLAND = "InvalidParameter.AdvancedOriginRoutingNotSupportAccelerateMainland"
+//  INVALIDPARAMETER_ADVANCEDORIGINROUTINGNOTSUPPORTCURRENTPLANORIGINWHITELIST = "InvalidParameter.AdvancedOriginRoutingNotSupportCurrentPlanOriginWhitelist"
+//  INVALIDPARAMETER_ADVANCEDORIGINROUTINGNOTSUPPORTMULTIPLYLAYER = "InvalidParameter.AdvancedOriginRoutingNotSupportMultiplyLayer"
+//  INVALIDPARAMETER_ADVANCEDORIGINROUTINGNOTSUPPORTOCDIRECTORIGIN = "InvalidParameter.AdvancedOriginRoutingNotSupportOCDirectOrigin"
+//  INVALIDPARAMETER_ADVANCEDORIGINROUTINGNOTSUPPORTRACINGPLATFORM = "InvalidParameter.AdvancedOriginRoutingNotSupportRacingPlatform"
+//  INVALIDPARAMETER_CACHEKEYQUERYSTRINGTOOMANYVALUE = "InvalidParameter.CacheKeyQueryStringTooManyValue"
+//  INVALIDPARAMETER_CERTSYSTEMERROR = "InvalidParameter.CertSystemError"
+//  INVALIDPARAMETER_COMPRESSIONINVALIDALGORITHMS = "InvalidParameter.CompressionInvalidAlgorithms"
+//  INVALIDPARAMETER_ERRACTIONUNSUPPORTTARGET = "InvalidParameter.ErrActionUnsupportTarget"
+//  INVALIDPARAMETER_ERRINVALIDACTION = "InvalidParameter.ErrInvalidAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONDUPLICATEACTION = "InvalidParameter.ErrInvalidActionDuplicateAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAM = "InvalidParameter.ErrInvalidActionParam"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMACTION = "InvalidParameter.ErrInvalidActionParamAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMDUPLICATENAME = "InvalidParameter.ErrInvalidActionParamDuplicateName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMNAME = "InvalidParameter.ErrInvalidActionParamName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMTOOMANYVALUES = "InvalidParameter.ErrInvalidActionParamTooManyValues"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMVALUE = "InvalidParameter.ErrInvalidActionParamValue"
+//  INVALIDPARAMETER_ERRINVALIDACTIONTYPE = "InvalidParameter.ErrInvalidActionType"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONHOSTTOOMANYWHENMODIFYORIGINACTIONCONFIGURED = "InvalidParameter.ErrInvalidConditionHostTooManyWhenModifyOriginActionConfigured"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONIGNORECASE = "InvalidParameter.ErrInvalidConditionIgnoreCase"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMEBADNAME = "InvalidParameter.ErrInvalidConditionNameBadName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMETARGETNOTSUPPORTNAME = "InvalidParameter.ErrInvalidConditionNameTargetNotSupportName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADREGULAR = "InvalidParameter.ErrInvalidConditionValueBadRegular"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADURL = "InvalidParameter.ErrInvalidConditionValueBadUrl"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUE = "InvalidParameter.ErrInvalidConditionValueBadValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUECONTAINFILENAMEEXTENSION = "InvalidParameter.ErrInvalidConditionValueBadValueContainFileNameExtension"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOLONGVALUE = "InvalidParameter.ErrInvalidConditionValueTooLongValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYVALUES = "InvalidParameter.ErrInvalidConditionValueTooManyValues"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYWILDCARD = "InvalidParameter.ErrInvalidConditionValueTooManyWildcard"
+//  INVALIDPARAMETER_ERRINVALIDELSEWHENMODIFYORIGINACTIONCONFIGURED = "InvalidParameter.ErrInvalidElseWhenModifyOriginActionConfigured"
+//  INVALIDPARAMETER_ERRNILCONDITION = "InvalidParameter.ErrNilCondition"
+//  INVALIDPARAMETER_GRPCREQUIREHTTP2 = "InvalidParameter.GrpcRequireHttp2"
+//  INVALIDPARAMETER_HOSTNOTFOUND = "InvalidParameter.HostNotFound"
+//  INVALIDPARAMETER_INVALIDADVANCEDORIGINROUTINGUNSUPPORTED = "InvalidParameter.InvalidAdvancedOriginRoutingUnsupported"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPESECRETKEY = "InvalidParameter.InvalidAuthenticationTypeSecretKey"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPESIGNPARAM = "InvalidParameter.InvalidAuthenticationTypeSignParam"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPETIMEFORMAT = "InvalidParameter.InvalidAuthenticationTypeTimeFormat"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPETIMEPARAM = "InvalidParameter.InvalidAuthenticationTypeTimeParam"
+//  INVALIDPARAMETER_INVALIDAWSREGION = "InvalidParameter.InvalidAwsRegion"
+//  INVALIDPARAMETER_INVALIDBACKUPSERVERNAME = "InvalidParameter.InvalidBackupServerName"
+//  INVALIDPARAMETER_INVALIDCACHEKEY = "InvalidParameter.InvalidCacheKey"
+//  INVALIDPARAMETER_INVALIDCACHEKEYCOOKIE = "InvalidParameter.InvalidCacheKeyCookie"
+//  INVALIDPARAMETER_INVALIDCACHEKEYIGNORECASE = "InvalidParameter.InvalidCacheKeyIgnoreCase"
+//  INVALIDPARAMETER_INVALIDCACHEKEYSCHEME = "InvalidParameter.InvalidCacheKeyScheme"
+//  INVALIDPARAMETER_INVALIDCACHETIME = "InvalidParameter.InvalidCacheTime"
+//  INVALIDPARAMETER_INVALIDCLIENTIPHEADERNAME = "InvalidParameter.InvalidClientIpHeaderName"
+//  INVALIDPARAMETER_INVALIDCOSDOMAIN = "InvalidParameter.InvalidCosDomain"
+//  INVALIDPARAMETER_INVALIDERRORPAGEREDIRECTURL = "InvalidParameter.InvalidErrorPageRedirectUrl"
+//  INVALIDPARAMETER_INVALIDHTTPSCIPHERSUITEANDTLSVERSION = "InvalidParameter.InvalidHttpsCipherSuiteAndTlsVersion"
+//  INVALIDPARAMETER_INVALIDHTTPSHSTSMAXAGE = "InvalidParameter.InvalidHttpsHstsMaxAge"
+//  INVALIDPARAMETER_INVALIDIPV6SWITCH = "InvalidParameter.InvalidIpv6Switch"
+//  INVALIDPARAMETER_INVALIDMAXAGETIME = "InvalidParameter.InvalidMaxAgeTime"
+//  INVALIDPARAMETER_INVALIDORIGIN = "InvalidParameter.InvalidOrigin"
+//  INVALIDPARAMETER_INVALIDPARAMETER = "InvalidParameter.InvalidParameter"
+//  INVALIDPARAMETER_INVALIDRANGEORIGINPULL = "InvalidParameter.InvalidRangeOriginPull"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAME = "InvalidParameter.InvalidRequestHeaderName"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAMEXFF = "InvalidParameter.InvalidRequestHeaderNameXff"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERVALUE = "InvalidParameter.InvalidRequestHeaderValue"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERNAME = "InvalidParameter.InvalidResponseHeaderName"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERVALUE = "InvalidParameter.InvalidResponseHeaderValue"
+//  INVALIDPARAMETER_INVALIDRULEENGINEACTION = "InvalidParameter.InvalidRuleEngineAction"
+//  INVALIDPARAMETER_INVALIDRULEENGINENOTFOUND = "InvalidParameter.InvalidRuleEngineNotFound"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGET = "InvalidParameter.InvalidRuleEngineTarget"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSEXTENSION = "InvalidParameter.InvalidRuleEngineTargetsExtension"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSURL = "InvalidParameter.InvalidRuleEngineTargetsUrl"
+//  INVALIDPARAMETER_INVALIDSERVERNAME = "InvalidParameter.InvalidServerName"
+//  INVALIDPARAMETER_INVALIDSHIELDUNSUPPORTED = "InvalidParameter.InvalidShieldUnsupported"
+//  INVALIDPARAMETER_INVALIDUPSTREAMREQUESTQUERYSTRINGVALUE = "InvalidParameter.InvalidUpstreamRequestQueryStringValue"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTHOST = "InvalidParameter.InvalidUrlRedirectHost"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTURL = "InvalidParameter.InvalidUrlRedirectUrl"
+//  INVALIDPARAMETER_KEYRULESINVALIDQUERYSTRINGVALUE = "InvalidParameter.KeyRulesInvalidQueryStringValue"
+//  INVALIDPARAMETER_LOADBALANCEINSTANCEIDISREQUIRED = "InvalidParameter.LoadBalanceInstanceIdIsRequired"
+//  INVALIDPARAMETER_NOTSUPPORTTHISPRESET = "InvalidParameter.NotSupportThisPreset"
+//  INVALIDPARAMETER_ORIGINORIGINGROUPIDISREQUIRED = "InvalidParameter.OriginOriginGroupIdIsRequired"
+//  INVALIDPARAMETER_ORIGINPULLPROTOCOLISREQUIRED = "InvalidParameter.OriginPullProtocolIsRequired"
+//  INVALIDPARAMETER_POSTMAXSIZELIMITEXCEEDED = "InvalidParameter.PostMaxSizeLimitExceeded"
+//  INVALIDPARAMETER_RESPONSEHEADERCACHECONTROLNOTALLOWDELETE = "InvalidParameter.ResponseHeaderCacheControlNotAllowDelete"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTHOSTCACHEPREFRESH = "InvalidParameter.ShieldNotSupportHostCachePrefresh"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTHOSTORIGINWHITELIST = "InvalidParameter.ShieldNotSupportHostOriginWhitelist"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTHOSTSMARTROUTING = "InvalidParameter.ShieldNotSupportHostSmartRouting"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTZONECACHEPREFRESH = "InvalidParameter.ShieldNotSupportZoneCachePrefresh"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTZONESMARTROUTING = "InvalidParameter.ShieldNotSupportZoneSmartRouting"
+//  INVALIDPARAMETER_SHIELDSPACENOTFOUND = "InvalidParameter.ShieldSpaceNotFound"
+//  INVALIDPARAMETER_SHIELDSPACEREQUIREDERROR = "InvalidParameter.ShieldSpaceRequiredError"
+//  INVALIDPARAMETER_SHIELDSPACESTATUSMUSTONLINE = "InvalidParameter.ShieldSpaceStatusMustOnline"
+//  INVALIDPARAMETER_STATUSCODECACHEINVALIDSTATUSCODE = "InvalidParameter.StatusCodeCacheInvalidStatusCode"
+//  INVALIDPARAMETER_TLSVERSIONNOTINSEQUENCE = "InvalidParameter.TlsVersionNotInSequence"
+//  INVALIDPARAMETERVALUE_FORMATMISMATCH = "InvalidParameterValue.FormatMismatch"
+//  INVALIDPARAMETERVALUE_GENERALMISMATCH = "InvalidParameterValue.GeneralMismatch"
+//  INVALIDPARAMETERVALUE_INCLUDEINVALIDVALUE = "InvalidParameterValue.IncludeInvalidValue"
+//  INVALIDPARAMETERVALUE_INVALIDSITEFAILOVERUNSUPPORTED = "InvalidParameterValue.InvalidSiteFailoverUnsupported"
+//  INVALIDPARAMETERVALUE_MISSINGNECESSARYPARAM = "InvalidParameterValue.MissingNecessaryParam"
+//  INVALIDPARAMETERVALUE_NOTINENUMERATION = "InvalidParameterValue.NotInEnumeration"
+//  INVALIDPARAMETERVALUE_NOTWITHINRANGE = "InvalidParameterValue.NotWithinRange"
+//  INVALIDPARAMETERVALUE_REGEXMISMATCH = "InvalidParameterValue.RegExMismatch"
+//  INVALIDPARAMETERVALUE_SITEFAILOVERNOTSUPPORTHOSTORIGINPULLRATELIMIT = "InvalidParameterValue.SiteFailoverNotSupportHostOriginPullRateLimit"
+//  INVALIDPARAMETERVALUE_SITEFAILOVERNOTSUPPORTHOSTORIGINTYPEVOD = "InvalidParameterValue.SiteFailoverNotSupportHostOriginTypeVod"
+//  INVALIDPARAMETERVALUE_SITEFAILOVERNOTSUPPORTHOSTUPSTREAMVERIFY = "InvalidParameterValue.SiteFailoverNotSupportHostUpstreamVerify"
+//  INVALIDPARAMETERVALUE_TRIALPLANRESPONSEPAGE = "InvalidParameterValue.TrialPlanResponsePage"
+//  INVALIDPARAMETERVALUE_UNRECOGNIZABLEVALUE = "InvalidParameterValue.UnrecognizableValue"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_ADVANCEDORIGINROUTINGCONFLICTWITHDCIOVERSEALAN = "OperationDenied.AdvancedOriginRoutingConflictWithDciOverseaLan"
+//  OPERATIONDENIED_CONFIGLOCKED = "OperationDenied.ConfigLocked"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_INVALIDADVANCEDDEFENSESECURITYTYPE = "OperationDenied.InvalidAdvancedDefenseSecurityType"
+//  OPERATIONDENIED_INVALIDADVANCEDORIGINROUTINGBILLING = "OperationDenied.InvalidAdvancedOriginRoutingBilling"
+//  OPERATIONDENIED_NOTINADVANCEDORIGINROUTINGWHITELIST = "OperationDenied.NotInAdvancedOriginRoutingWhiteList"
+//  OPERATIONDENIED_NOTINSHIELDSPACEWHITELIST = "OperationDenied.NotInShieldSpaceWhiteList"
+//  OPERATIONDENIED_NOTINSITEFAILOVERWHITELIST = "OperationDenied.NotInSiteFailoverWhiteList"
+//  RESOURCEINUSE = "ResourceInUse"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) ModifyL7AccRule(request *ModifyL7AccRuleRequest) (response *ModifyL7AccRuleResponse, err error) {
+    return c.ModifyL7AccRuleWithContext(context.Background(), request)
+}
+
+// ModifyL7AccRule
+// 本接口用于修改[规则引擎](https://cloud.tencent.com/document/product/1552/70901)中的规则，单次仅支持修改单条规则。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_ADVANCEDORIGINROUTINGNOTSUPPORTACCELERATEMAINLAND = "InvalidParameter.AdvancedOriginRoutingNotSupportAccelerateMainland"
+//  INVALIDPARAMETER_ADVANCEDORIGINROUTINGNOTSUPPORTCURRENTPLANORIGINWHITELIST = "InvalidParameter.AdvancedOriginRoutingNotSupportCurrentPlanOriginWhitelist"
+//  INVALIDPARAMETER_ADVANCEDORIGINROUTINGNOTSUPPORTMULTIPLYLAYER = "InvalidParameter.AdvancedOriginRoutingNotSupportMultiplyLayer"
+//  INVALIDPARAMETER_ADVANCEDORIGINROUTINGNOTSUPPORTOCDIRECTORIGIN = "InvalidParameter.AdvancedOriginRoutingNotSupportOCDirectOrigin"
+//  INVALIDPARAMETER_ADVANCEDORIGINROUTINGNOTSUPPORTRACINGPLATFORM = "InvalidParameter.AdvancedOriginRoutingNotSupportRacingPlatform"
+//  INVALIDPARAMETER_CACHEKEYQUERYSTRINGTOOMANYVALUE = "InvalidParameter.CacheKeyQueryStringTooManyValue"
+//  INVALIDPARAMETER_CERTSYSTEMERROR = "InvalidParameter.CertSystemError"
+//  INVALIDPARAMETER_COMPRESSIONINVALIDALGORITHMS = "InvalidParameter.CompressionInvalidAlgorithms"
+//  INVALIDPARAMETER_ERRACTIONUNSUPPORTTARGET = "InvalidParameter.ErrActionUnsupportTarget"
+//  INVALIDPARAMETER_ERRINVALIDACTION = "InvalidParameter.ErrInvalidAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONDUPLICATEACTION = "InvalidParameter.ErrInvalidActionDuplicateAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAM = "InvalidParameter.ErrInvalidActionParam"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMACTION = "InvalidParameter.ErrInvalidActionParamAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMDUPLICATENAME = "InvalidParameter.ErrInvalidActionParamDuplicateName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMNAME = "InvalidParameter.ErrInvalidActionParamName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMTOOMANYVALUES = "InvalidParameter.ErrInvalidActionParamTooManyValues"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMVALUE = "InvalidParameter.ErrInvalidActionParamValue"
+//  INVALIDPARAMETER_ERRINVALIDACTIONTYPE = "InvalidParameter.ErrInvalidActionType"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONHOSTTOOMANYWHENMODIFYORIGINACTIONCONFIGURED = "InvalidParameter.ErrInvalidConditionHostTooManyWhenModifyOriginActionConfigured"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONIGNORECASE = "InvalidParameter.ErrInvalidConditionIgnoreCase"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMEBADNAME = "InvalidParameter.ErrInvalidConditionNameBadName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMETARGETNOTSUPPORTNAME = "InvalidParameter.ErrInvalidConditionNameTargetNotSupportName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADREGULAR = "InvalidParameter.ErrInvalidConditionValueBadRegular"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADURL = "InvalidParameter.ErrInvalidConditionValueBadUrl"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUE = "InvalidParameter.ErrInvalidConditionValueBadValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUECONTAINFILENAMEEXTENSION = "InvalidParameter.ErrInvalidConditionValueBadValueContainFileNameExtension"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOLONGVALUE = "InvalidParameter.ErrInvalidConditionValueTooLongValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYVALUES = "InvalidParameter.ErrInvalidConditionValueTooManyValues"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYWILDCARD = "InvalidParameter.ErrInvalidConditionValueTooManyWildcard"
+//  INVALIDPARAMETER_ERRINVALIDELSEWHENMODIFYORIGINACTIONCONFIGURED = "InvalidParameter.ErrInvalidElseWhenModifyOriginActionConfigured"
+//  INVALIDPARAMETER_ERRNILCONDITION = "InvalidParameter.ErrNilCondition"
+//  INVALIDPARAMETER_GRPCREQUIREHTTP2 = "InvalidParameter.GrpcRequireHttp2"
+//  INVALIDPARAMETER_HOSTNOTFOUND = "InvalidParameter.HostNotFound"
+//  INVALIDPARAMETER_INVALIDADVANCEDORIGINROUTINGUNSUPPORTED = "InvalidParameter.InvalidAdvancedOriginRoutingUnsupported"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPESECRETKEY = "InvalidParameter.InvalidAuthenticationTypeSecretKey"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPESIGNPARAM = "InvalidParameter.InvalidAuthenticationTypeSignParam"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPETIMEFORMAT = "InvalidParameter.InvalidAuthenticationTypeTimeFormat"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPETIMEPARAM = "InvalidParameter.InvalidAuthenticationTypeTimeParam"
+//  INVALIDPARAMETER_INVALIDAWSREGION = "InvalidParameter.InvalidAwsRegion"
+//  INVALIDPARAMETER_INVALIDBACKUPSERVERNAME = "InvalidParameter.InvalidBackupServerName"
+//  INVALIDPARAMETER_INVALIDCACHEKEY = "InvalidParameter.InvalidCacheKey"
+//  INVALIDPARAMETER_INVALIDCACHEKEYCOOKIE = "InvalidParameter.InvalidCacheKeyCookie"
+//  INVALIDPARAMETER_INVALIDCACHEKEYIGNORECASE = "InvalidParameter.InvalidCacheKeyIgnoreCase"
+//  INVALIDPARAMETER_INVALIDCACHEKEYSCHEME = "InvalidParameter.InvalidCacheKeyScheme"
+//  INVALIDPARAMETER_INVALIDCACHETIME = "InvalidParameter.InvalidCacheTime"
+//  INVALIDPARAMETER_INVALIDCLIENTIPHEADERNAME = "InvalidParameter.InvalidClientIpHeaderName"
+//  INVALIDPARAMETER_INVALIDCOSDOMAIN = "InvalidParameter.InvalidCosDomain"
+//  INVALIDPARAMETER_INVALIDERRORPAGEREDIRECTURL = "InvalidParameter.InvalidErrorPageRedirectUrl"
+//  INVALIDPARAMETER_INVALIDHTTPSCIPHERSUITEANDTLSVERSION = "InvalidParameter.InvalidHttpsCipherSuiteAndTlsVersion"
+//  INVALIDPARAMETER_INVALIDHTTPSHSTSMAXAGE = "InvalidParameter.InvalidHttpsHstsMaxAge"
+//  INVALIDPARAMETER_INVALIDIPV6SWITCH = "InvalidParameter.InvalidIpv6Switch"
+//  INVALIDPARAMETER_INVALIDMAXAGETIME = "InvalidParameter.InvalidMaxAgeTime"
+//  INVALIDPARAMETER_INVALIDORIGIN = "InvalidParameter.InvalidOrigin"
+//  INVALIDPARAMETER_INVALIDPARAMETER = "InvalidParameter.InvalidParameter"
+//  INVALIDPARAMETER_INVALIDRANGEORIGINPULL = "InvalidParameter.InvalidRangeOriginPull"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAME = "InvalidParameter.InvalidRequestHeaderName"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAMEXFF = "InvalidParameter.InvalidRequestHeaderNameXff"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERVALUE = "InvalidParameter.InvalidRequestHeaderValue"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERNAME = "InvalidParameter.InvalidResponseHeaderName"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERVALUE = "InvalidParameter.InvalidResponseHeaderValue"
+//  INVALIDPARAMETER_INVALIDRULEENGINEACTION = "InvalidParameter.InvalidRuleEngineAction"
+//  INVALIDPARAMETER_INVALIDRULEENGINENOTFOUND = "InvalidParameter.InvalidRuleEngineNotFound"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGET = "InvalidParameter.InvalidRuleEngineTarget"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSEXTENSION = "InvalidParameter.InvalidRuleEngineTargetsExtension"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSURL = "InvalidParameter.InvalidRuleEngineTargetsUrl"
+//  INVALIDPARAMETER_INVALIDSERVERNAME = "InvalidParameter.InvalidServerName"
+//  INVALIDPARAMETER_INVALIDSHIELDUNSUPPORTED = "InvalidParameter.InvalidShieldUnsupported"
+//  INVALIDPARAMETER_INVALIDUPSTREAMREQUESTQUERYSTRINGVALUE = "InvalidParameter.InvalidUpstreamRequestQueryStringValue"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTHOST = "InvalidParameter.InvalidUrlRedirectHost"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTURL = "InvalidParameter.InvalidUrlRedirectUrl"
+//  INVALIDPARAMETER_KEYRULESINVALIDQUERYSTRINGVALUE = "InvalidParameter.KeyRulesInvalidQueryStringValue"
+//  INVALIDPARAMETER_LOADBALANCEINSTANCEIDISREQUIRED = "InvalidParameter.LoadBalanceInstanceIdIsRequired"
+//  INVALIDPARAMETER_NOTSUPPORTTHISPRESET = "InvalidParameter.NotSupportThisPreset"
+//  INVALIDPARAMETER_ORIGINORIGINGROUPIDISREQUIRED = "InvalidParameter.OriginOriginGroupIdIsRequired"
+//  INVALIDPARAMETER_ORIGINPULLPROTOCOLISREQUIRED = "InvalidParameter.OriginPullProtocolIsRequired"
+//  INVALIDPARAMETER_POSTMAXSIZELIMITEXCEEDED = "InvalidParameter.PostMaxSizeLimitExceeded"
+//  INVALIDPARAMETER_RESPONSEHEADERCACHECONTROLNOTALLOWDELETE = "InvalidParameter.ResponseHeaderCacheControlNotAllowDelete"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTHOSTCACHEPREFRESH = "InvalidParameter.ShieldNotSupportHostCachePrefresh"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTHOSTORIGINWHITELIST = "InvalidParameter.ShieldNotSupportHostOriginWhitelist"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTHOSTSMARTROUTING = "InvalidParameter.ShieldNotSupportHostSmartRouting"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTZONECACHEPREFRESH = "InvalidParameter.ShieldNotSupportZoneCachePrefresh"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTZONESMARTROUTING = "InvalidParameter.ShieldNotSupportZoneSmartRouting"
+//  INVALIDPARAMETER_SHIELDSPACENOTFOUND = "InvalidParameter.ShieldSpaceNotFound"
+//  INVALIDPARAMETER_SHIELDSPACEREQUIREDERROR = "InvalidParameter.ShieldSpaceRequiredError"
+//  INVALIDPARAMETER_SHIELDSPACESTATUSMUSTONLINE = "InvalidParameter.ShieldSpaceStatusMustOnline"
+//  INVALIDPARAMETER_STATUSCODECACHEINVALIDSTATUSCODE = "InvalidParameter.StatusCodeCacheInvalidStatusCode"
+//  INVALIDPARAMETER_TLSVERSIONNOTINSEQUENCE = "InvalidParameter.TlsVersionNotInSequence"
+//  INVALIDPARAMETERVALUE_FORMATMISMATCH = "InvalidParameterValue.FormatMismatch"
+//  INVALIDPARAMETERVALUE_GENERALMISMATCH = "InvalidParameterValue.GeneralMismatch"
+//  INVALIDPARAMETERVALUE_INCLUDEINVALIDVALUE = "InvalidParameterValue.IncludeInvalidValue"
+//  INVALIDPARAMETERVALUE_INVALIDSITEFAILOVERUNSUPPORTED = "InvalidParameterValue.InvalidSiteFailoverUnsupported"
+//  INVALIDPARAMETERVALUE_MISSINGNECESSARYPARAM = "InvalidParameterValue.MissingNecessaryParam"
+//  INVALIDPARAMETERVALUE_NOTINENUMERATION = "InvalidParameterValue.NotInEnumeration"
+//  INVALIDPARAMETERVALUE_NOTWITHINRANGE = "InvalidParameterValue.NotWithinRange"
+//  INVALIDPARAMETERVALUE_REGEXMISMATCH = "InvalidParameterValue.RegExMismatch"
+//  INVALIDPARAMETERVALUE_SITEFAILOVERNOTSUPPORTHOSTORIGINPULLRATELIMIT = "InvalidParameterValue.SiteFailoverNotSupportHostOriginPullRateLimit"
+//  INVALIDPARAMETERVALUE_SITEFAILOVERNOTSUPPORTHOSTORIGINTYPEVOD = "InvalidParameterValue.SiteFailoverNotSupportHostOriginTypeVod"
+//  INVALIDPARAMETERVALUE_SITEFAILOVERNOTSUPPORTHOSTUPSTREAMVERIFY = "InvalidParameterValue.SiteFailoverNotSupportHostUpstreamVerify"
+//  INVALIDPARAMETERVALUE_TRIALPLANRESPONSEPAGE = "InvalidParameterValue.TrialPlanResponsePage"
+//  INVALIDPARAMETERVALUE_UNRECOGNIZABLEVALUE = "InvalidParameterValue.UnrecognizableValue"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_ADVANCEDORIGINROUTINGCONFLICTWITHDCIOVERSEALAN = "OperationDenied.AdvancedOriginRoutingConflictWithDciOverseaLan"
+//  OPERATIONDENIED_CONFIGLOCKED = "OperationDenied.ConfigLocked"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_INVALIDADVANCEDDEFENSESECURITYTYPE = "OperationDenied.InvalidAdvancedDefenseSecurityType"
+//  OPERATIONDENIED_INVALIDADVANCEDORIGINROUTINGBILLING = "OperationDenied.InvalidAdvancedOriginRoutingBilling"
+//  OPERATIONDENIED_NOTINADVANCEDORIGINROUTINGWHITELIST = "OperationDenied.NotInAdvancedOriginRoutingWhiteList"
+//  OPERATIONDENIED_NOTINSHIELDSPACEWHITELIST = "OperationDenied.NotInShieldSpaceWhiteList"
+//  OPERATIONDENIED_NOTINSITEFAILOVERWHITELIST = "OperationDenied.NotInSiteFailoverWhiteList"
+//  RESOURCEINUSE = "ResourceInUse"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) ModifyL7AccRuleWithContext(ctx context.Context, request *ModifyL7AccRuleRequest) (response *ModifyL7AccRuleResponse, err error) {
+    if request == nil {
+        request = NewModifyL7AccRuleRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyL7AccRule")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyL7AccRule require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyL7AccRuleResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyL7AccRulePriorityRequest() (request *ModifyL7AccRulePriorityRequest) {
+    request = &ModifyL7AccRulePriorityRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifyL7AccRulePriority")
+    
+    
+    return
+}
+
+func NewModifyL7AccRulePriorityResponse() (response *ModifyL7AccRulePriorityResponse) {
+    response = &ModifyL7AccRulePriorityResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyL7AccRulePriority
+// 本接口用于修改[规则引擎](https://cloud.tencent.com/document/product/1552/70901)中规则列表的优先级，本接口需要传入站点 ID 下完整的规则 ID 列表，规则 ID 列表可以通过[查询七层加速规则](https://cloud.tencent.com/document/product/1552/115820)接口获取，最终优先级顺序将调整成规则 ID 列表的顺序，从前往后执行。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER_INVALIDRULEENGINE = "InvalidParameter.InvalidRuleEngine"
+//  INVALIDPARAMETER_INVALIDRULEENGINENOTFOUND = "InvalidParameter.InvalidRuleEngineNotFound"
+func (c *Client) ModifyL7AccRulePriority(request *ModifyL7AccRulePriorityRequest) (response *ModifyL7AccRulePriorityResponse, err error) {
+    return c.ModifyL7AccRulePriorityWithContext(context.Background(), request)
+}
+
+// ModifyL7AccRulePriority
+// 本接口用于修改[规则引擎](https://cloud.tencent.com/document/product/1552/70901)中规则列表的优先级，本接口需要传入站点 ID 下完整的规则 ID 列表，规则 ID 列表可以通过[查询七层加速规则](https://cloud.tencent.com/document/product/1552/115820)接口获取，最终优先级顺序将调整成规则 ID 列表的顺序，从前往后执行。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER_INVALIDRULEENGINE = "InvalidParameter.InvalidRuleEngine"
+//  INVALIDPARAMETER_INVALIDRULEENGINENOTFOUND = "InvalidParameter.InvalidRuleEngineNotFound"
+func (c *Client) ModifyL7AccRulePriorityWithContext(ctx context.Context, request *ModifyL7AccRulePriorityRequest) (response *ModifyL7AccRulePriorityResponse, err error) {
+    if request == nil {
+        request = NewModifyL7AccRulePriorityRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyL7AccRulePriority")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyL7AccRulePriority require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyL7AccRulePriorityResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyL7AccSettingRequest() (request *ModifyL7AccSettingRequest) {
+    request = &ModifyL7AccSettingRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifyL7AccSetting")
+    
+    
+    return
+}
+
+func NewModifyL7AccSettingResponse() (response *ModifyL7AccSettingResponse) {
+    response = &ModifyL7AccSettingResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyL7AccSetting
+// 本接口用于修改[站点加速](https://cloud.tencent.com/document/product/1552/96193)全局配置。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_CERTIFICATENOTFOUND = "FailedOperation.CertificateNotFound"
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INTERNALERROR_UNKNOWERROR = "InternalError.UnknowError"
+//  INVALIDPARAMETER_ACTIONINPROGRESS = "InvalidParameter.ActionInProgress"
+//  INVALIDPARAMETER_CACHEKEYQUERYSTRINGREQUIRESFULLURLCACHEOFF = "InvalidParameter.CacheKeyQueryStringRequiresFullUrlCacheOff"
+//  INVALIDPARAMETER_CACHEKEYQUERYSTRINGTOOMANYVALUE = "InvalidParameter.CacheKeyQueryStringTooManyValue"
+//  INVALIDPARAMETER_CERTSYSTEMERROR = "InvalidParameter.CertSystemError"
+//  INVALIDPARAMETER_CLIENTIPCOUNTRYCONFLICTSWITHIPV6 = "InvalidParameter.ClientIpCountryConflictsWithIpv6"
+//  INVALIDPARAMETER_GRPCREQUIREHTTP2 = "InvalidParameter.GrpcRequireHttp2"
+//  INVALIDPARAMETER_INVALIDAWSPRIVATEACCESS = "InvalidParameter.InvalidAwsPrivateAccess"
+//  INVALIDPARAMETER_INVALIDCACHECONFIGFOLLOWORIGIN = "InvalidParameter.InvalidCacheConfigFollowOrigin"
+//  INVALIDPARAMETER_INVALIDCACHEKEYQUERYSTRINGVALUE = "InvalidParameter.InvalidCacheKeyQueryStringValue"
+//  INVALIDPARAMETER_INVALIDCACHEONLYONSWITCH = "InvalidParameter.InvalidCacheOnlyOnSwitch"
+//  INVALIDPARAMETER_INVALIDCACHETIME = "InvalidParameter.InvalidCacheTime"
+//  INVALIDPARAMETER_INVALIDCLIENTIPCOUNTRYHEADERNAME = "InvalidParameter.InvalidClientIpCountryHeaderName"
+//  INVALIDPARAMETER_INVALIDCLIENTIPHEADERNAME = "InvalidParameter.InvalidClientIpHeaderName"
+//  INVALIDPARAMETER_INVALIDDYNAMICROUTINE = "InvalidParameter.InvalidDynamicRoutine"
+//  INVALIDPARAMETER_INVALIDDYNAMICROUTINEBILLING = "InvalidParameter.InvalidDynamicRoutineBilling"
+//  INVALIDPARAMETER_INVALIDFORCEREDIRECTTYPE = "InvalidParameter.InvalidForceRedirectType"
+//  INVALIDPARAMETER_INVALIDHTTPS = "InvalidParameter.InvalidHttps"
+//  INVALIDPARAMETER_INVALIDHTTPSCERTINFO = "InvalidParameter.InvalidHttpsCertInfo"
+//  INVALIDPARAMETER_INVALIDHTTPSCIPHERSUITEANDTLSVERSION = "InvalidParameter.InvalidHttpsCipherSuiteAndTlsVersion"
+//  INVALIDPARAMETER_INVALIDHTTPSHSTSMAXAGE = "InvalidParameter.InvalidHttpsHstsMaxAge"
+//  INVALIDPARAMETER_INVALIDHTTPSTLSVERSION = "InvalidParameter.InvalidHttpsTlsVersion"
+//  INVALIDPARAMETER_INVALIDIPV6SWITCH = "InvalidParameter.InvalidIpv6Switch"
+//  INVALIDPARAMETER_INVALIDMAXAGETIME = "InvalidParameter.InvalidMaxAgeTime"
+//  INVALIDPARAMETER_INVALIDORIGIN = "InvalidParameter.InvalidOrigin"
+//  INVALIDPARAMETER_INVALIDORIGINTYPE = "InvalidParameter.InvalidOriginType"
+//  INVALIDPARAMETER_INVALIDPARAMETER = "InvalidParameter.InvalidParameter"
+//  INVALIDPARAMETER_INVALIDPOSTMAXSIZEBILLING = "InvalidParameter.InvalidPostMaxSizeBilling"
+//  INVALIDPARAMETER_INVALIDPOSTSIZEVALUE = "InvalidParameter.InvalidPostSizeValue"
+//  INVALIDPARAMETER_INVALIDRANGEORIGINPULL = "InvalidParameter.InvalidRangeOriginPull"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAME = "InvalidParameter.InvalidRequestHeaderName"
+//  INVALIDPARAMETER_INVALIDRESOURCEIDBILLING = "InvalidParameter.InvalidResourceIdBilling"
+//  INVALIDPARAMETER_INVALIDSTANDARDDEBUGCLIENTIP = "InvalidParameter.InvalidStandardDebugClientIp"
+//  INVALIDPARAMETER_INVALIDSTANDARDDEBUGEMPTYLIST = "InvalidParameter.InvalidStandardDebugEmptyList"
+//  INVALIDPARAMETER_INVALIDSTANDARDDEBUGEXPIRETIMELIMIT = "InvalidParameter.InvalidStandardDebugExpireTimeLimit"
+//  INVALIDPARAMETER_INVALIDWEBSOCKETTIMEOUT = "InvalidParameter.InvalidWebSocketTimeout"
+//  INVALIDPARAMETER_MULTIPLYLAYERNOTSUPPORTSMARTROUTING = "InvalidParameter.MultiplyLayerNotSupportSmartRouting"
+//  INVALIDPARAMETER_OCDIRECTORIGINREQUIRESSMARTROUTING = "InvalidParameter.OCDirectOriginRequiresSmartRouting"
+//  INVALIDPARAMETER_POSTMAXSIZELIMITEXCEEDED = "InvalidParameter.PostMaxSizeLimitExceeded"
+//  INVALIDPARAMETER_SETTINGINVALIDPARAM = "InvalidParameter.SettingInvalidParam"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTZONECACHEPREFRESH = "InvalidParameter.ShieldNotSupportZoneCachePrefresh"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTZONESMARTROUTING = "InvalidParameter.ShieldNotSupportZoneSmartRouting"
+//  INVALIDPARAMETER_ZONEISGRAYPUBLISHING = "InvalidParameter.ZoneIsGrayPublishing"
+//  INVALIDPARAMETER_ZONENOTFOUND = "InvalidParameter.ZoneNotFound"
+//  INVALIDPARAMETERVALUE_FORMATMISMATCH = "InvalidParameterValue.FormatMismatch"
+//  INVALIDPARAMETERVALUE_GENERALMISMATCH = "InvalidParameterValue.GeneralMismatch"
+//  INVALIDPARAMETERVALUE_INCLUDEINVALIDVALUE = "InvalidParameterValue.IncludeInvalidValue"
+//  INVALIDPARAMETERVALUE_MISSINGNECESSARYPARAM = "InvalidParameterValue.MissingNecessaryParam"
+//  INVALIDPARAMETERVALUE_NOTINENUMERATION = "InvalidParameterValue.NotInEnumeration"
+//  INVALIDPARAMETERVALUE_NOTWITHINRANGE = "InvalidParameterValue.NotWithinRange"
+//  INVALIDPARAMETERVALUE_REGEXMISMATCH = "InvalidParameterValue.RegExMismatch"
+//  INVALIDPARAMETERVALUE_UNRECOGNIZABLEVALUE = "InvalidParameterValue.UnrecognizableValue"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_ACCELERATEMAINLANDDISABLE = "OperationDenied.AccelerateMainlandDisable"
+//  OPERATIONDENIED_ACCELERATEMAINLANDIPV6CONFLICT = "OperationDenied.AccelerateMainlandIpv6Conflict"
+//  OPERATIONDENIED_ACCELERATEMAINLANDMULTIPLYLAYERCONFLICT = "OperationDenied.AccelerateMainlandMultiplyLayerConflict"
+//  OPERATIONDENIED_CONFIGLOCKED = "OperationDenied.ConfigLocked"
+//  OPERATIONDENIED_DISABLEZONENOTCOMPLETED = "OperationDenied.DisableZoneNotCompleted"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_NOTALLOWCLOSEACCELERATEMAINLANDWHENDOMAINBOUNDEXCLUSIVEIP = "OperationDenied.NotAllowCloseAccelerateMainlandWhenDomainBoundExclusiveIP"
+//  OPERATIONDENIED_SHAREDCNAMEUNSUPPORTEDACCELERATEMAINLAND = "OperationDenied.SharedCNAMEUnsupportedAccelerateMainland"
+//  OPERATIONDENIED_SHAREDCNAMEUNSUPPORTEDIPV6 = "OperationDenied.SharedCNAMEUnsupportedIPv6"
+//  RESOURCEINUSE = "ResourceInUse"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  RESOURCENOTFOUND_POSTMAXSIZEQUOTANOTFOUND = "ResourceNotFound.PostMaxSizeQuotaNotFound"
+//  RESOURCEUNAVAILABLE_CERTNOTFOUND = "ResourceUnavailable.CertNotFound"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+func (c *Client) ModifyL7AccSetting(request *ModifyL7AccSettingRequest) (response *ModifyL7AccSettingResponse, err error) {
+    return c.ModifyL7AccSettingWithContext(context.Background(), request)
+}
+
+// ModifyL7AccSetting
+// 本接口用于修改[站点加速](https://cloud.tencent.com/document/product/1552/96193)全局配置。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_CERTIFICATENOTFOUND = "FailedOperation.CertificateNotFound"
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_ROUTEERROR = "InternalError.RouteError"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INTERNALERROR_UNKNOWERROR = "InternalError.UnknowError"
+//  INVALIDPARAMETER_ACTIONINPROGRESS = "InvalidParameter.ActionInProgress"
+//  INVALIDPARAMETER_CACHEKEYQUERYSTRINGREQUIRESFULLURLCACHEOFF = "InvalidParameter.CacheKeyQueryStringRequiresFullUrlCacheOff"
+//  INVALIDPARAMETER_CACHEKEYQUERYSTRINGTOOMANYVALUE = "InvalidParameter.CacheKeyQueryStringTooManyValue"
+//  INVALIDPARAMETER_CERTSYSTEMERROR = "InvalidParameter.CertSystemError"
+//  INVALIDPARAMETER_CLIENTIPCOUNTRYCONFLICTSWITHIPV6 = "InvalidParameter.ClientIpCountryConflictsWithIpv6"
+//  INVALIDPARAMETER_GRPCREQUIREHTTP2 = "InvalidParameter.GrpcRequireHttp2"
+//  INVALIDPARAMETER_INVALIDAWSPRIVATEACCESS = "InvalidParameter.InvalidAwsPrivateAccess"
+//  INVALIDPARAMETER_INVALIDCACHECONFIGFOLLOWORIGIN = "InvalidParameter.InvalidCacheConfigFollowOrigin"
+//  INVALIDPARAMETER_INVALIDCACHEKEYQUERYSTRINGVALUE = "InvalidParameter.InvalidCacheKeyQueryStringValue"
+//  INVALIDPARAMETER_INVALIDCACHEONLYONSWITCH = "InvalidParameter.InvalidCacheOnlyOnSwitch"
+//  INVALIDPARAMETER_INVALIDCACHETIME = "InvalidParameter.InvalidCacheTime"
+//  INVALIDPARAMETER_INVALIDCLIENTIPCOUNTRYHEADERNAME = "InvalidParameter.InvalidClientIpCountryHeaderName"
+//  INVALIDPARAMETER_INVALIDCLIENTIPHEADERNAME = "InvalidParameter.InvalidClientIpHeaderName"
+//  INVALIDPARAMETER_INVALIDDYNAMICROUTINE = "InvalidParameter.InvalidDynamicRoutine"
+//  INVALIDPARAMETER_INVALIDDYNAMICROUTINEBILLING = "InvalidParameter.InvalidDynamicRoutineBilling"
+//  INVALIDPARAMETER_INVALIDFORCEREDIRECTTYPE = "InvalidParameter.InvalidForceRedirectType"
+//  INVALIDPARAMETER_INVALIDHTTPS = "InvalidParameter.InvalidHttps"
+//  INVALIDPARAMETER_INVALIDHTTPSCERTINFO = "InvalidParameter.InvalidHttpsCertInfo"
+//  INVALIDPARAMETER_INVALIDHTTPSCIPHERSUITEANDTLSVERSION = "InvalidParameter.InvalidHttpsCipherSuiteAndTlsVersion"
+//  INVALIDPARAMETER_INVALIDHTTPSHSTSMAXAGE = "InvalidParameter.InvalidHttpsHstsMaxAge"
+//  INVALIDPARAMETER_INVALIDHTTPSTLSVERSION = "InvalidParameter.InvalidHttpsTlsVersion"
+//  INVALIDPARAMETER_INVALIDIPV6SWITCH = "InvalidParameter.InvalidIpv6Switch"
+//  INVALIDPARAMETER_INVALIDMAXAGETIME = "InvalidParameter.InvalidMaxAgeTime"
+//  INVALIDPARAMETER_INVALIDORIGIN = "InvalidParameter.InvalidOrigin"
+//  INVALIDPARAMETER_INVALIDORIGINTYPE = "InvalidParameter.InvalidOriginType"
+//  INVALIDPARAMETER_INVALIDPARAMETER = "InvalidParameter.InvalidParameter"
+//  INVALIDPARAMETER_INVALIDPOSTMAXSIZEBILLING = "InvalidParameter.InvalidPostMaxSizeBilling"
+//  INVALIDPARAMETER_INVALIDPOSTSIZEVALUE = "InvalidParameter.InvalidPostSizeValue"
+//  INVALIDPARAMETER_INVALIDRANGEORIGINPULL = "InvalidParameter.InvalidRangeOriginPull"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAME = "InvalidParameter.InvalidRequestHeaderName"
+//  INVALIDPARAMETER_INVALIDRESOURCEIDBILLING = "InvalidParameter.InvalidResourceIdBilling"
+//  INVALIDPARAMETER_INVALIDSTANDARDDEBUGCLIENTIP = "InvalidParameter.InvalidStandardDebugClientIp"
+//  INVALIDPARAMETER_INVALIDSTANDARDDEBUGEMPTYLIST = "InvalidParameter.InvalidStandardDebugEmptyList"
+//  INVALIDPARAMETER_INVALIDSTANDARDDEBUGEXPIRETIMELIMIT = "InvalidParameter.InvalidStandardDebugExpireTimeLimit"
+//  INVALIDPARAMETER_INVALIDWEBSOCKETTIMEOUT = "InvalidParameter.InvalidWebSocketTimeout"
+//  INVALIDPARAMETER_MULTIPLYLAYERNOTSUPPORTSMARTROUTING = "InvalidParameter.MultiplyLayerNotSupportSmartRouting"
+//  INVALIDPARAMETER_OCDIRECTORIGINREQUIRESSMARTROUTING = "InvalidParameter.OCDirectOriginRequiresSmartRouting"
+//  INVALIDPARAMETER_POSTMAXSIZELIMITEXCEEDED = "InvalidParameter.PostMaxSizeLimitExceeded"
+//  INVALIDPARAMETER_SETTINGINVALIDPARAM = "InvalidParameter.SettingInvalidParam"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTZONECACHEPREFRESH = "InvalidParameter.ShieldNotSupportZoneCachePrefresh"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTZONESMARTROUTING = "InvalidParameter.ShieldNotSupportZoneSmartRouting"
+//  INVALIDPARAMETER_ZONEISGRAYPUBLISHING = "InvalidParameter.ZoneIsGrayPublishing"
+//  INVALIDPARAMETER_ZONENOTFOUND = "InvalidParameter.ZoneNotFound"
+//  INVALIDPARAMETERVALUE_FORMATMISMATCH = "InvalidParameterValue.FormatMismatch"
+//  INVALIDPARAMETERVALUE_GENERALMISMATCH = "InvalidParameterValue.GeneralMismatch"
+//  INVALIDPARAMETERVALUE_INCLUDEINVALIDVALUE = "InvalidParameterValue.IncludeInvalidValue"
+//  INVALIDPARAMETERVALUE_MISSINGNECESSARYPARAM = "InvalidParameterValue.MissingNecessaryParam"
+//  INVALIDPARAMETERVALUE_NOTINENUMERATION = "InvalidParameterValue.NotInEnumeration"
+//  INVALIDPARAMETERVALUE_NOTWITHINRANGE = "InvalidParameterValue.NotWithinRange"
+//  INVALIDPARAMETERVALUE_REGEXMISMATCH = "InvalidParameterValue.RegExMismatch"
+//  INVALIDPARAMETERVALUE_UNRECOGNIZABLEVALUE = "InvalidParameterValue.UnrecognizableValue"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_ACCELERATEMAINLANDDISABLE = "OperationDenied.AccelerateMainlandDisable"
+//  OPERATIONDENIED_ACCELERATEMAINLANDIPV6CONFLICT = "OperationDenied.AccelerateMainlandIpv6Conflict"
+//  OPERATIONDENIED_ACCELERATEMAINLANDMULTIPLYLAYERCONFLICT = "OperationDenied.AccelerateMainlandMultiplyLayerConflict"
+//  OPERATIONDENIED_CONFIGLOCKED = "OperationDenied.ConfigLocked"
+//  OPERATIONDENIED_DISABLEZONENOTCOMPLETED = "OperationDenied.DisableZoneNotCompleted"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_NOTALLOWCLOSEACCELERATEMAINLANDWHENDOMAINBOUNDEXCLUSIVEIP = "OperationDenied.NotAllowCloseAccelerateMainlandWhenDomainBoundExclusiveIP"
+//  OPERATIONDENIED_SHAREDCNAMEUNSUPPORTEDACCELERATEMAINLAND = "OperationDenied.SharedCNAMEUnsupportedAccelerateMainland"
+//  OPERATIONDENIED_SHAREDCNAMEUNSUPPORTEDIPV6 = "OperationDenied.SharedCNAMEUnsupportedIPv6"
+//  RESOURCEINUSE = "ResourceInUse"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  RESOURCENOTFOUND_POSTMAXSIZEQUOTANOTFOUND = "ResourceNotFound.PostMaxSizeQuotaNotFound"
+//  RESOURCEUNAVAILABLE_CERTNOTFOUND = "ResourceUnavailable.CertNotFound"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+func (c *Client) ModifyL7AccSettingWithContext(ctx context.Context, request *ModifyL7AccSettingRequest) (response *ModifyL7AccSettingResponse, err error) {
+    if request == nil {
+        request = NewModifyL7AccSettingRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyL7AccSetting")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyL7AccSetting require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyL7AccSettingResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyLoadBalancerRequest() (request *ModifyLoadBalancerRequest) {
+    request = &ModifyLoadBalancerRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifyLoadBalancer")
+    
+    
+    return
+}
+
+func NewModifyLoadBalancerResponse() (response *ModifyLoadBalancerResponse) {
+    response = &ModifyLoadBalancerResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyLoadBalancer
+// 修改负载均衡实例配置。负载均衡功能内测中，如您需要使用请 [联系我们](https://cloud.tencent.com/online-service)。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER_LOADBALANCERBINDL4NOTINSTABLESTATUS = "InvalidParameter.LoadBalancerBindL4NotInStableStatus"
+//  INVALIDPARAMETER_LOADBALANCERBINDL7NOTINSTABLESTATUS = "InvalidParameter.LoadBalancerBindL7NotInStableStatus"
+func (c *Client) ModifyLoadBalancer(request *ModifyLoadBalancerRequest) (response *ModifyLoadBalancerResponse, err error) {
+    return c.ModifyLoadBalancerWithContext(context.Background(), request)
+}
+
+// ModifyLoadBalancer
+// 修改负载均衡实例配置。负载均衡功能内测中，如您需要使用请 [联系我们](https://cloud.tencent.com/online-service)。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER_LOADBALANCERBINDL4NOTINSTABLESTATUS = "InvalidParameter.LoadBalancerBindL4NotInStableStatus"
+//  INVALIDPARAMETER_LOADBALANCERBINDL7NOTINSTABLESTATUS = "InvalidParameter.LoadBalancerBindL7NotInStableStatus"
+func (c *Client) ModifyLoadBalancerWithContext(ctx context.Context, request *ModifyLoadBalancerRequest) (response *ModifyLoadBalancerResponse, err error) {
+    if request == nil {
+        request = NewModifyLoadBalancerRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyLoadBalancer")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyLoadBalancer require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyLoadBalancerResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyMultiPathGatewayRequest() (request *ModifyMultiPathGatewayRequest) {
+    request = &ModifyMultiPathGatewayRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifyMultiPathGateway")
+    
+    
+    return
+}
+
+func NewModifyMultiPathGatewayResponse() (response *ModifyMultiPathGatewayResponse) {
+    response = &ModifyMultiPathGatewayResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyMultiPathGateway
+// 通过本接口修改多通道安全加速网关信息，如名称、网关 ID、IP、端口等。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) ModifyMultiPathGateway(request *ModifyMultiPathGatewayRequest) (response *ModifyMultiPathGatewayResponse, err error) {
+    return c.ModifyMultiPathGatewayWithContext(context.Background(), request)
+}
+
+// ModifyMultiPathGateway
+// 通过本接口修改多通道安全加速网关信息，如名称、网关 ID、IP、端口等。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) ModifyMultiPathGatewayWithContext(ctx context.Context, request *ModifyMultiPathGatewayRequest) (response *ModifyMultiPathGatewayResponse, err error) {
+    if request == nil {
+        request = NewModifyMultiPathGatewayRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyMultiPathGateway")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyMultiPathGateway require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyMultiPathGatewayResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyMultiPathGatewayLineRequest() (request *ModifyMultiPathGatewayLineRequest) {
+    request = &ModifyMultiPathGatewayLineRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifyMultiPathGatewayLine")
+    
+    
+    return
+}
+
+func NewModifyMultiPathGatewayLineResponse() (response *ModifyMultiPathGatewayLineResponse) {
+    response = &ModifyMultiPathGatewayLineResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyMultiPathGatewayLine
+// 通过本接口修改接入多通道安全加速网关的线路，包括 EdgeOne 四层代理线路、自定义线路。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) ModifyMultiPathGatewayLine(request *ModifyMultiPathGatewayLineRequest) (response *ModifyMultiPathGatewayLineResponse, err error) {
+    return c.ModifyMultiPathGatewayLineWithContext(context.Background(), request)
+}
+
+// ModifyMultiPathGatewayLine
+// 通过本接口修改接入多通道安全加速网关的线路，包括 EdgeOne 四层代理线路、自定义线路。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) ModifyMultiPathGatewayLineWithContext(ctx context.Context, request *ModifyMultiPathGatewayLineRequest) (response *ModifyMultiPathGatewayLineResponse, err error) {
+    if request == nil {
+        request = NewModifyMultiPathGatewayLineRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyMultiPathGatewayLine")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyMultiPathGatewayLine require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyMultiPathGatewayLineResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyMultiPathGatewaySecretKeyRequest() (request *ModifyMultiPathGatewaySecretKeyRequest) {
+    request = &ModifyMultiPathGatewaySecretKeyRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifyMultiPathGatewaySecretKey")
+    
+    
+    return
+}
+
+func NewModifyMultiPathGatewaySecretKeyResponse() (response *ModifyMultiPathGatewaySecretKeyResponse) {
+    response = &ModifyMultiPathGatewaySecretKeyResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyMultiPathGatewaySecretKey
+// 通过本接口修改接入多通道安全加速网关的密钥，客户基于接入密钥签名接入多通道安全加速网关，修改后原密钥失效。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) ModifyMultiPathGatewaySecretKey(request *ModifyMultiPathGatewaySecretKeyRequest) (response *ModifyMultiPathGatewaySecretKeyResponse, err error) {
+    return c.ModifyMultiPathGatewaySecretKeyWithContext(context.Background(), request)
+}
+
+// ModifyMultiPathGatewaySecretKey
+// 通过本接口修改接入多通道安全加速网关的密钥，客户基于接入密钥签名接入多通道安全加速网关，修改后原密钥失效。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) ModifyMultiPathGatewaySecretKeyWithContext(ctx context.Context, request *ModifyMultiPathGatewaySecretKeyRequest) (response *ModifyMultiPathGatewaySecretKeyResponse, err error) {
+    if request == nil {
+        request = NewModifyMultiPathGatewaySecretKeyRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyMultiPathGatewaySecretKey")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyMultiPathGatewaySecretKey require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyMultiPathGatewaySecretKeyResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyMultiPathGatewayStatusRequest() (request *ModifyMultiPathGatewayStatusRequest) {
+    request = &ModifyMultiPathGatewayStatusRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifyMultiPathGatewayStatus")
+    
+    
+    return
+}
+
+func NewModifyMultiPathGatewayStatusResponse() (response *ModifyMultiPathGatewayStatusResponse) {
+    response = &ModifyMultiPathGatewayStatusResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyMultiPathGatewayStatus
+// 更新多通道安全网关状态。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) ModifyMultiPathGatewayStatus(request *ModifyMultiPathGatewayStatusRequest) (response *ModifyMultiPathGatewayStatusResponse, err error) {
+    return c.ModifyMultiPathGatewayStatusWithContext(context.Background(), request)
+}
+
+// ModifyMultiPathGatewayStatus
+// 更新多通道安全网关状态。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) ModifyMultiPathGatewayStatusWithContext(ctx context.Context, request *ModifyMultiPathGatewayStatusRequest) (response *ModifyMultiPathGatewayStatusResponse, err error) {
+    if request == nil {
+        request = NewModifyMultiPathGatewayStatusRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyMultiPathGatewayStatus")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyMultiPathGatewayStatus require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyMultiPathGatewayStatusResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyOriginACLRequest() (request *ModifyOriginACLRequest) {
+    request = &ModifyOriginACLRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifyOriginACL")
+    
+    
+    return
+}
+
+func NewModifyOriginACLResponse() (response *ModifyOriginACLResponse) {
+    response = &ModifyOriginACLResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyOriginACL
+// 本接口用于对七层加速域名/四层代理实例启用/关闭特定回源 IP 网段回源。单次支持提交的七层加速域名的数量最大为 200，四层代理实例的数量最大为 100，支持七层加速域名/四层代理实例混合提交，总实例个数最大为 200。如需变更超过 200 个实例，请通过本接口分批提交。同时对于开白的客户支持切换到其他可用的源站防护 IP 网段版本，例如精简版，可以减少回源 IP 网段。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_INVALIDDOMAINS = "InvalidParameter.InvalidDomains"
+//  INVALIDPARAMETER_INVALIDPROXIES = "InvalidParameter.InvalidProxies"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTHOSTORIGINWHITELIST = "InvalidParameter.ShieldNotSupportHostOriginWhitelist"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_UNSUPPORTEDPLAN = "OperationDenied.UnsupportedPlan"
+//  OPERATIONDENIED_UPDATEIPWHITELISTFIRST = "OperationDenied.UpdateIPWhitelistFirst"
+func (c *Client) ModifyOriginACL(request *ModifyOriginACLRequest) (response *ModifyOriginACLResponse, err error) {
+    return c.ModifyOriginACLWithContext(context.Background(), request)
+}
+
+// ModifyOriginACL
+// 本接口用于对七层加速域名/四层代理实例启用/关闭特定回源 IP 网段回源。单次支持提交的七层加速域名的数量最大为 200，四层代理实例的数量最大为 100，支持七层加速域名/四层代理实例混合提交，总实例个数最大为 200。如需变更超过 200 个实例，请通过本接口分批提交。同时对于开白的客户支持切换到其他可用的源站防护 IP 网段版本，例如精简版，可以减少回源 IP 网段。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_INVALIDDOMAINS = "InvalidParameter.InvalidDomains"
+//  INVALIDPARAMETER_INVALIDPROXIES = "InvalidParameter.InvalidProxies"
+//  INVALIDPARAMETER_SHIELDNOTSUPPORTHOSTORIGINWHITELIST = "InvalidParameter.ShieldNotSupportHostOriginWhitelist"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_UNSUPPORTEDPLAN = "OperationDenied.UnsupportedPlan"
+//  OPERATIONDENIED_UPDATEIPWHITELISTFIRST = "OperationDenied.UpdateIPWhitelistFirst"
+func (c *Client) ModifyOriginACLWithContext(ctx context.Context, request *ModifyOriginACLRequest) (response *ModifyOriginACLResponse, err error) {
+    if request == nil {
+        request = NewModifyOriginACLRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyOriginACL")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyOriginACL require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyOriginACLResponse()
     err = c.Send(request, response)
     return
 }
@@ -5931,6 +14490,7 @@ func (c *Client) ModifyOriginGroupWithContext(ctx context.Context, request *Modi
     if request == nil {
         request = NewModifyOriginGroupRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyOriginGroup")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyOriginGroup require credential")
@@ -5984,6 +14544,7 @@ func (c *Client) ModifyPlanWithContext(ctx context.Context, request *ModifyPlanR
     if request == nil {
         request = NewModifyPlanRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyPlan")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyPlan require credential")
@@ -5992,6 +14553,96 @@ func (c *Client) ModifyPlanWithContext(ctx context.Context, request *ModifyPlanR
     request.SetContext(ctx)
     
     response = NewModifyPlanResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyPrefetchOriginLimitRequest() (request *ModifyPrefetchOriginLimitRequest) {
+    request = &ModifyPrefetchOriginLimitRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifyPrefetchOriginLimit")
+    
+    
+    return
+}
+
+func NewModifyPrefetchOriginLimitResponse() (response *ModifyPrefetchOriginLimitResponse) {
+    response = &ModifyPrefetchOriginLimitResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyPrefetchOriginLimit
+// 本接口用于配置回源限速限制，该功能白名单内测中。
+//
+// 可通过此接口创建、修改与删除预热回源限速限制，每个账号最多支持 100 条限制。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_CREATEPREFETCHORIGINLIMITFAILED = "FailedOperation.CreatePrefetchOriginLimitFailed"
+//  FAILEDOPERATION_PREFETCHORIGINLIMITCOUNTEXCEEDED = "FailedOperation.PrefetchOriginLimitCountExceeded"
+//  FAILEDOPERATION_PREFETCHORIGINLIMITNOTFOUND = "FailedOperation.PrefetchOriginLimitNotFound"
+//  INTERNALERROR_BACKENDERROR = "InternalError.BackendError"
+//  INTERNALERROR_DOMAINCONFIG = "InternalError.DomainConfig"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_DOMAINAREANOTSUPPORTPREFETCHORIGINLIMITAREA = "InvalidParameter.DomainAreaNotSupportPrefetchOriginLimitArea"
+//  INVALIDPARAMETER_DOMAINNOTFOUND = "InvalidParameter.DomainNotFound"
+//  INVALIDPARAMETER_PREFETCHORIGINLIMITAREAINVALID = "InvalidParameter.PrefetchOriginLimitAreaInvalid"
+//  INVALIDPARAMETER_PREFETCHORIGINLIMITBANDWIDTHTOOLARGE = "InvalidParameter.PrefetchOriginLimitBandwidthTooLarge"
+//  INVALIDPARAMETER_PREFETCHORIGINLIMITBANDWIDTHTOOSMALL = "InvalidParameter.PrefetchOriginLimitBandwidthTooSmall"
+//  INVALIDPARAMETER_PREFETCHORIGINLIMITENABLEDINVALID = "InvalidParameter.PrefetchOriginLimitEnabledInvalid"
+//  INVALIDPARAMETER_ZONEAREANOTSUPPORTPREFETCHORIGINLIMITAREA = "InvalidParameter.ZoneAreaNotSupportPrefetchOriginLimitArea"
+//  OPERATIONDENIED_NOTINPREFETCHORIGINLIMITWHITELIST = "OperationDenied.NotInPrefetchOriginLimitWhiteList"
+//  RESOURCEINUSE_PREFETCHORIGINLIMITALREADYEXISTS = "ResourceInUse.PrefetchOriginLimitAlreadyExists"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) ModifyPrefetchOriginLimit(request *ModifyPrefetchOriginLimitRequest) (response *ModifyPrefetchOriginLimitResponse, err error) {
+    return c.ModifyPrefetchOriginLimitWithContext(context.Background(), request)
+}
+
+// ModifyPrefetchOriginLimit
+// 本接口用于配置回源限速限制，该功能白名单内测中。
+//
+// 可通过此接口创建、修改与删除预热回源限速限制，每个账号最多支持 100 条限制。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_CREATEPREFETCHORIGINLIMITFAILED = "FailedOperation.CreatePrefetchOriginLimitFailed"
+//  FAILEDOPERATION_PREFETCHORIGINLIMITCOUNTEXCEEDED = "FailedOperation.PrefetchOriginLimitCountExceeded"
+//  FAILEDOPERATION_PREFETCHORIGINLIMITNOTFOUND = "FailedOperation.PrefetchOriginLimitNotFound"
+//  INTERNALERROR_BACKENDERROR = "InternalError.BackendError"
+//  INTERNALERROR_DOMAINCONFIG = "InternalError.DomainConfig"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETER_DOMAINAREANOTSUPPORTPREFETCHORIGINLIMITAREA = "InvalidParameter.DomainAreaNotSupportPrefetchOriginLimitArea"
+//  INVALIDPARAMETER_DOMAINNOTFOUND = "InvalidParameter.DomainNotFound"
+//  INVALIDPARAMETER_PREFETCHORIGINLIMITAREAINVALID = "InvalidParameter.PrefetchOriginLimitAreaInvalid"
+//  INVALIDPARAMETER_PREFETCHORIGINLIMITBANDWIDTHTOOLARGE = "InvalidParameter.PrefetchOriginLimitBandwidthTooLarge"
+//  INVALIDPARAMETER_PREFETCHORIGINLIMITBANDWIDTHTOOSMALL = "InvalidParameter.PrefetchOriginLimitBandwidthTooSmall"
+//  INVALIDPARAMETER_PREFETCHORIGINLIMITENABLEDINVALID = "InvalidParameter.PrefetchOriginLimitEnabledInvalid"
+//  INVALIDPARAMETER_ZONEAREANOTSUPPORTPREFETCHORIGINLIMITAREA = "InvalidParameter.ZoneAreaNotSupportPrefetchOriginLimitArea"
+//  OPERATIONDENIED_NOTINPREFETCHORIGINLIMITWHITELIST = "OperationDenied.NotInPrefetchOriginLimitWhiteList"
+//  RESOURCEINUSE_PREFETCHORIGINLIMITALREADYEXISTS = "ResourceInUse.PrefetchOriginLimitAlreadyExists"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) ModifyPrefetchOriginLimitWithContext(ctx context.Context, request *ModifyPrefetchOriginLimitRequest) (response *ModifyPrefetchOriginLimitResponse, err error) {
+    if request == nil {
+        request = NewModifyPrefetchOriginLimitRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyPrefetchOriginLimit")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyPrefetchOriginLimit require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyPrefetchOriginLimitResponse()
     err = c.Send(request, response)
     return
 }
@@ -6024,6 +14675,7 @@ func NewModifyRealtimeLogDeliveryTaskResponse() (response *ModifyRealtimeLogDeli
 //  INVALIDPARAMETER_INVALIDLOGFORMATFIELDDELIMITER = "InvalidParameter.InvalidLogFormatFieldDelimiter"
 //  INVALIDPARAMETER_INVALIDLOGFORMATFORMATTYPE = "InvalidParameter.InvalidLogFormatFormatType"
 //  INVALIDPARAMETER_INVALIDLOGFORMATRECORDDELIMITER = "InvalidParameter.InvalidLogFormatRecordDelimiter"
+//  LIMITEXCEEDED_CUSTOMLOGFIELDREGEXLIMITEXCEEDED = "LimitExceeded.CustomLogFieldRegexLimitExceeded"
 func (c *Client) ModifyRealtimeLogDeliveryTask(request *ModifyRealtimeLogDeliveryTaskRequest) (response *ModifyRealtimeLogDeliveryTaskResponse, err error) {
     return c.ModifyRealtimeLogDeliveryTaskWithContext(context.Background(), request)
 }
@@ -6037,10 +14689,12 @@ func (c *Client) ModifyRealtimeLogDeliveryTask(request *ModifyRealtimeLogDeliver
 //  INVALIDPARAMETER_INVALIDLOGFORMATFIELDDELIMITER = "InvalidParameter.InvalidLogFormatFieldDelimiter"
 //  INVALIDPARAMETER_INVALIDLOGFORMATFORMATTYPE = "InvalidParameter.InvalidLogFormatFormatType"
 //  INVALIDPARAMETER_INVALIDLOGFORMATRECORDDELIMITER = "InvalidParameter.InvalidLogFormatRecordDelimiter"
+//  LIMITEXCEEDED_CUSTOMLOGFIELDREGEXLIMITEXCEEDED = "LimitExceeded.CustomLogFieldRegexLimitExceeded"
 func (c *Client) ModifyRealtimeLogDeliveryTaskWithContext(ctx context.Context, request *ModifyRealtimeLogDeliveryTaskRequest) (response *ModifyRealtimeLogDeliveryTaskResponse, err error) {
     if request == nil {
         request = NewModifyRealtimeLogDeliveryTaskRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyRealtimeLogDeliveryTask")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyRealtimeLogDeliveryTask require credential")
@@ -6073,7 +14727,9 @@ func NewModifyRuleResponse() (response *ModifyRuleResponse) {
 }
 
 // ModifyRule
-// 修改规则引擎规则。
+// 本接口为旧版本修改规则引擎接口，EdgeOne 于 2025 年 1 月 21 日已对规则引擎相关接口全面升级，新版本修改七层加速规则接口详情请参考 [ModifyL7AccRule](https://cloud.tencent.com/document/product/1552/115818)。
+//
+// <p style="color: red;">注意：自 2025 年 1 月 21 日起，旧版接口停止更新迭代，后续新增功能将仅在新版接口中提供，旧版接口支持的原有能力将不受影响。为避免在使用旧版接口时出现数据字段冲突，建议您尽早迁移到新版规则引擎接口。</p>
 //
 // 可能返回的错误码:
 //  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
@@ -6150,6 +14806,15 @@ func NewModifyRuleResponse() (response *ModifyRuleResponse) {
 //  INVALIDPARAMETER_RESPONSEHEADERCACHECONTROLNOTALLOWDELETE = "InvalidParameter.ResponseHeaderCacheControlNotAllowDelete"
 //  INVALIDPARAMETER_STATUSCODECACHEINVALIDSTATUSCODE = "InvalidParameter.StatusCodeCacheInvalidStatusCode"
 //  INVALIDPARAMETER_TLSVERSIONNOTINSEQUENCE = "InvalidParameter.TlsVersionNotInSequence"
+//  INVALIDPARAMETERVALUE_FORMATMISMATCH = "InvalidParameterValue.FormatMismatch"
+//  INVALIDPARAMETERVALUE_GENERALMISMATCH = "InvalidParameterValue.GeneralMismatch"
+//  INVALIDPARAMETERVALUE_INCLUDEINVALIDVALUE = "InvalidParameterValue.IncludeInvalidValue"
+//  INVALIDPARAMETERVALUE_MISSINGNECESSARYPARAM = "InvalidParameterValue.MissingNecessaryParam"
+//  INVALIDPARAMETERVALUE_NOTINENUMERATION = "InvalidParameterValue.NotInEnumeration"
+//  INVALIDPARAMETERVALUE_NOTWITHINRANGE = "InvalidParameterValue.NotWithinRange"
+//  INVALIDPARAMETERVALUE_REGEXMISMATCH = "InvalidParameterValue.RegExMismatch"
+//  INVALIDPARAMETERVALUE_TRIALPLANRESPONSEPAGE = "InvalidParameterValue.TrialPlanResponsePage"
+//  INVALIDPARAMETERVALUE_UNRECOGNIZABLEVALUE = "InvalidParameterValue.UnrecognizableValue"
 //  LIMITEXCEEDED = "LimitExceeded"
 //  OPERATIONDENIED = "OperationDenied"
 //  OPERATIONDENIED_CONFIGLOCKED = "OperationDenied.ConfigLocked"
@@ -6163,7 +14828,9 @@ func (c *Client) ModifyRule(request *ModifyRuleRequest) (response *ModifyRuleRes
 }
 
 // ModifyRule
-// 修改规则引擎规则。
+// 本接口为旧版本修改规则引擎接口，EdgeOne 于 2025 年 1 月 21 日已对规则引擎相关接口全面升级，新版本修改七层加速规则接口详情请参考 [ModifyL7AccRule](https://cloud.tencent.com/document/product/1552/115818)。
+//
+// <p style="color: red;">注意：自 2025 年 1 月 21 日起，旧版接口停止更新迭代，后续新增功能将仅在新版接口中提供，旧版接口支持的原有能力将不受影响。为避免在使用旧版接口时出现数据字段冲突，建议您尽早迁移到新版规则引擎接口。</p>
 //
 // 可能返回的错误码:
 //  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
@@ -6240,6 +14907,15 @@ func (c *Client) ModifyRule(request *ModifyRuleRequest) (response *ModifyRuleRes
 //  INVALIDPARAMETER_RESPONSEHEADERCACHECONTROLNOTALLOWDELETE = "InvalidParameter.ResponseHeaderCacheControlNotAllowDelete"
 //  INVALIDPARAMETER_STATUSCODECACHEINVALIDSTATUSCODE = "InvalidParameter.StatusCodeCacheInvalidStatusCode"
 //  INVALIDPARAMETER_TLSVERSIONNOTINSEQUENCE = "InvalidParameter.TlsVersionNotInSequence"
+//  INVALIDPARAMETERVALUE_FORMATMISMATCH = "InvalidParameterValue.FormatMismatch"
+//  INVALIDPARAMETERVALUE_GENERALMISMATCH = "InvalidParameterValue.GeneralMismatch"
+//  INVALIDPARAMETERVALUE_INCLUDEINVALIDVALUE = "InvalidParameterValue.IncludeInvalidValue"
+//  INVALIDPARAMETERVALUE_MISSINGNECESSARYPARAM = "InvalidParameterValue.MissingNecessaryParam"
+//  INVALIDPARAMETERVALUE_NOTINENUMERATION = "InvalidParameterValue.NotInEnumeration"
+//  INVALIDPARAMETERVALUE_NOTWITHINRANGE = "InvalidParameterValue.NotWithinRange"
+//  INVALIDPARAMETERVALUE_REGEXMISMATCH = "InvalidParameterValue.RegExMismatch"
+//  INVALIDPARAMETERVALUE_TRIALPLANRESPONSEPAGE = "InvalidParameterValue.TrialPlanResponsePage"
+//  INVALIDPARAMETERVALUE_UNRECOGNIZABLEVALUE = "InvalidParameterValue.UnrecognizableValue"
 //  LIMITEXCEEDED = "LimitExceeded"
 //  OPERATIONDENIED = "OperationDenied"
 //  OPERATIONDENIED_CONFIGLOCKED = "OperationDenied.ConfigLocked"
@@ -6252,6 +14928,7 @@ func (c *Client) ModifyRuleWithContext(ctx context.Context, request *ModifyRuleR
     if request == nil {
         request = NewModifyRuleRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyRule")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyRule require credential")
@@ -6260,6 +14937,696 @@ func (c *Client) ModifyRuleWithContext(ctx context.Context, request *ModifyRuleR
     request.SetContext(ctx)
     
     response = NewModifyRuleResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifySecurityAPIResourceRequest() (request *ModifySecurityAPIResourceRequest) {
+    request = &ModifySecurityAPIResourceRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifySecurityAPIResource")
+    
+    
+    return
+}
+
+func NewModifySecurityAPIResourceResponse() (response *ModifySecurityAPIResourceResponse) {
+    response = &ModifySecurityAPIResourceResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifySecurityAPIResource
+// 该接口用于修改 API 资源。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_CACHEKEYQUERYSTRINGTOOMANYVALUE = "InvalidParameter.CacheKeyQueryStringTooManyValue"
+//  INVALIDPARAMETER_CERTSYSTEMERROR = "InvalidParameter.CertSystemError"
+//  INVALIDPARAMETER_COMPRESSIONINVALIDALGORITHMS = "InvalidParameter.CompressionInvalidAlgorithms"
+//  INVALIDPARAMETER_ERRACTIONUNSUPPORTTARGET = "InvalidParameter.ErrActionUnsupportTarget"
+//  INVALIDPARAMETER_ERRINVALIDACTION = "InvalidParameter.ErrInvalidAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONDUPLICATEACTION = "InvalidParameter.ErrInvalidActionDuplicateAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAM = "InvalidParameter.ErrInvalidActionParam"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMACTION = "InvalidParameter.ErrInvalidActionParamAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMDUPLICATENAME = "InvalidParameter.ErrInvalidActionParamDuplicateName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMNAME = "InvalidParameter.ErrInvalidActionParamName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMTOOMANYVALUES = "InvalidParameter.ErrInvalidActionParamTooManyValues"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMVALUE = "InvalidParameter.ErrInvalidActionParamValue"
+//  INVALIDPARAMETER_ERRINVALIDACTIONTYPE = "InvalidParameter.ErrInvalidActionType"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONHOSTTOOMANYWHENMODIFYORIGINACTIONCONFIGURED = "InvalidParameter.ErrInvalidConditionHostTooManyWhenModifyOriginActionConfigured"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONIGNORECASE = "InvalidParameter.ErrInvalidConditionIgnoreCase"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMEBADNAME = "InvalidParameter.ErrInvalidConditionNameBadName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMETARGETNOTSUPPORTNAME = "InvalidParameter.ErrInvalidConditionNameTargetNotSupportName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADREGULAR = "InvalidParameter.ErrInvalidConditionValueBadRegular"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADURL = "InvalidParameter.ErrInvalidConditionValueBadUrl"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUE = "InvalidParameter.ErrInvalidConditionValueBadValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUECONTAINFILENAMEEXTENSION = "InvalidParameter.ErrInvalidConditionValueBadValueContainFileNameExtension"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOLONGVALUE = "InvalidParameter.ErrInvalidConditionValueTooLongValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYVALUES = "InvalidParameter.ErrInvalidConditionValueTooManyValues"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYWILDCARD = "InvalidParameter.ErrInvalidConditionValueTooManyWildcard"
+//  INVALIDPARAMETER_ERRINVALIDELSEWHENMODIFYORIGINACTIONCONFIGURED = "InvalidParameter.ErrInvalidElseWhenModifyOriginActionConfigured"
+//  INVALIDPARAMETER_ERRNILCONDITION = "InvalidParameter.ErrNilCondition"
+//  INVALIDPARAMETER_GRPCREQUIREHTTP2 = "InvalidParameter.GrpcRequireHttp2"
+//  INVALIDPARAMETER_HOSTNOTFOUND = "InvalidParameter.HostNotFound"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPESECRETKEY = "InvalidParameter.InvalidAuthenticationTypeSecretKey"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPESIGNPARAM = "InvalidParameter.InvalidAuthenticationTypeSignParam"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPETIMEFORMAT = "InvalidParameter.InvalidAuthenticationTypeTimeFormat"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPETIMEPARAM = "InvalidParameter.InvalidAuthenticationTypeTimeParam"
+//  INVALIDPARAMETER_INVALIDAWSREGION = "InvalidParameter.InvalidAwsRegion"
+//  INVALIDPARAMETER_INVALIDBACKUPSERVERNAME = "InvalidParameter.InvalidBackupServerName"
+//  INVALIDPARAMETER_INVALIDCACHEKEY = "InvalidParameter.InvalidCacheKey"
+//  INVALIDPARAMETER_INVALIDCACHEKEYCOOKIE = "InvalidParameter.InvalidCacheKeyCookie"
+//  INVALIDPARAMETER_INVALIDCACHEKEYIGNORECASE = "InvalidParameter.InvalidCacheKeyIgnoreCase"
+//  INVALIDPARAMETER_INVALIDCACHEKEYSCHEME = "InvalidParameter.InvalidCacheKeyScheme"
+//  INVALIDPARAMETER_INVALIDCACHETIME = "InvalidParameter.InvalidCacheTime"
+//  INVALIDPARAMETER_INVALIDCLIENTIPHEADERNAME = "InvalidParameter.InvalidClientIpHeaderName"
+//  INVALIDPARAMETER_INVALIDCOSDOMAIN = "InvalidParameter.InvalidCosDomain"
+//  INVALIDPARAMETER_INVALIDERRORPAGEREDIRECTURL = "InvalidParameter.InvalidErrorPageRedirectUrl"
+//  INVALIDPARAMETER_INVALIDHTTPSCIPHERSUITEANDTLSVERSION = "InvalidParameter.InvalidHttpsCipherSuiteAndTlsVersion"
+//  INVALIDPARAMETER_INVALIDHTTPSHSTSMAXAGE = "InvalidParameter.InvalidHttpsHstsMaxAge"
+//  INVALIDPARAMETER_INVALIDIPV6SWITCH = "InvalidParameter.InvalidIpv6Switch"
+//  INVALIDPARAMETER_INVALIDMAXAGETIME = "InvalidParameter.InvalidMaxAgeTime"
+//  INVALIDPARAMETER_INVALIDORIGIN = "InvalidParameter.InvalidOrigin"
+//  INVALIDPARAMETER_INVALIDPARAMETER = "InvalidParameter.InvalidParameter"
+//  INVALIDPARAMETER_INVALIDRANGEORIGINPULL = "InvalidParameter.InvalidRangeOriginPull"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAME = "InvalidParameter.InvalidRequestHeaderName"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAMEXFF = "InvalidParameter.InvalidRequestHeaderNameXff"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERVALUE = "InvalidParameter.InvalidRequestHeaderValue"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERNAME = "InvalidParameter.InvalidResponseHeaderName"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERVALUE = "InvalidParameter.InvalidResponseHeaderValue"
+//  INVALIDPARAMETER_INVALIDRULEENGINEACTION = "InvalidParameter.InvalidRuleEngineAction"
+//  INVALIDPARAMETER_INVALIDRULEENGINENOTFOUND = "InvalidParameter.InvalidRuleEngineNotFound"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGET = "InvalidParameter.InvalidRuleEngineTarget"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSEXTENSION = "InvalidParameter.InvalidRuleEngineTargetsExtension"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSURL = "InvalidParameter.InvalidRuleEngineTargetsUrl"
+//  INVALIDPARAMETER_INVALIDSERVERNAME = "InvalidParameter.InvalidServerName"
+//  INVALIDPARAMETER_INVALIDUPSTREAMREQUESTQUERYSTRINGVALUE = "InvalidParameter.InvalidUpstreamRequestQueryStringValue"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTHOST = "InvalidParameter.InvalidUrlRedirectHost"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTURL = "InvalidParameter.InvalidUrlRedirectUrl"
+//  INVALIDPARAMETER_KEYRULESINVALIDQUERYSTRINGVALUE = "InvalidParameter.KeyRulesInvalidQueryStringValue"
+//  INVALIDPARAMETER_LOADBALANCEINSTANCEIDISREQUIRED = "InvalidParameter.LoadBalanceInstanceIdIsRequired"
+//  INVALIDPARAMETER_NOTSUPPORTTHISPRESET = "InvalidParameter.NotSupportThisPreset"
+//  INVALIDPARAMETER_ORIGINORIGINGROUPIDISREQUIRED = "InvalidParameter.OriginOriginGroupIdIsRequired"
+//  INVALIDPARAMETER_ORIGINPULLPROTOCOLISREQUIRED = "InvalidParameter.OriginPullProtocolIsRequired"
+//  INVALIDPARAMETER_POSTMAXSIZELIMITEXCEEDED = "InvalidParameter.PostMaxSizeLimitExceeded"
+//  INVALIDPARAMETER_RESPONSEHEADERCACHECONTROLNOTALLOWDELETE = "InvalidParameter.ResponseHeaderCacheControlNotAllowDelete"
+//  INVALIDPARAMETER_STATUSCODECACHEINVALIDSTATUSCODE = "InvalidParameter.StatusCodeCacheInvalidStatusCode"
+//  INVALIDPARAMETER_TLSVERSIONNOTINSEQUENCE = "InvalidParameter.TlsVersionNotInSequence"
+//  INVALIDPARAMETERVALUE_FORMATMISMATCH = "InvalidParameterValue.FormatMismatch"
+//  INVALIDPARAMETERVALUE_GENERALMISMATCH = "InvalidParameterValue.GeneralMismatch"
+//  INVALIDPARAMETERVALUE_INCLUDEINVALIDVALUE = "InvalidParameterValue.IncludeInvalidValue"
+//  INVALIDPARAMETERVALUE_MISSINGNECESSARYPARAM = "InvalidParameterValue.MissingNecessaryParam"
+//  INVALIDPARAMETERVALUE_NOTINENUMERATION = "InvalidParameterValue.NotInEnumeration"
+//  INVALIDPARAMETERVALUE_NOTWITHINRANGE = "InvalidParameterValue.NotWithinRange"
+//  INVALIDPARAMETERVALUE_REGEXMISMATCH = "InvalidParameterValue.RegExMismatch"
+//  INVALIDPARAMETERVALUE_TRIALPLANRESPONSEPAGE = "InvalidParameterValue.TrialPlanResponsePage"
+//  INVALIDPARAMETERVALUE_UNRECOGNIZABLEVALUE = "InvalidParameterValue.UnrecognizableValue"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_CONFIGLOCKED = "OperationDenied.ConfigLocked"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_INVALIDADVANCEDDEFENSESECURITYTYPE = "OperationDenied.InvalidAdvancedDefenseSecurityType"
+//  RESOURCEINUSE = "ResourceInUse"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) ModifySecurityAPIResource(request *ModifySecurityAPIResourceRequest) (response *ModifySecurityAPIResourceResponse, err error) {
+    return c.ModifySecurityAPIResourceWithContext(context.Background(), request)
+}
+
+// ModifySecurityAPIResource
+// 该接口用于修改 API 资源。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_CACHEKEYQUERYSTRINGTOOMANYVALUE = "InvalidParameter.CacheKeyQueryStringTooManyValue"
+//  INVALIDPARAMETER_CERTSYSTEMERROR = "InvalidParameter.CertSystemError"
+//  INVALIDPARAMETER_COMPRESSIONINVALIDALGORITHMS = "InvalidParameter.CompressionInvalidAlgorithms"
+//  INVALIDPARAMETER_ERRACTIONUNSUPPORTTARGET = "InvalidParameter.ErrActionUnsupportTarget"
+//  INVALIDPARAMETER_ERRINVALIDACTION = "InvalidParameter.ErrInvalidAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONDUPLICATEACTION = "InvalidParameter.ErrInvalidActionDuplicateAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAM = "InvalidParameter.ErrInvalidActionParam"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMACTION = "InvalidParameter.ErrInvalidActionParamAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMDUPLICATENAME = "InvalidParameter.ErrInvalidActionParamDuplicateName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMNAME = "InvalidParameter.ErrInvalidActionParamName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMTOOMANYVALUES = "InvalidParameter.ErrInvalidActionParamTooManyValues"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMVALUE = "InvalidParameter.ErrInvalidActionParamValue"
+//  INVALIDPARAMETER_ERRINVALIDACTIONTYPE = "InvalidParameter.ErrInvalidActionType"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONHOSTTOOMANYWHENMODIFYORIGINACTIONCONFIGURED = "InvalidParameter.ErrInvalidConditionHostTooManyWhenModifyOriginActionConfigured"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONIGNORECASE = "InvalidParameter.ErrInvalidConditionIgnoreCase"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMEBADNAME = "InvalidParameter.ErrInvalidConditionNameBadName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMETARGETNOTSUPPORTNAME = "InvalidParameter.ErrInvalidConditionNameTargetNotSupportName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADREGULAR = "InvalidParameter.ErrInvalidConditionValueBadRegular"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADURL = "InvalidParameter.ErrInvalidConditionValueBadUrl"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUE = "InvalidParameter.ErrInvalidConditionValueBadValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUECONTAINFILENAMEEXTENSION = "InvalidParameter.ErrInvalidConditionValueBadValueContainFileNameExtension"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOLONGVALUE = "InvalidParameter.ErrInvalidConditionValueTooLongValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYVALUES = "InvalidParameter.ErrInvalidConditionValueTooManyValues"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYWILDCARD = "InvalidParameter.ErrInvalidConditionValueTooManyWildcard"
+//  INVALIDPARAMETER_ERRINVALIDELSEWHENMODIFYORIGINACTIONCONFIGURED = "InvalidParameter.ErrInvalidElseWhenModifyOriginActionConfigured"
+//  INVALIDPARAMETER_ERRNILCONDITION = "InvalidParameter.ErrNilCondition"
+//  INVALIDPARAMETER_GRPCREQUIREHTTP2 = "InvalidParameter.GrpcRequireHttp2"
+//  INVALIDPARAMETER_HOSTNOTFOUND = "InvalidParameter.HostNotFound"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPESECRETKEY = "InvalidParameter.InvalidAuthenticationTypeSecretKey"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPESIGNPARAM = "InvalidParameter.InvalidAuthenticationTypeSignParam"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPETIMEFORMAT = "InvalidParameter.InvalidAuthenticationTypeTimeFormat"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPETIMEPARAM = "InvalidParameter.InvalidAuthenticationTypeTimeParam"
+//  INVALIDPARAMETER_INVALIDAWSREGION = "InvalidParameter.InvalidAwsRegion"
+//  INVALIDPARAMETER_INVALIDBACKUPSERVERNAME = "InvalidParameter.InvalidBackupServerName"
+//  INVALIDPARAMETER_INVALIDCACHEKEY = "InvalidParameter.InvalidCacheKey"
+//  INVALIDPARAMETER_INVALIDCACHEKEYCOOKIE = "InvalidParameter.InvalidCacheKeyCookie"
+//  INVALIDPARAMETER_INVALIDCACHEKEYIGNORECASE = "InvalidParameter.InvalidCacheKeyIgnoreCase"
+//  INVALIDPARAMETER_INVALIDCACHEKEYSCHEME = "InvalidParameter.InvalidCacheKeyScheme"
+//  INVALIDPARAMETER_INVALIDCACHETIME = "InvalidParameter.InvalidCacheTime"
+//  INVALIDPARAMETER_INVALIDCLIENTIPHEADERNAME = "InvalidParameter.InvalidClientIpHeaderName"
+//  INVALIDPARAMETER_INVALIDCOSDOMAIN = "InvalidParameter.InvalidCosDomain"
+//  INVALIDPARAMETER_INVALIDERRORPAGEREDIRECTURL = "InvalidParameter.InvalidErrorPageRedirectUrl"
+//  INVALIDPARAMETER_INVALIDHTTPSCIPHERSUITEANDTLSVERSION = "InvalidParameter.InvalidHttpsCipherSuiteAndTlsVersion"
+//  INVALIDPARAMETER_INVALIDHTTPSHSTSMAXAGE = "InvalidParameter.InvalidHttpsHstsMaxAge"
+//  INVALIDPARAMETER_INVALIDIPV6SWITCH = "InvalidParameter.InvalidIpv6Switch"
+//  INVALIDPARAMETER_INVALIDMAXAGETIME = "InvalidParameter.InvalidMaxAgeTime"
+//  INVALIDPARAMETER_INVALIDORIGIN = "InvalidParameter.InvalidOrigin"
+//  INVALIDPARAMETER_INVALIDPARAMETER = "InvalidParameter.InvalidParameter"
+//  INVALIDPARAMETER_INVALIDRANGEORIGINPULL = "InvalidParameter.InvalidRangeOriginPull"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAME = "InvalidParameter.InvalidRequestHeaderName"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAMEXFF = "InvalidParameter.InvalidRequestHeaderNameXff"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERVALUE = "InvalidParameter.InvalidRequestHeaderValue"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERNAME = "InvalidParameter.InvalidResponseHeaderName"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERVALUE = "InvalidParameter.InvalidResponseHeaderValue"
+//  INVALIDPARAMETER_INVALIDRULEENGINEACTION = "InvalidParameter.InvalidRuleEngineAction"
+//  INVALIDPARAMETER_INVALIDRULEENGINENOTFOUND = "InvalidParameter.InvalidRuleEngineNotFound"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGET = "InvalidParameter.InvalidRuleEngineTarget"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSEXTENSION = "InvalidParameter.InvalidRuleEngineTargetsExtension"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSURL = "InvalidParameter.InvalidRuleEngineTargetsUrl"
+//  INVALIDPARAMETER_INVALIDSERVERNAME = "InvalidParameter.InvalidServerName"
+//  INVALIDPARAMETER_INVALIDUPSTREAMREQUESTQUERYSTRINGVALUE = "InvalidParameter.InvalidUpstreamRequestQueryStringValue"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTHOST = "InvalidParameter.InvalidUrlRedirectHost"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTURL = "InvalidParameter.InvalidUrlRedirectUrl"
+//  INVALIDPARAMETER_KEYRULESINVALIDQUERYSTRINGVALUE = "InvalidParameter.KeyRulesInvalidQueryStringValue"
+//  INVALIDPARAMETER_LOADBALANCEINSTANCEIDISREQUIRED = "InvalidParameter.LoadBalanceInstanceIdIsRequired"
+//  INVALIDPARAMETER_NOTSUPPORTTHISPRESET = "InvalidParameter.NotSupportThisPreset"
+//  INVALIDPARAMETER_ORIGINORIGINGROUPIDISREQUIRED = "InvalidParameter.OriginOriginGroupIdIsRequired"
+//  INVALIDPARAMETER_ORIGINPULLPROTOCOLISREQUIRED = "InvalidParameter.OriginPullProtocolIsRequired"
+//  INVALIDPARAMETER_POSTMAXSIZELIMITEXCEEDED = "InvalidParameter.PostMaxSizeLimitExceeded"
+//  INVALIDPARAMETER_RESPONSEHEADERCACHECONTROLNOTALLOWDELETE = "InvalidParameter.ResponseHeaderCacheControlNotAllowDelete"
+//  INVALIDPARAMETER_STATUSCODECACHEINVALIDSTATUSCODE = "InvalidParameter.StatusCodeCacheInvalidStatusCode"
+//  INVALIDPARAMETER_TLSVERSIONNOTINSEQUENCE = "InvalidParameter.TlsVersionNotInSequence"
+//  INVALIDPARAMETERVALUE_FORMATMISMATCH = "InvalidParameterValue.FormatMismatch"
+//  INVALIDPARAMETERVALUE_GENERALMISMATCH = "InvalidParameterValue.GeneralMismatch"
+//  INVALIDPARAMETERVALUE_INCLUDEINVALIDVALUE = "InvalidParameterValue.IncludeInvalidValue"
+//  INVALIDPARAMETERVALUE_MISSINGNECESSARYPARAM = "InvalidParameterValue.MissingNecessaryParam"
+//  INVALIDPARAMETERVALUE_NOTINENUMERATION = "InvalidParameterValue.NotInEnumeration"
+//  INVALIDPARAMETERVALUE_NOTWITHINRANGE = "InvalidParameterValue.NotWithinRange"
+//  INVALIDPARAMETERVALUE_REGEXMISMATCH = "InvalidParameterValue.RegExMismatch"
+//  INVALIDPARAMETERVALUE_TRIALPLANRESPONSEPAGE = "InvalidParameterValue.TrialPlanResponsePage"
+//  INVALIDPARAMETERVALUE_UNRECOGNIZABLEVALUE = "InvalidParameterValue.UnrecognizableValue"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_CONFIGLOCKED = "OperationDenied.ConfigLocked"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_INVALIDADVANCEDDEFENSESECURITYTYPE = "OperationDenied.InvalidAdvancedDefenseSecurityType"
+//  RESOURCEINUSE = "ResourceInUse"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) ModifySecurityAPIResourceWithContext(ctx context.Context, request *ModifySecurityAPIResourceRequest) (response *ModifySecurityAPIResourceResponse, err error) {
+    if request == nil {
+        request = NewModifySecurityAPIResourceRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifySecurityAPIResource")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifySecurityAPIResource require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifySecurityAPIResourceResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifySecurityAPIServiceRequest() (request *ModifySecurityAPIServiceRequest) {
+    request = &ModifySecurityAPIServiceRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifySecurityAPIService")
+    
+    
+    return
+}
+
+func NewModifySecurityAPIServiceResponse() (response *ModifySecurityAPIServiceResponse) {
+    response = &ModifySecurityAPIServiceResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifySecurityAPIService
+// 该接口用于修改 API 服务。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_CACHEKEYQUERYSTRINGTOOMANYVALUE = "InvalidParameter.CacheKeyQueryStringTooManyValue"
+//  INVALIDPARAMETER_CERTSYSTEMERROR = "InvalidParameter.CertSystemError"
+//  INVALIDPARAMETER_COMPRESSIONINVALIDALGORITHMS = "InvalidParameter.CompressionInvalidAlgorithms"
+//  INVALIDPARAMETER_ERRACTIONUNSUPPORTTARGET = "InvalidParameter.ErrActionUnsupportTarget"
+//  INVALIDPARAMETER_ERRINVALIDACTION = "InvalidParameter.ErrInvalidAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONDUPLICATEACTION = "InvalidParameter.ErrInvalidActionDuplicateAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAM = "InvalidParameter.ErrInvalidActionParam"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMACTION = "InvalidParameter.ErrInvalidActionParamAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMDUPLICATENAME = "InvalidParameter.ErrInvalidActionParamDuplicateName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMNAME = "InvalidParameter.ErrInvalidActionParamName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMTOOMANYVALUES = "InvalidParameter.ErrInvalidActionParamTooManyValues"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMVALUE = "InvalidParameter.ErrInvalidActionParamValue"
+//  INVALIDPARAMETER_ERRINVALIDACTIONTYPE = "InvalidParameter.ErrInvalidActionType"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONHOSTTOOMANYWHENMODIFYORIGINACTIONCONFIGURED = "InvalidParameter.ErrInvalidConditionHostTooManyWhenModifyOriginActionConfigured"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONIGNORECASE = "InvalidParameter.ErrInvalidConditionIgnoreCase"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMEBADNAME = "InvalidParameter.ErrInvalidConditionNameBadName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMETARGETNOTSUPPORTNAME = "InvalidParameter.ErrInvalidConditionNameTargetNotSupportName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADREGULAR = "InvalidParameter.ErrInvalidConditionValueBadRegular"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADURL = "InvalidParameter.ErrInvalidConditionValueBadUrl"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUE = "InvalidParameter.ErrInvalidConditionValueBadValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUECONTAINFILENAMEEXTENSION = "InvalidParameter.ErrInvalidConditionValueBadValueContainFileNameExtension"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOLONGVALUE = "InvalidParameter.ErrInvalidConditionValueTooLongValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYVALUES = "InvalidParameter.ErrInvalidConditionValueTooManyValues"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYWILDCARD = "InvalidParameter.ErrInvalidConditionValueTooManyWildcard"
+//  INVALIDPARAMETER_ERRINVALIDELSEWHENMODIFYORIGINACTIONCONFIGURED = "InvalidParameter.ErrInvalidElseWhenModifyOriginActionConfigured"
+//  INVALIDPARAMETER_ERRNILCONDITION = "InvalidParameter.ErrNilCondition"
+//  INVALIDPARAMETER_GRPCREQUIREHTTP2 = "InvalidParameter.GrpcRequireHttp2"
+//  INVALIDPARAMETER_HOSTNOTFOUND = "InvalidParameter.HostNotFound"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPESECRETKEY = "InvalidParameter.InvalidAuthenticationTypeSecretKey"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPESIGNPARAM = "InvalidParameter.InvalidAuthenticationTypeSignParam"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPETIMEFORMAT = "InvalidParameter.InvalidAuthenticationTypeTimeFormat"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPETIMEPARAM = "InvalidParameter.InvalidAuthenticationTypeTimeParam"
+//  INVALIDPARAMETER_INVALIDAWSREGION = "InvalidParameter.InvalidAwsRegion"
+//  INVALIDPARAMETER_INVALIDBACKUPSERVERNAME = "InvalidParameter.InvalidBackupServerName"
+//  INVALIDPARAMETER_INVALIDCACHEKEY = "InvalidParameter.InvalidCacheKey"
+//  INVALIDPARAMETER_INVALIDCACHEKEYCOOKIE = "InvalidParameter.InvalidCacheKeyCookie"
+//  INVALIDPARAMETER_INVALIDCACHEKEYIGNORECASE = "InvalidParameter.InvalidCacheKeyIgnoreCase"
+//  INVALIDPARAMETER_INVALIDCACHEKEYSCHEME = "InvalidParameter.InvalidCacheKeyScheme"
+//  INVALIDPARAMETER_INVALIDCACHETIME = "InvalidParameter.InvalidCacheTime"
+//  INVALIDPARAMETER_INVALIDCLIENTIPHEADERNAME = "InvalidParameter.InvalidClientIpHeaderName"
+//  INVALIDPARAMETER_INVALIDCOSDOMAIN = "InvalidParameter.InvalidCosDomain"
+//  INVALIDPARAMETER_INVALIDERRORPAGEREDIRECTURL = "InvalidParameter.InvalidErrorPageRedirectUrl"
+//  INVALIDPARAMETER_INVALIDHTTPSCIPHERSUITEANDTLSVERSION = "InvalidParameter.InvalidHttpsCipherSuiteAndTlsVersion"
+//  INVALIDPARAMETER_INVALIDHTTPSHSTSMAXAGE = "InvalidParameter.InvalidHttpsHstsMaxAge"
+//  INVALIDPARAMETER_INVALIDIPV6SWITCH = "InvalidParameter.InvalidIpv6Switch"
+//  INVALIDPARAMETER_INVALIDMAXAGETIME = "InvalidParameter.InvalidMaxAgeTime"
+//  INVALIDPARAMETER_INVALIDORIGIN = "InvalidParameter.InvalidOrigin"
+//  INVALIDPARAMETER_INVALIDPARAMETER = "InvalidParameter.InvalidParameter"
+//  INVALIDPARAMETER_INVALIDRANGEORIGINPULL = "InvalidParameter.InvalidRangeOriginPull"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAME = "InvalidParameter.InvalidRequestHeaderName"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAMEXFF = "InvalidParameter.InvalidRequestHeaderNameXff"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERVALUE = "InvalidParameter.InvalidRequestHeaderValue"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERNAME = "InvalidParameter.InvalidResponseHeaderName"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERVALUE = "InvalidParameter.InvalidResponseHeaderValue"
+//  INVALIDPARAMETER_INVALIDRULEENGINEACTION = "InvalidParameter.InvalidRuleEngineAction"
+//  INVALIDPARAMETER_INVALIDRULEENGINENOTFOUND = "InvalidParameter.InvalidRuleEngineNotFound"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGET = "InvalidParameter.InvalidRuleEngineTarget"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSEXTENSION = "InvalidParameter.InvalidRuleEngineTargetsExtension"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSURL = "InvalidParameter.InvalidRuleEngineTargetsUrl"
+//  INVALIDPARAMETER_INVALIDSERVERNAME = "InvalidParameter.InvalidServerName"
+//  INVALIDPARAMETER_INVALIDUPSTREAMREQUESTQUERYSTRINGVALUE = "InvalidParameter.InvalidUpstreamRequestQueryStringValue"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTHOST = "InvalidParameter.InvalidUrlRedirectHost"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTURL = "InvalidParameter.InvalidUrlRedirectUrl"
+//  INVALIDPARAMETER_KEYRULESINVALIDQUERYSTRINGVALUE = "InvalidParameter.KeyRulesInvalidQueryStringValue"
+//  INVALIDPARAMETER_LOADBALANCEINSTANCEIDISREQUIRED = "InvalidParameter.LoadBalanceInstanceIdIsRequired"
+//  INVALIDPARAMETER_NOTSUPPORTTHISPRESET = "InvalidParameter.NotSupportThisPreset"
+//  INVALIDPARAMETER_ORIGINORIGINGROUPIDISREQUIRED = "InvalidParameter.OriginOriginGroupIdIsRequired"
+//  INVALIDPARAMETER_ORIGINPULLPROTOCOLISREQUIRED = "InvalidParameter.OriginPullProtocolIsRequired"
+//  INVALIDPARAMETER_POSTMAXSIZELIMITEXCEEDED = "InvalidParameter.PostMaxSizeLimitExceeded"
+//  INVALIDPARAMETER_RESPONSEHEADERCACHECONTROLNOTALLOWDELETE = "InvalidParameter.ResponseHeaderCacheControlNotAllowDelete"
+//  INVALIDPARAMETER_STATUSCODECACHEINVALIDSTATUSCODE = "InvalidParameter.StatusCodeCacheInvalidStatusCode"
+//  INVALIDPARAMETER_TLSVERSIONNOTINSEQUENCE = "InvalidParameter.TlsVersionNotInSequence"
+//  INVALIDPARAMETERVALUE_FORMATMISMATCH = "InvalidParameterValue.FormatMismatch"
+//  INVALIDPARAMETERVALUE_GENERALMISMATCH = "InvalidParameterValue.GeneralMismatch"
+//  INVALIDPARAMETERVALUE_INCLUDEINVALIDVALUE = "InvalidParameterValue.IncludeInvalidValue"
+//  INVALIDPARAMETERVALUE_MISSINGNECESSARYPARAM = "InvalidParameterValue.MissingNecessaryParam"
+//  INVALIDPARAMETERVALUE_NOTINENUMERATION = "InvalidParameterValue.NotInEnumeration"
+//  INVALIDPARAMETERVALUE_NOTWITHINRANGE = "InvalidParameterValue.NotWithinRange"
+//  INVALIDPARAMETERVALUE_REGEXMISMATCH = "InvalidParameterValue.RegExMismatch"
+//  INVALIDPARAMETERVALUE_TRIALPLANRESPONSEPAGE = "InvalidParameterValue.TrialPlanResponsePage"
+//  INVALIDPARAMETERVALUE_UNRECOGNIZABLEVALUE = "InvalidParameterValue.UnrecognizableValue"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_CONFIGLOCKED = "OperationDenied.ConfigLocked"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_INVALIDADVANCEDDEFENSESECURITYTYPE = "OperationDenied.InvalidAdvancedDefenseSecurityType"
+//  RESOURCEINUSE = "ResourceInUse"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) ModifySecurityAPIService(request *ModifySecurityAPIServiceRequest) (response *ModifySecurityAPIServiceResponse, err error) {
+    return c.ModifySecurityAPIServiceWithContext(context.Background(), request)
+}
+
+// ModifySecurityAPIService
+// 该接口用于修改 API 服务。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_CACHEKEYQUERYSTRINGTOOMANYVALUE = "InvalidParameter.CacheKeyQueryStringTooManyValue"
+//  INVALIDPARAMETER_CERTSYSTEMERROR = "InvalidParameter.CertSystemError"
+//  INVALIDPARAMETER_COMPRESSIONINVALIDALGORITHMS = "InvalidParameter.CompressionInvalidAlgorithms"
+//  INVALIDPARAMETER_ERRACTIONUNSUPPORTTARGET = "InvalidParameter.ErrActionUnsupportTarget"
+//  INVALIDPARAMETER_ERRINVALIDACTION = "InvalidParameter.ErrInvalidAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONDUPLICATEACTION = "InvalidParameter.ErrInvalidActionDuplicateAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAM = "InvalidParameter.ErrInvalidActionParam"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMACTION = "InvalidParameter.ErrInvalidActionParamAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMDUPLICATENAME = "InvalidParameter.ErrInvalidActionParamDuplicateName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMNAME = "InvalidParameter.ErrInvalidActionParamName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMTOOMANYVALUES = "InvalidParameter.ErrInvalidActionParamTooManyValues"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMVALUE = "InvalidParameter.ErrInvalidActionParamValue"
+//  INVALIDPARAMETER_ERRINVALIDACTIONTYPE = "InvalidParameter.ErrInvalidActionType"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONHOSTTOOMANYWHENMODIFYORIGINACTIONCONFIGURED = "InvalidParameter.ErrInvalidConditionHostTooManyWhenModifyOriginActionConfigured"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONIGNORECASE = "InvalidParameter.ErrInvalidConditionIgnoreCase"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMEBADNAME = "InvalidParameter.ErrInvalidConditionNameBadName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMETARGETNOTSUPPORTNAME = "InvalidParameter.ErrInvalidConditionNameTargetNotSupportName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADREGULAR = "InvalidParameter.ErrInvalidConditionValueBadRegular"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADURL = "InvalidParameter.ErrInvalidConditionValueBadUrl"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUE = "InvalidParameter.ErrInvalidConditionValueBadValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUECONTAINFILENAMEEXTENSION = "InvalidParameter.ErrInvalidConditionValueBadValueContainFileNameExtension"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOLONGVALUE = "InvalidParameter.ErrInvalidConditionValueTooLongValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYVALUES = "InvalidParameter.ErrInvalidConditionValueTooManyValues"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYWILDCARD = "InvalidParameter.ErrInvalidConditionValueTooManyWildcard"
+//  INVALIDPARAMETER_ERRINVALIDELSEWHENMODIFYORIGINACTIONCONFIGURED = "InvalidParameter.ErrInvalidElseWhenModifyOriginActionConfigured"
+//  INVALIDPARAMETER_ERRNILCONDITION = "InvalidParameter.ErrNilCondition"
+//  INVALIDPARAMETER_GRPCREQUIREHTTP2 = "InvalidParameter.GrpcRequireHttp2"
+//  INVALIDPARAMETER_HOSTNOTFOUND = "InvalidParameter.HostNotFound"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPESECRETKEY = "InvalidParameter.InvalidAuthenticationTypeSecretKey"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPESIGNPARAM = "InvalidParameter.InvalidAuthenticationTypeSignParam"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPETIMEFORMAT = "InvalidParameter.InvalidAuthenticationTypeTimeFormat"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPETIMEPARAM = "InvalidParameter.InvalidAuthenticationTypeTimeParam"
+//  INVALIDPARAMETER_INVALIDAWSREGION = "InvalidParameter.InvalidAwsRegion"
+//  INVALIDPARAMETER_INVALIDBACKUPSERVERNAME = "InvalidParameter.InvalidBackupServerName"
+//  INVALIDPARAMETER_INVALIDCACHEKEY = "InvalidParameter.InvalidCacheKey"
+//  INVALIDPARAMETER_INVALIDCACHEKEYCOOKIE = "InvalidParameter.InvalidCacheKeyCookie"
+//  INVALIDPARAMETER_INVALIDCACHEKEYIGNORECASE = "InvalidParameter.InvalidCacheKeyIgnoreCase"
+//  INVALIDPARAMETER_INVALIDCACHEKEYSCHEME = "InvalidParameter.InvalidCacheKeyScheme"
+//  INVALIDPARAMETER_INVALIDCACHETIME = "InvalidParameter.InvalidCacheTime"
+//  INVALIDPARAMETER_INVALIDCLIENTIPHEADERNAME = "InvalidParameter.InvalidClientIpHeaderName"
+//  INVALIDPARAMETER_INVALIDCOSDOMAIN = "InvalidParameter.InvalidCosDomain"
+//  INVALIDPARAMETER_INVALIDERRORPAGEREDIRECTURL = "InvalidParameter.InvalidErrorPageRedirectUrl"
+//  INVALIDPARAMETER_INVALIDHTTPSCIPHERSUITEANDTLSVERSION = "InvalidParameter.InvalidHttpsCipherSuiteAndTlsVersion"
+//  INVALIDPARAMETER_INVALIDHTTPSHSTSMAXAGE = "InvalidParameter.InvalidHttpsHstsMaxAge"
+//  INVALIDPARAMETER_INVALIDIPV6SWITCH = "InvalidParameter.InvalidIpv6Switch"
+//  INVALIDPARAMETER_INVALIDMAXAGETIME = "InvalidParameter.InvalidMaxAgeTime"
+//  INVALIDPARAMETER_INVALIDORIGIN = "InvalidParameter.InvalidOrigin"
+//  INVALIDPARAMETER_INVALIDPARAMETER = "InvalidParameter.InvalidParameter"
+//  INVALIDPARAMETER_INVALIDRANGEORIGINPULL = "InvalidParameter.InvalidRangeOriginPull"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAME = "InvalidParameter.InvalidRequestHeaderName"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAMEXFF = "InvalidParameter.InvalidRequestHeaderNameXff"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERVALUE = "InvalidParameter.InvalidRequestHeaderValue"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERNAME = "InvalidParameter.InvalidResponseHeaderName"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERVALUE = "InvalidParameter.InvalidResponseHeaderValue"
+//  INVALIDPARAMETER_INVALIDRULEENGINEACTION = "InvalidParameter.InvalidRuleEngineAction"
+//  INVALIDPARAMETER_INVALIDRULEENGINENOTFOUND = "InvalidParameter.InvalidRuleEngineNotFound"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGET = "InvalidParameter.InvalidRuleEngineTarget"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSEXTENSION = "InvalidParameter.InvalidRuleEngineTargetsExtension"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSURL = "InvalidParameter.InvalidRuleEngineTargetsUrl"
+//  INVALIDPARAMETER_INVALIDSERVERNAME = "InvalidParameter.InvalidServerName"
+//  INVALIDPARAMETER_INVALIDUPSTREAMREQUESTQUERYSTRINGVALUE = "InvalidParameter.InvalidUpstreamRequestQueryStringValue"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTHOST = "InvalidParameter.InvalidUrlRedirectHost"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTURL = "InvalidParameter.InvalidUrlRedirectUrl"
+//  INVALIDPARAMETER_KEYRULESINVALIDQUERYSTRINGVALUE = "InvalidParameter.KeyRulesInvalidQueryStringValue"
+//  INVALIDPARAMETER_LOADBALANCEINSTANCEIDISREQUIRED = "InvalidParameter.LoadBalanceInstanceIdIsRequired"
+//  INVALIDPARAMETER_NOTSUPPORTTHISPRESET = "InvalidParameter.NotSupportThisPreset"
+//  INVALIDPARAMETER_ORIGINORIGINGROUPIDISREQUIRED = "InvalidParameter.OriginOriginGroupIdIsRequired"
+//  INVALIDPARAMETER_ORIGINPULLPROTOCOLISREQUIRED = "InvalidParameter.OriginPullProtocolIsRequired"
+//  INVALIDPARAMETER_POSTMAXSIZELIMITEXCEEDED = "InvalidParameter.PostMaxSizeLimitExceeded"
+//  INVALIDPARAMETER_RESPONSEHEADERCACHECONTROLNOTALLOWDELETE = "InvalidParameter.ResponseHeaderCacheControlNotAllowDelete"
+//  INVALIDPARAMETER_STATUSCODECACHEINVALIDSTATUSCODE = "InvalidParameter.StatusCodeCacheInvalidStatusCode"
+//  INVALIDPARAMETER_TLSVERSIONNOTINSEQUENCE = "InvalidParameter.TlsVersionNotInSequence"
+//  INVALIDPARAMETERVALUE_FORMATMISMATCH = "InvalidParameterValue.FormatMismatch"
+//  INVALIDPARAMETERVALUE_GENERALMISMATCH = "InvalidParameterValue.GeneralMismatch"
+//  INVALIDPARAMETERVALUE_INCLUDEINVALIDVALUE = "InvalidParameterValue.IncludeInvalidValue"
+//  INVALIDPARAMETERVALUE_MISSINGNECESSARYPARAM = "InvalidParameterValue.MissingNecessaryParam"
+//  INVALIDPARAMETERVALUE_NOTINENUMERATION = "InvalidParameterValue.NotInEnumeration"
+//  INVALIDPARAMETERVALUE_NOTWITHINRANGE = "InvalidParameterValue.NotWithinRange"
+//  INVALIDPARAMETERVALUE_REGEXMISMATCH = "InvalidParameterValue.RegExMismatch"
+//  INVALIDPARAMETERVALUE_TRIALPLANRESPONSEPAGE = "InvalidParameterValue.TrialPlanResponsePage"
+//  INVALIDPARAMETERVALUE_UNRECOGNIZABLEVALUE = "InvalidParameterValue.UnrecognizableValue"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_CONFIGLOCKED = "OperationDenied.ConfigLocked"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_INVALIDADVANCEDDEFENSESECURITYTYPE = "OperationDenied.InvalidAdvancedDefenseSecurityType"
+//  RESOURCEINUSE = "ResourceInUse"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) ModifySecurityAPIServiceWithContext(ctx context.Context, request *ModifySecurityAPIServiceRequest) (response *ModifySecurityAPIServiceResponse, err error) {
+    if request == nil {
+        request = NewModifySecurityAPIServiceRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifySecurityAPIService")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifySecurityAPIService require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifySecurityAPIServiceResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifySecurityClientAttesterRequest() (request *ModifySecurityClientAttesterRequest) {
+    request = &ModifySecurityClientAttesterRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifySecurityClientAttester")
+    
+    
+    return
+}
+
+func NewModifySecurityClientAttesterResponse() (response *ModifySecurityClientAttesterResponse) {
+    response = &ModifySecurityClientAttesterResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifySecurityClientAttester
+// 修改客户端认证选项。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_CACHEKEYQUERYSTRINGTOOMANYVALUE = "InvalidParameter.CacheKeyQueryStringTooManyValue"
+//  INVALIDPARAMETER_CERTSYSTEMERROR = "InvalidParameter.CertSystemError"
+//  INVALIDPARAMETER_COMPRESSIONINVALIDALGORITHMS = "InvalidParameter.CompressionInvalidAlgorithms"
+//  INVALIDPARAMETER_ERRACTIONUNSUPPORTTARGET = "InvalidParameter.ErrActionUnsupportTarget"
+//  INVALIDPARAMETER_ERRINVALIDACTION = "InvalidParameter.ErrInvalidAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONDUPLICATEACTION = "InvalidParameter.ErrInvalidActionDuplicateAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAM = "InvalidParameter.ErrInvalidActionParam"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMACTION = "InvalidParameter.ErrInvalidActionParamAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMDUPLICATENAME = "InvalidParameter.ErrInvalidActionParamDuplicateName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMNAME = "InvalidParameter.ErrInvalidActionParamName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMTOOMANYVALUES = "InvalidParameter.ErrInvalidActionParamTooManyValues"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMVALUE = "InvalidParameter.ErrInvalidActionParamValue"
+//  INVALIDPARAMETER_ERRINVALIDACTIONTYPE = "InvalidParameter.ErrInvalidActionType"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONHOSTTOOMANYWHENMODIFYORIGINACTIONCONFIGURED = "InvalidParameter.ErrInvalidConditionHostTooManyWhenModifyOriginActionConfigured"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONIGNORECASE = "InvalidParameter.ErrInvalidConditionIgnoreCase"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMEBADNAME = "InvalidParameter.ErrInvalidConditionNameBadName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMETARGETNOTSUPPORTNAME = "InvalidParameter.ErrInvalidConditionNameTargetNotSupportName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADREGULAR = "InvalidParameter.ErrInvalidConditionValueBadRegular"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADURL = "InvalidParameter.ErrInvalidConditionValueBadUrl"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUE = "InvalidParameter.ErrInvalidConditionValueBadValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUECONTAINFILENAMEEXTENSION = "InvalidParameter.ErrInvalidConditionValueBadValueContainFileNameExtension"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOLONGVALUE = "InvalidParameter.ErrInvalidConditionValueTooLongValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYVALUES = "InvalidParameter.ErrInvalidConditionValueTooManyValues"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYWILDCARD = "InvalidParameter.ErrInvalidConditionValueTooManyWildcard"
+//  INVALIDPARAMETER_ERRINVALIDELSEWHENMODIFYORIGINACTIONCONFIGURED = "InvalidParameter.ErrInvalidElseWhenModifyOriginActionConfigured"
+//  INVALIDPARAMETER_ERRNILCONDITION = "InvalidParameter.ErrNilCondition"
+//  INVALIDPARAMETER_GRPCREQUIREHTTP2 = "InvalidParameter.GrpcRequireHttp2"
+//  INVALIDPARAMETER_HOSTNOTFOUND = "InvalidParameter.HostNotFound"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPESECRETKEY = "InvalidParameter.InvalidAuthenticationTypeSecretKey"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPESIGNPARAM = "InvalidParameter.InvalidAuthenticationTypeSignParam"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPETIMEFORMAT = "InvalidParameter.InvalidAuthenticationTypeTimeFormat"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPETIMEPARAM = "InvalidParameter.InvalidAuthenticationTypeTimeParam"
+//  INVALIDPARAMETER_INVALIDAWSREGION = "InvalidParameter.InvalidAwsRegion"
+//  INVALIDPARAMETER_INVALIDBACKUPSERVERNAME = "InvalidParameter.InvalidBackupServerName"
+//  INVALIDPARAMETER_INVALIDCACHEKEY = "InvalidParameter.InvalidCacheKey"
+//  INVALIDPARAMETER_INVALIDCACHEKEYCOOKIE = "InvalidParameter.InvalidCacheKeyCookie"
+//  INVALIDPARAMETER_INVALIDCACHEKEYIGNORECASE = "InvalidParameter.InvalidCacheKeyIgnoreCase"
+//  INVALIDPARAMETER_INVALIDCACHEKEYSCHEME = "InvalidParameter.InvalidCacheKeyScheme"
+//  INVALIDPARAMETER_INVALIDCACHETIME = "InvalidParameter.InvalidCacheTime"
+//  INVALIDPARAMETER_INVALIDCLIENTIPHEADERNAME = "InvalidParameter.InvalidClientIpHeaderName"
+//  INVALIDPARAMETER_INVALIDCOSDOMAIN = "InvalidParameter.InvalidCosDomain"
+//  INVALIDPARAMETER_INVALIDERRORPAGEREDIRECTURL = "InvalidParameter.InvalidErrorPageRedirectUrl"
+//  INVALIDPARAMETER_INVALIDHTTPSCIPHERSUITEANDTLSVERSION = "InvalidParameter.InvalidHttpsCipherSuiteAndTlsVersion"
+//  INVALIDPARAMETER_INVALIDHTTPSHSTSMAXAGE = "InvalidParameter.InvalidHttpsHstsMaxAge"
+//  INVALIDPARAMETER_INVALIDIPV6SWITCH = "InvalidParameter.InvalidIpv6Switch"
+//  INVALIDPARAMETER_INVALIDMAXAGETIME = "InvalidParameter.InvalidMaxAgeTime"
+//  INVALIDPARAMETER_INVALIDORIGIN = "InvalidParameter.InvalidOrigin"
+//  INVALIDPARAMETER_INVALIDPARAMETER = "InvalidParameter.InvalidParameter"
+//  INVALIDPARAMETER_INVALIDRANGEORIGINPULL = "InvalidParameter.InvalidRangeOriginPull"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAME = "InvalidParameter.InvalidRequestHeaderName"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAMEXFF = "InvalidParameter.InvalidRequestHeaderNameXff"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERVALUE = "InvalidParameter.InvalidRequestHeaderValue"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERNAME = "InvalidParameter.InvalidResponseHeaderName"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERVALUE = "InvalidParameter.InvalidResponseHeaderValue"
+//  INVALIDPARAMETER_INVALIDRULEENGINEACTION = "InvalidParameter.InvalidRuleEngineAction"
+//  INVALIDPARAMETER_INVALIDRULEENGINENOTFOUND = "InvalidParameter.InvalidRuleEngineNotFound"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGET = "InvalidParameter.InvalidRuleEngineTarget"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSEXTENSION = "InvalidParameter.InvalidRuleEngineTargetsExtension"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSURL = "InvalidParameter.InvalidRuleEngineTargetsUrl"
+//  INVALIDPARAMETER_INVALIDSERVERNAME = "InvalidParameter.InvalidServerName"
+//  INVALIDPARAMETER_INVALIDUPSTREAMREQUESTQUERYSTRINGVALUE = "InvalidParameter.InvalidUpstreamRequestQueryStringValue"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTHOST = "InvalidParameter.InvalidUrlRedirectHost"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTURL = "InvalidParameter.InvalidUrlRedirectUrl"
+//  INVALIDPARAMETER_KEYRULESINVALIDQUERYSTRINGVALUE = "InvalidParameter.KeyRulesInvalidQueryStringValue"
+//  INVALIDPARAMETER_LOADBALANCEINSTANCEIDISREQUIRED = "InvalidParameter.LoadBalanceInstanceIdIsRequired"
+//  INVALIDPARAMETER_NOTSUPPORTTHISPRESET = "InvalidParameter.NotSupportThisPreset"
+//  INVALIDPARAMETER_ORIGINORIGINGROUPIDISREQUIRED = "InvalidParameter.OriginOriginGroupIdIsRequired"
+//  INVALIDPARAMETER_ORIGINPULLPROTOCOLISREQUIRED = "InvalidParameter.OriginPullProtocolIsRequired"
+//  INVALIDPARAMETER_POSTMAXSIZELIMITEXCEEDED = "InvalidParameter.PostMaxSizeLimitExceeded"
+//  INVALIDPARAMETER_RESPONSEHEADERCACHECONTROLNOTALLOWDELETE = "InvalidParameter.ResponseHeaderCacheControlNotAllowDelete"
+//  INVALIDPARAMETER_STATUSCODECACHEINVALIDSTATUSCODE = "InvalidParameter.StatusCodeCacheInvalidStatusCode"
+//  INVALIDPARAMETER_TLSVERSIONNOTINSEQUENCE = "InvalidParameter.TlsVersionNotInSequence"
+//  INVALIDPARAMETERVALUE_FORMATMISMATCH = "InvalidParameterValue.FormatMismatch"
+//  INVALIDPARAMETERVALUE_GENERALMISMATCH = "InvalidParameterValue.GeneralMismatch"
+//  INVALIDPARAMETERVALUE_INCLUDEINVALIDVALUE = "InvalidParameterValue.IncludeInvalidValue"
+//  INVALIDPARAMETERVALUE_MISSINGNECESSARYPARAM = "InvalidParameterValue.MissingNecessaryParam"
+//  INVALIDPARAMETERVALUE_NOTINENUMERATION = "InvalidParameterValue.NotInEnumeration"
+//  INVALIDPARAMETERVALUE_NOTWITHINRANGE = "InvalidParameterValue.NotWithinRange"
+//  INVALIDPARAMETERVALUE_REGEXMISMATCH = "InvalidParameterValue.RegExMismatch"
+//  INVALIDPARAMETERVALUE_TRIALPLANRESPONSEPAGE = "InvalidParameterValue.TrialPlanResponsePage"
+//  INVALIDPARAMETERVALUE_UNRECOGNIZABLEVALUE = "InvalidParameterValue.UnrecognizableValue"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_CONFIGLOCKED = "OperationDenied.ConfigLocked"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_INVALIDADVANCEDDEFENSESECURITYTYPE = "OperationDenied.InvalidAdvancedDefenseSecurityType"
+//  RESOURCEINUSE = "ResourceInUse"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) ModifySecurityClientAttester(request *ModifySecurityClientAttesterRequest) (response *ModifySecurityClientAttesterResponse, err error) {
+    return c.ModifySecurityClientAttesterWithContext(context.Background(), request)
+}
+
+// ModifySecurityClientAttester
+// 修改客户端认证选项。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
+//  INTERNALERROR_SYSTEMERROR = "InternalError.SystemError"
+//  INVALIDPARAMETER_CACHEKEYQUERYSTRINGTOOMANYVALUE = "InvalidParameter.CacheKeyQueryStringTooManyValue"
+//  INVALIDPARAMETER_CERTSYSTEMERROR = "InvalidParameter.CertSystemError"
+//  INVALIDPARAMETER_COMPRESSIONINVALIDALGORITHMS = "InvalidParameter.CompressionInvalidAlgorithms"
+//  INVALIDPARAMETER_ERRACTIONUNSUPPORTTARGET = "InvalidParameter.ErrActionUnsupportTarget"
+//  INVALIDPARAMETER_ERRINVALIDACTION = "InvalidParameter.ErrInvalidAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONDUPLICATEACTION = "InvalidParameter.ErrInvalidActionDuplicateAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAM = "InvalidParameter.ErrInvalidActionParam"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMACTION = "InvalidParameter.ErrInvalidActionParamAction"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMDUPLICATENAME = "InvalidParameter.ErrInvalidActionParamDuplicateName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMNAME = "InvalidParameter.ErrInvalidActionParamName"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMTOOMANYVALUES = "InvalidParameter.ErrInvalidActionParamTooManyValues"
+//  INVALIDPARAMETER_ERRINVALIDACTIONPARAMVALUE = "InvalidParameter.ErrInvalidActionParamValue"
+//  INVALIDPARAMETER_ERRINVALIDACTIONTYPE = "InvalidParameter.ErrInvalidActionType"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONHOSTTOOMANYWHENMODIFYORIGINACTIONCONFIGURED = "InvalidParameter.ErrInvalidConditionHostTooManyWhenModifyOriginActionConfigured"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONIGNORECASE = "InvalidParameter.ErrInvalidConditionIgnoreCase"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMEBADNAME = "InvalidParameter.ErrInvalidConditionNameBadName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONNAMETARGETNOTSUPPORTNAME = "InvalidParameter.ErrInvalidConditionNameTargetNotSupportName"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADREGULAR = "InvalidParameter.ErrInvalidConditionValueBadRegular"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADURL = "InvalidParameter.ErrInvalidConditionValueBadUrl"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUE = "InvalidParameter.ErrInvalidConditionValueBadValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUEBADVALUECONTAINFILENAMEEXTENSION = "InvalidParameter.ErrInvalidConditionValueBadValueContainFileNameExtension"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOLONGVALUE = "InvalidParameter.ErrInvalidConditionValueTooLongValue"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYVALUES = "InvalidParameter.ErrInvalidConditionValueTooManyValues"
+//  INVALIDPARAMETER_ERRINVALIDCONDITIONVALUETOOMANYWILDCARD = "InvalidParameter.ErrInvalidConditionValueTooManyWildcard"
+//  INVALIDPARAMETER_ERRINVALIDELSEWHENMODIFYORIGINACTIONCONFIGURED = "InvalidParameter.ErrInvalidElseWhenModifyOriginActionConfigured"
+//  INVALIDPARAMETER_ERRNILCONDITION = "InvalidParameter.ErrNilCondition"
+//  INVALIDPARAMETER_GRPCREQUIREHTTP2 = "InvalidParameter.GrpcRequireHttp2"
+//  INVALIDPARAMETER_HOSTNOTFOUND = "InvalidParameter.HostNotFound"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPESECRETKEY = "InvalidParameter.InvalidAuthenticationTypeSecretKey"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPESIGNPARAM = "InvalidParameter.InvalidAuthenticationTypeSignParam"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPETIMEFORMAT = "InvalidParameter.InvalidAuthenticationTypeTimeFormat"
+//  INVALIDPARAMETER_INVALIDAUTHENTICATIONTYPETIMEPARAM = "InvalidParameter.InvalidAuthenticationTypeTimeParam"
+//  INVALIDPARAMETER_INVALIDAWSREGION = "InvalidParameter.InvalidAwsRegion"
+//  INVALIDPARAMETER_INVALIDBACKUPSERVERNAME = "InvalidParameter.InvalidBackupServerName"
+//  INVALIDPARAMETER_INVALIDCACHEKEY = "InvalidParameter.InvalidCacheKey"
+//  INVALIDPARAMETER_INVALIDCACHEKEYCOOKIE = "InvalidParameter.InvalidCacheKeyCookie"
+//  INVALIDPARAMETER_INVALIDCACHEKEYIGNORECASE = "InvalidParameter.InvalidCacheKeyIgnoreCase"
+//  INVALIDPARAMETER_INVALIDCACHEKEYSCHEME = "InvalidParameter.InvalidCacheKeyScheme"
+//  INVALIDPARAMETER_INVALIDCACHETIME = "InvalidParameter.InvalidCacheTime"
+//  INVALIDPARAMETER_INVALIDCLIENTIPHEADERNAME = "InvalidParameter.InvalidClientIpHeaderName"
+//  INVALIDPARAMETER_INVALIDCOSDOMAIN = "InvalidParameter.InvalidCosDomain"
+//  INVALIDPARAMETER_INVALIDERRORPAGEREDIRECTURL = "InvalidParameter.InvalidErrorPageRedirectUrl"
+//  INVALIDPARAMETER_INVALIDHTTPSCIPHERSUITEANDTLSVERSION = "InvalidParameter.InvalidHttpsCipherSuiteAndTlsVersion"
+//  INVALIDPARAMETER_INVALIDHTTPSHSTSMAXAGE = "InvalidParameter.InvalidHttpsHstsMaxAge"
+//  INVALIDPARAMETER_INVALIDIPV6SWITCH = "InvalidParameter.InvalidIpv6Switch"
+//  INVALIDPARAMETER_INVALIDMAXAGETIME = "InvalidParameter.InvalidMaxAgeTime"
+//  INVALIDPARAMETER_INVALIDORIGIN = "InvalidParameter.InvalidOrigin"
+//  INVALIDPARAMETER_INVALIDPARAMETER = "InvalidParameter.InvalidParameter"
+//  INVALIDPARAMETER_INVALIDRANGEORIGINPULL = "InvalidParameter.InvalidRangeOriginPull"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAME = "InvalidParameter.InvalidRequestHeaderName"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERNAMEXFF = "InvalidParameter.InvalidRequestHeaderNameXff"
+//  INVALIDPARAMETER_INVALIDREQUESTHEADERVALUE = "InvalidParameter.InvalidRequestHeaderValue"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERNAME = "InvalidParameter.InvalidResponseHeaderName"
+//  INVALIDPARAMETER_INVALIDRESPONSEHEADERVALUE = "InvalidParameter.InvalidResponseHeaderValue"
+//  INVALIDPARAMETER_INVALIDRULEENGINEACTION = "InvalidParameter.InvalidRuleEngineAction"
+//  INVALIDPARAMETER_INVALIDRULEENGINENOTFOUND = "InvalidParameter.InvalidRuleEngineNotFound"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGET = "InvalidParameter.InvalidRuleEngineTarget"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSEXTENSION = "InvalidParameter.InvalidRuleEngineTargetsExtension"
+//  INVALIDPARAMETER_INVALIDRULEENGINETARGETSURL = "InvalidParameter.InvalidRuleEngineTargetsUrl"
+//  INVALIDPARAMETER_INVALIDSERVERNAME = "InvalidParameter.InvalidServerName"
+//  INVALIDPARAMETER_INVALIDUPSTREAMREQUESTQUERYSTRINGVALUE = "InvalidParameter.InvalidUpstreamRequestQueryStringValue"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTHOST = "InvalidParameter.InvalidUrlRedirectHost"
+//  INVALIDPARAMETER_INVALIDURLREDIRECTURL = "InvalidParameter.InvalidUrlRedirectUrl"
+//  INVALIDPARAMETER_KEYRULESINVALIDQUERYSTRINGVALUE = "InvalidParameter.KeyRulesInvalidQueryStringValue"
+//  INVALIDPARAMETER_LOADBALANCEINSTANCEIDISREQUIRED = "InvalidParameter.LoadBalanceInstanceIdIsRequired"
+//  INVALIDPARAMETER_NOTSUPPORTTHISPRESET = "InvalidParameter.NotSupportThisPreset"
+//  INVALIDPARAMETER_ORIGINORIGINGROUPIDISREQUIRED = "InvalidParameter.OriginOriginGroupIdIsRequired"
+//  INVALIDPARAMETER_ORIGINPULLPROTOCOLISREQUIRED = "InvalidParameter.OriginPullProtocolIsRequired"
+//  INVALIDPARAMETER_POSTMAXSIZELIMITEXCEEDED = "InvalidParameter.PostMaxSizeLimitExceeded"
+//  INVALIDPARAMETER_RESPONSEHEADERCACHECONTROLNOTALLOWDELETE = "InvalidParameter.ResponseHeaderCacheControlNotAllowDelete"
+//  INVALIDPARAMETER_STATUSCODECACHEINVALIDSTATUSCODE = "InvalidParameter.StatusCodeCacheInvalidStatusCode"
+//  INVALIDPARAMETER_TLSVERSIONNOTINSEQUENCE = "InvalidParameter.TlsVersionNotInSequence"
+//  INVALIDPARAMETERVALUE_FORMATMISMATCH = "InvalidParameterValue.FormatMismatch"
+//  INVALIDPARAMETERVALUE_GENERALMISMATCH = "InvalidParameterValue.GeneralMismatch"
+//  INVALIDPARAMETERVALUE_INCLUDEINVALIDVALUE = "InvalidParameterValue.IncludeInvalidValue"
+//  INVALIDPARAMETERVALUE_MISSINGNECESSARYPARAM = "InvalidParameterValue.MissingNecessaryParam"
+//  INVALIDPARAMETERVALUE_NOTINENUMERATION = "InvalidParameterValue.NotInEnumeration"
+//  INVALIDPARAMETERVALUE_NOTWITHINRANGE = "InvalidParameterValue.NotWithinRange"
+//  INVALIDPARAMETERVALUE_REGEXMISMATCH = "InvalidParameterValue.RegExMismatch"
+//  INVALIDPARAMETERVALUE_TRIALPLANRESPONSEPAGE = "InvalidParameterValue.TrialPlanResponsePage"
+//  INVALIDPARAMETERVALUE_UNRECOGNIZABLEVALUE = "InvalidParameterValue.UnrecognizableValue"
+//  LIMITEXCEEDED = "LimitExceeded"
+//  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_CONFIGLOCKED = "OperationDenied.ConfigLocked"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_INVALIDADVANCEDDEFENSESECURITYTYPE = "OperationDenied.InvalidAdvancedDefenseSecurityType"
+//  RESOURCEINUSE = "ResourceInUse"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) ModifySecurityClientAttesterWithContext(ctx context.Context, request *ModifySecurityClientAttesterRequest) (response *ModifySecurityClientAttesterResponse, err error) {
+    if request == nil {
+        request = NewModifySecurityClientAttesterRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifySecurityClientAttester")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifySecurityClientAttester require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifySecurityClientAttesterResponse()
     err = c.Send(request, response)
     return
 }
@@ -6309,6 +15676,7 @@ func (c *Client) ModifySecurityIPGroupWithContext(ctx context.Context, request *
     if request == nil {
         request = NewModifySecurityIPGroupRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifySecurityIPGroup")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifySecurityIPGroup require credential")
@@ -6317,6 +15685,64 @@ func (c *Client) ModifySecurityIPGroupWithContext(ctx context.Context, request *
     request.SetContext(ctx)
     
     response = NewModifySecurityIPGroupResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifySecurityJSInjectionRuleRequest() (request *ModifySecurityJSInjectionRuleRequest) {
+    request = &ModifySecurityJSInjectionRuleRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifySecurityJSInjectionRule")
+    
+    
+    return
+}
+
+func NewModifySecurityJSInjectionRuleResponse() (response *ModifySecurityJSInjectionRuleResponse) {
+    response = &ModifySecurityJSInjectionRuleResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifySecurityJSInjectionRule
+// 修改 JavaScript 注入规则。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INVALIDPARAMETER_SECURITY = "InvalidParameter.Security"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) ModifySecurityJSInjectionRule(request *ModifySecurityJSInjectionRuleRequest) (response *ModifySecurityJSInjectionRuleResponse, err error) {
+    return c.ModifySecurityJSInjectionRuleWithContext(context.Background(), request)
+}
+
+// ModifySecurityJSInjectionRule
+// 修改 JavaScript 注入规则。
+//
+// 可能返回的错误码:
+//  INTERNALERROR_PROXYSERVER = "InternalError.ProxyServer"
+//  INVALIDPARAMETER_SECURITY = "InvalidParameter.Security"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+//  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
+//  UNAUTHORIZEDOPERATION_UNKNOWN = "UnauthorizedOperation.Unknown"
+func (c *Client) ModifySecurityJSInjectionRuleWithContext(ctx context.Context, request *ModifySecurityJSInjectionRuleRequest) (response *ModifySecurityJSInjectionRuleResponse, err error) {
+    if request == nil {
+        request = NewModifySecurityJSInjectionRuleRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifySecurityJSInjectionRule")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifySecurityJSInjectionRule require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifySecurityJSInjectionRuleResponse()
     err = c.Send(request, response)
     return
 }
@@ -6378,6 +15804,7 @@ func (c *Client) ModifySecurityPolicyWithContext(ctx context.Context, request *M
     if request == nil {
         request = NewModifySecurityPolicyRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifySecurityPolicy")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifySecurityPolicy require credential")
@@ -6386,6 +15813,114 @@ func (c *Client) ModifySecurityPolicyWithContext(ctx context.Context, request *M
     request.SetContext(ctx)
     
     response = NewModifySecurityPolicyResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifySharedCNAMERequest() (request *ModifySharedCNAMERequest) {
+    request = &ModifySharedCNAMERequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifySharedCNAME")
+    
+    
+    return
+}
+
+func NewModifySharedCNAMEResponse() (response *ModifySharedCNAMEResponse) {
+    response = &ModifySharedCNAMEResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifySharedCNAME
+// 用于修改共享 CNAME。当前仅支持修改共享 CNAME 的描述和设置 IP SSL类型的共享CNAME关联IP SSL 域名，共享 CNAME 本身创建后不支持修改。该功能白名单内测中。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  OPERATIONDENIED_DOMAINMUSTINIPSSLSHAREDCNAMEZONEANDINSHAREDCNAME = "OperationDenied.DomainMustInIPSSLSharedCNAMEZoneAndInSharedCNAME"
+//  OPERATIONDENIED_IPSSLALREADYBOUNDANOTHERDOMAIN = "OperationDenied.IPSSLAlreadyBoundAnotherDomain"
+//  OPERATIONDENIED_LASTIPSSLOPERATIONNOTCOMPLETE = "OperationDenied.LastIPSSLOperationNotComplete"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+func (c *Client) ModifySharedCNAME(request *ModifySharedCNAMERequest) (response *ModifySharedCNAMEResponse, err error) {
+    return c.ModifySharedCNAMEWithContext(context.Background(), request)
+}
+
+// ModifySharedCNAME
+// 用于修改共享 CNAME。当前仅支持修改共享 CNAME 的描述和设置 IP SSL类型的共享CNAME关联IP SSL 域名，共享 CNAME 本身创建后不支持修改。该功能白名单内测中。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  OPERATIONDENIED_DOMAINMUSTINIPSSLSHAREDCNAMEZONEANDINSHAREDCNAME = "OperationDenied.DomainMustInIPSSLSharedCNAMEZoneAndInSharedCNAME"
+//  OPERATIONDENIED_IPSSLALREADYBOUNDANOTHERDOMAIN = "OperationDenied.IPSSLAlreadyBoundAnotherDomain"
+//  OPERATIONDENIED_LASTIPSSLOPERATIONNOTCOMPLETE = "OperationDenied.LastIPSSLOperationNotComplete"
+//  RESOURCENOTFOUND = "ResourceNotFound"
+func (c *Client) ModifySharedCNAMEWithContext(ctx context.Context, request *ModifySharedCNAMERequest) (response *ModifySharedCNAMEResponse, err error) {
+    if request == nil {
+        request = NewModifySharedCNAMERequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifySharedCNAME")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifySharedCNAME require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifySharedCNAMEResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyWebSecurityTemplateRequest() (request *ModifyWebSecurityTemplateRequest) {
+    request = &ModifyWebSecurityTemplateRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifyWebSecurityTemplate")
+    
+    
+    return
+}
+
+func NewModifyWebSecurityTemplateResponse() (response *ModifyWebSecurityTemplateResponse) {
+    response = &ModifyWebSecurityTemplateResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyWebSecurityTemplate
+// 修改安全策略配置模板
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER_SECURITY = "InvalidParameter.Security"
+func (c *Client) ModifyWebSecurityTemplate(request *ModifyWebSecurityTemplateRequest) (response *ModifyWebSecurityTemplateResponse, err error) {
+    return c.ModifyWebSecurityTemplateWithContext(context.Background(), request)
+}
+
+// ModifyWebSecurityTemplate
+// 修改安全策略配置模板
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER_SECURITY = "InvalidParameter.Security"
+func (c *Client) ModifyWebSecurityTemplateWithContext(ctx context.Context, request *ModifyWebSecurityTemplateRequest) (response *ModifyWebSecurityTemplateResponse, err error) {
+    if request == nil {
+        request = NewModifyWebSecurityTemplateRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyWebSecurityTemplate")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyWebSecurityTemplate require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyWebSecurityTemplateResponse()
     err = c.Send(request, response)
     return
 }
@@ -6415,6 +15950,7 @@ func NewModifyZoneResponse() (response *ModifyZoneResponse) {
 // 可能返回的错误码:
 //  DRYRUNOPERATION = "DryRunOperation"
 //  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_FAILEDTOCALLDNSPOD = "FailedOperation.FailedToCallDNSPod"
 //  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
 //  INVALIDPARAMETER_INVALIDORIGINIP = "InvalidParameter.InvalidOriginIp"
 //  INVALIDPARAMETER_INVALIDWEBSOCKETTIMEOUT = "InvalidParameter.InvalidWebSocketTimeout"
@@ -6423,6 +15959,7 @@ func NewModifyZoneResponse() (response *ModifyZoneResponse) {
 //  INVALIDPARAMETERVALUE = "InvalidParameterValue"
 //  INVALIDPARAMETERVALUE_ZONESAMEASNAME = "InvalidParameterValue.ZoneSameAsName"
 //  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_DNSPODUNAUTHORIZEDROLEOPERATION = "OperationDenied.DNSPodUnauthorizedRoleOperation"
 //  OPERATIONDENIED_DISABLEZONENOTCOMPLETED = "OperationDenied.DisableZoneNotCompleted"
 //  OPERATIONDENIED_DOMAININSHARECNAMEGROUP = "OperationDenied.DomainInShareCnameGroup"
 //  OPERATIONDENIED_DOMAINNUMBERISNOTZERO = "OperationDenied.DomainNumberIsNotZero"
@@ -6430,9 +15967,13 @@ func NewModifyZoneResponse() (response *ModifyZoneResponse) {
 //  OPERATIONDENIED_MULTIPLECNAMEZONE = "OperationDenied.MultipleCnameZone"
 //  OPERATIONDENIED_NSNOTALLOWTRAFFICSTRATEGY = "OperationDenied.NSNotAllowTrafficStrategy"
 //  OPERATIONDENIED_NODOMAINACCESSZONEONLYALLOWMODIFIEDTOCNAME = "OperationDenied.NoDomainAccessZoneOnlyAllowModifiedToCNAME"
+//  OPERATIONDENIED_NODOMAINACCESSZONEONLYSUPPORTMODIFYAREAANDALIASZONENAME = "OperationDenied.NoDomainAccessZoneOnlySupportModifyAreaAndAliasZoneName"
 //  OPERATIONDENIED_NODOMAINACCESSZONEONLYSUPPORTMODIFYTYPE = "OperationDenied.NoDomainAccessZoneOnlySupportModifyType"
 //  OPERATIONDENIED_PLANNOTSUPPORTMODIFYZONEAREA = "OperationDenied.PlanNotSupportModifyZoneArea"
 //  OPERATIONDENIED_RESOURCELOCKEDTEMPORARY = "OperationDenied.ResourceLockedTemporary"
+//  OPERATIONDENIED_SWITCHAREACDNPLATFORMREUSE = "OperationDenied.SwitchAreaCdnPlatformReuse"
+//  OPERATIONDENIED_SWITCHAREAORIGINPROTECTIONDEPLOYING = "OperationDenied.SwitchAreaOriginProtectionDeploying"
+//  OPERATIONDENIED_ZONEHASHOSTSMODIFYCONFLICT = "OperationDenied.ZoneHasHostsModifyConflict"
 //  RESOURCEINUSE_CNAME = "ResourceInUse.Cname"
 //  RESOURCEINUSE_DNS = "ResourceInUse.Dns"
 //  RESOURCEINUSE_GENERICHOST = "ResourceInUse.GenericHost"
@@ -6443,6 +15984,7 @@ func NewModifyZoneResponse() (response *ModifyZoneResponse) {
 //  RESOURCEINUSE_OTHERSNS = "ResourceInUse.OthersNS"
 //  RESOURCEINUSE_SELFANDOTHERSCNAME = "ResourceInUse.SelfAndOthersCname"
 //  RESOURCENOTFOUND = "ResourceNotFound"
+//  RESOURCENOTFOUND_DNSPODDOMAINNOTINACCOUNT = "ResourceNotFound.DNSPodDomainNotInAccount"
 //  RESOURCEUNAVAILABLE = "ResourceUnavailable"
 //  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
 //  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
@@ -6456,6 +15998,7 @@ func (c *Client) ModifyZone(request *ModifyZoneRequest) (response *ModifyZoneRes
 // 可能返回的错误码:
 //  DRYRUNOPERATION = "DryRunOperation"
 //  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_FAILEDTOCALLDNSPOD = "FailedOperation.FailedToCallDNSPod"
 //  INTERNALERROR_CONFIGLOCKED = "InternalError.ConfigLocked"
 //  INVALIDPARAMETER_INVALIDORIGINIP = "InvalidParameter.InvalidOriginIp"
 //  INVALIDPARAMETER_INVALIDWEBSOCKETTIMEOUT = "InvalidParameter.InvalidWebSocketTimeout"
@@ -6464,6 +16007,7 @@ func (c *Client) ModifyZone(request *ModifyZoneRequest) (response *ModifyZoneRes
 //  INVALIDPARAMETERVALUE = "InvalidParameterValue"
 //  INVALIDPARAMETERVALUE_ZONESAMEASNAME = "InvalidParameterValue.ZoneSameAsName"
 //  OPERATIONDENIED = "OperationDenied"
+//  OPERATIONDENIED_DNSPODUNAUTHORIZEDROLEOPERATION = "OperationDenied.DNSPodUnauthorizedRoleOperation"
 //  OPERATIONDENIED_DISABLEZONENOTCOMPLETED = "OperationDenied.DisableZoneNotCompleted"
 //  OPERATIONDENIED_DOMAININSHARECNAMEGROUP = "OperationDenied.DomainInShareCnameGroup"
 //  OPERATIONDENIED_DOMAINNUMBERISNOTZERO = "OperationDenied.DomainNumberIsNotZero"
@@ -6471,9 +16015,13 @@ func (c *Client) ModifyZone(request *ModifyZoneRequest) (response *ModifyZoneRes
 //  OPERATIONDENIED_MULTIPLECNAMEZONE = "OperationDenied.MultipleCnameZone"
 //  OPERATIONDENIED_NSNOTALLOWTRAFFICSTRATEGY = "OperationDenied.NSNotAllowTrafficStrategy"
 //  OPERATIONDENIED_NODOMAINACCESSZONEONLYALLOWMODIFIEDTOCNAME = "OperationDenied.NoDomainAccessZoneOnlyAllowModifiedToCNAME"
+//  OPERATIONDENIED_NODOMAINACCESSZONEONLYSUPPORTMODIFYAREAANDALIASZONENAME = "OperationDenied.NoDomainAccessZoneOnlySupportModifyAreaAndAliasZoneName"
 //  OPERATIONDENIED_NODOMAINACCESSZONEONLYSUPPORTMODIFYTYPE = "OperationDenied.NoDomainAccessZoneOnlySupportModifyType"
 //  OPERATIONDENIED_PLANNOTSUPPORTMODIFYZONEAREA = "OperationDenied.PlanNotSupportModifyZoneArea"
 //  OPERATIONDENIED_RESOURCELOCKEDTEMPORARY = "OperationDenied.ResourceLockedTemporary"
+//  OPERATIONDENIED_SWITCHAREACDNPLATFORMREUSE = "OperationDenied.SwitchAreaCdnPlatformReuse"
+//  OPERATIONDENIED_SWITCHAREAORIGINPROTECTIONDEPLOYING = "OperationDenied.SwitchAreaOriginProtectionDeploying"
+//  OPERATIONDENIED_ZONEHASHOSTSMODIFYCONFLICT = "OperationDenied.ZoneHasHostsModifyConflict"
 //  RESOURCEINUSE_CNAME = "ResourceInUse.Cname"
 //  RESOURCEINUSE_DNS = "ResourceInUse.Dns"
 //  RESOURCEINUSE_GENERICHOST = "ResourceInUse.GenericHost"
@@ -6484,6 +16032,7 @@ func (c *Client) ModifyZone(request *ModifyZoneRequest) (response *ModifyZoneRes
 //  RESOURCEINUSE_OTHERSNS = "ResourceInUse.OthersNS"
 //  RESOURCEINUSE_SELFANDOTHERSCNAME = "ResourceInUse.SelfAndOthersCname"
 //  RESOURCENOTFOUND = "ResourceNotFound"
+//  RESOURCENOTFOUND_DNSPODDOMAINNOTINACCOUNT = "ResourceNotFound.DNSPodDomainNotInAccount"
 //  RESOURCEUNAVAILABLE = "ResourceUnavailable"
 //  UNAUTHORIZEDOPERATION_CAMUNAUTHORIZED = "UnauthorizedOperation.CamUnauthorized"
 //  UNAUTHORIZEDOPERATION_NOPERMISSION = "UnauthorizedOperation.NoPermission"
@@ -6491,6 +16040,7 @@ func (c *Client) ModifyZoneWithContext(ctx context.Context, request *ModifyZoneR
     if request == nil {
         request = NewModifyZoneRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyZone")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyZone require credential")
@@ -6523,7 +16073,7 @@ func NewModifyZoneSettingResponse() (response *ModifyZoneSettingResponse) {
 }
 
 // ModifyZoneSetting
-// 用于修改站点配置
+// 本接口为旧版，EdgeOne 已对规则引擎相关接口全面升级，详情请参考 [ModifyL7AccSetting](https://cloud.tencent.com/document/product/1552/115817)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -6573,6 +16123,14 @@ func NewModifyZoneSettingResponse() (response *ModifyZoneSettingResponse) {
 //  INVALIDPARAMETER_SETTINGINVALIDPARAM = "InvalidParameter.SettingInvalidParam"
 //  INVALIDPARAMETER_ZONEISGRAYPUBLISHING = "InvalidParameter.ZoneIsGrayPublishing"
 //  INVALIDPARAMETER_ZONENOTFOUND = "InvalidParameter.ZoneNotFound"
+//  INVALIDPARAMETERVALUE_FORMATMISMATCH = "InvalidParameterValue.FormatMismatch"
+//  INVALIDPARAMETERVALUE_GENERALMISMATCH = "InvalidParameterValue.GeneralMismatch"
+//  INVALIDPARAMETERVALUE_INCLUDEINVALIDVALUE = "InvalidParameterValue.IncludeInvalidValue"
+//  INVALIDPARAMETERVALUE_MISSINGNECESSARYPARAM = "InvalidParameterValue.MissingNecessaryParam"
+//  INVALIDPARAMETERVALUE_NOTINENUMERATION = "InvalidParameterValue.NotInEnumeration"
+//  INVALIDPARAMETERVALUE_NOTWITHINRANGE = "InvalidParameterValue.NotWithinRange"
+//  INVALIDPARAMETERVALUE_REGEXMISMATCH = "InvalidParameterValue.RegExMismatch"
+//  INVALIDPARAMETERVALUE_UNRECOGNIZABLEVALUE = "InvalidParameterValue.UnrecognizableValue"
 //  OPERATIONDENIED = "OperationDenied"
 //  OPERATIONDENIED_ACCELERATEMAINLANDDISABLE = "OperationDenied.AccelerateMainlandDisable"
 //  OPERATIONDENIED_ACCELERATEMAINLANDIPV6CONFLICT = "OperationDenied.AccelerateMainlandIpv6Conflict"
@@ -6593,7 +16151,7 @@ func (c *Client) ModifyZoneSetting(request *ModifyZoneSettingRequest) (response 
 }
 
 // ModifyZoneSetting
-// 用于修改站点配置
+// 本接口为旧版，EdgeOne 已对规则引擎相关接口全面升级，详情请参考 [ModifyL7AccSetting](https://cloud.tencent.com/document/product/1552/115817)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -6643,6 +16201,14 @@ func (c *Client) ModifyZoneSetting(request *ModifyZoneSettingRequest) (response 
 //  INVALIDPARAMETER_SETTINGINVALIDPARAM = "InvalidParameter.SettingInvalidParam"
 //  INVALIDPARAMETER_ZONEISGRAYPUBLISHING = "InvalidParameter.ZoneIsGrayPublishing"
 //  INVALIDPARAMETER_ZONENOTFOUND = "InvalidParameter.ZoneNotFound"
+//  INVALIDPARAMETERVALUE_FORMATMISMATCH = "InvalidParameterValue.FormatMismatch"
+//  INVALIDPARAMETERVALUE_GENERALMISMATCH = "InvalidParameterValue.GeneralMismatch"
+//  INVALIDPARAMETERVALUE_INCLUDEINVALIDVALUE = "InvalidParameterValue.IncludeInvalidValue"
+//  INVALIDPARAMETERVALUE_MISSINGNECESSARYPARAM = "InvalidParameterValue.MissingNecessaryParam"
+//  INVALIDPARAMETERVALUE_NOTINENUMERATION = "InvalidParameterValue.NotInEnumeration"
+//  INVALIDPARAMETERVALUE_NOTWITHINRANGE = "InvalidParameterValue.NotWithinRange"
+//  INVALIDPARAMETERVALUE_REGEXMISMATCH = "InvalidParameterValue.RegExMismatch"
+//  INVALIDPARAMETERVALUE_UNRECOGNIZABLEVALUE = "InvalidParameterValue.UnrecognizableValue"
 //  OPERATIONDENIED = "OperationDenied"
 //  OPERATIONDENIED_ACCELERATEMAINLANDDISABLE = "OperationDenied.AccelerateMainlandDisable"
 //  OPERATIONDENIED_ACCELERATEMAINLANDIPV6CONFLICT = "OperationDenied.AccelerateMainlandIpv6Conflict"
@@ -6662,6 +16228,7 @@ func (c *Client) ModifyZoneSettingWithContext(ctx context.Context, request *Modi
     if request == nil {
         request = NewModifyZoneSettingRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyZoneSetting")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyZoneSetting require credential")
@@ -6733,6 +16300,7 @@ func (c *Client) ModifyZoneStatusWithContext(ctx context.Context, request *Modif
     if request == nil {
         request = NewModifyZoneStatusRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyZoneStatus")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyZoneStatus require credential")
@@ -6741,6 +16309,194 @@ func (c *Client) ModifyZoneStatusWithContext(ctx context.Context, request *Modif
     request.SetContext(ctx)
     
     response = NewModifyZoneStatusResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewModifyZoneWorkModeRequest() (request *ModifyZoneWorkModeRequest) {
+    request = &ModifyZoneWorkModeRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "ModifyZoneWorkMode")
+    
+    
+    return
+}
+
+func NewModifyZoneWorkModeResponse() (response *ModifyZoneWorkModeResponse) {
+    response = &ModifyZoneWorkModeResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ModifyZoneWorkMode
+// 本接口用于修改站点下各配置模块的工作模式。站点各配置模块可按照配置组维度开启「版本管理模式」或「即时生效模式」，详情请参考 [版本管理](https://cloud.tencent.com/document/product/1552/113690)。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER_WORKMODEISSAME = "InvalidParameter.WorkModeIsSame"
+//  INVALIDPARAMETER_ZONENOTFOUND = "InvalidParameter.ZoneNotFound"
+//  INVALIDPARAMETERVALUE_OWNERSHIPVERIFICATIONNOTPASSED = "InvalidParameterValue.OwnershipVerificationNotPassed"
+//  OPERATIONDENIED_ALIASDOMAINNOTSUPPORT = "OperationDenied.AliasDomainNotSupport"
+//  OPERATIONDENIED_CONFIGLOCKED = "OperationDenied.ConfigLocked"
+//  OPERATIONDENIED_DOMAINSTATUSUNSTABLE = "OperationDenied.DomainStatusUnstable"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_NOTINVERSIONCONTROLWHITELIST = "OperationDenied.NotInVersionControlWhiteList"
+//  OPERATIONDENIED_OWNERSHIPVERIFICATIONNOTPASSED = "OperationDenied.OwnershipVerificationNotPassed"
+//  OPERATIONDENIED_PLANTYPEISWRONG = "OperationDenied.PlanTypeIsWrong"
+//  OPERATIONDENIED_VERSIONCONTROLLOCKED = "OperationDenied.VersionControlLocked"
+//  OPERATIONDENIED_VERSIONCONTROLNEEDNSSWITCHED = "OperationDenied.VersionControlNeedNSSwitched"
+//  RESOURCENOTFOUND_ZONENOTFOUND = "ResourceNotFound.ZoneNotFound"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
+func (c *Client) ModifyZoneWorkMode(request *ModifyZoneWorkModeRequest) (response *ModifyZoneWorkModeResponse, err error) {
+    return c.ModifyZoneWorkModeWithContext(context.Background(), request)
+}
+
+// ModifyZoneWorkMode
+// 本接口用于修改站点下各配置模块的工作模式。站点各配置模块可按照配置组维度开启「版本管理模式」或「即时生效模式」，详情请参考 [版本管理](https://cloud.tencent.com/document/product/1552/113690)。
+//
+// 可能返回的错误码:
+//  INVALIDPARAMETER_WORKMODEISSAME = "InvalidParameter.WorkModeIsSame"
+//  INVALIDPARAMETER_ZONENOTFOUND = "InvalidParameter.ZoneNotFound"
+//  INVALIDPARAMETERVALUE_OWNERSHIPVERIFICATIONNOTPASSED = "InvalidParameterValue.OwnershipVerificationNotPassed"
+//  OPERATIONDENIED_ALIASDOMAINNOTSUPPORT = "OperationDenied.AliasDomainNotSupport"
+//  OPERATIONDENIED_CONFIGLOCKED = "OperationDenied.ConfigLocked"
+//  OPERATIONDENIED_DOMAINSTATUSUNSTABLE = "OperationDenied.DomainStatusUnstable"
+//  OPERATIONDENIED_ERRZONEISALREADYPAUSED = "OperationDenied.ErrZoneIsAlreadyPaused"
+//  OPERATIONDENIED_NOTINVERSIONCONTROLWHITELIST = "OperationDenied.NotInVersionControlWhiteList"
+//  OPERATIONDENIED_OWNERSHIPVERIFICATIONNOTPASSED = "OperationDenied.OwnershipVerificationNotPassed"
+//  OPERATIONDENIED_PLANTYPEISWRONG = "OperationDenied.PlanTypeIsWrong"
+//  OPERATIONDENIED_VERSIONCONTROLLOCKED = "OperationDenied.VersionControlLocked"
+//  OPERATIONDENIED_VERSIONCONTROLNEEDNSSWITCHED = "OperationDenied.VersionControlNeedNSSwitched"
+//  RESOURCENOTFOUND_ZONENOTFOUND = "ResourceNotFound.ZoneNotFound"
+//  RESOURCEUNAVAILABLE_ZONENOTFOUND = "ResourceUnavailable.ZoneNotFound"
+func (c *Client) ModifyZoneWorkModeWithContext(ctx context.Context, request *ModifyZoneWorkModeRequest) (response *ModifyZoneWorkModeResponse, err error) {
+    if request == nil {
+        request = NewModifyZoneWorkModeRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "ModifyZoneWorkMode")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ModifyZoneWorkMode require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewModifyZoneWorkModeResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewOperateInferenceServiceRequest() (request *OperateInferenceServiceRequest) {
+    request = &OperateInferenceServiceRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "OperateInferenceService")
+    
+    
+    return
+}
+
+func NewOperateInferenceServiceResponse() (response *OperateInferenceServiceResponse) {
+    response = &OperateInferenceServiceResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// OperateInferenceService
+// 操作推理服务，支持停止、启动和删除推理服务，删除后资源不可恢复。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+//  RESOURCENOTFOUND_INFERENCESERVICE = "ResourceNotFound.InferenceService"
+func (c *Client) OperateInferenceService(request *OperateInferenceServiceRequest) (response *OperateInferenceServiceResponse, err error) {
+    return c.OperateInferenceServiceWithContext(context.Background(), request)
+}
+
+// OperateInferenceService
+// 操作推理服务，支持停止、启动和删除推理服务，删除后资源不可恢复。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETERVALUE_ZONENOTFOUND = "InvalidParameterValue.ZoneNotFound"
+//  RESOURCENOTFOUND_INFERENCESERVICE = "ResourceNotFound.InferenceService"
+func (c *Client) OperateInferenceServiceWithContext(ctx context.Context, request *OperateInferenceServiceRequest) (response *OperateInferenceServiceResponse, err error) {
+    if request == nil {
+        request = NewOperateInferenceServiceRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "OperateInferenceService")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("OperateInferenceService require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewOperateInferenceServiceResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewRefreshMultiPathGatewaySecretKeyRequest() (request *RefreshMultiPathGatewaySecretKeyRequest) {
+    request = &RefreshMultiPathGatewaySecretKeyRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("teo", APIVersion, "RefreshMultiPathGatewaySecretKey")
+    
+    
+    return
+}
+
+func NewRefreshMultiPathGatewaySecretKeyResponse() (response *RefreshMultiPathGatewaySecretKeyResponse) {
+    response = &RefreshMultiPathGatewaySecretKeyResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// RefreshMultiPathGatewaySecretKey
+// 通过本接口刷新多通道安全加速网关的密钥。客户基于接入密钥签名接入多通道安全加速网关。每个站点下只有一个密钥，可用于接入该站点下的所有网关，刷新密钥后，原始密钥会失效。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) RefreshMultiPathGatewaySecretKey(request *RefreshMultiPathGatewaySecretKeyRequest) (response *RefreshMultiPathGatewaySecretKeyResponse, err error) {
+    return c.RefreshMultiPathGatewaySecretKeyWithContext(context.Background(), request)
+}
+
+// RefreshMultiPathGatewaySecretKey
+// 通过本接口刷新多通道安全加速网关的密钥。客户基于接入密钥签名接入多通道安全加速网关。每个站点下只有一个密钥，可用于接入该站点下的所有网关，刷新密钥后，原始密钥会失效。
+//
+// 可能返回的错误码:
+//  INTERNALERROR = "InternalError"
+//  INVALIDPARAMETER = "InvalidParameter"
+//  INVALIDPARAMETERVALUE = "InvalidParameterValue"
+//  MISSINGPARAMETER = "MissingParameter"
+//  OPERATIONDENIED = "OperationDenied"
+func (c *Client) RefreshMultiPathGatewaySecretKeyWithContext(ctx context.Context, request *RefreshMultiPathGatewaySecretKeyRequest) (response *RefreshMultiPathGatewaySecretKeyResponse, err error) {
+    if request == nil {
+        request = NewRefreshMultiPathGatewaySecretKeyRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "RefreshMultiPathGatewaySecretKey")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("RefreshMultiPathGatewaySecretKey require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewRefreshMultiPathGatewaySecretKeyResponse()
     err = c.Send(request, response)
     return
 }
@@ -6796,6 +16552,7 @@ func (c *Client) RenewPlanWithContext(ctx context.Context, request *RenewPlanReq
     if request == nil {
         request = NewRenewPlanRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "RenewPlan")
     
     if c.GetCredential() == nil {
         return nil, errors.New("RenewPlan require credential")
@@ -6873,6 +16630,7 @@ func (c *Client) UpgradePlanWithContext(ctx context.Context, request *UpgradePla
     if request == nil {
         request = NewUpgradePlanRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "UpgradePlan")
     
     if c.GetCredential() == nil {
         return nil, errors.New("UpgradePlan require credential")
@@ -6934,6 +16692,7 @@ func (c *Client) VerifyOwnershipWithContext(ctx context.Context, request *Verify
     if request == nil {
         request = NewVerifyOwnershipRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "teo", APIVersion, "VerifyOwnership")
     
     if c.GetCredential() == nil {
         return nil, errors.New("VerifyOwnership require credential")

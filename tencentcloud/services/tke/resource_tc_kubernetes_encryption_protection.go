@@ -4,6 +4,7 @@ package tke
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -18,6 +19,10 @@ func ResourceTencentCloudKubernetesEncryptionProtection() *schema.Resource {
 		Create: resourceTencentCloudKubernetesEncryptionProtectionCreate,
 		Read:   resourceTencentCloudKubernetesEncryptionProtectionRead,
 		Delete: resourceTencentCloudKubernetesEncryptionProtectionDelete,
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			"cluster_id": {
 				Type:        schema.TypeString,
@@ -37,12 +42,12 @@ func ResourceTencentCloudKubernetesEncryptionProtection() *schema.Resource {
 						"key_id": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "kms id.",
+							Description: "Custom key: If no KeyId is specified, a default key will be generated (TKE-KMS).",
 						},
 						"kms_region": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "kms region.",
+							Description: "Generate keys with default settings or customize key region information.",
 						},
 					},
 				},
@@ -81,14 +86,23 @@ func resourceTencentCloudKubernetesEncryptionProtectionCreate(d *schema.Resource
 		request.ClusterId = helper.String(v.(string))
 	}
 
-	if kMSConfigurationMap, ok := helper.InterfacesHeadMap(d, "kms_configuration"); ok {
+	if v, ok := d.GetOk("kms_configuration"); ok {
 		kMSConfiguration := tkev20180525.KMSConfiguration{}
-		if v, ok := kMSConfigurationMap["key_id"]; ok {
-			kMSConfiguration.KeyId = helper.String(v.(string))
+		for _, item := range v.([]interface{}) {
+			if item == nil {
+				continue
+			}
+
+			kMSConfigurationMap := item.(map[string]interface{})
+			if v, ok := kMSConfigurationMap["key_id"]; ok {
+				kMSConfiguration.KeyId = helper.String(v.(string))
+			}
+
+			if v, ok := kMSConfigurationMap["kms_region"]; ok {
+				kMSConfiguration.KmsRegion = helper.String(v.(string))
+			}
 		}
-		if v, ok := kMSConfigurationMap["kms_region"]; ok {
-			kMSConfiguration.KmsRegion = helper.String(v.(string))
-		}
+
 		request.KMSConfiguration = &kMSConfiguration
 	}
 
@@ -107,13 +121,11 @@ func resourceTencentCloudKubernetesEncryptionProtectionCreate(d *schema.Resource
 		return err
 	}
 
-	_ = response
+	d.SetId(clusterId)
 
 	if err := resourceTencentCloudKubernetesEncryptionProtectionCreatePostHandleResponse0(ctx, response); err != nil {
 		return err
 	}
-
-	d.SetId(clusterId)
 
 	return resourceTencentCloudKubernetesEncryptionProtectionRead(d, meta)
 }
@@ -138,8 +150,8 @@ func resourceTencentCloudKubernetesEncryptionProtectionRead(d *schema.ResourceDa
 	}
 
 	if respData == nil {
+		log.Printf("[WARN]%s resource `tencentcloud_kubernetes_encryption_protection` [%s] not found, please check if it has been deleted.\n", logId, d.Id())
 		d.SetId("")
-		log.Printf("[WARN]%s resource `kubernetes_encryption_protection` [%s] not found, please check if it has been deleted.\n", logId, d.Id())
 		return nil
 	}
 	if respData.Status != nil {
@@ -180,7 +192,6 @@ func resourceTencentCloudKubernetesEncryptionProtectionDelete(d *schema.Resource
 		return err
 	}
 
-	_ = response
 	if err := resourceTencentCloudKubernetesEncryptionProtectionDeletePostHandleResponse0(ctx, response); err != nil {
 		return err
 	}

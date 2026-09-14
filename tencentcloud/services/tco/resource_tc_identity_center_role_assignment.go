@@ -154,6 +154,11 @@ func resourceTencentCloudIdentityCenterRoleAssignmentCreate(d *schema.ResourceDa
 		} else {
 			log.Printf("[DEBUG]%s api[%s] success, request body [%s], response body [%s]\n", logId, request.GetAction(), request.ToJsonString(), result.ToJsonString())
 		}
+
+		if result == nil || result.Response == nil {
+			return resource.NonRetryableError(fmt.Errorf("Create identity center role assignment failed, Response is nil."))
+		}
+
 		response = result
 		return nil
 	})
@@ -164,15 +169,35 @@ func resourceTencentCloudIdentityCenterRoleAssignmentCreate(d *schema.ResourceDa
 
 	if len(response.Response.Tasks) > 0 {
 		task := response.Response.Tasks[0]
+		if task == nil {
+			return fmt.Errorf("Tasks is nil")
+		}
+		if task.Status != nil && *task.Status == TASK_STATUS_FAILED {
+			if task.FailureReason != nil {
+				return fmt.Errorf("create role assignment task failed, failure reason:%s", *task.FailureReason)
+			}
+			return fmt.Errorf("create role assignment task failed")
+		}
+
+		if task.TaskId == nil {
+			return fmt.Errorf("create role assignment task id is nil")
+		}
 		taskId := *task.TaskId
 		roleConfigurationId := *task.RoleConfigurationId
-		conf := tccommon.BuildStateChangeConf([]string{}, []string{"Success"}, 2*tccommon.ReadRetryTimeout, time.Second, service.AssignmentTaskStatusStateRefreshFunc(zoneId, taskId, []string{}))
-		if _, e := conf.WaitForState(); e != nil {
+		conf := tccommon.BuildStateChangeConf([]string{}, []string{TASK_STATUS_SUCCESS, TASK_STATUS_FAILED}, 2*tccommon.ReadRetryTimeout, time.Second, service.AssignmentTaskStatusStateRefreshFunc(zoneId, taskId, []string{}))
+		if object, e := conf.WaitForState(); e != nil {
 			return e
+		} else {
+			taskStatus := object.(*organization.TaskStatus)
+			if taskStatus.Status != nil && *taskStatus.Status == TASK_STATUS_FAILED {
+				return fmt.Errorf("create role assignment task status is %s", *taskStatus.Status)
+			}
 		}
 
 		targetUinString := strconv.FormatInt(targetUin, 10)
 		d.SetId(strings.Join([]string{zoneId, roleConfigurationId, targetType, targetUinString, principalType, principalId}, tccommon.FILED_SP))
+	} else {
+		return fmt.Errorf("Tasks is nil")
 	}
 
 	return resourceTencentCloudIdentityCenterRoleAssignmentRead(d, meta)
@@ -188,51 +213,55 @@ func resourceTencentCloudIdentityCenterRoleAssignmentRead(d *schema.ResourceData
 
 	service := OrganizationService{client: meta.(tccommon.ProviderMeta).GetAPIV3Conn()}
 
-	respData, err := service.DescribeIdentityCenterRoleAssignmentById(ctx, d.Id())
+	var roleAssignmentsResponseParams *organization.ListRoleAssignmentsResponseParams
+	err := resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
+		result, e := service.DescribeIdentityCenterRoleAssignmentById(ctx, d.Id())
+		if e != nil {
+			return tccommon.RetryError(e)
+		}
+		roleAssignmentsResponseParams = result
+		return nil
+	})
 	if err != nil {
 		return err
 	}
 
-	if respData == nil {
+	if roleAssignmentsResponseParams == nil || len(roleAssignmentsResponseParams.RoleAssignments) == 0 {
+		log.Printf("[WARN]%s resource `tencentcloud_identity_center_role_assignment` [%s] not found, please check if it has been deleted.\n", logId, d.Id())
 		d.SetId("")
-		log.Printf("[WARN]%s resource `identity_center_role_assignment` [%s] not found, please check if it has been deleted.\n", logId, d.Id())
 		return nil
 	}
-	if len(respData.RoleAssignments) > 0 {
-		roleAssignment := respData.RoleAssignments[0]
-		if roleAssignment.RoleConfigurationId != nil {
-			_ = d.Set("role_configuration_id", roleAssignment.RoleConfigurationId)
-		}
-		if roleAssignment.RoleConfigurationName != nil {
-			_ = d.Set("role_configuration_name", roleAssignment.RoleConfigurationName)
-		}
-		if roleAssignment.TargetUin != nil {
-			_ = d.Set("target_uin", roleAssignment.TargetUin)
-		}
-		if roleAssignment.TargetType != nil {
-			_ = d.Set("target_type", roleAssignment.TargetType)
-		}
-		if roleAssignment.PrincipalId != nil {
-			_ = d.Set("principal_id", roleAssignment.PrincipalId)
-		}
-		if roleAssignment.PrincipalType != nil {
-			_ = d.Set("principal_type", roleAssignment.PrincipalType)
-		}
-		if roleAssignment.PrincipalName != nil {
-			_ = d.Set("principal_name", roleAssignment.PrincipalName)
-		}
-		if roleAssignment.TargetName != nil {
-			_ = d.Set("target_name", roleAssignment.TargetName)
-		}
-		if roleAssignment.CreateTime != nil {
-			_ = d.Set("create_time", roleAssignment.CreateTime)
-		}
-		if roleAssignment.UpdateTime != nil {
-			_ = d.Set("update_time", roleAssignment.UpdateTime)
-		}
 
-	} else {
-		d.SetId("")
+	roleAssignment := roleAssignmentsResponseParams.RoleAssignments[0]
+	if roleAssignment.RoleConfigurationId != nil {
+		_ = d.Set("role_configuration_id", roleAssignment.RoleConfigurationId)
+	}
+	if roleAssignment.RoleConfigurationName != nil {
+		_ = d.Set("role_configuration_name", roleAssignment.RoleConfigurationName)
+	}
+	if roleAssignment.TargetUin != nil {
+		_ = d.Set("target_uin", roleAssignment.TargetUin)
+	}
+	if roleAssignment.TargetType != nil {
+		_ = d.Set("target_type", roleAssignment.TargetType)
+	}
+	if roleAssignment.PrincipalId != nil {
+		_ = d.Set("principal_id", roleAssignment.PrincipalId)
+	}
+	if roleAssignment.PrincipalType != nil {
+		_ = d.Set("principal_type", roleAssignment.PrincipalType)
+	}
+	if roleAssignment.PrincipalName != nil {
+		_ = d.Set("principal_name", roleAssignment.PrincipalName)
+	}
+	if roleAssignment.TargetName != nil {
+		_ = d.Set("target_name", roleAssignment.TargetName)
+	}
+	if roleAssignment.CreateTime != nil {
+		_ = d.Set("create_time", roleAssignment.CreateTime)
+	}
+	if roleAssignment.UpdateTime != nil {
+		_ = d.Set("update_time", roleAssignment.UpdateTime)
 	}
 
 	return nil
@@ -292,10 +321,29 @@ func resourceTencentCloudIdentityCenterRoleAssignmentDelete(d *schema.ResourceDa
 		return err
 	}
 
-	if deleteRoleAssignmentResponse.Response != nil && deleteRoleAssignmentResponse.Response.Task != nil && deleteRoleAssignmentResponse.Response.Task.TaskId != nil {
-		conf := tccommon.BuildStateChangeConf([]string{}, []string{"Success"}, 2*tccommon.ReadRetryTimeout, time.Second, service.AssignmentTaskStatusStateRefreshFunc(zoneId, *deleteRoleAssignmentResponse.Response.Task.TaskId, []string{}))
-		if _, e := conf.WaitForState(); e != nil {
-			return e
+	if deleteRoleAssignmentResponse == nil || deleteRoleAssignmentResponse.Response == nil {
+		return fmt.Errorf("delete role assignment response is nil")
+	}
+	if deleteRoleAssignmentResponse.Response.Task == nil {
+		return fmt.Errorf("delete role assignment task is nil")
+	}
+	task := deleteRoleAssignmentResponse.Response.Task
+	if task.Status != nil && *task.Status == TASK_STATUS_FAILED {
+		if task.FailureReason != nil {
+			return fmt.Errorf("delete role assignment failed, failure reason:%s", *task.FailureReason)
+		}
+		return fmt.Errorf("delete role assignment failed")
+	}
+	if task.TaskId == nil {
+		return fmt.Errorf("delete role assignment task id is nil")
+	}
+	conf := tccommon.BuildStateChangeConf([]string{}, []string{TASK_STATUS_SUCCESS, TASK_STATUS_FAILED}, 2*tccommon.ReadRetryTimeout, time.Second, service.AssignmentTaskStatusStateRefreshFunc(zoneId, *task.TaskId, []string{}))
+	if object, e := conf.WaitForState(); e != nil {
+		return e
+	} else {
+		taskStatus := object.(*organization.TaskStatus)
+		if taskStatus.Status != nil && *taskStatus.Status == TASK_STATUS_FAILED {
+			return fmt.Errorf("delete role assignment failed")
 		}
 	}
 
@@ -318,10 +366,28 @@ func resourceTencentCloudIdentityCenterRoleAssignmentDelete(d *schema.ResourceDa
 		return err
 	}
 
-	if dismantleRoleConfigurationResponse.Response != nil && dismantleRoleConfigurationResponse.Response.Task != nil && dismantleRoleConfigurationResponse.Response.Task.TaskId != nil {
-		conf := tccommon.BuildStateChangeConf([]string{}, []string{"Success"}, 2*tccommon.ReadRetryTimeout, time.Second, service.AssignmentTaskStatusStateRefreshFunc(zoneId, *dismantleRoleConfigurationResponse.Response.Task.TaskId, []string{}))
-		if _, e := conf.WaitForState(); e != nil {
-			return e
+	if dismantleRoleConfigurationResponse == nil || dismantleRoleConfigurationResponse.Response == nil {
+		return fmt.Errorf("dismantle role assignment response is nil")
+	}
+	if dismantleRoleConfigurationResponse.Response.Task == nil {
+		return fmt.Errorf("dismantle role assignment task is nil")
+	}
+	dismantleTask := dismantleRoleConfigurationResponse.Response.Task
+
+	if dismantleTask.TaskStatus != nil && *dismantleTask.TaskStatus == TASK_STATUS_FAILED {
+		return fmt.Errorf("dismantle role assignment task failed")
+	}
+
+	if dismantleTask.TaskId == nil {
+		return fmt.Errorf("dismantle role assignment task id is nil")
+	}
+	conf = tccommon.BuildStateChangeConf([]string{}, []string{TASK_STATUS_SUCCESS, TASK_STATUS_FAILED}, 2*tccommon.ReadRetryTimeout, time.Second, service.AssignmentTaskStatusStateRefreshFunc(zoneId, *dismantleTask.TaskId, []string{}))
+	if object, e := conf.WaitForState(); e != nil {
+		return e
+	} else {
+		taskStatus := object.(*organization.TaskStatus)
+		if taskStatus.Status != nil && *taskStatus.Status == TASK_STATUS_FAILED {
+			return fmt.Errorf("dismantle role assignment task failed")
 		}
 	}
 

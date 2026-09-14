@@ -42,6 +42,11 @@ resource "tencentcloud_cfs_file_system" "foo" {
   capacity          = 20480
   ccn_id             = "ccn-39lqkygf"
   cidr_block         = "11.0.0.0/24"
+
+  timeouts {
+    create = "30m"
+    update = "30m"
+  }
 }
 ```
 
@@ -58,6 +63,11 @@ resource "tencentcloud_cfs_file_system" "foo" {
   capacity          = 10240
   ccn_id             = "ccn-39lqkygf"
   cidr_block         = "11.0.0.0/24"
+
+  timeouts {
+    create = "30m"
+    update = "30m"
+  }
 }
 ```
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2018 THL A29 Limited, a Tencent company. All Rights Reserved.
+// Copyright (c) 2017-2025 Tencent. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -45,6 +45,56 @@ func NewClient(credential common.CredentialIface, region string, clientProfile *
 }
 
 
+func NewChangeMigratingTopicToNextStageRequest() (request *ChangeMigratingTopicToNextStageRequest) {
+    request = &ChangeMigratingTopicToNextStageRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "ChangeMigratingTopicToNextStage")
+    
+    
+    return
+}
+
+func NewChangeMigratingTopicToNextStageResponse() (response *ChangeMigratingTopicToNextStageResponse) {
+    response = &ChangeMigratingTopicToNextStageResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ChangeMigratingTopicToNextStage
+// 修改迁移中的Topic状态进入下一步
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_MIGRATIONTASK = "ResourceNotFound.MigrationTask"
+func (c *Client) ChangeMigratingTopicToNextStage(request *ChangeMigratingTopicToNextStageRequest) (response *ChangeMigratingTopicToNextStageResponse, err error) {
+    return c.ChangeMigratingTopicToNextStageWithContext(context.Background(), request)
+}
+
+// ChangeMigratingTopicToNextStage
+// 修改迁移中的Topic状态进入下一步
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_MIGRATIONTASK = "ResourceNotFound.MigrationTask"
+func (c *Client) ChangeMigratingTopicToNextStageWithContext(ctx context.Context, request *ChangeMigratingTopicToNextStageRequest) (response *ChangeMigratingTopicToNextStageResponse, err error) {
+    if request == nil {
+        request = NewChangeMigratingTopicToNextStageRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "ChangeMigratingTopicToNextStage")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ChangeMigratingTopicToNextStage require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewChangeMigratingTopicToNextStageResponse()
+    err = c.Send(request, response)
+    return
+}
+
 func NewCreateConsumerGroupRequest() (request *CreateConsumerGroupRequest) {
     request = &CreateConsumerGroupRequest{
         BaseRequest: &tchttp.BaseRequest{},
@@ -65,7 +115,9 @@ func NewCreateConsumerGroupResponse() (response *CreateConsumerGroupResponse) {
 }
 
 // CreateConsumerGroup
-// 创建消费组
+// 创建消费组。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的创建消费组接口文档见 [CreateRocketMQGroup](https://cloud.tencent.com/document/api/1179/63428)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -77,7 +129,9 @@ func (c *Client) CreateConsumerGroup(request *CreateConsumerGroupRequest) (respo
 }
 
 // CreateConsumerGroup
-// 创建消费组
+// 创建消费组。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的创建消费组接口文档见 [CreateRocketMQGroup](https://cloud.tencent.com/document/api/1179/63428)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -88,6 +142,7 @@ func (c *Client) CreateConsumerGroupWithContext(ctx context.Context, request *Cr
     if request == nil {
         request = NewCreateConsumerGroupRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "CreateConsumerGroup")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateConsumerGroup require credential")
@@ -96,6 +151,62 @@ func (c *Client) CreateConsumerGroupWithContext(ctx context.Context, request *Cr
     request.SetContext(ctx)
     
     response = NewCreateConsumerGroupResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewCreateConsumerLabelRequest() (request *CreateConsumerLabelRequest) {
+    request = &CreateConsumerLabelRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "CreateConsumerLabel")
+    
+    
+    return
+}
+
+func NewCreateConsumerLabelResponse() (response *CreateConsumerLabelResponse) {
+    response = &CreateConsumerLabelResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// CreateConsumerLabel
+// 创建消费组灰度标签
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_INSTANCENOTREADY = "FailedOperation.InstanceNotReady"
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  UNSUPPORTEDOPERATION_RESOURCEALREADYEXISTS = "UnsupportedOperation.ResourceAlreadyExists"
+func (c *Client) CreateConsumerLabel(request *CreateConsumerLabelRequest) (response *CreateConsumerLabelResponse, err error) {
+    return c.CreateConsumerLabelWithContext(context.Background(), request)
+}
+
+// CreateConsumerLabel
+// 创建消费组灰度标签
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  FAILEDOPERATION_INSTANCENOTREADY = "FailedOperation.InstanceNotReady"
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  UNSUPPORTEDOPERATION_RESOURCEALREADYEXISTS = "UnsupportedOperation.ResourceAlreadyExists"
+func (c *Client) CreateConsumerLabelWithContext(ctx context.Context, request *CreateConsumerLabelRequest) (response *CreateConsumerLabelResponse, err error) {
+    if request == nil {
+        request = NewCreateConsumerLabelRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "CreateConsumerLabel")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("CreateConsumerLabel require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewCreateConsumerLabelResponse()
     err = c.Send(request, response)
     return
 }
@@ -120,7 +231,9 @@ func NewCreateInstanceResponse() (response *CreateInstanceResponse) {
 }
 
 // CreateInstance
-// 创建 RocketMQ 5.x 集群
+// 创建 RocketMQ 5.x 集群。
+//
+// 当前 API 适用集群：5.x 集群。创建 4.x 专享/通用集群的接口文档见 [CreateRocketMQVipInstance](https://cloud.tencent.com/document/product/1179/95721)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -129,7 +242,9 @@ func (c *Client) CreateInstance(request *CreateInstanceRequest) (response *Creat
 }
 
 // CreateInstance
-// 创建 RocketMQ 5.x 集群
+// 创建 RocketMQ 5.x 集群。
+//
+// 当前 API 适用集群：5.x 集群。创建 4.x 专享/通用集群的接口文档见 [CreateRocketMQVipInstance](https://cloud.tencent.com/document/product/1179/95721)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -137,6 +252,7 @@ func (c *Client) CreateInstanceWithContext(ctx context.Context, request *CreateI
     if request == nil {
         request = NewCreateInstanceRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "CreateInstance")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateInstance require credential")
@@ -149,218 +265,52 @@ func (c *Client) CreateInstanceWithContext(ctx context.Context, request *CreateI
     return
 }
 
-func NewCreateMQTTInsPublicEndpointRequest() (request *CreateMQTTInsPublicEndpointRequest) {
-    request = &CreateMQTTInsPublicEndpointRequest{
+func NewCreateMigrationTaskRequest() (request *CreateMigrationTaskRequest) {
+    request = &CreateMigrationTaskRequest{
         BaseRequest: &tchttp.BaseRequest{},
     }
     
-    request.Init().WithApiInfo("trocket", APIVersion, "CreateMQTTInsPublicEndpoint")
+    request.Init().WithApiInfo("trocket", APIVersion, "CreateMigrationTask")
     
     
     return
 }
 
-func NewCreateMQTTInsPublicEndpointResponse() (response *CreateMQTTInsPublicEndpointResponse) {
-    response = &CreateMQTTInsPublicEndpointResponse{
+func NewCreateMigrationTaskResponse() (response *CreateMigrationTaskResponse) {
+    response = &CreateMigrationTaskResponse{
         BaseResponse: &tchttp.BaseResponse{},
     } 
     return
 
 }
 
-// CreateMQTTInsPublicEndpoint
-// 为MQTT实例创建公网接入点
+// CreateMigrationTask
+// 创建元数据迁移上云任务
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
-func (c *Client) CreateMQTTInsPublicEndpoint(request *CreateMQTTInsPublicEndpointRequest) (response *CreateMQTTInsPublicEndpointResponse, err error) {
-    return c.CreateMQTTInsPublicEndpointWithContext(context.Background(), request)
+func (c *Client) CreateMigrationTask(request *CreateMigrationTaskRequest) (response *CreateMigrationTaskResponse, err error) {
+    return c.CreateMigrationTaskWithContext(context.Background(), request)
 }
 
-// CreateMQTTInsPublicEndpoint
-// 为MQTT实例创建公网接入点
+// CreateMigrationTask
+// 创建元数据迁移上云任务
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
-func (c *Client) CreateMQTTInsPublicEndpointWithContext(ctx context.Context, request *CreateMQTTInsPublicEndpointRequest) (response *CreateMQTTInsPublicEndpointResponse, err error) {
+func (c *Client) CreateMigrationTaskWithContext(ctx context.Context, request *CreateMigrationTaskRequest) (response *CreateMigrationTaskResponse, err error) {
     if request == nil {
-        request = NewCreateMQTTInsPublicEndpointRequest()
+        request = NewCreateMigrationTaskRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "CreateMigrationTask")
     
     if c.GetCredential() == nil {
-        return nil, errors.New("CreateMQTTInsPublicEndpoint require credential")
+        return nil, errors.New("CreateMigrationTask require credential")
     }
 
     request.SetContext(ctx)
     
-    response = NewCreateMQTTInsPublicEndpointResponse()
-    err = c.Send(request, response)
-    return
-}
-
-func NewCreateMQTTInstanceRequest() (request *CreateMQTTInstanceRequest) {
-    request = &CreateMQTTInstanceRequest{
-        BaseRequest: &tchttp.BaseRequest{},
-    }
-    
-    request.Init().WithApiInfo("trocket", APIVersion, "CreateMQTTInstance")
-    
-    
-    return
-}
-
-func NewCreateMQTTInstanceResponse() (response *CreateMQTTInstanceResponse) {
-    response = &CreateMQTTInstanceResponse{
-        BaseResponse: &tchttp.BaseResponse{},
-    } 
-    return
-
-}
-
-// CreateMQTTInstance
-// 购买新的MQTT实例
-//
-// 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-func (c *Client) CreateMQTTInstance(request *CreateMQTTInstanceRequest) (response *CreateMQTTInstanceResponse, err error) {
-    return c.CreateMQTTInstanceWithContext(context.Background(), request)
-}
-
-// CreateMQTTInstance
-// 购买新的MQTT实例
-//
-// 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-func (c *Client) CreateMQTTInstanceWithContext(ctx context.Context, request *CreateMQTTInstanceRequest) (response *CreateMQTTInstanceResponse, err error) {
-    if request == nil {
-        request = NewCreateMQTTInstanceRequest()
-    }
-    
-    if c.GetCredential() == nil {
-        return nil, errors.New("CreateMQTTInstance require credential")
-    }
-
-    request.SetContext(ctx)
-    
-    response = NewCreateMQTTInstanceResponse()
-    err = c.Send(request, response)
-    return
-}
-
-func NewCreateMQTTTopicRequest() (request *CreateMQTTTopicRequest) {
-    request = &CreateMQTTTopicRequest{
-        BaseRequest: &tchttp.BaseRequest{},
-    }
-    
-    request.Init().WithApiInfo("trocket", APIVersion, "CreateMQTTTopic")
-    
-    
-    return
-}
-
-func NewCreateMQTTTopicResponse() (response *CreateMQTTTopicResponse) {
-    response = &CreateMQTTTopicResponse{
-        BaseResponse: &tchttp.BaseResponse{},
-    } 
-    return
-
-}
-
-// CreateMQTTTopic
-// 创建主题
-//
-// 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-//  FAILEDOPERATION_INSTANCENOTREADY = "FailedOperation.InstanceNotReady"
-//  LIMITEXCEEDED_TOPICNUM = "LimitExceeded.TopicNum"
-//  OPERATIONDENIED = "OperationDenied"
-//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
-//  UNSUPPORTEDOPERATION_RESOURCEALREADYEXISTS = "UnsupportedOperation.ResourceAlreadyExists"
-func (c *Client) CreateMQTTTopic(request *CreateMQTTTopicRequest) (response *CreateMQTTTopicResponse, err error) {
-    return c.CreateMQTTTopicWithContext(context.Background(), request)
-}
-
-// CreateMQTTTopic
-// 创建主题
-//
-// 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-//  FAILEDOPERATION_INSTANCENOTREADY = "FailedOperation.InstanceNotReady"
-//  LIMITEXCEEDED_TOPICNUM = "LimitExceeded.TopicNum"
-//  OPERATIONDENIED = "OperationDenied"
-//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
-//  UNSUPPORTEDOPERATION_RESOURCEALREADYEXISTS = "UnsupportedOperation.ResourceAlreadyExists"
-func (c *Client) CreateMQTTTopicWithContext(ctx context.Context, request *CreateMQTTTopicRequest) (response *CreateMQTTTopicResponse, err error) {
-    if request == nil {
-        request = NewCreateMQTTTopicRequest()
-    }
-    
-    if c.GetCredential() == nil {
-        return nil, errors.New("CreateMQTTTopic require credential")
-    }
-
-    request.SetContext(ctx)
-    
-    response = NewCreateMQTTTopicResponse()
-    err = c.Send(request, response)
-    return
-}
-
-func NewCreateMQTTUserRequest() (request *CreateMQTTUserRequest) {
-    request = &CreateMQTTUserRequest{
-        BaseRequest: &tchttp.BaseRequest{},
-    }
-    
-    request.Init().WithApiInfo("trocket", APIVersion, "CreateMQTTUser")
-    
-    
-    return
-}
-
-func NewCreateMQTTUserResponse() (response *CreateMQTTUserResponse) {
-    response = &CreateMQTTUserResponse{
-        BaseResponse: &tchttp.BaseResponse{},
-    } 
-    return
-
-}
-
-// CreateMQTTUser
-// 添加mqtt角色
-//
-// 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-//  FAILEDOPERATION_INSTANCENOTREADY = "FailedOperation.InstanceNotReady"
-//  OPERATIONDENIED = "OperationDenied"
-//  RESOURCEINUSE = "ResourceInUse"
-//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
-//  UNSUPPORTEDOPERATION_RESOURCEALREADYEXISTS = "UnsupportedOperation.ResourceAlreadyExists"
-func (c *Client) CreateMQTTUser(request *CreateMQTTUserRequest) (response *CreateMQTTUserResponse, err error) {
-    return c.CreateMQTTUserWithContext(context.Background(), request)
-}
-
-// CreateMQTTUser
-// 添加mqtt角色
-//
-// 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-//  FAILEDOPERATION_INSTANCENOTREADY = "FailedOperation.InstanceNotReady"
-//  OPERATIONDENIED = "OperationDenied"
-//  RESOURCEINUSE = "ResourceInUse"
-//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
-//  UNSUPPORTEDOPERATION_RESOURCEALREADYEXISTS = "UnsupportedOperation.ResourceAlreadyExists"
-func (c *Client) CreateMQTTUserWithContext(ctx context.Context, request *CreateMQTTUserRequest) (response *CreateMQTTUserResponse, err error) {
-    if request == nil {
-        request = NewCreateMQTTUserRequest()
-    }
-    
-    if c.GetCredential() == nil {
-        return nil, errors.New("CreateMQTTUser require credential")
-    }
-
-    request.SetContext(ctx)
-    
-    response = NewCreateMQTTUserResponse()
+    response = NewCreateMigrationTaskResponse()
     err = c.Send(request, response)
     return
 }
@@ -385,7 +335,9 @@ func NewCreateRoleResponse() (response *CreateRoleResponse) {
 }
 
 // CreateRole
-// 添加角色
+// 添加角色。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的创建角色接口文档见 [CreateRocketMQRole](https://cloud.tencent.com/document/product/1179/107538)，给角色授权接口文档见 [CreateRocketMQEnvironmentRole](https://cloud.tencent.com/document/product/1179/107539)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -399,7 +351,9 @@ func (c *Client) CreateRole(request *CreateRoleRequest) (response *CreateRoleRes
 }
 
 // CreateRole
-// 添加角色
+// 添加角色。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的创建角色接口文档见 [CreateRocketMQRole](https://cloud.tencent.com/document/product/1179/107538)，给角色授权接口文档见 [CreateRocketMQEnvironmentRole](https://cloud.tencent.com/document/product/1179/107539)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -412,6 +366,7 @@ func (c *Client) CreateRoleWithContext(ctx context.Context, request *CreateRoleR
     if request == nil {
         request = NewCreateRoleRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "CreateRole")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateRole require credential")
@@ -444,7 +399,9 @@ func NewCreateTopicResponse() (response *CreateTopicResponse) {
 }
 
 // CreateTopic
-// 创建主题
+// 创建 RocketMQ 主题。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的创建主题接口文档见 [CreateRocketMQTopic](https://cloud.tencent.com/document/api/1179/63426)
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -458,7 +415,9 @@ func (c *Client) CreateTopic(request *CreateTopicRequest) (response *CreateTopic
 }
 
 // CreateTopic
-// 创建主题
+// 创建 RocketMQ 主题。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的创建主题接口文档见 [CreateRocketMQTopic](https://cloud.tencent.com/document/api/1179/63426)
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -471,6 +430,7 @@ func (c *Client) CreateTopicWithContext(ctx context.Context, request *CreateTopi
     if request == nil {
         request = NewCreateTopicRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "CreateTopic")
     
     if c.GetCredential() == nil {
         return nil, errors.New("CreateTopic require credential")
@@ -503,7 +463,9 @@ func NewDeleteConsumerGroupResponse() (response *DeleteConsumerGroupResponse) {
 }
 
 // DeleteConsumerGroup
-// 删除消费组
+// 删除消费组。消费者组删除后，消费者组的所有配置和相关数据都会被清空，且无法找回。删除后，在线的消费者客户端会出现报错，建议您提前下线客户端。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的删除消费组接口文档见 [DeleteRocketMQGroup](https://cloud.tencent.com/document/api/1179/63424)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -513,7 +475,9 @@ func (c *Client) DeleteConsumerGroup(request *DeleteConsumerGroupRequest) (respo
 }
 
 // DeleteConsumerGroup
-// 删除消费组
+// 删除消费组。消费者组删除后，消费者组的所有配置和相关数据都会被清空，且无法找回。删除后，在线的消费者客户端会出现报错，建议您提前下线客户端。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的删除消费组接口文档见 [DeleteRocketMQGroup](https://cloud.tencent.com/document/api/1179/63424)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -522,6 +486,7 @@ func (c *Client) DeleteConsumerGroupWithContext(ctx context.Context, request *De
     if request == nil {
         request = NewDeleteConsumerGroupRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DeleteConsumerGroup")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteConsumerGroup require credential")
@@ -530,6 +495,110 @@ func (c *Client) DeleteConsumerGroupWithContext(ctx context.Context, request *De
     request.SetContext(ctx)
     
     response = NewDeleteConsumerGroupResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDeleteConsumerLabelRequest() (request *DeleteConsumerLabelRequest) {
+    request = &DeleteConsumerLabelRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "DeleteConsumerLabel")
+    
+    
+    return
+}
+
+func NewDeleteConsumerLabelResponse() (response *DeleteConsumerLabelResponse) {
+    response = &DeleteConsumerLabelResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DeleteConsumerLabel
+// 删除消费组灰度标签
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  RESOURCENOTFOUND_GROUP = "ResourceNotFound.Group"
+func (c *Client) DeleteConsumerLabel(request *DeleteConsumerLabelRequest) (response *DeleteConsumerLabelResponse, err error) {
+    return c.DeleteConsumerLabelWithContext(context.Background(), request)
+}
+
+// DeleteConsumerLabel
+// 删除消费组灰度标签
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  RESOURCENOTFOUND_GROUP = "ResourceNotFound.Group"
+func (c *Client) DeleteConsumerLabelWithContext(ctx context.Context, request *DeleteConsumerLabelRequest) (response *DeleteConsumerLabelResponse, err error) {
+    if request == nil {
+        request = NewDeleteConsumerLabelRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DeleteConsumerLabel")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DeleteConsumerLabel require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDeleteConsumerLabelResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDeleteConsumerRouteConfigRequest() (request *DeleteConsumerRouteConfigRequest) {
+    request = &DeleteConsumerRouteConfigRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "DeleteConsumerRouteConfig")
+    
+    
+    return
+}
+
+func NewDeleteConsumerRouteConfigResponse() (response *DeleteConsumerRouteConfigResponse) {
+    response = &DeleteConsumerRouteConfigResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DeleteConsumerRouteConfig
+// 删除消费组灰度路由配置
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  RESOURCENOTFOUND_GROUP = "ResourceNotFound.Group"
+func (c *Client) DeleteConsumerRouteConfig(request *DeleteConsumerRouteConfigRequest) (response *DeleteConsumerRouteConfigResponse, err error) {
+    return c.DeleteConsumerRouteConfigWithContext(context.Background(), request)
+}
+
+// DeleteConsumerRouteConfig
+// 删除消费组灰度路由配置
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  RESOURCENOTFOUND_GROUP = "ResourceNotFound.Group"
+func (c *Client) DeleteConsumerRouteConfigWithContext(ctx context.Context, request *DeleteConsumerRouteConfigRequest) (response *DeleteConsumerRouteConfigResponse, err error) {
+    if request == nil {
+        request = NewDeleteConsumerRouteConfigRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DeleteConsumerRouteConfig")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DeleteConsumerRouteConfig require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDeleteConsumerRouteConfigResponse()
     err = c.Send(request, response)
     return
 }
@@ -554,7 +623,9 @@ func NewDeleteInstanceResponse() (response *DeleteInstanceResponse) {
 }
 
 // DeleteInstance
-// 删除实例
+// 删除 RocketMQ 5.x 集群，删除前请先删除正在使用的主题、消费组和角色信息。
+//
+// 当前 API 适用集群：5.x 集群。删除 4.x 集群接口文档见 [DeleteRocketMQVipInstance](https://cloud.tencent.com/document/product/1179/95802)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -565,7 +636,9 @@ func (c *Client) DeleteInstance(request *DeleteInstanceRequest) (response *Delet
 }
 
 // DeleteInstance
-// 删除实例
+// 删除 RocketMQ 5.x 集群，删除前请先删除正在使用的主题、消费组和角色信息。
+//
+// 当前 API 适用集群：5.x 集群。删除 4.x 集群接口文档见 [DeleteRocketMQVipInstance](https://cloud.tencent.com/document/product/1179/95802)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -575,6 +648,7 @@ func (c *Client) DeleteInstanceWithContext(ctx context.Context, request *DeleteI
     if request == nil {
         request = NewDeleteInstanceRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DeleteInstance")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteInstance require credential")
@@ -583,216 +657,6 @@ func (c *Client) DeleteInstanceWithContext(ctx context.Context, request *DeleteI
     request.SetContext(ctx)
     
     response = NewDeleteInstanceResponse()
-    err = c.Send(request, response)
-    return
-}
-
-func NewDeleteMQTTInsPublicEndpointRequest() (request *DeleteMQTTInsPublicEndpointRequest) {
-    request = &DeleteMQTTInsPublicEndpointRequest{
-        BaseRequest: &tchttp.BaseRequest{},
-    }
-    
-    request.Init().WithApiInfo("trocket", APIVersion, "DeleteMQTTInsPublicEndpoint")
-    
-    
-    return
-}
-
-func NewDeleteMQTTInsPublicEndpointResponse() (response *DeleteMQTTInsPublicEndpointResponse) {
-    response = &DeleteMQTTInsPublicEndpointResponse{
-        BaseResponse: &tchttp.BaseResponse{},
-    } 
-    return
-
-}
-
-// DeleteMQTTInsPublicEndpoint
-// 删除MQTT实例的公网接入点
-//
-// 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-//  RESOURCEINUSE = "ResourceInUse"
-//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
-func (c *Client) DeleteMQTTInsPublicEndpoint(request *DeleteMQTTInsPublicEndpointRequest) (response *DeleteMQTTInsPublicEndpointResponse, err error) {
-    return c.DeleteMQTTInsPublicEndpointWithContext(context.Background(), request)
-}
-
-// DeleteMQTTInsPublicEndpoint
-// 删除MQTT实例的公网接入点
-//
-// 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-//  RESOURCEINUSE = "ResourceInUse"
-//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
-func (c *Client) DeleteMQTTInsPublicEndpointWithContext(ctx context.Context, request *DeleteMQTTInsPublicEndpointRequest) (response *DeleteMQTTInsPublicEndpointResponse, err error) {
-    if request == nil {
-        request = NewDeleteMQTTInsPublicEndpointRequest()
-    }
-    
-    if c.GetCredential() == nil {
-        return nil, errors.New("DeleteMQTTInsPublicEndpoint require credential")
-    }
-
-    request.SetContext(ctx)
-    
-    response = NewDeleteMQTTInsPublicEndpointResponse()
-    err = c.Send(request, response)
-    return
-}
-
-func NewDeleteMQTTInstanceRequest() (request *DeleteMQTTInstanceRequest) {
-    request = &DeleteMQTTInstanceRequest{
-        BaseRequest: &tchttp.BaseRequest{},
-    }
-    
-    request.Init().WithApiInfo("trocket", APIVersion, "DeleteMQTTInstance")
-    
-    
-    return
-}
-
-func NewDeleteMQTTInstanceResponse() (response *DeleteMQTTInstanceResponse) {
-    response = &DeleteMQTTInstanceResponse{
-        BaseResponse: &tchttp.BaseResponse{},
-    } 
-    return
-
-}
-
-// DeleteMQTTInstance
-// 删除MQTT实例
-//
-// 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-//  RESOURCEINUSE = "ResourceInUse"
-//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
-func (c *Client) DeleteMQTTInstance(request *DeleteMQTTInstanceRequest) (response *DeleteMQTTInstanceResponse, err error) {
-    return c.DeleteMQTTInstanceWithContext(context.Background(), request)
-}
-
-// DeleteMQTTInstance
-// 删除MQTT实例
-//
-// 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-//  RESOURCEINUSE = "ResourceInUse"
-//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
-func (c *Client) DeleteMQTTInstanceWithContext(ctx context.Context, request *DeleteMQTTInstanceRequest) (response *DeleteMQTTInstanceResponse, err error) {
-    if request == nil {
-        request = NewDeleteMQTTInstanceRequest()
-    }
-    
-    if c.GetCredential() == nil {
-        return nil, errors.New("DeleteMQTTInstance require credential")
-    }
-
-    request.SetContext(ctx)
-    
-    response = NewDeleteMQTTInstanceResponse()
-    err = c.Send(request, response)
-    return
-}
-
-func NewDeleteMQTTTopicRequest() (request *DeleteMQTTTopicRequest) {
-    request = &DeleteMQTTTopicRequest{
-        BaseRequest: &tchttp.BaseRequest{},
-    }
-    
-    request.Init().WithApiInfo("trocket", APIVersion, "DeleteMQTTTopic")
-    
-    
-    return
-}
-
-func NewDeleteMQTTTopicResponse() (response *DeleteMQTTTopicResponse) {
-    response = &DeleteMQTTTopicResponse{
-        BaseResponse: &tchttp.BaseResponse{},
-    } 
-    return
-
-}
-
-// DeleteMQTTTopic
-// 删除MQTT主题
-//
-// 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-//  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
-func (c *Client) DeleteMQTTTopic(request *DeleteMQTTTopicRequest) (response *DeleteMQTTTopicResponse, err error) {
-    return c.DeleteMQTTTopicWithContext(context.Background(), request)
-}
-
-// DeleteMQTTTopic
-// 删除MQTT主题
-//
-// 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-//  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
-func (c *Client) DeleteMQTTTopicWithContext(ctx context.Context, request *DeleteMQTTTopicRequest) (response *DeleteMQTTTopicResponse, err error) {
-    if request == nil {
-        request = NewDeleteMQTTTopicRequest()
-    }
-    
-    if c.GetCredential() == nil {
-        return nil, errors.New("DeleteMQTTTopic require credential")
-    }
-
-    request.SetContext(ctx)
-    
-    response = NewDeleteMQTTTopicResponse()
-    err = c.Send(request, response)
-    return
-}
-
-func NewDeleteMQTTUserRequest() (request *DeleteMQTTUserRequest) {
-    request = &DeleteMQTTUserRequest{
-        BaseRequest: &tchttp.BaseRequest{},
-    }
-    
-    request.Init().WithApiInfo("trocket", APIVersion, "DeleteMQTTUser")
-    
-    
-    return
-}
-
-func NewDeleteMQTTUserResponse() (response *DeleteMQTTUserResponse) {
-    response = &DeleteMQTTUserResponse{
-        BaseResponse: &tchttp.BaseResponse{},
-    } 
-    return
-
-}
-
-// DeleteMQTTUser
-// 删除MQTT访问用户
-//
-// 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
-//  RESOURCENOTFOUND_ROLE = "ResourceNotFound.Role"
-func (c *Client) DeleteMQTTUser(request *DeleteMQTTUserRequest) (response *DeleteMQTTUserResponse, err error) {
-    return c.DeleteMQTTUserWithContext(context.Background(), request)
-}
-
-// DeleteMQTTUser
-// 删除MQTT访问用户
-//
-// 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
-//  RESOURCENOTFOUND_ROLE = "ResourceNotFound.Role"
-func (c *Client) DeleteMQTTUserWithContext(ctx context.Context, request *DeleteMQTTUserRequest) (response *DeleteMQTTUserResponse, err error) {
-    if request == nil {
-        request = NewDeleteMQTTUserRequest()
-    }
-    
-    if c.GetCredential() == nil {
-        return nil, errors.New("DeleteMQTTUser require credential")
-    }
-
-    request.SetContext(ctx)
-    
-    response = NewDeleteMQTTUserResponse()
     err = c.Send(request, response)
     return
 }
@@ -817,7 +681,9 @@ func NewDeleteRoleResponse() (response *DeleteRoleResponse) {
 }
 
 // DeleteRole
-// 删除角色
+// 删除角色。请确保该角色相关信息不在当前代码中被使用。删除角色后，原先使用该角色进行生产或消费消息的密钥（AccessKey 和 SecretKey）将立即失效。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的删除角色接口文档见 [DeleteRocketMQRoles](https://cloud.tencent.com/document/product/1179/107536)，删除角色授权接口文档见 [DeleteRocketMQEnvironmentRoles](https://cloud.tencent.com/document/product/1179/107537)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -828,7 +694,9 @@ func (c *Client) DeleteRole(request *DeleteRoleRequest) (response *DeleteRoleRes
 }
 
 // DeleteRole
-// 删除角色
+// 删除角色。请确保该角色相关信息不在当前代码中被使用。删除角色后，原先使用该角色进行生产或消费消息的密钥（AccessKey 和 SecretKey）将立即失效。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的删除角色接口文档见 [DeleteRocketMQRoles](https://cloud.tencent.com/document/product/1179/107536)，删除角色授权接口文档见 [DeleteRocketMQEnvironmentRoles](https://cloud.tencent.com/document/product/1179/107537)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -838,6 +706,7 @@ func (c *Client) DeleteRoleWithContext(ctx context.Context, request *DeleteRoleR
     if request == nil {
         request = NewDeleteRoleRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DeleteRole")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteRole require credential")
@@ -846,6 +715,60 @@ func (c *Client) DeleteRoleWithContext(ctx context.Context, request *DeleteRoleR
     request.SetContext(ctx)
     
     response = NewDeleteRoleResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDeleteSmoothMigrationTaskRequest() (request *DeleteSmoothMigrationTaskRequest) {
+    request = &DeleteSmoothMigrationTaskRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "DeleteSmoothMigrationTask")
+    
+    
+    return
+}
+
+func NewDeleteSmoothMigrationTaskResponse() (response *DeleteSmoothMigrationTaskResponse) {
+    response = &DeleteSmoothMigrationTaskResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DeleteSmoothMigrationTask
+// 删除平滑迁移任务，只有被取消的任务才可删除
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  RESOURCENOTFOUND_ROLE = "ResourceNotFound.Role"
+func (c *Client) DeleteSmoothMigrationTask(request *DeleteSmoothMigrationTaskRequest) (response *DeleteSmoothMigrationTaskResponse, err error) {
+    return c.DeleteSmoothMigrationTaskWithContext(context.Background(), request)
+}
+
+// DeleteSmoothMigrationTask
+// 删除平滑迁移任务，只有被取消的任务才可删除
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  RESOURCENOTFOUND_ROLE = "ResourceNotFound.Role"
+func (c *Client) DeleteSmoothMigrationTaskWithContext(ctx context.Context, request *DeleteSmoothMigrationTaskRequest) (response *DeleteSmoothMigrationTaskResponse, err error) {
+    if request == nil {
+        request = NewDeleteSmoothMigrationTaskRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DeleteSmoothMigrationTask")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DeleteSmoothMigrationTask require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDeleteSmoothMigrationTaskResponse()
     err = c.Send(request, response)
     return
 }
@@ -870,7 +793,9 @@ func NewDeleteTopicResponse() (response *DeleteTopicResponse) {
 }
 
 // DeleteTopic
-// 删除主题
+// 删除主题。主题删除后，主题的所有配置和相关数据都会被清空，且无法找回。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的删除主题接口文档见 [DeleteRocketMQTopic](https://cloud.tencent.com/document/api/1179/63423)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -880,7 +805,9 @@ func (c *Client) DeleteTopic(request *DeleteTopicRequest) (response *DeleteTopic
 }
 
 // DeleteTopic
-// 删除主题
+// 删除主题。主题删除后，主题的所有配置和相关数据都会被清空，且无法找回。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的删除主题接口文档见 [DeleteRocketMQTopic](https://cloud.tencent.com/document/api/1179/63423)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -889,6 +816,7 @@ func (c *Client) DeleteTopicWithContext(ctx context.Context, request *DeleteTopi
     if request == nil {
         request = NewDeleteTopicRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DeleteTopic")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DeleteTopic require credential")
@@ -897,6 +825,114 @@ func (c *Client) DeleteTopicWithContext(ctx context.Context, request *DeleteTopi
     request.SetContext(ctx)
     
     response = NewDeleteTopicResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeConsumerClientRequest() (request *DescribeConsumerClientRequest) {
+    request = &DescribeConsumerClientRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "DescribeConsumerClient")
+    
+    
+    return
+}
+
+func NewDescribeConsumerClientResponse() (response *DescribeConsumerClientResponse) {
+    response = &DescribeConsumerClientResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeConsumerClient
+// 查询消费者客户端详情。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的查询消费者客户端详情接口文档见 [DescribeRocketMQConsumerConnectionDetail](https://cloud.tencent.com/document/product/1179/102490)。
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+func (c *Client) DescribeConsumerClient(request *DescribeConsumerClientRequest) (response *DescribeConsumerClientResponse, err error) {
+    return c.DescribeConsumerClientWithContext(context.Background(), request)
+}
+
+// DescribeConsumerClient
+// 查询消费者客户端详情。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的查询消费者客户端详情接口文档见 [DescribeRocketMQConsumerConnectionDetail](https://cloud.tencent.com/document/product/1179/102490)。
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+func (c *Client) DescribeConsumerClientWithContext(ctx context.Context, request *DescribeConsumerClientRequest) (response *DescribeConsumerClientResponse, err error) {
+    if request == nil {
+        request = NewDescribeConsumerClientRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeConsumerClient")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeConsumerClient require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeConsumerClientResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeConsumerClientListRequest() (request *DescribeConsumerClientListRequest) {
+    request = &DescribeConsumerClientListRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "DescribeConsumerClientList")
+    
+    
+    return
+}
+
+func NewDescribeConsumerClientListResponse() (response *DescribeConsumerClientListResponse) {
+    response = &DescribeConsumerClientListResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeConsumerClientList
+// 查询消费组下的客户端连接列表。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的查询消费组下的客户端列表接口文档见 [DescribeRocketMQConsumerConnections](https://cloud.tencent.com/document/product/1179/100460)。
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+func (c *Client) DescribeConsumerClientList(request *DescribeConsumerClientListRequest) (response *DescribeConsumerClientListResponse, err error) {
+    return c.DescribeConsumerClientListWithContext(context.Background(), request)
+}
+
+// DescribeConsumerClientList
+// 查询消费组下的客户端连接列表。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的查询消费组下的客户端列表接口文档见 [DescribeRocketMQConsumerConnections](https://cloud.tencent.com/document/product/1179/100460)。
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+func (c *Client) DescribeConsumerClientListWithContext(ctx context.Context, request *DescribeConsumerClientListRequest) (response *DescribeConsumerClientListResponse, err error) {
+    if request == nil {
+        request = NewDescribeConsumerClientListRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeConsumerClientList")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeConsumerClientList require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeConsumerClientListResponse()
     err = c.Send(request, response)
     return
 }
@@ -921,7 +957,9 @@ func NewDescribeConsumerGroupResponse() (response *DescribeConsumerGroupResponse
 }
 
 // DescribeConsumerGroup
-// 查询消费组详情
+// 查询消费组详情。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的查询消费组详情接口文档见 [DescribeRocketMQConsumerConnections](https://cloud.tencent.com/document/product/1179/100460)。
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_GROUP = "ResourceNotFound.Group"
@@ -931,7 +969,9 @@ func (c *Client) DescribeConsumerGroup(request *DescribeConsumerGroupRequest) (r
 }
 
 // DescribeConsumerGroup
-// 查询消费组详情
+// 查询消费组详情。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的查询消费组详情接口文档见 [DescribeRocketMQConsumerConnections](https://cloud.tencent.com/document/product/1179/100460)。
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_GROUP = "ResourceNotFound.Group"
@@ -940,6 +980,7 @@ func (c *Client) DescribeConsumerGroupWithContext(ctx context.Context, request *
     if request == nil {
         request = NewDescribeConsumerGroupRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeConsumerGroup")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeConsumerGroup require credential")
@@ -976,9 +1017,27 @@ func NewDescribeConsumerGroupListResponse() (response *DescribeConsumerGroupList
 //
 // 
 //
-// 1. ConsumerGroupName，名称模糊查询
+// - ConsumerGroupName 消费组名称，支持模糊查询，从 [DescribeConsumerGroupList](https://cloud.tencent.com/document/api/1493/101535) 接口返回的 [ConsumeGroupItem](https://cloud.tencent.com/document/api/1493/96031#ConsumeGroupItem) 或控制台获得。
 //
-// 2. ConsumeMessageOrderly，投递顺序性。"true":顺序投递；"false":并发投递
+// - ConsumeMessageOrderly，投递顺序性，枚举值如下：
+//
+//     - true 顺序投递
+//
+//     - false 并发投递
+//
+// - RetryPolicy，重试策略，枚举值如下：
+//
+//     - EXPONENTIAL：固定间隔
+//
+//     - CUSTOMIZED：阶梯退避
+//
+// 
+//
+// Filters示例： 
+//
+// [{ "Name": "ConsumeMessageOrderly", "Values": ["true"] }]
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的获取消费组列表接口文档见 [DescribeRocketMQGroups](https://cloud.tencent.com/document/api/1179/63420)。
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
@@ -991,9 +1050,27 @@ func (c *Client) DescribeConsumerGroupList(request *DescribeConsumerGroupListReq
 //
 // 
 //
-// 1. ConsumerGroupName，名称模糊查询
+// - ConsumerGroupName 消费组名称，支持模糊查询，从 [DescribeConsumerGroupList](https://cloud.tencent.com/document/api/1493/101535) 接口返回的 [ConsumeGroupItem](https://cloud.tencent.com/document/api/1493/96031#ConsumeGroupItem) 或控制台获得。
 //
-// 2. ConsumeMessageOrderly，投递顺序性。"true":顺序投递；"false":并发投递
+// - ConsumeMessageOrderly，投递顺序性，枚举值如下：
+//
+//     - true 顺序投递
+//
+//     - false 并发投递
+//
+// - RetryPolicy，重试策略，枚举值如下：
+//
+//     - EXPONENTIAL：固定间隔
+//
+//     - CUSTOMIZED：阶梯退避
+//
+// 
+//
+// Filters示例： 
+//
+// [{ "Name": "ConsumeMessageOrderly", "Values": ["true"] }]
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的获取消费组列表接口文档见 [DescribeRocketMQGroups](https://cloud.tencent.com/document/api/1179/63420)。
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
@@ -1001,6 +1078,7 @@ func (c *Client) DescribeConsumerGroupListWithContext(ctx context.Context, reque
     if request == nil {
         request = NewDescribeConsumerGroupListRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeConsumerGroupList")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeConsumerGroupList require credential")
@@ -1009,6 +1087,260 @@ func (c *Client) DescribeConsumerGroupListWithContext(ctx context.Context, reque
     request.SetContext(ctx)
     
     response = NewDescribeConsumerGroupListResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeConsumerLabelRequest() (request *DescribeConsumerLabelRequest) {
+    request = &DescribeConsumerLabelRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "DescribeConsumerLabel")
+    
+    
+    return
+}
+
+func NewDescribeConsumerLabelResponse() (response *DescribeConsumerLabelResponse) {
+    response = &DescribeConsumerLabelResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeConsumerLabel
+// 查询消费组某个灰度标签详情
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+func (c *Client) DescribeConsumerLabel(request *DescribeConsumerLabelRequest) (response *DescribeConsumerLabelResponse, err error) {
+    return c.DescribeConsumerLabelWithContext(context.Background(), request)
+}
+
+// DescribeConsumerLabel
+// 查询消费组某个灰度标签详情
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+func (c *Client) DescribeConsumerLabelWithContext(ctx context.Context, request *DescribeConsumerLabelRequest) (response *DescribeConsumerLabelResponse, err error) {
+    if request == nil {
+        request = NewDescribeConsumerLabelRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeConsumerLabel")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeConsumerLabel require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeConsumerLabelResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeConsumerLabelListRequest() (request *DescribeConsumerLabelListRequest) {
+    request = &DescribeConsumerLabelListRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "DescribeConsumerLabelList")
+    
+    
+    return
+}
+
+func NewDescribeConsumerLabelListResponse() (response *DescribeConsumerLabelListResponse) {
+    response = &DescribeConsumerLabelListResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeConsumerLabelList
+// 查询消费组下灰度标签列表
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+func (c *Client) DescribeConsumerLabelList(request *DescribeConsumerLabelListRequest) (response *DescribeConsumerLabelListResponse, err error) {
+    return c.DescribeConsumerLabelListWithContext(context.Background(), request)
+}
+
+// DescribeConsumerLabelList
+// 查询消费组下灰度标签列表
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+func (c *Client) DescribeConsumerLabelListWithContext(ctx context.Context, request *DescribeConsumerLabelListRequest) (response *DescribeConsumerLabelListResponse, err error) {
+    if request == nil {
+        request = NewDescribeConsumerLabelListRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeConsumerLabelList")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeConsumerLabelList require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeConsumerLabelListResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeConsumerLagRequest() (request *DescribeConsumerLagRequest) {
+    request = &DescribeConsumerLagRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "DescribeConsumerLag")
+    
+    
+    return
+}
+
+func NewDescribeConsumerLagResponse() (response *DescribeConsumerLagResponse) {
+    response = &DescribeConsumerLagResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeConsumerLag
+// 查询指定消费组堆积数。
+//
+// 当前 API 适用集群：4.x 集群和 5.x 集群。
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+func (c *Client) DescribeConsumerLag(request *DescribeConsumerLagRequest) (response *DescribeConsumerLagResponse, err error) {
+    return c.DescribeConsumerLagWithContext(context.Background(), request)
+}
+
+// DescribeConsumerLag
+// 查询指定消费组堆积数。
+//
+// 当前 API 适用集群：4.x 集群和 5.x 集群。
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+func (c *Client) DescribeConsumerLagWithContext(ctx context.Context, request *DescribeConsumerLagRequest) (response *DescribeConsumerLagResponse, err error) {
+    if request == nil {
+        request = NewDescribeConsumerLagRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeConsumerLag")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeConsumerLag require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeConsumerLagResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeConsumerRouteConfigRequest() (request *DescribeConsumerRouteConfigRequest) {
+    request = &DescribeConsumerRouteConfigRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "DescribeConsumerRouteConfig")
+    
+    
+    return
+}
+
+func NewDescribeConsumerRouteConfigResponse() (response *DescribeConsumerRouteConfigResponse) {
+    response = &DescribeConsumerRouteConfigResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeConsumerRouteConfig
+// 查询消费组当前生效的灰度路由配置
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+func (c *Client) DescribeConsumerRouteConfig(request *DescribeConsumerRouteConfigRequest) (response *DescribeConsumerRouteConfigResponse, err error) {
+    return c.DescribeConsumerRouteConfigWithContext(context.Background(), request)
+}
+
+// DescribeConsumerRouteConfig
+// 查询消费组当前生效的灰度路由配置
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+func (c *Client) DescribeConsumerRouteConfigWithContext(ctx context.Context, request *DescribeConsumerRouteConfigRequest) (response *DescribeConsumerRouteConfigResponse, err error) {
+    if request == nil {
+        request = NewDescribeConsumerRouteConfigRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeConsumerRouteConfig")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeConsumerRouteConfig require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeConsumerRouteConfigResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeConsumerRouteVersionListRequest() (request *DescribeConsumerRouteVersionListRequest) {
+    request = &DescribeConsumerRouteVersionListRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "DescribeConsumerRouteVersionList")
+    
+    
+    return
+}
+
+func NewDescribeConsumerRouteVersionListResponse() (response *DescribeConsumerRouteVersionListResponse) {
+    response = &DescribeConsumerRouteVersionListResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeConsumerRouteVersionList
+// 查询消费组灰度路由配置版本列表
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+func (c *Client) DescribeConsumerRouteVersionList(request *DescribeConsumerRouteVersionListRequest) (response *DescribeConsumerRouteVersionListResponse, err error) {
+    return c.DescribeConsumerRouteVersionListWithContext(context.Background(), request)
+}
+
+// DescribeConsumerRouteVersionList
+// 查询消费组灰度路由配置版本列表
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+func (c *Client) DescribeConsumerRouteVersionListWithContext(ctx context.Context, request *DescribeConsumerRouteVersionListRequest) (response *DescribeConsumerRouteVersionListResponse, err error) {
+    if request == nil {
+        request = NewDescribeConsumerRouteVersionListRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeConsumerRouteVersionList")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeConsumerRouteVersionList require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeConsumerRouteVersionListResponse()
     err = c.Send(request, response)
     return
 }
@@ -1033,17 +1365,47 @@ func NewDescribeFusionInstanceListResponse() (response *DescribeFusionInstanceLi
 }
 
 // DescribeFusionInstanceList
-// 获取实例列表，Filters参数使用说明如下：
+// 查询集群列表，支持 4.x 和 5.x 集群，其中 Filters 参数使用说明如下：
 //
-// 1. InstanceName, 名称模糊查询
+// 
 //
-// 2. InstanceId，实例ID查询
+// - InstanceName: 集群名称，支持模糊查询，从本接口返回值或控制台获得
 //
-// 3. InstanceType, 实例类型查询，支持多选
+// - InstanceId: 集群ID，精确查询，从当前接口或控制台获得
 //
-// 4. Version，实例版本查询
+// - InstanceType: 集群类型，可参考 [InstanceItem](https://cloud.tencent.com/document/api/1493/96031#InstanceItem) 数据结构，支持多选
 //
-// 当使用TagFilters查询时，Filters参数失效。
+// - Version: 集群版本，枚举值如下：
+//
+//     - 4 RocketMQ 4.x 集群
+//
+//     - 5 RocketMQ 5.x 集群
+//
+// -  InstanceStatus: 集群状态筛选条件，支持多选，枚举值如下：
+//
+//     - RUNNING：运行中
+//
+//     - ABNORMAL：异常
+//
+//     - OVERDUE：隔离中
+//
+//     - DESTROYED：已销毁
+//
+//     - CREATING：创建中
+//
+//     - MODIFYING：变配中
+//
+//     - CREATE_FAILURE：创建失败
+//
+//     - MODIFY_FAILURE：变配失败
+//
+//     - DELETING：删除中
+//
+// 
+//
+// Filters示例：
+//
+//  [{ "Name": "InstanceId", "Values": ["rmq-72mo3a9o"] }]
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -1052,17 +1414,47 @@ func (c *Client) DescribeFusionInstanceList(request *DescribeFusionInstanceListR
 }
 
 // DescribeFusionInstanceList
-// 获取实例列表，Filters参数使用说明如下：
+// 查询集群列表，支持 4.x 和 5.x 集群，其中 Filters 参数使用说明如下：
 //
-// 1. InstanceName, 名称模糊查询
+// 
 //
-// 2. InstanceId，实例ID查询
+// - InstanceName: 集群名称，支持模糊查询，从本接口返回值或控制台获得
 //
-// 3. InstanceType, 实例类型查询，支持多选
+// - InstanceId: 集群ID，精确查询，从当前接口或控制台获得
 //
-// 4. Version，实例版本查询
+// - InstanceType: 集群类型，可参考 [InstanceItem](https://cloud.tencent.com/document/api/1493/96031#InstanceItem) 数据结构，支持多选
 //
-// 当使用TagFilters查询时，Filters参数失效。
+// - Version: 集群版本，枚举值如下：
+//
+//     - 4 RocketMQ 4.x 集群
+//
+//     - 5 RocketMQ 5.x 集群
+//
+// -  InstanceStatus: 集群状态筛选条件，支持多选，枚举值如下：
+//
+//     - RUNNING：运行中
+//
+//     - ABNORMAL：异常
+//
+//     - OVERDUE：隔离中
+//
+//     - DESTROYED：已销毁
+//
+//     - CREATING：创建中
+//
+//     - MODIFYING：变配中
+//
+//     - CREATE_FAILURE：创建失败
+//
+//     - MODIFY_FAILURE：变配失败
+//
+//     - DELETING：删除中
+//
+// 
+//
+// Filters示例：
+//
+//  [{ "Name": "InstanceId", "Values": ["rmq-72mo3a9o"] }]
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -1070,6 +1462,7 @@ func (c *Client) DescribeFusionInstanceListWithContext(ctx context.Context, requ
     if request == nil {
         request = NewDescribeFusionInstanceListRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeFusionInstanceList")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeFusionInstanceList require credential")
@@ -1102,7 +1495,9 @@ func NewDescribeInstanceResponse() (response *DescribeInstanceResponse) {
 }
 
 // DescribeInstance
-// 查询实例信息
+// 查询 RocketMQ 5.x 集群信息。
+//
+// 当前 API 适用集群：5.x 集群。查询 4.x 专享/通用集群信息的接口文档见 [DescribeRocketMQVipInstanceDetail](https://cloud.tencent.com/document/product/1179/86725)。
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
@@ -1111,7 +1506,9 @@ func (c *Client) DescribeInstance(request *DescribeInstanceRequest) (response *D
 }
 
 // DescribeInstance
-// 查询实例信息
+// 查询 RocketMQ 5.x 集群信息。
+//
+// 当前 API 适用集群：5.x 集群。查询 4.x 专享/通用集群信息的接口文档见 [DescribeRocketMQVipInstanceDetail](https://cloud.tencent.com/document/product/1179/86725)。
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
@@ -1119,6 +1516,7 @@ func (c *Client) DescribeInstanceWithContext(ctx context.Context, request *Descr
     if request == nil {
         request = NewDescribeInstanceRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeInstance")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeInstance require credential")
@@ -1151,19 +1549,29 @@ func NewDescribeInstanceListResponse() (response *DescribeInstanceListResponse) 
 }
 
 // DescribeInstanceList
-// 获取实例列表，Filters参数使用说明如下：
-//
-// 1. InstanceName, 名称模糊查询
-//
-// 2. InstanceId，实例ID查询
-//
-// 3. InstanceType, 实例类型查询，支持多选
-//
-// 3. InstanceStatus，实例状态查询，支持多选
+// 查询集群列表，仅支持 5.x 集群。Filters参数使用说明如下：
 //
 // 
 //
-// 当使用TagFilters查询时，Filters参数失效。
+// - InstanceName 集群名称，支持模糊搜索
+//
+// - InstanceId 腾讯云 RocketMQ 实例 ID，从 [DescribeFusionInstanceList](https://cloud.tencent.com/document/api/1493/106745) 接口或控制台获得
+//
+// - InstanceType 集群类型，可参考 [InstanceItem](https://cloud.tencent.com/document/api/1493/96031#InstanceItem) 数据结构，支持多选
+//
+// - InstanceStatus 集群状态，可参考 [InstanceItem](https://cloud.tencent.com/document/api/1493/96031#InstanceItem) 数据结构，支持多选
+//
+// 
+//
+// Filters示例：
+//
+// [{
+//
+//     "Name": "InstanceId",
+//
+//     "Values": ["rmq-72mo3a9o"]
+//
+// }]
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -1172,19 +1580,29 @@ func (c *Client) DescribeInstanceList(request *DescribeInstanceListRequest) (res
 }
 
 // DescribeInstanceList
-// 获取实例列表，Filters参数使用说明如下：
-//
-// 1. InstanceName, 名称模糊查询
-//
-// 2. InstanceId，实例ID查询
-//
-// 3. InstanceType, 实例类型查询，支持多选
-//
-// 3. InstanceStatus，实例状态查询，支持多选
+// 查询集群列表，仅支持 5.x 集群。Filters参数使用说明如下：
 //
 // 
 //
-// 当使用TagFilters查询时，Filters参数失效。
+// - InstanceName 集群名称，支持模糊搜索
+//
+// - InstanceId 腾讯云 RocketMQ 实例 ID，从 [DescribeFusionInstanceList](https://cloud.tencent.com/document/api/1493/106745) 接口或控制台获得
+//
+// - InstanceType 集群类型，可参考 [InstanceItem](https://cloud.tencent.com/document/api/1493/96031#InstanceItem) 数据结构，支持多选
+//
+// - InstanceStatus 集群状态，可参考 [InstanceItem](https://cloud.tencent.com/document/api/1493/96031#InstanceItem) 数据结构，支持多选
+//
+// 
+//
+// Filters示例：
+//
+// [{
+//
+//     "Name": "InstanceId",
+//
+//     "Values": ["rmq-72mo3a9o"]
+//
+// }]
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -1192,6 +1610,7 @@ func (c *Client) DescribeInstanceListWithContext(ctx context.Context, request *D
     if request == nil {
         request = NewDescribeInstanceListRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeInstanceList")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeInstanceList require credential")
@@ -1204,638 +1623,566 @@ func (c *Client) DescribeInstanceListWithContext(ctx context.Context, request *D
     return
 }
 
-func NewDescribeMQTTClientRequest() (request *DescribeMQTTClientRequest) {
-    request = &DescribeMQTTClientRequest{
+func NewDescribeMessageRequest() (request *DescribeMessageRequest) {
+    request = &DescribeMessageRequest{
         BaseRequest: &tchttp.BaseRequest{},
     }
     
-    request.Init().WithApiInfo("trocket", APIVersion, "DescribeMQTTClient")
+    request.Init().WithApiInfo("trocket", APIVersion, "DescribeMessage")
     
     
     return
 }
 
-func NewDescribeMQTTClientResponse() (response *DescribeMQTTClientResponse) {
-    response = &DescribeMQTTClientResponse{
+func NewDescribeMessageResponse() (response *DescribeMessageResponse) {
+    response = &DescribeMessageResponse{
         BaseResponse: &tchttp.BaseResponse{},
     } 
     return
 
 }
 
-// DescribeMQTTClient
-// 查询 MQTT 客户端详情
+// DescribeMessage
+// 查询消息详情。
 //
-// 可能返回的错误码:
-//  RESOURCENOTFOUND_CLIENT = "ResourceNotFound.Client"
-func (c *Client) DescribeMQTTClient(request *DescribeMQTTClientRequest) (response *DescribeMQTTClientResponse, err error) {
-    return c.DescribeMQTTClientWithContext(context.Background(), request)
-}
-
-// DescribeMQTTClient
-// 查询 MQTT 客户端详情
-//
-// 可能返回的错误码:
-//  RESOURCENOTFOUND_CLIENT = "ResourceNotFound.Client"
-func (c *Client) DescribeMQTTClientWithContext(ctx context.Context, request *DescribeMQTTClientRequest) (response *DescribeMQTTClientResponse, err error) {
-    if request == nil {
-        request = NewDescribeMQTTClientRequest()
-    }
-    
-    if c.GetCredential() == nil {
-        return nil, errors.New("DescribeMQTTClient require credential")
-    }
-
-    request.SetContext(ctx)
-    
-    response = NewDescribeMQTTClientResponse()
-    err = c.Send(request, response)
-    return
-}
-
-func NewDescribeMQTTInsPublicEndpointsRequest() (request *DescribeMQTTInsPublicEndpointsRequest) {
-    request = &DescribeMQTTInsPublicEndpointsRequest{
-        BaseRequest: &tchttp.BaseRequest{},
-    }
-    
-    request.Init().WithApiInfo("trocket", APIVersion, "DescribeMQTTInsPublicEndpoints")
-    
-    
-    return
-}
-
-func NewDescribeMQTTInsPublicEndpointsResponse() (response *DescribeMQTTInsPublicEndpointsResponse) {
-    response = &DescribeMQTTInsPublicEndpointsResponse{
-        BaseResponse: &tchttp.BaseResponse{},
-    } 
-    return
-
-}
-
-// DescribeMQTTInsPublicEndpoints
-// 查询MQTT实例公网接入点
-//
-// 可能返回的错误码:
-//  RESOURCENOTFOUND_CLIENT = "ResourceNotFound.Client"
-func (c *Client) DescribeMQTTInsPublicEndpoints(request *DescribeMQTTInsPublicEndpointsRequest) (response *DescribeMQTTInsPublicEndpointsResponse, err error) {
-    return c.DescribeMQTTInsPublicEndpointsWithContext(context.Background(), request)
-}
-
-// DescribeMQTTInsPublicEndpoints
-// 查询MQTT实例公网接入点
-//
-// 可能返回的错误码:
-//  RESOURCENOTFOUND_CLIENT = "ResourceNotFound.Client"
-func (c *Client) DescribeMQTTInsPublicEndpointsWithContext(ctx context.Context, request *DescribeMQTTInsPublicEndpointsRequest) (response *DescribeMQTTInsPublicEndpointsResponse, err error) {
-    if request == nil {
-        request = NewDescribeMQTTInsPublicEndpointsRequest()
-    }
-    
-    if c.GetCredential() == nil {
-        return nil, errors.New("DescribeMQTTInsPublicEndpoints require credential")
-    }
-
-    request.SetContext(ctx)
-    
-    response = NewDescribeMQTTInsPublicEndpointsResponse()
-    err = c.Send(request, response)
-    return
-}
-
-func NewDescribeMQTTInsVPCEndpointsRequest() (request *DescribeMQTTInsVPCEndpointsRequest) {
-    request = &DescribeMQTTInsVPCEndpointsRequest{
-        BaseRequest: &tchttp.BaseRequest{},
-    }
-    
-    request.Init().WithApiInfo("trocket", APIVersion, "DescribeMQTTInsVPCEndpoints")
-    
-    
-    return
-}
-
-func NewDescribeMQTTInsVPCEndpointsResponse() (response *DescribeMQTTInsVPCEndpointsResponse) {
-    response = &DescribeMQTTInsVPCEndpointsResponse{
-        BaseResponse: &tchttp.BaseResponse{},
-    } 
-    return
-
-}
-
-// DescribeMQTTInsVPCEndpoints
-// 查询MQTT实例公网接入点
-//
-// 可能返回的错误码:
-//  RESOURCENOTFOUND_CLIENT = "ResourceNotFound.Client"
-func (c *Client) DescribeMQTTInsVPCEndpoints(request *DescribeMQTTInsVPCEndpointsRequest) (response *DescribeMQTTInsVPCEndpointsResponse, err error) {
-    return c.DescribeMQTTInsVPCEndpointsWithContext(context.Background(), request)
-}
-
-// DescribeMQTTInsVPCEndpoints
-// 查询MQTT实例公网接入点
-//
-// 可能返回的错误码:
-//  RESOURCENOTFOUND_CLIENT = "ResourceNotFound.Client"
-func (c *Client) DescribeMQTTInsVPCEndpointsWithContext(ctx context.Context, request *DescribeMQTTInsVPCEndpointsRequest) (response *DescribeMQTTInsVPCEndpointsResponse, err error) {
-    if request == nil {
-        request = NewDescribeMQTTInsVPCEndpointsRequest()
-    }
-    
-    if c.GetCredential() == nil {
-        return nil, errors.New("DescribeMQTTInsVPCEndpoints require credential")
-    }
-
-    request.SetContext(ctx)
-    
-    response = NewDescribeMQTTInsVPCEndpointsResponse()
-    err = c.Send(request, response)
-    return
-}
-
-func NewDescribeMQTTInstanceRequest() (request *DescribeMQTTInstanceRequest) {
-    request = &DescribeMQTTInstanceRequest{
-        BaseRequest: &tchttp.BaseRequest{},
-    }
-    
-    request.Init().WithApiInfo("trocket", APIVersion, "DescribeMQTTInstance")
-    
-    
-    return
-}
-
-func NewDescribeMQTTInstanceResponse() (response *DescribeMQTTInstanceResponse) {
-    response = &DescribeMQTTInstanceResponse{
-        BaseResponse: &tchttp.BaseResponse{},
-    } 
-    return
-
-}
-
-// DescribeMQTTInstance
-// 查询实例信息
-//
-// 可能返回的错误码:
-//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
-func (c *Client) DescribeMQTTInstance(request *DescribeMQTTInstanceRequest) (response *DescribeMQTTInstanceResponse, err error) {
-    return c.DescribeMQTTInstanceWithContext(context.Background(), request)
-}
-
-// DescribeMQTTInstance
-// 查询实例信息
-//
-// 可能返回的错误码:
-//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
-func (c *Client) DescribeMQTTInstanceWithContext(ctx context.Context, request *DescribeMQTTInstanceRequest) (response *DescribeMQTTInstanceResponse, err error) {
-    if request == nil {
-        request = NewDescribeMQTTInstanceRequest()
-    }
-    
-    if c.GetCredential() == nil {
-        return nil, errors.New("DescribeMQTTInstance require credential")
-    }
-
-    request.SetContext(ctx)
-    
-    response = NewDescribeMQTTInstanceResponse()
-    err = c.Send(request, response)
-    return
-}
-
-func NewDescribeMQTTInstanceCertRequest() (request *DescribeMQTTInstanceCertRequest) {
-    request = &DescribeMQTTInstanceCertRequest{
-        BaseRequest: &tchttp.BaseRequest{},
-    }
-    
-    request.Init().WithApiInfo("trocket", APIVersion, "DescribeMQTTInstanceCert")
-    
-    
-    return
-}
-
-func NewDescribeMQTTInstanceCertResponse() (response *DescribeMQTTInstanceCertResponse) {
-    response = &DescribeMQTTInstanceCertResponse{
-        BaseResponse: &tchttp.BaseResponse{},
-    } 
-    return
-
-}
-
-// DescribeMQTTInstanceCert
-// 查询MQTT集群证书列表
-//
-// 可能返回的错误码:
-//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
-func (c *Client) DescribeMQTTInstanceCert(request *DescribeMQTTInstanceCertRequest) (response *DescribeMQTTInstanceCertResponse, err error) {
-    return c.DescribeMQTTInstanceCertWithContext(context.Background(), request)
-}
-
-// DescribeMQTTInstanceCert
-// 查询MQTT集群证书列表
-//
-// 可能返回的错误码:
-//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
-func (c *Client) DescribeMQTTInstanceCertWithContext(ctx context.Context, request *DescribeMQTTInstanceCertRequest) (response *DescribeMQTTInstanceCertResponse, err error) {
-    if request == nil {
-        request = NewDescribeMQTTInstanceCertRequest()
-    }
-    
-    if c.GetCredential() == nil {
-        return nil, errors.New("DescribeMQTTInstanceCert require credential")
-    }
-
-    request.SetContext(ctx)
-    
-    response = NewDescribeMQTTInstanceCertResponse()
-    err = c.Send(request, response)
-    return
-}
-
-func NewDescribeMQTTInstanceListRequest() (request *DescribeMQTTInstanceListRequest) {
-    request = &DescribeMQTTInstanceListRequest{
-        BaseRequest: &tchttp.BaseRequest{},
-    }
-    
-    request.Init().WithApiInfo("trocket", APIVersion, "DescribeMQTTInstanceList")
-    
-    
-    return
-}
-
-func NewDescribeMQTTInstanceListResponse() (response *DescribeMQTTInstanceListResponse) {
-    response = &DescribeMQTTInstanceListResponse{
-        BaseResponse: &tchttp.BaseResponse{},
-    } 
-    return
-
-}
-
-// DescribeMQTTInstanceList
-// 获取实例列表，Filters参数使用说明如下：
-//
-// 1. InstanceName, 名称模糊查询
-//
-// 2. InstanceId，实例ID查询
-//
-// 3. InstanceType, 实例类型查询，支持多选
-//
-// 3. InstanceStatus，实例状态查询，支持多选
-//
-// 
-//
-// 当使用TagFilters查询时，Filters参数失效。
-//
-// 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-func (c *Client) DescribeMQTTInstanceList(request *DescribeMQTTInstanceListRequest) (response *DescribeMQTTInstanceListResponse, err error) {
-    return c.DescribeMQTTInstanceListWithContext(context.Background(), request)
-}
-
-// DescribeMQTTInstanceList
-// 获取实例列表，Filters参数使用说明如下：
-//
-// 1. InstanceName, 名称模糊查询
-//
-// 2. InstanceId，实例ID查询
-//
-// 3. InstanceType, 实例类型查询，支持多选
-//
-// 3. InstanceStatus，实例状态查询，支持多选
-//
-// 
-//
-// 当使用TagFilters查询时，Filters参数失效。
-//
-// 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-func (c *Client) DescribeMQTTInstanceListWithContext(ctx context.Context, request *DescribeMQTTInstanceListRequest) (response *DescribeMQTTInstanceListResponse, err error) {
-    if request == nil {
-        request = NewDescribeMQTTInstanceListRequest()
-    }
-    
-    if c.GetCredential() == nil {
-        return nil, errors.New("DescribeMQTTInstanceList require credential")
-    }
-
-    request.SetContext(ctx)
-    
-    response = NewDescribeMQTTInstanceListResponse()
-    err = c.Send(request, response)
-    return
-}
-
-func NewDescribeMQTTMessageRequest() (request *DescribeMQTTMessageRequest) {
-    request = &DescribeMQTTMessageRequest{
-        BaseRequest: &tchttp.BaseRequest{},
-    }
-    
-    request.Init().WithApiInfo("trocket", APIVersion, "DescribeMQTTMessage")
-    
-    
-    return
-}
-
-func NewDescribeMQTTMessageResponse() (response *DescribeMQTTMessageResponse) {
-    response = &DescribeMQTTMessageResponse{
-        BaseResponse: &tchttp.BaseResponse{},
-    } 
-    return
-
-}
-
-// DescribeMQTTMessage
-// 查询MQTT消息详情
+// 当前 API 适用集群：5.x 集群。4.x 集群的查询消息详情接口文档见 [DescribeRocketMQMsg](https://cloud.tencent.com/document/product/1179/91055)。
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
 //  RESOURCENOTFOUND_MESSAGE = "ResourceNotFound.Message"
-func (c *Client) DescribeMQTTMessage(request *DescribeMQTTMessageRequest) (response *DescribeMQTTMessageResponse, err error) {
-    return c.DescribeMQTTMessageWithContext(context.Background(), request)
+func (c *Client) DescribeMessage(request *DescribeMessageRequest) (response *DescribeMessageResponse, err error) {
+    return c.DescribeMessageWithContext(context.Background(), request)
 }
 
-// DescribeMQTTMessage
-// 查询MQTT消息详情
+// DescribeMessage
+// 查询消息详情。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的查询消息详情接口文档见 [DescribeRocketMQMsg](https://cloud.tencent.com/document/product/1179/91055)。
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
 //  RESOURCENOTFOUND_MESSAGE = "ResourceNotFound.Message"
-func (c *Client) DescribeMQTTMessageWithContext(ctx context.Context, request *DescribeMQTTMessageRequest) (response *DescribeMQTTMessageResponse, err error) {
+func (c *Client) DescribeMessageWithContext(ctx context.Context, request *DescribeMessageRequest) (response *DescribeMessageResponse, err error) {
     if request == nil {
-        request = NewDescribeMQTTMessageRequest()
+        request = NewDescribeMessageRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeMessage")
     
     if c.GetCredential() == nil {
-        return nil, errors.New("DescribeMQTTMessage require credential")
+        return nil, errors.New("DescribeMessage require credential")
     }
 
     request.SetContext(ctx)
     
-    response = NewDescribeMQTTMessageResponse()
+    response = NewDescribeMessageResponse()
     err = c.Send(request, response)
     return
 }
 
-func NewDescribeMQTTMessageListRequest() (request *DescribeMQTTMessageListRequest) {
-    request = &DescribeMQTTMessageListRequest{
+func NewDescribeMessageListRequest() (request *DescribeMessageListRequest) {
+    request = &DescribeMessageListRequest{
         BaseRequest: &tchttp.BaseRequest{},
     }
     
-    request.Init().WithApiInfo("trocket", APIVersion, "DescribeMQTTMessageList")
+    request.Init().WithApiInfo("trocket", APIVersion, "DescribeMessageList")
     
     
     return
 }
 
-func NewDescribeMQTTMessageListResponse() (response *DescribeMQTTMessageListResponse) {
-    response = &DescribeMQTTMessageListResponse{
+func NewDescribeMessageListResponse() (response *DescribeMessageListResponse) {
+    response = &DescribeMessageListResponse{
         BaseResponse: &tchttp.BaseResponse{},
     } 
     return
 
 }
 
-// DescribeMQTTMessageList
-// 查询消息列表，如查询死信，请设置ConsumerGroup参数
+// DescribeMessageList
+// 查询消息列表。如果查询死信消息，请设置ConsumerGroup参数。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的查询消息列表接口文档见 [DescribeRocketMQTopicMsgs](https://cloud.tencent.com/document/product/1179/97761)。
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
-func (c *Client) DescribeMQTTMessageList(request *DescribeMQTTMessageListRequest) (response *DescribeMQTTMessageListResponse, err error) {
-    return c.DescribeMQTTMessageListWithContext(context.Background(), request)
+func (c *Client) DescribeMessageList(request *DescribeMessageListRequest) (response *DescribeMessageListResponse, err error) {
+    return c.DescribeMessageListWithContext(context.Background(), request)
 }
 
-// DescribeMQTTMessageList
-// 查询消息列表，如查询死信，请设置ConsumerGroup参数
+// DescribeMessageList
+// 查询消息列表。如果查询死信消息，请设置ConsumerGroup参数。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的查询消息列表接口文档见 [DescribeRocketMQTopicMsgs](https://cloud.tencent.com/document/product/1179/97761)。
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
-func (c *Client) DescribeMQTTMessageListWithContext(ctx context.Context, request *DescribeMQTTMessageListRequest) (response *DescribeMQTTMessageListResponse, err error) {
+func (c *Client) DescribeMessageListWithContext(ctx context.Context, request *DescribeMessageListRequest) (response *DescribeMessageListResponse, err error) {
     if request == nil {
-        request = NewDescribeMQTTMessageListRequest()
+        request = NewDescribeMessageListRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeMessageList")
     
     if c.GetCredential() == nil {
-        return nil, errors.New("DescribeMQTTMessageList require credential")
+        return nil, errors.New("DescribeMessageList require credential")
     }
 
     request.SetContext(ctx)
     
-    response = NewDescribeMQTTMessageListResponse()
+    response = NewDescribeMessageListResponse()
     err = c.Send(request, response)
     return
 }
 
-func NewDescribeMQTTProductSKUListRequest() (request *DescribeMQTTProductSKUListRequest) {
-    request = &DescribeMQTTProductSKUListRequest{
+func NewDescribeMessageTraceRequest() (request *DescribeMessageTraceRequest) {
+    request = &DescribeMessageTraceRequest{
         BaseRequest: &tchttp.BaseRequest{},
     }
     
-    request.Init().WithApiInfo("trocket", APIVersion, "DescribeMQTTProductSKUList")
+    request.Init().WithApiInfo("trocket", APIVersion, "DescribeMessageTrace")
     
     
     return
 }
 
-func NewDescribeMQTTProductSKUListResponse() (response *DescribeMQTTProductSKUListResponse) {
-    response = &DescribeMQTTProductSKUListResponse{
+func NewDescribeMessageTraceResponse() (response *DescribeMessageTraceResponse) {
+    response = &DescribeMessageTraceResponse{
         BaseResponse: &tchttp.BaseResponse{},
     } 
     return
 
 }
 
-// DescribeMQTTProductSKUList
-// 获取产品售卖规格
+// DescribeMessageTrace
+// 根据消息 ID 查询消息轨迹。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群查询消息轨迹接口文档见 [DescribeRocketMQMsgTrace](https://cloud.tencent.com/document/product/1179/97760)。
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
-func (c *Client) DescribeMQTTProductSKUList(request *DescribeMQTTProductSKUListRequest) (response *DescribeMQTTProductSKUListResponse, err error) {
-    return c.DescribeMQTTProductSKUListWithContext(context.Background(), request)
+//  RESOURCENOTFOUND_MESSAGE = "ResourceNotFound.Message"
+func (c *Client) DescribeMessageTrace(request *DescribeMessageTraceRequest) (response *DescribeMessageTraceResponse, err error) {
+    return c.DescribeMessageTraceWithContext(context.Background(), request)
 }
 
-// DescribeMQTTProductSKUList
-// 获取产品售卖规格
+// DescribeMessageTrace
+// 根据消息 ID 查询消息轨迹。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群查询消息轨迹接口文档见 [DescribeRocketMQMsgTrace](https://cloud.tencent.com/document/product/1179/97760)。
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
-func (c *Client) DescribeMQTTProductSKUListWithContext(ctx context.Context, request *DescribeMQTTProductSKUListRequest) (response *DescribeMQTTProductSKUListResponse, err error) {
+//  RESOURCENOTFOUND_MESSAGE = "ResourceNotFound.Message"
+func (c *Client) DescribeMessageTraceWithContext(ctx context.Context, request *DescribeMessageTraceRequest) (response *DescribeMessageTraceResponse, err error) {
     if request == nil {
-        request = NewDescribeMQTTProductSKUListRequest()
+        request = NewDescribeMessageTraceRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeMessageTrace")
     
     if c.GetCredential() == nil {
-        return nil, errors.New("DescribeMQTTProductSKUList require credential")
+        return nil, errors.New("DescribeMessageTrace require credential")
     }
 
     request.SetContext(ctx)
     
-    response = NewDescribeMQTTProductSKUListResponse()
+    response = NewDescribeMessageTraceResponse()
     err = c.Send(request, response)
     return
 }
 
-func NewDescribeMQTTTopicRequest() (request *DescribeMQTTTopicRequest) {
-    request = &DescribeMQTTTopicRequest{
+func NewDescribeMigratingGroupStatsRequest() (request *DescribeMigratingGroupStatsRequest) {
+    request = &DescribeMigratingGroupStatsRequest{
         BaseRequest: &tchttp.BaseRequest{},
     }
     
-    request.Init().WithApiInfo("trocket", APIVersion, "DescribeMQTTTopic")
+    request.Init().WithApiInfo("trocket", APIVersion, "DescribeMigratingGroupStats")
     
     
     return
 }
 
-func NewDescribeMQTTTopicResponse() (response *DescribeMQTTTopicResponse) {
-    response = &DescribeMQTTTopicResponse{
+func NewDescribeMigratingGroupStatsResponse() (response *DescribeMigratingGroupStatsResponse) {
+    response = &DescribeMigratingGroupStatsResponse{
         BaseResponse: &tchttp.BaseResponse{},
     } 
     return
 
 }
 
-// DescribeMQTTTopic
-// 查询mqtt主题详情
+// DescribeMigratingGroupStats
+// 查看迁移消费组的实时信息
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  RESOURCENOTFOUND_MESSAGE = "ResourceNotFound.Message"
+func (c *Client) DescribeMigratingGroupStats(request *DescribeMigratingGroupStatsRequest) (response *DescribeMigratingGroupStatsResponse, err error) {
+    return c.DescribeMigratingGroupStatsWithContext(context.Background(), request)
+}
+
+// DescribeMigratingGroupStats
+// 查看迁移消费组的实时信息
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  RESOURCENOTFOUND_MESSAGE = "ResourceNotFound.Message"
+func (c *Client) DescribeMigratingGroupStatsWithContext(ctx context.Context, request *DescribeMigratingGroupStatsRequest) (response *DescribeMigratingGroupStatsResponse, err error) {
+    if request == nil {
+        request = NewDescribeMigratingGroupStatsRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeMigratingGroupStats")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeMigratingGroupStats require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeMigratingGroupStatsResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeMigratingTopicListRequest() (request *DescribeMigratingTopicListRequest) {
+    request = &DescribeMigratingTopicListRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "DescribeMigratingTopicList")
+    
+    
+    return
+}
+
+func NewDescribeMigratingTopicListResponse() (response *DescribeMigratingTopicListResponse) {
+    response = &DescribeMigratingTopicListResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeMigratingTopicList
+// 查询Topic迁移状态列表。
+//
+// 
+//
+// Filters字段为查询过滤器，支持以下条件：
+//
+// * TopicName 主题名称，支持模糊查询
+//
+// * MigrationStatus 迁移状态，可参考[MigratingTopic](https://cloud.tencent.com/document/api/1493/96031#MigratingTopic)数据结构
+//
+// * Namespace 命名空间，仅4.x集群有效
+//
+// 
+//
+// Filters示例：
+//
+// [{
+//
+//     "Name": "TopicName",
+//
+//     "Values": ["topic-a"]
+//
+// }]
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_MIGRATIONTASK = "ResourceNotFound.MigrationTask"
+func (c *Client) DescribeMigratingTopicList(request *DescribeMigratingTopicListRequest) (response *DescribeMigratingTopicListResponse, err error) {
+    return c.DescribeMigratingTopicListWithContext(context.Background(), request)
+}
+
+// DescribeMigratingTopicList
+// 查询Topic迁移状态列表。
+//
+// 
+//
+// Filters字段为查询过滤器，支持以下条件：
+//
+// * TopicName 主题名称，支持模糊查询
+//
+// * MigrationStatus 迁移状态，可参考[MigratingTopic](https://cloud.tencent.com/document/api/1493/96031#MigratingTopic)数据结构
+//
+// * Namespace 命名空间，仅4.x集群有效
+//
+// 
+//
+// Filters示例：
+//
+// [{
+//
+//     "Name": "TopicName",
+//
+//     "Values": ["topic-a"]
+//
+// }]
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_MIGRATIONTASK = "ResourceNotFound.MigrationTask"
+func (c *Client) DescribeMigratingTopicListWithContext(ctx context.Context, request *DescribeMigratingTopicListRequest) (response *DescribeMigratingTopicListResponse, err error) {
+    if request == nil {
+        request = NewDescribeMigratingTopicListRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeMigratingTopicList")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeMigratingTopicList require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeMigratingTopicListResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeMigratingTopicStatsRequest() (request *DescribeMigratingTopicStatsRequest) {
+    request = &DescribeMigratingTopicStatsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "DescribeMigratingTopicStats")
+    
+    
+    return
+}
+
+func NewDescribeMigratingTopicStatsResponse() (response *DescribeMigratingTopicStatsResponse) {
+    response = &DescribeMigratingTopicStatsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeMigratingTopicStats
+// 用于查询迁移主题的实时数据
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  RESOURCENOTFOUND_MIGRATIONTASK = "ResourceNotFound.MigrationTask"
 //  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
-func (c *Client) DescribeMQTTTopic(request *DescribeMQTTTopicRequest) (response *DescribeMQTTTopicResponse, err error) {
-    return c.DescribeMQTTTopicWithContext(context.Background(), request)
+//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
+func (c *Client) DescribeMigratingTopicStats(request *DescribeMigratingTopicStatsRequest) (response *DescribeMigratingTopicStatsResponse, err error) {
+    return c.DescribeMigratingTopicStatsWithContext(context.Background(), request)
 }
 
-// DescribeMQTTTopic
-// 查询mqtt主题详情
+// DescribeMigratingTopicStats
+// 用于查询迁移主题的实时数据
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  RESOURCENOTFOUND_MIGRATIONTASK = "ResourceNotFound.MigrationTask"
 //  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
-func (c *Client) DescribeMQTTTopicWithContext(ctx context.Context, request *DescribeMQTTTopicRequest) (response *DescribeMQTTTopicResponse, err error) {
+//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
+func (c *Client) DescribeMigratingTopicStatsWithContext(ctx context.Context, request *DescribeMigratingTopicStatsRequest) (response *DescribeMigratingTopicStatsResponse, err error) {
     if request == nil {
-        request = NewDescribeMQTTTopicRequest()
+        request = NewDescribeMigratingTopicStatsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeMigratingTopicStats")
     
     if c.GetCredential() == nil {
-        return nil, errors.New("DescribeMQTTTopic require credential")
+        return nil, errors.New("DescribeMigratingTopicStats require credential")
     }
 
     request.SetContext(ctx)
     
-    response = NewDescribeMQTTTopicResponse()
+    response = NewDescribeMigratingTopicStatsResponse()
     err = c.Send(request, response)
     return
 }
 
-func NewDescribeMQTTTopicListRequest() (request *DescribeMQTTTopicListRequest) {
-    request = &DescribeMQTTTopicListRequest{
+func NewDescribeMigrationTaskListRequest() (request *DescribeMigrationTaskListRequest) {
+    request = &DescribeMigrationTaskListRequest{
         BaseRequest: &tchttp.BaseRequest{},
     }
     
-    request.Init().WithApiInfo("trocket", APIVersion, "DescribeMQTTTopicList")
+    request.Init().WithApiInfo("trocket", APIVersion, "DescribeMigrationTaskList")
     
     
     return
 }
 
-func NewDescribeMQTTTopicListResponse() (response *DescribeMQTTTopicListResponse) {
-    response = &DescribeMQTTTopicListResponse{
+func NewDescribeMigrationTaskListResponse() (response *DescribeMigrationTaskListResponse) {
+    response = &DescribeMigrationTaskListResponse{
         BaseResponse: &tchttp.BaseResponse{},
     } 
     return
 
 }
 
-// DescribeMQTTTopicList
-// 获取主题列表，Filter参数使用说明如下：
+// DescribeMigrationTaskList
+// 获取数据迁移任务列表，Filter参数使用说明如下：
 //
 // 
 //
-// 1. TopicName，主题名称模糊搜索
+// TaskId，根据任务ID精确查找
 //
-// 2. TopicType，主题类型查询，支持多选，可选值：Normal,Order,Transaction,DelayScheduled
+// InstanceId，根据实例ID精确查找
+//
+// Type，根据任务类型精确查找
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
-func (c *Client) DescribeMQTTTopicList(request *DescribeMQTTTopicListRequest) (response *DescribeMQTTTopicListResponse, err error) {
-    return c.DescribeMQTTTopicListWithContext(context.Background(), request)
+//  RESOURCENOTFOUND_MIGRATIONTASK = "ResourceNotFound.MigrationTask"
+//  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
+//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
+func (c *Client) DescribeMigrationTaskList(request *DescribeMigrationTaskListRequest) (response *DescribeMigrationTaskListResponse, err error) {
+    return c.DescribeMigrationTaskListWithContext(context.Background(), request)
 }
 
-// DescribeMQTTTopicList
-// 获取主题列表，Filter参数使用说明如下：
+// DescribeMigrationTaskList
+// 获取数据迁移任务列表，Filter参数使用说明如下：
 //
 // 
 //
-// 1. TopicName，主题名称模糊搜索
+// TaskId，根据任务ID精确查找
 //
-// 2. TopicType，主题类型查询，支持多选，可选值：Normal,Order,Transaction,DelayScheduled
+// InstanceId，根据实例ID精确查找
+//
+// Type，根据任务类型精确查找
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
-func (c *Client) DescribeMQTTTopicListWithContext(ctx context.Context, request *DescribeMQTTTopicListRequest) (response *DescribeMQTTTopicListResponse, err error) {
+//  RESOURCENOTFOUND_MIGRATIONTASK = "ResourceNotFound.MigrationTask"
+//  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
+//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
+func (c *Client) DescribeMigrationTaskListWithContext(ctx context.Context, request *DescribeMigrationTaskListRequest) (response *DescribeMigrationTaskListResponse, err error) {
     if request == nil {
-        request = NewDescribeMQTTTopicListRequest()
+        request = NewDescribeMigrationTaskListRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeMigrationTaskList")
     
     if c.GetCredential() == nil {
-        return nil, errors.New("DescribeMQTTTopicList require credential")
+        return nil, errors.New("DescribeMigrationTaskList require credential")
     }
 
     request.SetContext(ctx)
     
-    response = NewDescribeMQTTTopicListResponse()
+    response = NewDescribeMigrationTaskListResponse()
     err = c.Send(request, response)
     return
 }
 
-func NewDescribeMQTTUserListRequest() (request *DescribeMQTTUserListRequest) {
-    request = &DescribeMQTTUserListRequest{
+func NewDescribeProducerListRequest() (request *DescribeProducerListRequest) {
+    request = &DescribeProducerListRequest{
         BaseRequest: &tchttp.BaseRequest{},
     }
     
-    request.Init().WithApiInfo("trocket", APIVersion, "DescribeMQTTUserList")
+    request.Init().WithApiInfo("trocket", APIVersion, "DescribeProducerList")
     
     
     return
 }
 
-func NewDescribeMQTTUserListResponse() (response *DescribeMQTTUserListResponse) {
-    response = &DescribeMQTTUserListResponse{
+func NewDescribeProducerListResponse() (response *DescribeProducerListResponse) {
+    response = &DescribeProducerListResponse{
         BaseResponse: &tchttp.BaseResponse{},
     } 
     return
 
 }
 
-// DescribeMQTTUserList
-// 查询用户列表，Filter参数使用说明如下：
+// DescribeProducerList
+// 查询主题关联的生产者列表信息，Filters支持以下筛选条件：
 //
-// 
+// - ClientIP，客户端IP
 //
-// 1. Username，用户名称模糊搜索
+// - ClientID，客户端ID
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的查询生产者客户端列表接口文档见 [DescribeRocketMQProducers](https://cloud.tencent.com/document/api/1179/122749)。
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
-func (c *Client) DescribeMQTTUserList(request *DescribeMQTTUserListRequest) (response *DescribeMQTTUserListResponse, err error) {
-    return c.DescribeMQTTUserListWithContext(context.Background(), request)
+//  RESOURCENOTFOUND_MIGRATIONTASK = "ResourceNotFound.MigrationTask"
+//  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
+//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
+func (c *Client) DescribeProducerList(request *DescribeProducerListRequest) (response *DescribeProducerListResponse, err error) {
+    return c.DescribeProducerListWithContext(context.Background(), request)
 }
 
-// DescribeMQTTUserList
-// 查询用户列表，Filter参数使用说明如下：
+// DescribeProducerList
+// 查询主题关联的生产者列表信息，Filters支持以下筛选条件：
 //
-// 
+// - ClientIP，客户端IP
 //
-// 1. Username，用户名称模糊搜索
+// - ClientID，客户端ID
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的查询生产者客户端列表接口文档见 [DescribeRocketMQProducers](https://cloud.tencent.com/document/api/1179/122749)。
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
-func (c *Client) DescribeMQTTUserListWithContext(ctx context.Context, request *DescribeMQTTUserListRequest) (response *DescribeMQTTUserListResponse, err error) {
+//  RESOURCENOTFOUND_MIGRATIONTASK = "ResourceNotFound.MigrationTask"
+//  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
+//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
+func (c *Client) DescribeProducerListWithContext(ctx context.Context, request *DescribeProducerListRequest) (response *DescribeProducerListResponse, err error) {
     if request == nil {
-        request = NewDescribeMQTTUserListRequest()
+        request = NewDescribeProducerListRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeProducerList")
     
     if c.GetCredential() == nil {
-        return nil, errors.New("DescribeMQTTUserList require credential")
+        return nil, errors.New("DescribeProducerList require credential")
     }
 
     request.SetContext(ctx)
     
-    response = NewDescribeMQTTUserListResponse()
+    response = NewDescribeProducerListResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeProductSKUsRequest() (request *DescribeProductSKUsRequest) {
+    request = &DescribeProductSKUsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "DescribeProductSKUs")
+    
+    
+    return
+}
+
+func NewDescribeProductSKUsResponse() (response *DescribeProductSKUsResponse) {
+    response = &DescribeProductSKUsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeProductSKUs
+// 查询产品售卖规格，针对 RocketMQ 5.x 集群。
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  RESOURCENOTFOUND_MIGRATIONTASK = "ResourceNotFound.MigrationTask"
+//  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
+//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
+func (c *Client) DescribeProductSKUs(request *DescribeProductSKUsRequest) (response *DescribeProductSKUsResponse, err error) {
+    return c.DescribeProductSKUsWithContext(context.Background(), request)
+}
+
+// DescribeProductSKUs
+// 查询产品售卖规格，针对 RocketMQ 5.x 集群。
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  RESOURCENOTFOUND_MIGRATIONTASK = "ResourceNotFound.MigrationTask"
+//  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
+//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
+func (c *Client) DescribeProductSKUsWithContext(ctx context.Context, request *DescribeProductSKUsRequest) (response *DescribeProductSKUsResponse, err error) {
+    if request == nil {
+        request = NewDescribeProductSKUsRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeProductSKUs")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeProductSKUs require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeProductSKUsResponse()
     err = c.Send(request, response)
     return
 }
@@ -1864,10 +2211,23 @@ func NewDescribeRoleListResponse() (response *DescribeRoleListResponse) {
 //
 // 
 //
-// 1. RoleName，角色名称模糊搜索
+// - RoleName 角色名称，支持模糊搜索，从本接口返回值或控制台获得
+//
+// - AccessKey AccessKey，支持模糊搜索，从本接口返回值或控制台获得
+//
+// 
+//
+// Filters示例： 
+//
+// [{ "Name": "RoleName", "Values": ["test_role"] }]
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的查询角色列表接口文档见 [DescribeRocketMQRoles](https://cloud.tencent.com/document/product/1179/107534)，查询角色授权列表接口文档见 [DescribeRocketMQEnvironmentRoles](https://cloud.tencent.com/document/product/1179/107535)。
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  RESOURCENOTFOUND_MIGRATIONTASK = "ResourceNotFound.MigrationTask"
+//  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
+//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
 func (c *Client) DescribeRoleList(request *DescribeRoleListRequest) (response *DescribeRoleListResponse, err error) {
     return c.DescribeRoleListWithContext(context.Background(), request)
 }
@@ -1877,14 +2237,28 @@ func (c *Client) DescribeRoleList(request *DescribeRoleListRequest) (response *D
 //
 // 
 //
-// 1. RoleName，角色名称模糊搜索
+// - RoleName 角色名称，支持模糊搜索，从本接口返回值或控制台获得
+//
+// - AccessKey AccessKey，支持模糊搜索，从本接口返回值或控制台获得
+//
+// 
+//
+// Filters示例： 
+//
+// [{ "Name": "RoleName", "Values": ["test_role"] }]
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的查询角色列表接口文档见 [DescribeRocketMQRoles](https://cloud.tencent.com/document/product/1179/107534)，查询角色授权列表接口文档见 [DescribeRocketMQEnvironmentRoles](https://cloud.tencent.com/document/product/1179/107535)。
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  RESOURCENOTFOUND_MIGRATIONTASK = "ResourceNotFound.MigrationTask"
+//  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
+//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
 func (c *Client) DescribeRoleListWithContext(ctx context.Context, request *DescribeRoleListRequest) (response *DescribeRoleListResponse, err error) {
     if request == nil {
         request = NewDescribeRoleListRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeRoleList")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeRoleList require credential")
@@ -1893,6 +2267,214 @@ func (c *Client) DescribeRoleListWithContext(ctx context.Context, request *Descr
     request.SetContext(ctx)
     
     response = NewDescribeRoleListResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeSmoothMigrationTaskListRequest() (request *DescribeSmoothMigrationTaskListRequest) {
+    request = &DescribeSmoothMigrationTaskListRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "DescribeSmoothMigrationTaskList")
+    
+    
+    return
+}
+
+func NewDescribeSmoothMigrationTaskListResponse() (response *DescribeSmoothMigrationTaskListResponse) {
+    response = &DescribeSmoothMigrationTaskListResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeSmoothMigrationTaskList
+// 用于查询平滑迁移任务列表。
+//
+// 
+//
+// 查询参数Filters， 支持的字段如下：
+//
+// * TaskStatus, 任务状态，支持多选 
+//
+// * ConnectionType，网络连接类型，支持多选，参考[SmoothMigrationTaskItem](https://cloud.tencent.com/document/api/1493/96031#SmoothMigrationTaskItem)的说明
+//
+// * InstanceId，实例ID，精确搜索 
+//
+// * TaskName，任务名称，支持模糊搜索
+//
+// 
+//
+// Filters示例：
+//
+// [{
+//
+//     "Name": "InstanceId",
+//
+//     "Values": ["rmq-1gzecldfg"]
+//
+// }]
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  RESOURCENOTFOUND_MIGRATIONTASK = "ResourceNotFound.MigrationTask"
+//  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
+//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
+func (c *Client) DescribeSmoothMigrationTaskList(request *DescribeSmoothMigrationTaskListRequest) (response *DescribeSmoothMigrationTaskListResponse, err error) {
+    return c.DescribeSmoothMigrationTaskListWithContext(context.Background(), request)
+}
+
+// DescribeSmoothMigrationTaskList
+// 用于查询平滑迁移任务列表。
+//
+// 
+//
+// 查询参数Filters， 支持的字段如下：
+//
+// * TaskStatus, 任务状态，支持多选 
+//
+// * ConnectionType，网络连接类型，支持多选，参考[SmoothMigrationTaskItem](https://cloud.tencent.com/document/api/1493/96031#SmoothMigrationTaskItem)的说明
+//
+// * InstanceId，实例ID，精确搜索 
+//
+// * TaskName，任务名称，支持模糊搜索
+//
+// 
+//
+// Filters示例：
+//
+// [{
+//
+//     "Name": "InstanceId",
+//
+//     "Values": ["rmq-1gzecldfg"]
+//
+// }]
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  RESOURCENOTFOUND_MIGRATIONTASK = "ResourceNotFound.MigrationTask"
+//  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
+//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
+func (c *Client) DescribeSmoothMigrationTaskListWithContext(ctx context.Context, request *DescribeSmoothMigrationTaskListRequest) (response *DescribeSmoothMigrationTaskListResponse, err error) {
+    if request == nil {
+        request = NewDescribeSmoothMigrationTaskListRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeSmoothMigrationTaskList")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeSmoothMigrationTaskList require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeSmoothMigrationTaskListResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeSourceClusterGroupListRequest() (request *DescribeSourceClusterGroupListRequest) {
+    request = &DescribeSourceClusterGroupListRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "DescribeSourceClusterGroupList")
+    
+    
+    return
+}
+
+func NewDescribeSourceClusterGroupListResponse() (response *DescribeSourceClusterGroupListResponse) {
+    response = &DescribeSourceClusterGroupListResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeSourceClusterGroupList
+// 平滑迁移过程获取源集群group列表接口。
+//
+// 
+//
+// Filters字段为查询过滤器，支持以下字段：
+//
+// * GroupName，消费组名称，支持模糊搜索
+//
+// * Imported，是否已导入
+//
+// * ImportStatus，导入状态，参考[SourceClusterGroupConfig](https://cloud.tencent.com/document/api/1493/96031#SourceClusterGroupConfig)的说明
+//
+// * Namespace，命名空间，仅4.x集群有效
+//
+// 
+//
+// Filters示例：
+//
+// [{
+//
+//     "Name": "GroupName",
+//
+//     "Values": ["group-a"]
+//
+// }]
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  RESOURCENOTFOUND_MIGRATIONTASK = "ResourceNotFound.MigrationTask"
+//  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
+//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
+func (c *Client) DescribeSourceClusterGroupList(request *DescribeSourceClusterGroupListRequest) (response *DescribeSourceClusterGroupListResponse, err error) {
+    return c.DescribeSourceClusterGroupListWithContext(context.Background(), request)
+}
+
+// DescribeSourceClusterGroupList
+// 平滑迁移过程获取源集群group列表接口。
+//
+// 
+//
+// Filters字段为查询过滤器，支持以下字段：
+//
+// * GroupName，消费组名称，支持模糊搜索
+//
+// * Imported，是否已导入
+//
+// * ImportStatus，导入状态，参考[SourceClusterGroupConfig](https://cloud.tencent.com/document/api/1493/96031#SourceClusterGroupConfig)的说明
+//
+// * Namespace，命名空间，仅4.x集群有效
+//
+// 
+//
+// Filters示例：
+//
+// [{
+//
+//     "Name": "GroupName",
+//
+//     "Values": ["group-a"]
+//
+// }]
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  RESOURCENOTFOUND_MIGRATIONTASK = "ResourceNotFound.MigrationTask"
+//  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
+//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
+func (c *Client) DescribeSourceClusterGroupListWithContext(ctx context.Context, request *DescribeSourceClusterGroupListRequest) (response *DescribeSourceClusterGroupListResponse, err error) {
+    if request == nil {
+        request = NewDescribeSourceClusterGroupListRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeSourceClusterGroupList")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeSourceClusterGroupList require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeSourceClusterGroupListResponse()
     err = c.Send(request, response)
     return
 }
@@ -1921,7 +2503,13 @@ func NewDescribeTopicResponse() (response *DescribeTopicResponse) {
 //
 // 
 //
-// ConsumerGroup，消费组名称过滤
+// - ConsumerGroup 消费组名称，从 [DescribeConsumerGroupList](https://cloud.tencent.com/document/api/1493/101535) 接口返回的 [ConsumeGroupItem](https://cloud.tencent.com/document/api/1493/96031#ConsumeGroupItem) 或控制台获得。
+//
+// 
+//
+// Filters示例： 
+//
+// [{ "Name": "ConsumerGroup", "Values": ["test_group"] }]
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
@@ -1935,7 +2523,13 @@ func (c *Client) DescribeTopic(request *DescribeTopicRequest) (response *Describ
 //
 // 
 //
-// ConsumerGroup，消费组名称过滤
+// - ConsumerGroup 消费组名称，从 [DescribeConsumerGroupList](https://cloud.tencent.com/document/api/1493/101535) 接口返回的 [ConsumeGroupItem](https://cloud.tencent.com/document/api/1493/96031#ConsumeGroupItem) 或控制台获得。
+//
+// 
+//
+// Filters示例： 
+//
+// [{ "Name": "ConsumerGroup", "Values": ["test_group"] }]
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
@@ -1944,6 +2538,7 @@ func (c *Client) DescribeTopicWithContext(ctx context.Context, request *Describe
     if request == nil {
         request = NewDescribeTopicRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeTopic")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeTopic require credential")
@@ -1980,9 +2575,17 @@ func NewDescribeTopicListResponse() (response *DescribeTopicListResponse) {
 //
 // 
 //
-// 1. TopicName，主题名称模糊搜索
+// - TopicName 主题名称，支持模糊搜索，从 [DescribeTopicList](https://cloud.tencent.com/document/api/1493/96030) 接口返回的 [TopicItem](https://cloud.tencent.com/document/api/1493/96031#TopicItem) 或控制台获得
 //
-// 2. TopicType，主题类型查询，支持多选，可选值：Normal,Order,Transaction,DelayScheduled
+// - TopicType 主题类型查询，支持多选，参考 [DescribeTopic](https://cloud.tencent.com/document/api/1493/97945) 接口 TopicType 字段
+//
+// 
+//
+// Filters示例：
+//
+//  [{ "Name": "TopicName", "Values": ["test_topic"] }]
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的获取主题列表接口文档见 [DescribeRocketMQTopics](https://cloud.tencent.com/document/api/1179/63418)。
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
@@ -1995,9 +2598,17 @@ func (c *Client) DescribeTopicList(request *DescribeTopicListRequest) (response 
 //
 // 
 //
-// 1. TopicName，主题名称模糊搜索
+// - TopicName 主题名称，支持模糊搜索，从 [DescribeTopicList](https://cloud.tencent.com/document/api/1493/96030) 接口返回的 [TopicItem](https://cloud.tencent.com/document/api/1493/96031#TopicItem) 或控制台获得
 //
-// 2. TopicType，主题类型查询，支持多选，可选值：Normal,Order,Transaction,DelayScheduled
+// - TopicType 主题类型查询，支持多选，参考 [DescribeTopic](https://cloud.tencent.com/document/api/1493/97945) 接口 TopicType 字段
+//
+// 
+//
+// Filters示例：
+//
+//  [{ "Name": "TopicName", "Values": ["test_topic"] }]
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的获取主题列表接口文档见 [DescribeRocketMQTopics](https://cloud.tencent.com/document/api/1179/63418)。
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
@@ -2005,6 +2616,7 @@ func (c *Client) DescribeTopicListWithContext(ctx context.Context, request *Desc
     if request == nil {
         request = NewDescribeTopicListRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeTopicList")
     
     if c.GetCredential() == nil {
         return nil, errors.New("DescribeTopicList require credential")
@@ -2013,6 +2625,192 @@ func (c *Client) DescribeTopicListWithContext(ctx context.Context, request *Desc
     request.SetContext(ctx)
     
     response = NewDescribeTopicListResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeTopicListByGroupRequest() (request *DescribeTopicListByGroupRequest) {
+    request = &DescribeTopicListByGroupRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "DescribeTopicListByGroup")
+    
+    
+    return
+}
+
+func NewDescribeTopicListByGroupResponse() (response *DescribeTopicListByGroupResponse) {
+    response = &DescribeTopicListByGroupResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeTopicListByGroup
+// 查询消费组订阅的主题列表，Filter参数使用说明如下：
+//
+// 
+//
+// - TopicName 主题名称，从 [DescribeTopicList](https://cloud.tencent.com/document/api/1493/96030) 接口返回的 [TopicItem](https://cloud.tencent.com/document/api/1493/96031#TopicItem) 或控制台获得。
+//
+// 
+//
+// Filters示例： 
+//
+// [{ "Name": "TopicName", "Values": ["test_topic"] }]
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的查询消费组订阅的主题列表接口文档见 [DescribeRocketMQTopicsByGroup](https://cloud.tencent.com/document/product/1179/108863)。
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+func (c *Client) DescribeTopicListByGroup(request *DescribeTopicListByGroupRequest) (response *DescribeTopicListByGroupResponse, err error) {
+    return c.DescribeTopicListByGroupWithContext(context.Background(), request)
+}
+
+// DescribeTopicListByGroup
+// 查询消费组订阅的主题列表，Filter参数使用说明如下：
+//
+// 
+//
+// - TopicName 主题名称，从 [DescribeTopicList](https://cloud.tencent.com/document/api/1493/96030) 接口返回的 [TopicItem](https://cloud.tencent.com/document/api/1493/96031#TopicItem) 或控制台获得。
+//
+// 
+//
+// Filters示例： 
+//
+// [{ "Name": "TopicName", "Values": ["test_topic"] }]
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的查询消费组订阅的主题列表接口文档见 [DescribeRocketMQTopicsByGroup](https://cloud.tencent.com/document/product/1179/108863)。
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+func (c *Client) DescribeTopicListByGroupWithContext(ctx context.Context, request *DescribeTopicListByGroupRequest) (response *DescribeTopicListByGroupResponse, err error) {
+    if request == nil {
+        request = NewDescribeTopicListByGroupRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeTopicListByGroup")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeTopicListByGroup require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeTopicListByGroupResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDescribeTopicStatsRequest() (request *DescribeTopicStatsRequest) {
+    request = &DescribeTopicStatsRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "DescribeTopicStats")
+    
+    
+    return
+}
+
+func NewDescribeTopicStatsResponse() (response *DescribeTopicStatsResponse) {
+    response = &DescribeTopicStatsResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DescribeTopicStats
+// 获取主题队列级别的消费详情
+//
+// 当前 API 适用集群：5.x 铂金版集群
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
+func (c *Client) DescribeTopicStats(request *DescribeTopicStatsRequest) (response *DescribeTopicStatsResponse, err error) {
+    return c.DescribeTopicStatsWithContext(context.Background(), request)
+}
+
+// DescribeTopicStats
+// 获取主题队列级别的消费详情
+//
+// 当前 API 适用集群：5.x 铂金版集群
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
+func (c *Client) DescribeTopicStatsWithContext(ctx context.Context, request *DescribeTopicStatsRequest) (response *DescribeTopicStatsResponse, err error) {
+    if request == nil {
+        request = NewDescribeTopicStatsRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DescribeTopicStats")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DescribeTopicStats require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDescribeTopicStatsResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewDoHealthCheckOnMigratingTopicRequest() (request *DoHealthCheckOnMigratingTopicRequest) {
+    request = &DoHealthCheckOnMigratingTopicRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "DoHealthCheckOnMigratingTopic")
+    
+    
+    return
+}
+
+func NewDoHealthCheckOnMigratingTopicResponse() (response *DoHealthCheckOnMigratingTopicResponse) {
+    response = &DoHealthCheckOnMigratingTopicResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// DoHealthCheckOnMigratingTopic
+// 检查迁移中的主题是否处于正常状态，只有处于正常状态的主题，才可以进入下一个迁移阶段
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
+func (c *Client) DoHealthCheckOnMigratingTopic(request *DoHealthCheckOnMigratingTopicRequest) (response *DoHealthCheckOnMigratingTopicResponse, err error) {
+    return c.DoHealthCheckOnMigratingTopicWithContext(context.Background(), request)
+}
+
+// DoHealthCheckOnMigratingTopic
+// 检查迁移中的主题是否处于正常状态，只有处于正常状态的主题，才可以进入下一个迁移阶段
+//
+// 可能返回的错误码:
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
+func (c *Client) DoHealthCheckOnMigratingTopicWithContext(ctx context.Context, request *DoHealthCheckOnMigratingTopicRequest) (response *DoHealthCheckOnMigratingTopicResponse, err error) {
+    if request == nil {
+        request = NewDoHealthCheckOnMigratingTopicRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "DoHealthCheckOnMigratingTopic")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("DoHealthCheckOnMigratingTopic require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewDoHealthCheckOnMigratingTopicResponse()
     err = c.Send(request, response)
     return
 }
@@ -2041,6 +2839,8 @@ func NewImportSourceClusterConsumerGroupsResponse() (response *ImportSourceClust
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
 func (c *Client) ImportSourceClusterConsumerGroups(request *ImportSourceClusterConsumerGroupsRequest) (response *ImportSourceClusterConsumerGroupsResponse, err error) {
     return c.ImportSourceClusterConsumerGroupsWithContext(context.Background(), request)
 }
@@ -2050,10 +2850,13 @@ func (c *Client) ImportSourceClusterConsumerGroups(request *ImportSourceClusterC
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
 func (c *Client) ImportSourceClusterConsumerGroupsWithContext(ctx context.Context, request *ImportSourceClusterConsumerGroupsRequest) (response *ImportSourceClusterConsumerGroupsResponse, err error) {
     if request == nil {
         request = NewImportSourceClusterConsumerGroupsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "ImportSourceClusterConsumerGroups")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ImportSourceClusterConsumerGroups require credential")
@@ -2090,6 +2893,8 @@ func NewImportSourceClusterTopicsResponse() (response *ImportSourceClusterTopics
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
 func (c *Client) ImportSourceClusterTopics(request *ImportSourceClusterTopicsRequest) (response *ImportSourceClusterTopicsResponse, err error) {
     return c.ImportSourceClusterTopicsWithContext(context.Background(), request)
 }
@@ -2099,10 +2904,13 @@ func (c *Client) ImportSourceClusterTopics(request *ImportSourceClusterTopicsReq
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
 func (c *Client) ImportSourceClusterTopicsWithContext(ctx context.Context, request *ImportSourceClusterTopicsRequest) (response *ImportSourceClusterTopicsResponse, err error) {
     if request == nil {
         request = NewImportSourceClusterTopicsRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "ImportSourceClusterTopics")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ImportSourceClusterTopics require credential")
@@ -2135,23 +2943,32 @@ func NewModifyConsumerGroupResponse() (response *ModifyConsumerGroupResponse) {
 }
 
 // ModifyConsumerGroup
-// 修改消费组属性
+// 修改消费组属性。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的修改消费组属性接口文档见 [ModifyRocketMQGroup](https://cloud.tencent.com/document/api/1179/63416)。
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
 func (c *Client) ModifyConsumerGroup(request *ModifyConsumerGroupRequest) (response *ModifyConsumerGroupResponse, err error) {
     return c.ModifyConsumerGroupWithContext(context.Background(), request)
 }
 
 // ModifyConsumerGroup
-// 修改消费组属性
+// 修改消费组属性。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的修改消费组属性接口文档见 [ModifyRocketMQGroup](https://cloud.tencent.com/document/api/1179/63416)。
 //
 // 可能返回的错误码:
 //  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
 func (c *Client) ModifyConsumerGroupWithContext(ctx context.Context, request *ModifyConsumerGroupRequest) (response *ModifyConsumerGroupResponse, err error) {
     if request == nil {
         request = NewModifyConsumerGroupRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "ModifyConsumerGroup")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyConsumerGroup require credential")
@@ -2184,7 +3001,9 @@ func NewModifyInstanceResponse() (response *ModifyInstanceResponse) {
 }
 
 // ModifyInstance
-// 修改实例属性
+// 修改 RocketMQ 5.x 集群属性，仅支持修改运行中的集群。
+//
+// 当前 API 适用集群：5.x 集群。修改 4.x 集群属性的接口文档见 [ModifyRocketMQInstance](https://cloud.tencent.com/document/product/1179/108862)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -2196,7 +3015,9 @@ func (c *Client) ModifyInstance(request *ModifyInstanceRequest) (response *Modif
 }
 
 // ModifyInstance
-// 修改实例属性
+// 修改 RocketMQ 5.x 集群属性，仅支持修改运行中的集群。
+//
+// 当前 API 适用集群：5.x 集群。修改 4.x 集群属性的接口文档见 [ModifyRocketMQInstance](https://cloud.tencent.com/document/product/1179/108862)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -2207,6 +3028,7 @@ func (c *Client) ModifyInstanceWithContext(ctx context.Context, request *ModifyI
     if request == nil {
         request = NewModifyInstanceRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "ModifyInstance")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyInstance require credential")
@@ -2219,265 +3041,56 @@ func (c *Client) ModifyInstanceWithContext(ctx context.Context, request *ModifyI
     return
 }
 
-func NewModifyMQTTInsPublicEndpointRequest() (request *ModifyMQTTInsPublicEndpointRequest) {
-    request = &ModifyMQTTInsPublicEndpointRequest{
+func NewModifyInstanceEndpointRequest() (request *ModifyInstanceEndpointRequest) {
+    request = &ModifyInstanceEndpointRequest{
         BaseRequest: &tchttp.BaseRequest{},
     }
     
-    request.Init().WithApiInfo("trocket", APIVersion, "ModifyMQTTInsPublicEndpoint")
+    request.Init().WithApiInfo("trocket", APIVersion, "ModifyInstanceEndpoint")
     
     
     return
 }
 
-func NewModifyMQTTInsPublicEndpointResponse() (response *ModifyMQTTInsPublicEndpointResponse) {
-    response = &ModifyMQTTInsPublicEndpointResponse{
+func NewModifyInstanceEndpointResponse() (response *ModifyInstanceEndpointResponse) {
+    response = &ModifyInstanceEndpointResponse{
         BaseResponse: &tchttp.BaseResponse{},
     } 
     return
 
 }
 
-// ModifyMQTTInsPublicEndpoint
-// 更新MQTT实例公网接入点
+// ModifyInstanceEndpoint
+// 修改 RocketMQ 5.x 集群接入点，操作前请先确认接入点已存在。
 //
 // 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-//  FAILEDOPERATION_INSTANCENOTREADY = "FailedOperation.InstanceNotReady"
-//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
-//  UNSUPPORTEDOPERATION_INSTANCETOPICNUMDOWNGRADE = "UnsupportedOperation.InstanceTopicNumDowngrade"
-func (c *Client) ModifyMQTTInsPublicEndpoint(request *ModifyMQTTInsPublicEndpointRequest) (response *ModifyMQTTInsPublicEndpointResponse, err error) {
-    return c.ModifyMQTTInsPublicEndpointWithContext(context.Background(), request)
+//  OPERATIONDENIED = "OperationDenied"
+//  RESOURCENOTFOUND_ENDPOINT = "ResourceNotFound.Endpoint"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
+func (c *Client) ModifyInstanceEndpoint(request *ModifyInstanceEndpointRequest) (response *ModifyInstanceEndpointResponse, err error) {
+    return c.ModifyInstanceEndpointWithContext(context.Background(), request)
 }
 
-// ModifyMQTTInsPublicEndpoint
-// 更新MQTT实例公网接入点
+// ModifyInstanceEndpoint
+// 修改 RocketMQ 5.x 集群接入点，操作前请先确认接入点已存在。
 //
 // 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-//  FAILEDOPERATION_INSTANCENOTREADY = "FailedOperation.InstanceNotReady"
-//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
-//  UNSUPPORTEDOPERATION_INSTANCETOPICNUMDOWNGRADE = "UnsupportedOperation.InstanceTopicNumDowngrade"
-func (c *Client) ModifyMQTTInsPublicEndpointWithContext(ctx context.Context, request *ModifyMQTTInsPublicEndpointRequest) (response *ModifyMQTTInsPublicEndpointResponse, err error) {
+//  OPERATIONDENIED = "OperationDenied"
+//  RESOURCENOTFOUND_ENDPOINT = "ResourceNotFound.Endpoint"
+//  UNSUPPORTEDOPERATION = "UnsupportedOperation"
+func (c *Client) ModifyInstanceEndpointWithContext(ctx context.Context, request *ModifyInstanceEndpointRequest) (response *ModifyInstanceEndpointResponse, err error) {
     if request == nil {
-        request = NewModifyMQTTInsPublicEndpointRequest()
+        request = NewModifyInstanceEndpointRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "ModifyInstanceEndpoint")
     
     if c.GetCredential() == nil {
-        return nil, errors.New("ModifyMQTTInsPublicEndpoint require credential")
+        return nil, errors.New("ModifyInstanceEndpoint require credential")
     }
 
     request.SetContext(ctx)
     
-    response = NewModifyMQTTInsPublicEndpointResponse()
-    err = c.Send(request, response)
-    return
-}
-
-func NewModifyMQTTInstanceRequest() (request *ModifyMQTTInstanceRequest) {
-    request = &ModifyMQTTInstanceRequest{
-        BaseRequest: &tchttp.BaseRequest{},
-    }
-    
-    request.Init().WithApiInfo("trocket", APIVersion, "ModifyMQTTInstance")
-    
-    
-    return
-}
-
-func NewModifyMQTTInstanceResponse() (response *ModifyMQTTInstanceResponse) {
-    response = &ModifyMQTTInstanceResponse{
-        BaseResponse: &tchttp.BaseResponse{},
-    } 
-    return
-
-}
-
-// ModifyMQTTInstance
-// 修改实例属性
-//
-// 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-//  FAILEDOPERATION_INSTANCENOTREADY = "FailedOperation.InstanceNotReady"
-//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
-func (c *Client) ModifyMQTTInstance(request *ModifyMQTTInstanceRequest) (response *ModifyMQTTInstanceResponse, err error) {
-    return c.ModifyMQTTInstanceWithContext(context.Background(), request)
-}
-
-// ModifyMQTTInstance
-// 修改实例属性
-//
-// 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-//  FAILEDOPERATION_INSTANCENOTREADY = "FailedOperation.InstanceNotReady"
-//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
-func (c *Client) ModifyMQTTInstanceWithContext(ctx context.Context, request *ModifyMQTTInstanceRequest) (response *ModifyMQTTInstanceResponse, err error) {
-    if request == nil {
-        request = NewModifyMQTTInstanceRequest()
-    }
-    
-    if c.GetCredential() == nil {
-        return nil, errors.New("ModifyMQTTInstance require credential")
-    }
-
-    request.SetContext(ctx)
-    
-    response = NewModifyMQTTInstanceResponse()
-    err = c.Send(request, response)
-    return
-}
-
-func NewModifyMQTTInstanceCertBindingRequest() (request *ModifyMQTTInstanceCertBindingRequest) {
-    request = &ModifyMQTTInstanceCertBindingRequest{
-        BaseRequest: &tchttp.BaseRequest{},
-    }
-    
-    request.Init().WithApiInfo("trocket", APIVersion, "ModifyMQTTInstanceCertBinding")
-    
-    
-    return
-}
-
-func NewModifyMQTTInstanceCertBindingResponse() (response *ModifyMQTTInstanceCertBindingResponse) {
-    response = &ModifyMQTTInstanceCertBindingResponse{
-        BaseResponse: &tchttp.BaseResponse{},
-    } 
-    return
-
-}
-
-// ModifyMQTTInstanceCertBinding
-// 更新MQTT集群绑定证书
-//
-// 参数传空，则为删除证书
-//
-// 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-//  FAILEDOPERATION_INSTANCENOTREADY = "FailedOperation.InstanceNotReady"
-//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
-func (c *Client) ModifyMQTTInstanceCertBinding(request *ModifyMQTTInstanceCertBindingRequest) (response *ModifyMQTTInstanceCertBindingResponse, err error) {
-    return c.ModifyMQTTInstanceCertBindingWithContext(context.Background(), request)
-}
-
-// ModifyMQTTInstanceCertBinding
-// 更新MQTT集群绑定证书
-//
-// 参数传空，则为删除证书
-//
-// 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-//  FAILEDOPERATION_INSTANCENOTREADY = "FailedOperation.InstanceNotReady"
-//  RESOURCEUNAVAILABLE = "ResourceUnavailable"
-func (c *Client) ModifyMQTTInstanceCertBindingWithContext(ctx context.Context, request *ModifyMQTTInstanceCertBindingRequest) (response *ModifyMQTTInstanceCertBindingResponse, err error) {
-    if request == nil {
-        request = NewModifyMQTTInstanceCertBindingRequest()
-    }
-    
-    if c.GetCredential() == nil {
-        return nil, errors.New("ModifyMQTTInstanceCertBinding require credential")
-    }
-
-    request.SetContext(ctx)
-    
-    response = NewModifyMQTTInstanceCertBindingResponse()
-    err = c.Send(request, response)
-    return
-}
-
-func NewModifyMQTTTopicRequest() (request *ModifyMQTTTopicRequest) {
-    request = &ModifyMQTTTopicRequest{
-        BaseRequest: &tchttp.BaseRequest{},
-    }
-    
-    request.Init().WithApiInfo("trocket", APIVersion, "ModifyMQTTTopic")
-    
-    
-    return
-}
-
-func NewModifyMQTTTopicResponse() (response *ModifyMQTTTopicResponse) {
-    response = &ModifyMQTTTopicResponse{
-        BaseResponse: &tchttp.BaseResponse{},
-    } 
-    return
-
-}
-
-// ModifyMQTTTopic
-// 修改主题属性
-//
-// 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-func (c *Client) ModifyMQTTTopic(request *ModifyMQTTTopicRequest) (response *ModifyMQTTTopicResponse, err error) {
-    return c.ModifyMQTTTopicWithContext(context.Background(), request)
-}
-
-// ModifyMQTTTopic
-// 修改主题属性
-//
-// 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-func (c *Client) ModifyMQTTTopicWithContext(ctx context.Context, request *ModifyMQTTTopicRequest) (response *ModifyMQTTTopicResponse, err error) {
-    if request == nil {
-        request = NewModifyMQTTTopicRequest()
-    }
-    
-    if c.GetCredential() == nil {
-        return nil, errors.New("ModifyMQTTTopic require credential")
-    }
-
-    request.SetContext(ctx)
-    
-    response = NewModifyMQTTTopicResponse()
-    err = c.Send(request, response)
-    return
-}
-
-func NewModifyMQTTUserRequest() (request *ModifyMQTTUserRequest) {
-    request = &ModifyMQTTUserRequest{
-        BaseRequest: &tchttp.BaseRequest{},
-    }
-    
-    request.Init().WithApiInfo("trocket", APIVersion, "ModifyMQTTUser")
-    
-    
-    return
-}
-
-func NewModifyMQTTUserResponse() (response *ModifyMQTTUserResponse) {
-    response = &ModifyMQTTUserResponse{
-        BaseResponse: &tchttp.BaseResponse{},
-    } 
-    return
-
-}
-
-// ModifyMQTTUser
-// 修改MQTT角色
-//
-// 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-func (c *Client) ModifyMQTTUser(request *ModifyMQTTUserRequest) (response *ModifyMQTTUserResponse, err error) {
-    return c.ModifyMQTTUserWithContext(context.Background(), request)
-}
-
-// ModifyMQTTUser
-// 修改MQTT角色
-//
-// 可能返回的错误码:
-//  FAILEDOPERATION = "FailedOperation"
-func (c *Client) ModifyMQTTUserWithContext(ctx context.Context, request *ModifyMQTTUserRequest) (response *ModifyMQTTUserResponse, err error) {
-    if request == nil {
-        request = NewModifyMQTTUserRequest()
-    }
-    
-    if c.GetCredential() == nil {
-        return nil, errors.New("ModifyMQTTUser require credential")
-    }
-
-    request.SetContext(ctx)
-    
-    response = NewModifyMQTTUserResponse()
+    response = NewModifyInstanceEndpointResponse()
     err = c.Send(request, response)
     return
 }
@@ -2502,23 +3115,32 @@ func NewModifyRoleResponse() (response *ModifyRoleResponse) {
 }
 
 // ModifyRole
-// 修改角色
+// 修改角色。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的修改角色接口文档见 [ModifyRocketMQRole](https://cloud.tencent.com/document/product/1179/107532)，修改角色的授权接口文档见 [ModifyRocketMQEnvironmentRole](https://cloud.tencent.com/document/product/1179/107533)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  RESOURCENOTFOUND_ROLE = "ResourceNotFound.Role"
 func (c *Client) ModifyRole(request *ModifyRoleRequest) (response *ModifyRoleResponse, err error) {
     return c.ModifyRoleWithContext(context.Background(), request)
 }
 
 // ModifyRole
-// 修改角色
+// 修改角色。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的修改角色接口文档见 [ModifyRocketMQRole](https://cloud.tencent.com/document/product/1179/107532)，修改角色的授权接口文档见 [ModifyRocketMQEnvironmentRole](https://cloud.tencent.com/document/product/1179/107533)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
+//  RESOURCENOTFOUND_INSTANCE = "ResourceNotFound.Instance"
+//  RESOURCENOTFOUND_ROLE = "ResourceNotFound.Role"
 func (c *Client) ModifyRoleWithContext(ctx context.Context, request *ModifyRoleRequest) (response *ModifyRoleResponse, err error) {
     if request == nil {
         request = NewModifyRoleRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "ModifyRole")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyRole require credential")
@@ -2551,7 +3173,9 @@ func NewModifyTopicResponse() (response *ModifyTopicResponse) {
 }
 
 // ModifyTopic
-// 修改主题属性
+// 修改主题属性。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的修改主题属性接口文档见 [ModifyRocketMQTopic](https://cloud.tencent.com/document/api/1179/63414)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -2560,7 +3184,9 @@ func (c *Client) ModifyTopic(request *ModifyTopicRequest) (response *ModifyTopic
 }
 
 // ModifyTopic
-// 修改主题属性
+// 修改主题属性。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的修改主题属性接口文档见 [ModifyRocketMQTopic](https://cloud.tencent.com/document/api/1179/63414)。
 //
 // 可能返回的错误码:
 //  FAILEDOPERATION = "FailedOperation"
@@ -2568,6 +3194,7 @@ func (c *Client) ModifyTopicWithContext(ctx context.Context, request *ModifyTopi
     if request == nil {
         request = NewModifyTopicRequest()
     }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "ModifyTopic")
     
     if c.GetCredential() == nil {
         return nil, errors.New("ModifyTopic require credential")
@@ -2576,6 +3203,376 @@ func (c *Client) ModifyTopicWithContext(ctx context.Context, request *ModifyTopi
     request.SetContext(ctx)
     
     response = NewModifyTopicResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewPutConsumerRouteConfigRequest() (request *PutConsumerRouteConfigRequest) {
+    request = &PutConsumerRouteConfigRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "PutConsumerRouteConfig")
+    
+    
+    return
+}
+
+func NewPutConsumerRouteConfigResponse() (response *PutConsumerRouteConfigResponse) {
+    response = &PutConsumerRouteConfigResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// PutConsumerRouteConfig
+// 写入消费组灰度路由配置
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+func (c *Client) PutConsumerRouteConfig(request *PutConsumerRouteConfigRequest) (response *PutConsumerRouteConfigResponse, err error) {
+    return c.PutConsumerRouteConfigWithContext(context.Background(), request)
+}
+
+// PutConsumerRouteConfig
+// 写入消费组灰度路由配置
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+func (c *Client) PutConsumerRouteConfigWithContext(ctx context.Context, request *PutConsumerRouteConfigRequest) (response *PutConsumerRouteConfigResponse, err error) {
+    if request == nil {
+        request = NewPutConsumerRouteConfigRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "PutConsumerRouteConfig")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("PutConsumerRouteConfig require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewPutConsumerRouteConfigResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewRemoveMigratingTopicRequest() (request *RemoveMigratingTopicRequest) {
+    request = &RemoveMigratingTopicRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "RemoveMigratingTopic")
+    
+    
+    return
+}
+
+func NewRemoveMigratingTopicResponse() (response *RemoveMigratingTopicResponse) {
+    response = &RemoveMigratingTopicResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// RemoveMigratingTopic
+// 从迁移列表中移除主题，仅当主题处于初始状态时有效
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+func (c *Client) RemoveMigratingTopic(request *RemoveMigratingTopicRequest) (response *RemoveMigratingTopicResponse, err error) {
+    return c.RemoveMigratingTopicWithContext(context.Background(), request)
+}
+
+// RemoveMigratingTopic
+// 从迁移列表中移除主题，仅当主题处于初始状态时有效
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+func (c *Client) RemoveMigratingTopicWithContext(ctx context.Context, request *RemoveMigratingTopicRequest) (response *RemoveMigratingTopicResponse, err error) {
+    if request == nil {
+        request = NewRemoveMigratingTopicRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "RemoveMigratingTopic")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("RemoveMigratingTopic require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewRemoveMigratingTopicResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewResendDeadLetterMessageRequest() (request *ResendDeadLetterMessageRequest) {
+    request = &ResendDeadLetterMessageRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "ResendDeadLetterMessage")
+    
+    
+    return
+}
+
+func NewResendDeadLetterMessageResponse() (response *ResendDeadLetterMessageResponse) {
+    response = &ResendDeadLetterMessageResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ResendDeadLetterMessage
+// 重新发送死信消息。
+//
+// 当前 API 适用集群：5.x集群。4.x 集群的重发死信消息接口文档见 [RetryRocketMQDlqMessage](https://cloud.tencent.com/document/api/1179/114595)。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+func (c *Client) ResendDeadLetterMessage(request *ResendDeadLetterMessageRequest) (response *ResendDeadLetterMessageResponse, err error) {
+    return c.ResendDeadLetterMessageWithContext(context.Background(), request)
+}
+
+// ResendDeadLetterMessage
+// 重新发送死信消息。
+//
+// 当前 API 适用集群：5.x集群。4.x 集群的重发死信消息接口文档见 [RetryRocketMQDlqMessage](https://cloud.tencent.com/document/api/1179/114595)。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+func (c *Client) ResendDeadLetterMessageWithContext(ctx context.Context, request *ResendDeadLetterMessageRequest) (response *ResendDeadLetterMessageResponse, err error) {
+    if request == nil {
+        request = NewResendDeadLetterMessageRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "ResendDeadLetterMessage")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ResendDeadLetterMessage require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewResendDeadLetterMessageResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewResetConsumerGroupOffsetRequest() (request *ResetConsumerGroupOffsetRequest) {
+    request = &ResetConsumerGroupOffsetRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "ResetConsumerGroupOffset")
+    
+    
+    return
+}
+
+func NewResetConsumerGroupOffsetResponse() (response *ResetConsumerGroupOffsetResponse) {
+    response = &ResetConsumerGroupOffsetResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// ResetConsumerGroupOffset
+// 重置消费位点。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的重置消费位点接口文档见 [ResetRocketMQConsumerOffSet](https://cloud.tencent.com/document/api/1179/71662)。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+func (c *Client) ResetConsumerGroupOffset(request *ResetConsumerGroupOffsetRequest) (response *ResetConsumerGroupOffsetResponse, err error) {
+    return c.ResetConsumerGroupOffsetWithContext(context.Background(), request)
+}
+
+// ResetConsumerGroupOffset
+// 重置消费位点。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的重置消费位点接口文档见 [ResetRocketMQConsumerOffSet](https://cloud.tencent.com/document/api/1179/71662)。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+func (c *Client) ResetConsumerGroupOffsetWithContext(ctx context.Context, request *ResetConsumerGroupOffsetRequest) (response *ResetConsumerGroupOffsetResponse, err error) {
+    if request == nil {
+        request = NewResetConsumerGroupOffsetRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "ResetConsumerGroupOffset")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("ResetConsumerGroupOffset require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewResetConsumerGroupOffsetResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewRollbackMigratingTopicStageRequest() (request *RollbackMigratingTopicStageRequest) {
+    request = &RollbackMigratingTopicStageRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "RollbackMigratingTopicStage")
+    
+    
+    return
+}
+
+func NewRollbackMigratingTopicStageResponse() (response *RollbackMigratingTopicStageResponse) {
+    response = &RollbackMigratingTopicStageResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// RollbackMigratingTopicStage
+// 回滚正在迁移的主题至前一个阶段
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+func (c *Client) RollbackMigratingTopicStage(request *RollbackMigratingTopicStageRequest) (response *RollbackMigratingTopicStageResponse, err error) {
+    return c.RollbackMigratingTopicStageWithContext(context.Background(), request)
+}
+
+// RollbackMigratingTopicStage
+// 回滚正在迁移的主题至前一个阶段
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+func (c *Client) RollbackMigratingTopicStageWithContext(ctx context.Context, request *RollbackMigratingTopicStageRequest) (response *RollbackMigratingTopicStageResponse, err error) {
+    if request == nil {
+        request = NewRollbackMigratingTopicStageRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "RollbackMigratingTopicStage")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("RollbackMigratingTopicStage require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewRollbackMigratingTopicStageResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewSendMessageRequest() (request *SendMessageRequest) {
+    request = &SendMessageRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "SendMessage")
+    
+    
+    return
+}
+
+func NewSendMessageResponse() (response *SendMessageResponse) {
+    response = &SendMessageResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// SendMessage
+// 发送 RocketMQ 消息，该接口仅用于控制台发送少量测试消息，不保证 SLA，且云 API 存在限流，在真实业务场景下，请使用 RocketMQ SDK 发送消息。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的发送消息接口文档见 [SendRocketMQMessage](https://cloud.tencent.com/document/api/1179/94179)。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
+func (c *Client) SendMessage(request *SendMessageRequest) (response *SendMessageResponse, err error) {
+    return c.SendMessageWithContext(context.Background(), request)
+}
+
+// SendMessage
+// 发送 RocketMQ 消息，该接口仅用于控制台发送少量测试消息，不保证 SLA，且云 API 存在限流，在真实业务场景下，请使用 RocketMQ SDK 发送消息。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的发送消息接口文档见 [SendRocketMQMessage](https://cloud.tencent.com/document/api/1179/94179)。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  RESOURCENOTFOUND_TOPIC = "ResourceNotFound.Topic"
+func (c *Client) SendMessageWithContext(ctx context.Context, request *SendMessageRequest) (response *SendMessageResponse, err error) {
+    if request == nil {
+        request = NewSendMessageRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "SendMessage")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("SendMessage require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewSendMessageResponse()
+    err = c.Send(request, response)
+    return
+}
+
+func NewVerifyMessageConsumptionRequest() (request *VerifyMessageConsumptionRequest) {
+    request = &VerifyMessageConsumptionRequest{
+        BaseRequest: &tchttp.BaseRequest{},
+    }
+    
+    request.Init().WithApiInfo("trocket", APIVersion, "VerifyMessageConsumption")
+    
+    
+    return
+}
+
+func NewVerifyMessageConsumptionResponse() (response *VerifyMessageConsumptionResponse) {
+    response = &VerifyMessageConsumptionResponse{
+        BaseResponse: &tchttp.BaseResponse{},
+    } 
+    return
+
+}
+
+// VerifyMessageConsumption
+// 消息消费验证。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的消息消费验证接口文档见 [VerifyRocketMQConsume](https://cloud.tencent.com/document/api/1179/101061)。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  UNSUPPORTEDOPERATION_UNSUPPORTEDCONSUMERTYPE = "UnsupportedOperation.UnsupportedConsumerType"
+func (c *Client) VerifyMessageConsumption(request *VerifyMessageConsumptionRequest) (response *VerifyMessageConsumptionResponse, err error) {
+    return c.VerifyMessageConsumptionWithContext(context.Background(), request)
+}
+
+// VerifyMessageConsumption
+// 消息消费验证。
+//
+// 当前 API 适用集群：5.x 集群。4.x 集群的消息消费验证接口文档见 [VerifyRocketMQConsume](https://cloud.tencent.com/document/api/1179/101061)。
+//
+// 可能返回的错误码:
+//  FAILEDOPERATION = "FailedOperation"
+//  UNSUPPORTEDOPERATION_UNSUPPORTEDCONSUMERTYPE = "UnsupportedOperation.UnsupportedConsumerType"
+func (c *Client) VerifyMessageConsumptionWithContext(ctx context.Context, request *VerifyMessageConsumptionRequest) (response *VerifyMessageConsumptionResponse, err error) {
+    if request == nil {
+        request = NewVerifyMessageConsumptionRequest()
+    }
+    c.InitBaseRequest(&request.BaseRequest, "trocket", APIVersion, "VerifyMessageConsumption")
+    
+    if c.GetCredential() == nil {
+        return nil, errors.New("VerifyMessageConsumption require credential")
+    }
+
+    request.SetContext(ctx)
+    
+    response = NewVerifyMessageConsumptionResponse()
     err = c.Send(request, response)
     return
 }

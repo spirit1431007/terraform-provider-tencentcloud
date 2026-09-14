@@ -15,6 +15,8 @@ Use the navigation on the left to read about the available resources.
 
 -> **Note:** Terraform 0.12.x supported began with provider version 1.9.0 (June 18, 2019).
 
+-> **Note:** When managing tag fields such as [`tag`, `tags`, `tag_list`...] for all of the Tencent Cloud resources, avoid using system-reserved fields, such as: [`qcs:`, `project_`, `项目`]. for details, please refer to the [Use Limits](https://www.tencentcloud.com/document/product/651/13354?lang=en&pg=).
+
 ## Example Usage
 
 ```hcl
@@ -68,24 +70,25 @@ resource "tencentcloud_security_group" "default" {
   description = "make it accessible for both production and stage ports"
 }
 
-# Create security group rule allow web request
-resource "tencentcloud_security_group_rule" "web" {
+# Create security group rule allow web and ssh request
+resource "tencentcloud_security_group_rule_set" "base" {
   security_group_id = tencentcloud_security_group.default.id
-  type              = "ingress"
-  cidr_ip           = "0.0.0.0/0"
-  ip_protocol       = "tcp"
-  port_range        = "80,8080"
-  policy            = "accept"
-}
 
-# Create security group rule allow ssh request
-resource "tencentcloud_security_group_rule" "ssh" {
-  security_group_id = tencentcloud_security_group.default.id
-  type              = "ingress"
-  cidr_ip           = "0.0.0.0/0"
-  ip_protocol       = "tcp"
-  port_range        = "22"
-  policy            = "accept"
+  ingress {
+    action      = "ACCEPT"
+    cidr_block  = "0.0.0.0/0"
+    protocol    = "TCP"
+    port        = "80,8080"
+    description = "Create security group rule allow web request"
+  }
+
+  egress {
+    action      = "ACCEPT"
+    cidr_block  = "0.0.0.0/0"
+    protocol    = "TCP"
+    port        = "22"
+    description = "Create security group rule allow ssh request"
+  }
 }
 ```
 
@@ -100,6 +103,9 @@ The following methods are supported, in this order, and explained below:
 - Assume role with SAML
 - Assume role with OIDC
 - Shared credentials
+- Enable pod OIDC
+- Cam role name
+- MFA certification
 
 ### Static credentials
 
@@ -116,6 +122,28 @@ provider "tencentcloud" {
   secret_id  = "my-secret-id"
   secret_key = "my-secret-key"
   region     = "ap-guangzhou"
+}
+```
+
+Use `allowed_account_ids` or `forbidden_account_ids`
+
+```hcl
+provider "tencentcloud" {
+  secret_id  = "my-secret-id"
+  secret_key = "my-secret-key"
+  region     = "ap-guangzhou"
+
+  allowed_account_ids   = ["100023201586", "100023201349"]
+}
+```
+
+```hcl
+provider "tencentcloud" {
+  secret_id  = "my-secret-id"
+  secret_key = "my-secret-key"
+  region     = "ap-guangzhou"
+
+  forbidden_account_ids = ["100023201223"]
 }
 ```
 
@@ -139,7 +167,7 @@ $ terraform plan
 
 ### Assume role
 
-If provided with an assume role, Terraform will attempt to assume this role using the supplied credentials. Assume role can be provided by adding an `role_arn`, `session_name`, `session_duration` and `policy`(optional) in-line in the tencentcloud provider block:
+If provided with an assume role, Terraform will attempt to assume this role using the supplied credentials. Assume role can be provided by adding an `role_arn`, `session_name`, `session_duration`, `policy`(optional) and `external_id`(optional) in-line in the tencentcloud provider block:
 
 Usage:
 
@@ -158,7 +186,28 @@ provider "tencentcloud" {
 }
 ```
 
-The `role_arn`, `session_name`, `session_duration` can also provided via `TENCENTCLOUD_ASSUME_ROLE_ARN`, `TENCENTCLOUD_ASSUME_ROLE_SESSION_NAME` and `TENCENTCLOUD_ASSUME_ROLE_SESSION_DURATION` environment variables.
+Combining MFA
+
+```hcl
+provider "tencentcloud" {
+  secret_id  = "my-secret-id"
+  secret_key = "my-secret-key"
+  region     = "ap-guangzhou"
+
+  assume_role {
+    role_arn         = "my-role-arn"
+    session_name     = "my-session-name"
+    policy           = "my-role-policy"
+    session_duration = 3600
+    serial_number    = "qcs::cam:uin/{my-uin}::mfa/softToken"
+    token_code       = "523886"
+  }
+}
+```
+
+The `role_arn`, `session_name`, `session_duration` and `external_id` can also provided via `TENCENTCLOUD_ASSUME_ROLE_ARN`, `TENCENTCLOUD_ASSUME_ROLE_SESSION_NAME`, `TENCENTCLOUD_ASSUME_ROLE_SESSION_DURATION` and `TENCENTCLOUD_ASSUME_ROLE_EXTERNAL_ID` environment variables.
+
+The `serial_number`, `token_code` can also provided via `TENCENTCLOUD_ASSUME_ROLE_SERIAL_NUMBER`, `TENCENTCLOUD_ASSUME_ROLE_TOKEN_CODE` environment variables.
 
 Usage:
 
@@ -169,6 +218,9 @@ $ export TENCENTCLOUD_REGION="ap-guangzhou"
 $ export TENCENTCLOUD_ASSUME_ROLE_ARN="my-role-arn"
 $ export TENCENTCLOUD_ASSUME_ROLE_SESSION_NAME="my-session-name"
 $ export TENCENTCLOUD_ASSUME_ROLE_SESSION_DURATION=3600
+
+$ export TENCENTCLOUD_ASSUME_ROLE_SERIAL_NUMBER="my-serial-number"
+$ export TENCENTCLOUD_ASSUME_ROLE_TOKEN_CODE="my-token-code"
 $ terraform plan
 ```
 
@@ -207,15 +259,42 @@ $ terraform plan
 
 ### Assume role with OIDC
 
-If provided with an assume role with OIDC, Terraform will attempt to assume this role using the supplied credentials. Assume role can be provided by adding an `role_arn`, `session_name`, `session_duration` and `web_identity_token` in-line in the tencentcloud provider block:
+If provided with an assume role with OIDC, Terraform will attempt to assume this role using the supplied credentials. Assume role can be provided by adding an `role_arn` or `role_arn_file`, `session_name`, `session_duration` and `web_identity_token` or `web_identity_token_file` in-line in the tencentcloud provider block:
 
 -> **Note:** Assume-role-with-OIDC is a no-AK auth type, and there is no need setting secret_id and secret_key while using it.
 
+-> **Note:** If both `web_identity_token` and `web_identity_token_file` are configured, `web_identity_token` will be used preferentially(overriding `web_identity_token_file`).
+
+-> **Note:** If both `role_arn` and `role_arn_file` are configured, `role_arn` will be used preferentially(overriding `role_arn_file`).
+
+Content formatting guidelines of `web_identity_token_file`:
+
+The file content must be in JSON format and must contain the key: `web_identity_token`.
+
+```json
+{
+    "web_identity_token": "eyJ0eXAiOiJKV1QiLCJh......E8T0qyVA7hWM55_g"
+}
+```
+
+Content formatting guidelines of `role_arn_file`:
+
+The file content must be in JSON format and must contain the key: `role_arn`.
+
+```json
+{
+    "role_arn": "my-role-arn"
+}
+```
+
 Usage:
+
+Use web_identity_token
 
 ```hcl
 provider "tencentcloud" {
   assume_role_with_web_identity {
+    provider_id        = "OIDC"
     role_arn           = "my-role-arn"
     session_name       = "my-session-name"
     session_duration   = 3600
@@ -224,15 +303,126 @@ provider "tencentcloud" {
 }
 ```
 
-The `role_arn`, `session_name`, `session_duration`, `web_identity_token` can also provided via `TENCENTCLOUD_ASSUME_ROLE_ARN`, `TENCENTCLOUD_ASSUME_ROLE_SESSION_NAME`, `TENCENTCLOUD_ASSUME_ROLE_SESSION_DURATION` and `TENCENTCLOUD_ASSUME_ROLE_WEB_IDENTITY_TOKEN` environment variables.
+Use web_identity_token_file
+
+```hcl
+provider "tencentcloud" {
+  assume_role_with_web_identity {
+    provider_id             = "OIDC"
+    role_arn                = "my-role-arn"
+    session_name            = "my-session-name"
+    session_duration        = 3600
+    web_identity_token_file = "/AbsolutePath/to/your/secrets/web-identity-token-file"
+  }
+}
+```
+
+Use role_arn_file
+
+```hcl
+provider "tencentcloud" {
+  assume_role_with_web_identity {
+    provider_id        = "OIDC"
+    role_arn_file      = "/AbsolutePath/to/your/secrets/role-arn-file"
+    session_name       = "my-session-name"
+    session_duration   = 3600
+    web_identity_token = "my-web-identity-token"
+  }
+}
+```
+
+The `provider_id`, `role_arn`, `role_arn_file`, `session_name`, `session_duration`, `web_identity_token`, `web_identity_token_file` can also provided via `TENCENTCLOUD_ASSUME_ROLE_PROVIDER_ID`, `TENCENTCLOUD_ASSUME_ROLE_ARN`, `TENCENTCLOUD_ASSUME_ROLE_ARN_FILE`, `TENCENTCLOUD_ASSUME_ROLE_SESSION_NAME`, `TENCENTCLOUD_ASSUME_ROLE_SESSION_DURATION`, `TENCENTCLOUD_ASSUME_ROLE_WEB_IDENTITY_TOKEN` and `TENCENTCLOUD_ASSUME_ROLE_WEB_IDENTITY_TOKEN_FILE` environment variables.
 
 Usage:
 
 ```shell
 $ export TENCENTCLOUD_SECRET_ID="my-secret-id"
 $ export TENCENTCLOUD_SECRET_KEY="my-secret-key"
+$ export TENCENTCLOUD_ASSUME_ROLE_ARN="my-role-arn"
+$ export TENCENTCLOUD_ASSUME_ROLE_ARNN_FILE="/AbsolutePath/to/your/secrets/role-arn-file"
 $ export TENCENTCLOUD_ASSUME_ROLE_SESSION_DURATION=3600
 $ export TENCENTCLOUD_ASSUME_ROLE_WEB_IDENTITY_TOKEN="my-web-identity-token"
+$ export TENCENTCLOUD_ASSUME_ROLE_WEB_IDENTITY_TOKEN_FILE="/AbsolutePath/to/your/secrets/web-identity-token-file"
+$ export TENCENTCLOUD_ASSUME_ROLE_PROVIDER_ID="OIDC"
+$ terraform plan
+```
+
+### Enable pod OIDC
+
+Configure the TencentCloud Provider with TKE OIDC.
+
+-> **Note:** Must ensure CAM OIDC provider and WEBHOOK component are created successfully.
+
+Usage:
+
+```hcl
+provider "tencentcloud" {
+  enable_pod_oidc = true
+}
+```
+
+### Cam role name
+
+If provided with a Cam role name, Terraform will just access the metadata URL: `http://metadata.tencentyun.com/latest/meta-data/cam/security-credentials/<cam_role_name>` to obtain the STS credential. The CVM Instance Role also can be set using the `TENCENTCLOUD_CAM_ROLE_NAME` environment variables.
+
+-> **Note:** Cam-role-name is used to grant the role entity the permissions to access services and resources and perform operations in Tencent Cloud. You can associate the CAM role with a CVM instance to call other Tencent Cloud APIs from the instance using the periodically updated temporary Security Token Service (STS) key.
+
+-> **Note:** Cam-role-name is a no-AK auth type, and there is no need setting secret_id and secret_key while using it.
+
+Usage:
+
+```hcl
+provider "tencentcloud" {
+  cam_role_name = "my-cam-role-name"
+}
+```
+
+It can also be authenticated together with method Assume role. Authentication process: Perform CAM authentication first, then proceed with Assume role authentication.
+
+Usage:
+
+```hcl
+provider "tencentcloud" {
+  cam_role_name = "my-cam-role-name"
+
+  assume_role {
+    role_arn         = "my-role-arn"
+    session_name     = "my-session-name"
+    policy           = "my-role-policy"
+    session_duration = 3600
+    external_id      = "my-external-id"
+  }
+}
+```
+
+### MFA certification
+
+If provided with MFA certification, Terraform will attempt to use the provided credentials for MFA authentication.
+
+Usage:
+
+```hcl
+provider "tencentcloud" {
+  secret_id  = "my-secret-id"
+  secret_key = "my-secret-key"
+  region     = "ap-guangzhou"
+
+  mfa_certification {
+    serial_number    = "qcs::cam:uin/{my-uin}::mfa/softToken"
+    token_code       = "523886"
+    duration_seconds = 1800
+  }
+}
+```
+
+The `serial_number`, `token_code`, `duration_seconds` can also provided via `TENCENTCLOUD_MFA_CERTIFICATION_SERIAL_NUMBER`, `TENCENTCLOUD_MFA_CERTIFICATION_TOKEN_CODE`, `TENCENTCLOUD_MFA_CERTIFICATION_DURATION_SECONDS` environment variables.
+
+Usage:
+
+```shell
+$ export TENCENTCLOUD_MFA_CERTIFICATION_SERIAL_NUMBER="my-serial-number"
+$ export TENCENTCLOUD_MFA_CERTIFICATION_TOKEN_CODE="my-token-code"
+$ export TENCENTCLOUD_MFA_CERTIFICATION_DURATION_SECONDS=1800
 $ terraform plan
 ```
 
@@ -250,8 +440,8 @@ locals {
 
 provider "tencentcloud" {
   region     = local.region
-  secret_id  = "xxxxxx"
-  secret_key = "xxxxxx"
+  secret_id  = "my-secret-id"
+  secret_key = "my-secret-key"
   cos_domain = "https://${local.cdc_id}.cos-cdc.${local.region}.myqcloud.com/"
 }
 ```
@@ -308,22 +498,28 @@ In addition to generic provider arguments (e.g. alias and version), the followin
 * `assume_role_with_web_identity` - (Optional, Available in 1.81.111+) An `assume_role_with_web_identity` block (documented below). If provided, terraform will attempt to assume this role using the supplied credentials. Only one `assume_role_with_web_identity` block may be in the configuration.
 * `protocol` - (Optional, Available in 1.37.0+) The protocol of the API request. Valid values: `HTTP` and `HTTPS`. Default is `HTTPS`.
 * `domain` - (Optional, Available in 1.37.0+) The root domain of the API request, Default is `tencentcloudapi.com`. 
+* `cam_role_name` - (Optional, Available in 1.81.117+) The name of the CVM instance CAM role. It can be sourced from the `TENCENTCLOUD_CAM_ROLE_NAME` environment variable. 
+* `allowed_account_ids` - (Optional) List of allowed TencentCloud account IDs to prevent you from mistakenly using the wrong one (and potentially end up destroying a live environment). Conflicts with `forbidden_account_ids`, If use `assume_role_with_saml` or `assume_role_with_web_identity`, it is not supported.
+* `forbidden_account_ids` - (Optional) List of forbidden TencentCloud account IDs to prevent you from mistakenly using the wrong one (and potentially end up destroying a live environment). Conflicts with `allowed_account_ids`, If use `assume_role_with_saml` or `assume_role_with_web_identity`, it is not supported.
 
 The nested `assume_role` block supports the following:
 * `role_arn` - (Required) The ARN of the role to assume. It can also be sourced from the `TENCENTCLOUD_ASSUME_ROLE_ARN` environment variable.
 * `session_name` - (Required) The session name to use when making the AssumeRole call. It can also be sourced from the `TENCENTCLOUD_ASSUME_ROLE_SESSION_NAME` environment variable.
 * `session_duration` - (Required) The duration of the session when making the AssumeRole call. Its value ranges from 0 to 43200(seconds), and default is 7200 seconds. It can also be sourced from the `TENCENTCLOUD_ASSUME_ROLE_SESSION_DURATION` environment variable.
 * `policy` - (Optional) A more restrictive policy to apply to the temporary credentials. This gives you a way to further restrict the permissions for the resulting temporary security credentials. You cannot use the passed policy to grant permissions that are in excess of those allowed by the access policy of the role that is being assumed.
+* `external_id` - (Optional) External role ID, which can be obtained by clicking the role name in the CAM console. It can contain 2-128 letters, digits, and symbols (=,.@\:/-). Regex: [\\w+=,.@\:/-]*. It can be sourced from the `TENCENTCLOUD_ASSUME_ROLE_EXTERNAL_ID`.
 
 The nested `assume_role_with_saml` block supports the following:
 * `role_arn` - (Required) The ARN of the role to assume. It can also be sourced from the `TENCENTCLOUD_ASSUME_ROLE_ARN` environment variable.
 * `session_name` - (Required) The session name to use when making the AssumeRole call. It can also be sourced from the `TENCENTCLOUD_ASSUME_ROLE_SESSION_NAME` environment variable.
 * `session_duration` - (Required) The duration of the session when making the AssumeRole call. Its value ranges from 0 to 43200(seconds), and default is 7200 seconds. It can also be sourced from the `TENCENTCLOUD_ASSUME_ROLE_SESSION_DURATION` environment variable.
-* `saml_assertion` - (Required) SAML assertion information encoded in base64. It can be sourced from the `PROVIDER_ASSUME_ROLE_SAML_ASSERTION`.
-* `principal_arn` - (Required) Player Access Description Name. It can be sourced from the `PROVIDER_ASSUME_ROLE_PRINCIPAL_ARN`.
+* `saml_assertion` - (Required) SAML assertion information encoded in base64. It can be sourced from the `TENCENTCLOUD_ASSUME_ROLE_SAML_ASSERTION`.
+* `principal_arn` - (Required) Player Access Description Name. It can be sourced from the `TENCENTCLOUD_ASSUME_ROLE_PRINCIPAL_ARN`.
 
 The nested `assume_role_with_web_identity` block supports the following:
+* `provider_id` - (Optional) Identity provider name. It can be sourced from the `TENCENTCLOUD_ASSUME_ROLE_PROVIDER_ID`, Default is OIDC.
 * `role_arn` - (Required) The ARN of the role to assume. It can also be sourced from the `TENCENTCLOUD_ASSUME_ROLE_ARN` environment variable.
 * `session_name` - (Required) The session name to use when making the AssumeRole call. It can also be sourced from the `TENCENTCLOUD_ASSUME_ROLE_SESSION_NAME` environment variable.
 * `session_duration` - (Required) The duration of the session when making the AssumeRole call. Its value ranges from 0 to 43200(seconds), and default is 7200 seconds. It can also be sourced from the `TENCENTCLOUD_ASSUME_ROLE_SESSION_DURATION` environment variable.
-* `web_identity_token` - (Required) OIDC token issued by IdP. It can be sourced from the `PROVIDER_ASSUME_ROLE_WEB_IDENTITY_TOKEN`.
+* `web_identity_token` - (Optional) OIDC token issued by IdP. It can be sourced from the `TENCENTCLOUD_ASSUME_ROLE_WEB_IDENTITY_TOKEN`. One of `web_identity_token` or `web_identity_token_file` is required.
+* `web_identity_token_file` - (Optional) File containing a web identity token from an OpenID Connect (OIDC) or OAuth provider. It can be sourced from the `TENCENTCLOUD_ASSUME_ROLE_WEB_IDENTITY_TOKEN_FILE`. One of `web_identity_token` or `web_identity_token_file` is required.

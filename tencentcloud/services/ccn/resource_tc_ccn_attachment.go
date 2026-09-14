@@ -19,10 +19,11 @@ import (
 
 func ResourceTencentCloudCcnAttachment() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceTencentCloudCcnAttachmentCreate,
-		Read:   resourceTencentCloudCcnAttachmentRead,
-		Update: resourceTencentCloudCcnAttachmentUpdate,
-		Delete: resourceTencentCloudCcnAttachmentDelete,
+		DeprecationMessage: "This resource has been deprecated in Terraform TencentCloud provider version 1.81.198. Please use 'tencentcloud_ccn_attachment_v2' instead.",
+		Create:             resourceTencentCloudCcnAttachmentCreate,
+		Read:               resourceTencentCloudCcnAttachmentRead,
+		Update:             resourceTencentCloudCcnAttachmentUpdate,
+		Delete:             resourceTencentCloudCcnAttachmentDelete,
 
 		Schema: map[string]*schema.Schema{
 			"ccn_id": {
@@ -169,85 +170,52 @@ func resourceTencentCloudCcnAttachmentRead(d *schema.ResourceData, meta interfac
 		service = VpcService{client: meta.(tccommon.ProviderMeta).GetAPIV3Conn()}
 	)
 
-	if v, ok := d.GetOk("ccn_uin"); ok {
-		ccnUin := v.(string)
-		ccnId := d.Get("ccn_id").(string)
-		instanceType := d.Get("instance_type").(string)
-		instanceRegion := d.Get("instance_region").(string)
-		instanceId := d.Get("instance_id").(string)
+	var (
+		ccnId          = d.Get("ccn_id").(string)
+		instanceType   = d.Get("instance_type").(string)
+		instanceRegion = d.Get("instance_region").(string)
+		instanceId     = d.Get("instance_id").(string)
+	)
+
+	if _, ok := d.GetOk("ccn_uin"); !ok {
+		onlineHas := true
 
 		err := resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
-			infos, e := service.DescribeCcnAttachmentsByInstance(ctx, instanceType, instanceId, instanceRegion)
+			_, has, e := service.DescribeCcn(ctx, ccnId)
 			if e != nil {
 				return tccommon.RetryError(e)
 			}
 
-			if len(infos) == 0 {
+			if has == 0 {
 				d.SetId("")
+				onlineHas = false
 				return nil
 			}
 
-			findFlag := false
-			for _, info := range infos {
-				if *info.CcnUin == ccnUin && *info.CcnId == ccnId {
-					_ = d.Set("state", strings.ToUpper(*info.State))
-					_ = d.Set("attached_time", info.AttachedTime)
-					_ = d.Set("cidr_block", info.CidrBlock)
-					findFlag = true
-					break
-				}
-			}
-			if !findFlag {
-				d.SetId("")
-				return nil
-			}
 			return nil
 		})
 
 		if err != nil {
 			return err
 		}
-		return nil
-	}
 
-	var (
-		ccnId          = d.Get("ccn_id").(string)
-		instanceType   = d.Get("instance_type").(string)
-		instanceRegion = d.Get("instance_region").(string)
-		instanceId     = d.Get("instance_id").(string)
-		onlineHas      = true
-	)
-
-	err := resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
-		_, has, e := service.DescribeCcn(ctx, ccnId)
-		if e != nil {
-			return tccommon.RetryError(e)
-		}
-
-		if has == 0 {
-			d.SetId("")
-			onlineHas = false
+		if !onlineHas {
 			return nil
 		}
-
-		return nil
-	})
-
-	if err != nil {
-		return err
 	}
 
-	if !onlineHas {
-		return nil
-	}
-
-	err = resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
+	err := resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
 		info, has, e := service.DescribeCcnAttachedInstance(ctx, ccnId, instanceRegion, instanceType, instanceId)
 		if e != nil {
 			return tccommon.RetryError(e)
 		}
 
 		if has == 0 {
+			d.SetId("")
+			return nil
+		}
+
+		if v, ok := d.GetOk("ccn_uin"); ok && v.(string) != info.ccnUin {
 			d.SetId("")
 			return nil
 		}

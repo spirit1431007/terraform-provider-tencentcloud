@@ -110,7 +110,7 @@ func resourceTencentCloudKubernetesClusterAttachmentCreatePostHandleResponse0(ct
 	}
 
 	/*wait for cvm status*/
-	if err := resource.Retry(7*tccommon.ReadRetryTimeout, func() *resource.RetryError {
+	if err := resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
 		instance, errRet := cvmService.DescribeInstanceById(ctx, instanceId)
 		if errRet != nil {
 			return tccommon.RetryError(errRet, tccommon.InternalError)
@@ -124,29 +124,21 @@ func resourceTencentCloudKubernetesClusterAttachmentCreatePostHandleResponse0(ct
 	}
 
 	/*wait for tke init ok */
-	return resource.Retry(7*tccommon.ReadRetryTimeout, func() *resource.RetryError {
-		_, workers, err := tkeService.DescribeClusterInstances(ctx, clusterId)
+	return resource.Retry(d.Timeout(schema.TimeoutCreate), func() *resource.RetryError {
+		ret, err := tkeService.DescribeClusterInstanceById(ctx, clusterId, instanceId)
 		if err != nil {
 			return tccommon.RetryError(err, tccommon.InternalError)
 		}
-		has := false
-		for _, worker := range workers {
-			if worker.InstanceId == instanceId {
-				has = true
-				if worker.InstanceState == "failed" {
-					return resource.NonRetryableError(fmt.Errorf("cvm instance %s attach to cluster %s fail,reason:%s",
-						instanceId, clusterId, worker.FailedReason))
-				}
-
-				if worker.InstanceState != "running" {
-					return resource.RetryableError(fmt.Errorf("cvm instance  %s in tke status is %s, retry...",
-						instanceId, worker.InstanceState))
-				}
-
-			}
-		}
-		if !has {
+		if ret == nil {
 			return resource.NonRetryableError(fmt.Errorf("cvm instance %s not exist in tke instance list", instanceId))
+		}
+		if ret.InstanceState == "failed" {
+			return resource.NonRetryableError(fmt.Errorf("cvm instance %s attach to cluster %s fail,reason:%s",
+				instanceId, clusterId, ret.FailedReason))
+		}
+		if ret.InstanceState != "running" {
+			return resource.RetryableError(fmt.Errorf("cvm instance  %s in tke status is %s, retry...",
+				instanceId, ret.InstanceState))
 		}
 		return nil
 	})
@@ -170,6 +162,7 @@ func resourceTencentCloudKubernetesClusterAttachmentReadRequestOnError2(ctx cont
 }
 
 func resourceTencentCloudKubernetesClusterAttachmentReadRequestOnSuccess2(ctx context.Context, resp *tke.Instance) *resource.RetryError {
+	// d := tccommon.ResourceDataFromContext(ctx)
 	if resp == nil {
 		return nil
 	}
@@ -196,6 +189,33 @@ func resourceTencentCloudKubernetesClusterAttachmentReadRequestOnSuccess2(ctx co
 		))
 	}
 
+	// api cannot return Taints
+	// if resp.InstanceAdvancedSettings.Taints != nil {
+	// 	iAdvanced := resp.InstanceAdvancedSettings
+	// 	taintsList := make([]map[string]interface{}, 0, len(iAdvanced.Taints))
+	// 	if iAdvanced.Taints != nil {
+	// 		for _, taints := range iAdvanced.Taints {
+	// 			taintsMap := map[string]interface{}{}
+
+	// 			if taints.Key != nil {
+	// 				taintsMap["key"] = taints.Key
+	// 			}
+
+	// 			if taints.Value != nil {
+	// 				taintsMap["value"] = taints.Value
+	// 			}
+
+	// 			if taints.Effect != nil {
+	// 				taintsMap["effect"] = taints.Effect
+	// 			}
+
+	// 			taintsList = append(taintsList, taintsMap)
+	// 		}
+
+	// 		_ = d.Set("taints", taintsList)
+	// 	}
+	// }
+
 	return nil
 }
 
@@ -207,17 +227,7 @@ func nodeHasAttachedToCluster(ctx context.Context, insID, clsID string) (bool, e
 	}
 	service := TkeService{client: meta.(tccommon.ProviderMeta).GetAPIV3Conn()}
 
-	var err error
-	_, workers, err := service.DescribeClusterInstances(ctx, clsID)
-	if err != nil {
-		err = resource.Retry(tccommon.ReadRetryTimeout, func() *resource.RetryError {
-			_, workers, err = service.DescribeClusterInstances(ctx, clsID)
-			if err != nil {
-				return tccommon.RetryError(err, tccommon.InternalError)
-			}
-			return nil
-		})
-	}
+	_, workers, err := service.DescribeAllClusterInstances(ctx, clsID)
 	if err != nil {
 		return false, err
 	}

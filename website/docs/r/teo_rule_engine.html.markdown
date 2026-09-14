@@ -11,6 +11,8 @@ description: |-
 
 Provides a resource to create a teo rule_engine
 
+~> **NOTE:** The current resource has been deprecated, please use `tencentcloud_teo_l7_acc_rule`.
+
 ## Example Usage
 
 ```hcl
@@ -186,8 +188,8 @@ Note: This field may return null, indicating that no valid values can be obtaine
 The `and` object of `or` supports the following:
 
 * `operator` - (Required, String) Operator. Valid values:
-  - `equals`: Equals.
-  - `notEquals`: Does not equal.
+  - `equal`: Equal.
+  - `notEqual`: Does not equal.
   - `exist`: Exists.
   - `notexist`: Does not exist.
 * `target` - (Required, String) The match type. Values:
@@ -199,6 +201,7 @@ The `and` object of `or` supports the following:
   - `client_country`: Country/Region of the client.
   - `query_string`: Query string in the request URL.
   - `request_header`: HTTP request header.
+  - `client_ip`: Client IP.
 * `ignore_case` - (Optional, Bool) Whether the parameter value is case insensitive. Default value: false.
 * `name` - (Optional, String) The parameter name of the match type. This field is required only when `Target=query_string/request_header`.
   - `query_string`: Name of the query string, such as "lang" and "version" in "lang=cn&version=1".
@@ -217,8 +220,8 @@ The `and` object of `or` supports the following:
 The `and` object of `or` supports the following:
 
 * `operator` - (Required, String) Operator. Valid values:
-  - `equals`: Equals.
-  - `notEquals`: Does not equal.
+  - `equal`: Equal.
+  - `notEqual`: Does not equal.
   - `exist`: Exists.
   - `notexist`: Does not exist.
 * `target` - (Required, String) The match type. Values:
@@ -229,6 +232,7 @@ The `and` object of `or` supports the following:
   - `url`: Partial URL under the current site.  - `client_country`: Country/Region of the client.
   - `query_string`: Query string in the request URL.
   - `request_header`: HTTP request header.
+  - `client_ip`: Client IP.
 * `ignore_case` - (Optional, Bool) Whether the parameter value is case insensitive. Default value: false.
 * `name` - (Optional, String) The parameter name of the match type. This field is required only when `Target=query_string/request_header`.
   - `query_string`: Name of the query string, such as "lang" and "version" in "lang=cn&version=1".
@@ -310,6 +314,7 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - ID of the resource.
 * `rule_id` - Rule ID.
+* `rule_priority` - Rule priority, the larger the value, the higher the priority, the minimum is 1.
 
 
 ## Import
